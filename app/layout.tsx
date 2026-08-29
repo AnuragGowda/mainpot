@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
+import Providers from "@/components/Providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen bg-[#FAFAFA] text-gray-900 font-sans">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
