@@ -1,0 +1,177 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Badge from "@/components/ui/Badge";
+import Card from "@/components/ui/Card";
+import Input from "@/components/ui/Input";
+import { getPlayerCashOut, playerInvested } from "@/lib/game";
+import { formatCurrency, round2 } from "@/lib/format";
+import type { GameSnapshot, Player } from "@/lib/types";
+
+export interface CashOutEntryProps {
+  snapshot: GameSnapshot;
+  currentPlayerId: string | null;
+  isHost: boolean;
+  onSaveCashOut: (playerId: string, amount: number) => void;
+}
+
+interface CashOutRowProps {
+  player: Player;
+  snapshot: GameSnapshot;
+  editable: boolean;
+  isCurrentUser: boolean;
+  onSaveCashOut: (playerId: string, amount: number) => void;
+}
+
+const SAVE_DEBOUNCE_MS = 400;
+
+/**
+ * One player's cash-out input. Local state is seeded from the snapshot and
+ * re-synced from props whenever the saved value changes — but never while the
+ * user is focused/typing, so realtime updates don't clobber an in-progress edit.
+ */
+function CashOutRow({
+  player,
+  snapshot,
+  editable,
+  isCurrentUser,
+  onSaveCashOut,
+}: CashOutRowProps) {
+  const currentCashOut = getPlayerCashOut(snapshot, player.id);
+  const propValue = currentCashOut ? String(currentCashOut.amount) : "";
+  const [value, setValue] = useState(propValue);
+  const focusedRef = useRef(false);
+  const valueAtFocusRef = useRef("");
+  const debounceRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!focusedRef.current) {
+      setValue(propValue);
+    }
+  }, [propValue]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current !== null) {
+        window.clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  /** Saves `raw` when it parses to a finite, non-negative amount. */
+  function commit(raw: string) {
+    if (raw.trim() === "") {
+      return;
+    }
+    const parsed = round2(Number(raw));
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return;
+    }
+    const current = currentCashOut ? round2(currentCashOut.amount) : Number.NaN;
+    if (Number.isNaN(current) || Math.abs(parsed - current) > 0.004) {
+      onSaveCashOut(player.id, parsed);
+    }
+  }
+
+  function handleChange(raw: string) {
+    setValue(raw);
+    if (debounceRef.current !== null) {
+      window.clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = window.setTimeout(() => commit(raw), SAVE_DEBOUNCE_MS);
+  }
+
+  function handleFocus() {
+    focusedRef.current = true;
+    valueAtFocusRef.current = value;
+  }
+
+  function handleBlur() {
+    focusedRef.current = false;
+    if (debounceRef.current !== null) {
+      window.clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    if (value !== valueAtFocusRef.current) {
+      commit(value);
+    } else {
+      setValue(propValue);
+    }
+  }
+
+  const invested = playerInvested(snapshot, player.id);
+  const hint = !editable && player.left_at ? "Host will enter" : null;
+
+  return (
+    <Card padding="md">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-semibold text-gray-900">{player.name}</h3>
+            {player.is_host ? <Badge variant="gray">Host</Badge> : null}
+            {player.left_at ? <Badge variant="amber">left early</Badge> : null}
+            {isCurrentUser ? <Badge variant="green">You</Badge> : null}
+          </div>
+          <p className="mt-0.5 text-sm text-gray-500">
+            Bought in {formatCurrency(invested)}
+          </p>
+        </div>
+
+        <div className="w-full shrink-0 sm:w-44">
+          <Input
+            type="number"
+            min={0}
+            step={0.01}
+            inputMode="decimal"
+            prefix="$"
+            value={value}
+            disabled={!editable}
+            placeholder="0.00"
+            aria-label={`Cash-out amount for ${player.name}`}
+            onChange={(event) => handleChange(event.target.value)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+          />
+          {hint ? <p className="mt-1 text-xs text-gray-400">{hint}</p> : null}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * Card list of cash-out entry rows — one per player (including players who
+ * left early). Hosts can edit everyone's row; players can edit their own.
+ */
+export default function CashOutEntry({
+  snapshot,
+  currentPlayerId,
+  isHost,
+  onSaveCashOut,
+}: CashOutEntryProps) {
+  return (
+    <section aria-labelledby="cash-out-heading">
+      <h2
+        id="cash-out-heading"
+        className="mb-2 text-sm font-medium uppercase tracking-widest text-gray-500"
+      >
+        Cash-outs
+      </h2>
+      <div className="space-y-3">
+        {snapshot.players.map((player) => {
+          const editable = isHost || player.id === currentPlayerId;
+          return (
+            <CashOutRow
+              key={player.id}
+              player={player}
+              snapshot={snapshot}
+              editable={editable}
+              isCurrentUser={player.id === currentPlayerId}
+              onSaveCashOut={onSaveCashOut}
+            />
+          );
+        })}
+      </div>
+    </section>
+  );
+}
