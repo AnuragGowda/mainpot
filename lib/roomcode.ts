@@ -29,13 +29,33 @@ export function generateRoomCode(): string {
 }
 
 /**
- * Normalizes pasted input into a 6-character room code: uppercases,
- * strips whitespace, and extracts the first run of 6 allowed characters
- * (e.g. from a full URL or pasted text). Returns "" when no valid code
- * is found.
+ * Normalizes pasted input into a 6-character room code.
+ *
+ * Strategy (robust to pasted URLs, paths, and stray text):
+ * 1. Trim + uppercase.
+ * 2. Strip any query string / hash fragment.
+ * 3. Split on "/" and "\" — when segments exist, the LAST segment is the
+ *    candidate (so "https://ante.app/game/ABC123" yields "ABC123"); otherwise
+ *    the whole (query-stripped) string is the candidate.
+ * 4. Remove every character that cannot appear in a generated code.
+ * 5. Extract the first run of exactly 6 allowed characters.
+ *
+ * Fallback: if no strict 6-char run exists but the candidate contains a plain
+ * 6-char alphanumeric token, accept that token verbatim. Room codes are
+ * generated only from the strict alphabet, so a hand-shared code like
+ * "ABC123" may contain a lookalike digit (1) — treat it as given and let the
+ * lookup decide. Returns "" when no plausible code is found.
  */
 export function normalizeRoomCode(input: string): string {
-  const cleaned = input.toUpperCase().replace(/\s+/g, "");
-  const match = cleaned.match(/[A-HJ-NP-Z2-9]{6}/);
-  return match ? match[0] : "";
+  const trimmed = input.trim().toUpperCase();
+  const withoutQuery = trimmed.split(/[?#]/)[0];
+  const segments = withoutQuery.split(/[/\\]/).filter((segment) => segment.length > 0);
+  const candidate = segments.length > 0 ? segments[segments.length - 1] : withoutQuery;
+  const allowedOnly = candidate.replace(/[^A-HJ-NP-Z2-9]/g, "");
+  const match = allowedOnly.match(/[A-HJ-NP-Z2-9]{6}/);
+  if (match) {
+    return match[0];
+  }
+  const token = candidate.match(/[A-Z0-9]{6}/);
+  return token ? token[0] : "";
 }
