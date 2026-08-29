@@ -9,7 +9,7 @@ import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
 import ConfirmButton from "@/components/GameRoom/ConfirmButton";
 import { copyText } from "@/lib/clipboard";
-import { addCashOut } from "@/lib/data";
+import { addCashOut, markEnded } from "@/lib/data";
 import { getPlayerCashOut, playerInvested, totalPot } from "@/lib/game";
 import { round2 } from "@/lib/format";
 import { getSessionId } from "@/lib/session";
@@ -67,6 +67,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const [bankPlayerId, setBankPlayerId] = useState<string>(() =>
     defaultBankId(snapshot.players)
   );
+  const [finalizing, setFinalizing] = useState(false);
 
   useEffect(() => {
     setSessionId(getSessionId());
@@ -134,6 +135,21 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     }
   }
 
+  async function handleFinalize() {
+    setFinalizing(true);
+    try {
+      await markEnded(snapshot.game.id);
+      toast("Game finalized", "success");
+    } catch (err) {
+      toast(
+        err instanceof Error ? err.message : "Failed to finalize the game.",
+        "error"
+      );
+    } finally {
+      setFinalizing(false);
+    }
+  }
+
   function handleTabKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
       return;
@@ -163,18 +179,32 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
           </div>
         </div>
 
-        <div className="mt-5">
-          <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
-            Room code
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <span className="font-mono text-2xl font-bold tracking-[0.2em] text-gray-900">
-              {snapshot.game.code}
-            </span>
-            <Button variant="secondary" size="md" onClick={handleCopyCode}>
-              Copy
-            </Button>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
+              Room code
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <span className="font-mono text-2xl font-bold tracking-[0.2em] text-gray-900">
+                {snapshot.game.code}
+              </span>
+              <Button variant="secondary" size="md" onClick={handleCopyCode}>
+                Copy
+              </Button>
+            </div>
           </div>
+
+          {isHost && snapshot.game.status === "settling" ? (
+            <ConfirmButton
+              variant="primary"
+              size="md"
+              loading={finalizing}
+              confirmLabel="Finalize now?"
+              onConfirm={handleFinalize}
+            >
+              Finalize game
+            </ConfirmButton>
+          ) : null}
         </div>
       </header>
 
@@ -342,7 +372,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 <NetList
                   nets={nets}
                   bankPlayerId={bankPlayerId}
-                  balanced={balanced}
+                  bankResidual={difference}
                 />
               </section>
             </div>

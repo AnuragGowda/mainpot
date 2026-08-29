@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ResumeBanner from "@/components/ResumeBanner";
 
 const linkBaseClasses =
   "inline-flex h-11 items-center justify-center rounded-md text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2";
@@ -24,6 +25,7 @@ const steps = [
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 sm:px-6">
+      <ResumeBanner />
       <section className="flex flex-1 flex-col items-center justify-center py-24 text-center sm:py-32">
         <p className="mb-5 text-xs font-medium uppercase tracking-widest text-gray-500">
           Poker money tracking

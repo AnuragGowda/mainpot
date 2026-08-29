@@ -1,14 +1,15 @@
-import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import { formatCurrency, formatSignedNet } from "@/lib/format";
 import type { PlayerNet } from "@/lib/settlement";
 
 export interface NetListProps {
   nets: PlayerNet[];
-  /** When set, the bank's net is called out explicitly with a footer line. */
+  /** When set, the bank player is excluded from the main list and called
+   *  out explicitly with a footer line. */
   bankPlayerId?: string;
-  /** Whether the books are balanced (controls the bank footer note). */
-  balanced?: boolean;
+  /** The residual the bank should display (difference = bought in - cashed
+   *  out). When omitted, the footer shows $0.00 even. */
+  bankResidual?: number;
 }
 
 interface NetMeta {
@@ -42,11 +43,16 @@ function netMeta(net: number): NetMeta {
 /**
  * Per-player net result list: green "+$X" / red "-$X" / gray "$0.00",
  * each with an "up $X" / "down $X" / "even" caption.
+ *
+ * In bank mode (`bankPlayerId` set) the bank player is filtered out of the
+ * main list — their residual is shown once in the footer instead, so a
+ * balanced bank renders "$0.00 even" instead of duplicating its min-transfer
+ * net in both places.
  */
 export default function NetList({
   nets,
   bankPlayerId,
-  balanced,
+  bankResidual,
 }: NetListProps) {
   if (nets.length === 0) {
     return <p className="text-sm text-gray-500">No players.</p>;
@@ -55,60 +61,45 @@ export default function NetList({
   const bank = bankPlayerId
     ? (nets.find((net) => net.playerId === bankPlayerId) ?? null)
     : null;
+  const bankMeta = bankPlayerId ? netMeta(bankResidual ?? 0) : null;
 
   return (
     <Card padding="none">
       <ul className="divide-y divide-gray-100">
-        {nets.map((net) => {
-          const meta = netMeta(net.net);
-          return (
-            <li
-              key={net.playerId}
-              className="flex items-center justify-between gap-3 px-4 py-3"
-            >
-              <span className="flex min-w-0 flex-wrap items-center gap-2">
-                <span className="font-medium text-gray-900">{net.name}</span>
-                {bank && net.playerId === bank.playerId ? (
-                  <Badge variant="gray">Bank</Badge>
-                ) : null}
-              </span>
-              <div className="shrink-0 text-right">
-                <p className={`font-semibold ${meta.amountClass}`}>
-                  {meta.amount}
-                </p>
-                <p className="text-xs text-gray-500">{meta.caption}</p>
-              </div>
-            </li>
-          );
-        })}
+        {nets
+          .filter((net) => net.playerId !== bankPlayerId)
+          .map((net) => {
+            const meta = netMeta(net.net);
+            return (
+              <li
+                key={net.playerId}
+                className="flex items-center justify-between gap-3 px-4 py-3"
+              >
+                <span className="flex min-w-0 flex-wrap items-center gap-2">
+                  <span className="font-medium text-gray-900">{net.name}</span>
+                </span>
+                <div className="shrink-0 text-right">
+                  <p className={`font-semibold ${meta.amountClass}`}>
+                    {meta.amount}
+                  </p>
+                  <p className="text-xs text-gray-500">{meta.caption}</p>
+                </div>
+              </li>
+            );
+          })}
       </ul>
 
-      {bank ? (
+      {bankMeta ? (
         <div className="border-t border-gray-100 px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <span className="font-medium text-gray-900">
-              Bank ({bank.name})
+              Bank{bank ? ` (${bank.name})` : ""}
             </span>
             <div className="shrink-0 text-right">
-              {balanced ? (
-                <>
-                  <p className="font-semibold text-gray-400">
-                    {formatCurrency(0)}
-                  </p>
-                  <p className="text-xs text-gray-500">even</p>
-                </>
-              ) : (
-                <>
-                  <p
-                    className={`font-semibold ${netMeta(bank.net).amountClass}`}
-                  >
-                    {netMeta(bank.net).amount}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {netMeta(bank.net).caption}
-                  </p>
-                </>
-              )}
+              <p className={`font-semibold ${bankMeta.amountClass}`}>
+                {bankMeta.amount}
+              </p>
+              <p className="text-xs text-gray-500">{bankMeta.caption}</p>
             </div>
           </div>
         </div>

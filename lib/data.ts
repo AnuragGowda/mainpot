@@ -10,6 +10,7 @@ import type {
 } from "./types";
 import { generateRoomCode, normalizeRoomCode } from "./roomcode";
 import { getSessionId, randomUUID } from "./session";
+import { round2 } from "./format";
 
 export { isSupabaseConfigured };
 
@@ -162,7 +163,7 @@ async function createGameLocal(
     name,
     host_session_id: sessionId,
     host_name: hostName,
-    buy_in_amount: buyInAmount,
+    buy_in_amount: round2(buyInAmount),
     status: "active",
     created_at: now,
     ended_at: null,
@@ -182,7 +183,7 @@ async function createGameLocal(
     id: randomUUID(),
     game_id: gameId,
     player_id: player.id,
-    amount: buyInAmount,
+    amount: round2(buyInAmount),
     type: "buy_in",
     verified: false,
     created_at: now,
@@ -272,7 +273,7 @@ async function addBuyInLocal(
     id: randomUUID(),
     game_id: gameId,
     player_id: playerId,
-    amount,
+    amount: round2(amount),
     type,
     verified: false,
     created_at: new Date().toISOString(),
@@ -309,7 +310,7 @@ async function updateBuyInLocal(buyInId: string, amount: number): Promise<void> 
   const store = loadStore();
   const buyIn = store.buyIns.find((b) => b.id === buyInId);
   if (buyIn) {
-    buyIn.amount = amount;
+    buyIn.amount = round2(amount);
   }
   persistStore(store);
   if (buyIn) {
@@ -352,7 +353,7 @@ async function addCashOutLocal(
     (c) => c.game_id === gameId && c.player_id === playerId
   );
   if (existing) {
-    existing.amount = amount;
+    existing.amount = round2(amount);
     persistStore(store);
     emitSnapshot(gameId, store);
     return existing;
@@ -362,7 +363,7 @@ async function addCashOutLocal(
     id: randomUUID(),
     game_id: gameId,
     player_id: playerId,
-    amount,
+    amount: round2(amount),
     created_at: new Date().toISOString(),
   };
   store.cashOuts.push(cashOut);
@@ -378,7 +379,7 @@ async function updateCashOutLocal(
   const store = loadStore();
   const cashOut = store.cashOuts.find((c) => c.id === cashOutId);
   if (cashOut) {
-    cashOut.amount = amount;
+    cashOut.amount = round2(amount);
   }
   persistStore(store);
   if (cashOut) {
@@ -392,6 +393,18 @@ async function endGameLocal(gameId: string): Promise<void> {
   if (game) {
     game.status = "settling";
     game.ended_at = new Date().toISOString();
+  }
+  persistStore(store);
+  if (game) {
+    emitSnapshot(gameId, store);
+  }
+}
+
+async function markEndedLocal(gameId: string): Promise<void> {
+  const store = loadStore();
+  const game = store.games.find((g) => g.id === gameId);
+  if (game) {
+    game.status = "ended";
   }
   persistStore(store);
   if (game) {
@@ -756,6 +769,17 @@ async function endGameSupabase(gameId: string): Promise<void> {
   }
 }
 
+async function markEndedSupabase(gameId: string): Promise<void> {
+  const client = assertSupabase();
+  const { error } = await client
+    .from("games")
+    .update({ status: "ended" })
+    .eq("id", gameId);
+  if (error) {
+    throw error;
+  }
+}
+
 async function getGameSnapshotSupabase(gameId: string): Promise<GameSnapshot> {
   const client = assertSupabase();
 
@@ -901,6 +925,10 @@ export async function updateCashOut(
 
 export async function endGame(gameId: string): Promise<void> {
   return usingLocalStorage() ? endGameLocal(gameId) : endGameSupabase(gameId);
+}
+
+export async function markEnded(gameId: string): Promise<void> {
+  return usingLocalStorage() ? markEndedLocal(gameId) : markEndedSupabase(gameId);
 }
 
 export async function getGameSnapshot(gameId: string): Promise<GameSnapshot> {

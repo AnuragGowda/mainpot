@@ -4,6 +4,7 @@ import type { Game, GameStatus } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+import { copyText } from "@/lib/clipboard";
 import { formatCurrency } from "@/lib/format";
 import ConfirmButton from "./ConfirmButton";
 
@@ -22,24 +23,6 @@ const statusMeta: Record<GameStatus, { label: string; variant: "green" | "amber"
   settling: { label: "Settling", variant: "amber" },
   ended: { label: "Ended", variant: "gray" },
 };
-
-async function copyText(text: string): Promise<void> {
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-  const ok = document.execCommand("copy");
-  document.body.removeChild(textarea);
-  if (!ok) {
-    throw new Error("Copy failed");
-  }
-}
 
 export default function GameHeader({
   game,

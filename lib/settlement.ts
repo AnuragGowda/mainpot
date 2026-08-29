@@ -18,7 +18,8 @@ function round2(value: number): number {
 
 /**
  * Greedy minimum-transfers settlement:
- * 1. Separate creditors (net > 0) and debtors (net < 0); ignore net === 0.
+ * 1. Separate creditors (net > EPSILON) and debtors (net < -EPSILON); ignore
+ *    near-zero nets so balanced players never appear in a transfer.
  * 2. Sort both by absolute net descending.
  * 3. Pair the largest creditor with the largest debtor, transfer the smaller
  *    of the two amounts, and drop anyone who reaches ~0 (<= 0.005).
@@ -26,12 +27,12 @@ function round2(value: number): number {
  */
 export function calculateMinTransfers(players: PlayerNet[]): Transfer[] {
   const creditors = players
-    .filter((p) => p.net > 0)
+    .filter((p) => p.net > EPSILON)
     .map((p) => ({ ...p }))
     .sort((a, b) => b.net - a.net);
 
   const debtors = players
-    .filter((p) => p.net < 0)
+    .filter((p) => p.net < -EPSILON)
     .map((p) => ({ ...p }))
     .sort((a, b) => Math.abs(b.net) - Math.abs(a.net));
 
