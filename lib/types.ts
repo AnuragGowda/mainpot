@@ -16,6 +16,7 @@ export interface Player {
   id: string;
   game_id: string;
   session_id: string;
+  user_id: string | null;
   name: string;
   is_host: boolean;
   joined_at: string;
@@ -47,4 +48,63 @@ export interface GameSnapshot {
   players: Player[];
   buyIns: BuyIn[];
   cashOuts: CashOut[];
+}
+
+export interface Profile {
+  id: string;
+  username: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  venmo_handle: string | null;
+  zelle_handle: string | null;
+  bio: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type FriendshipStatus = 'pending' | 'accepted' | 'declined';
+
+export interface Friendship {
+  id: string;
+  requester_id: string;
+  addressee_id: string;
+  status: FriendshipStatus;
+  created_at: string;
+  responded_at: string | null;
+}
+
+export interface GameParticipant {
+  id: string;
+  game_id: string;
+  user_id: string;
+  player_id: string;
+  net_result: number;
+  created_at: string;
+}
+
+export interface GameHistory {
+  gameId: string;
+  gameName: string;
+  date: Date;
+  netResult: number;
+  buyInAmount: number;
+  playerCount: number;
+}
+
+export interface UserStats {
+  gamesPlayed: number;
+  totalPL: number;
+  avgPL: number;
+  biggestWin: number;
+  biggestLoss: number;
+  winRate: number;
+}
+
+export interface FriendStats {
+  userId: string;
+  username: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
+  totalPL: number;
+  gamesPlayed: number;
 }

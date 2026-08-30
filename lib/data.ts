@@ -177,6 +177,7 @@ async function createGameLocal(
     is_host: true,
     joined_at: now,
     left_at: null,
+    user_id: null,
   };
 
   const buyIn: BuyIn = {
@@ -229,6 +230,7 @@ async function joinGameLocal(
     is_host: false,
     joined_at: new Date().toISOString(),
     left_at: null,
+    user_id: null,
   };
   store.players.push(player);
   persistStore(store);
