@@ -8,6 +8,7 @@ An open-source, realtime ledger for home poker games. Track buy-ins and rebuys, 
 - Host approval and correction of buy-ins
 - Rebuys fronted by another player without changing chip accounting
 - Cash-out reconciliation and minimum-transfer settlement
+- Optional Venmo and Zelle shortcuts for completing settlements
 - Friends, direct table invitations, game history, and player statistics
 - Host handoff, audit log, and one-click rematches
 

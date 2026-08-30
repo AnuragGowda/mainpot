@@ -1,11 +1,18 @@
 "use client";
 
-import { Circle, CircleCheck } from "lucide-react";
+import { Circle, CircleCheck, Copy, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
+import { copyText } from "@/lib/clipboard";
 import { formatCurrency } from "@/lib/format";
+import {
+  buildVenmoPaymentUrl,
+  buildZellePaymentText,
+  getPlayerPaymentHandles,
+} from "@/lib/payment-links";
+import type { PlayerPaymentHandles } from "@/lib/payment-links";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import { getSettlementPaymentStatuses, setSettlementPaymentStatus, settlementPaymentKey } from "@/lib/payments";
 import type { SettlementMode } from "@/lib/payments";
@@ -26,6 +33,7 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
   const { toast } = useToast();
   const [settledKeys, setSettledKeys] = useState<Set<string>>(new Set());
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [paymentHandles, setPaymentHandles] = useState<Map<string, PlayerPaymentHandles>>(new Map());
 
   useEffect(() => {
     let cancelled = false;
@@ -48,6 +56,21 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
     };
   }, [gameId]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const recipientIds = transfers
+      .map((transfer) => transfer.toPlayerId)
+      .filter((id): id is string => Boolean(id));
+    void getPlayerPaymentHandles(recipientIds)
+      .then((handles) => {
+        if (!cancelled) setPaymentHandles(handles);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [transfers]);
+
   if (!transfers.length) return <p className="text-sm text-gray-500">No transfers needed — everyone is square.</p>;
 
   return (
@@ -56,6 +79,13 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
         {transfers.map((transfer) => {
           const key = settlementPaymentKey(mode, transfer);
           const settled = settledKeys.has(key);
+          const handles = transfer.toPlayerId ? paymentHandles.get(transfer.toPlayerId) : undefined;
+          const venmoUrl = handles?.venmo
+            ? buildVenmoPaymentUrl(handles.venmo, transfer.amount)
+            : null;
+          const zelleText = handles?.zelle
+            ? buildZellePaymentText(handles.zelle, transfer.amount)
+            : null;
           return (
             <li key={key} className={`flex flex-col gap-3 px-4 py-3 transition sm:flex-row sm:items-center sm:justify-between ${settled ? "bg-emerald-50/60" : ""}`}>
               <div className="flex min-w-0 flex-wrap items-center gap-1.5">
@@ -63,8 +93,34 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
                 <span className="text-gray-500">pays</span>
                 <PartyName name={transfer.to} />
               </div>
-              <div className="flex items-center justify-between gap-3 sm:justify-end">
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
                 <span className={`font-semibold ${settled ? "text-emerald-800" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
+                {!settled && venmoUrl ? (
+                  <a
+                    href={venmoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-700 transition hover:border-gray-300 hover:text-gray-950"
+                  >
+                    Venmo <ExternalLink aria-hidden size={14} />
+                  </a>
+                ) : null}
+                {!settled && zelleText ? (
+                  <a
+                    href="https://www.zellepay.com/get-started"
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Copy payment details and open Zelle's bank finder"
+                    onClick={() => {
+                      void copyText(zelleText)
+                        .then(() => toast("Zelle details copied", "success"))
+                        .catch(() => toast("Could not copy Zelle details", "error"));
+                    }}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-700 transition hover:border-gray-300 hover:text-gray-950"
+                  >
+                    Zelle <Copy aria-hidden size={14} />
+                  </a>
+                ) : null}
                 <button
                   type="button"
                   disabled={busyKey === key}

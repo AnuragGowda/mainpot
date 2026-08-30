@@ -190,6 +190,9 @@ export default function DashboardPage() {
               <Input label="Username" prefix="@" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value.replace(/^@/, "") })} placeholder="pocketaces" />
               <Input label="Venmo" prefix="@" value={form.venmo_handle} onChange={(event) => setForm({ ...form, venmo_handle: event.target.value.replace(/^@/, "") })} placeholder="your-handle" />
               <Input label="Zelle email or phone" value={form.zelle_handle} onChange={(event) => setForm({ ...form, zelle_handle: event.target.value })} />
+              <p className="-mt-2 text-xs leading-5 text-gray-500 sm:col-span-2">
+                Optional. Mainpot uses these to create settlement shortcuts; you always review and send the payment yourself.
+              </p>
               <label className="sm:col-span-2">
                 <span className="mb-1 block text-sm font-medium text-gray-700">Bio</span>
                 <textarea value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} maxLength={160} rows={3} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" placeholder="Weekly home game enthusiast." />
