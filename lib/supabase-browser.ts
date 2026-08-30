@@ -34,4 +34,4 @@ export function getBrowserSupabase(): SupabaseClient | null {
 }
 
 /** Singleton browser client (null when Supabase is unconfigured). */
-export const browserSupabase: SupabaseClient | null = createBrowserSupabase();
+export const browserSupabase: SupabaseClient | null = getBrowserSupabase();
