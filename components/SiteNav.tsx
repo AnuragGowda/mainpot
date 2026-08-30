@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { LogOut } from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
 import { getCurrentUser, signOutUser } from "@/lib/auth-client";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import { isSupabaseConfigured } from "@/lib/supabase";
@@ -99,6 +99,14 @@ export default function SiteNav() {
               ) : null}
               <Link href="/signin" className={`${navLink} hidden sm:inline-flex`}>
                 Sign in
+              </Link>
+              <Link
+                href="/signin"
+                aria-label="Sign in"
+                title="Sign in"
+                className={`${navLink} grid h-9 w-9 place-items-center px-0 sm:hidden`}
+              >
+                <LogIn aria-hidden className="h-4 w-4" />
               </Link>
               <Link
                 href="/create"
