@@ -4,7 +4,8 @@ Follow these steps to run Ante locally and connect it to Supabase.
 
 ## 1. Prerequisites
 
-- **Node.js 18+** (Node 20 recommended) and **npm**.
+- **Node.js 22+** and **npm**. The included `.mise.toml` pins the runner to
+  the current Node 22 release.
 - A free [Supabase](https://supabase.com) account.
 
 ## 2. Create a Supabase project
@@ -22,7 +23,7 @@ Follow these steps to run Ante locally and connect it to Supabase.
 2. Open [`supabase/schema.sql`](supabase/schema.sql), copy the entire file,
    and paste it into the SQL Editor.
 3. Click **Run**. This creates the `games`, `players`, `buy_ins`, and
-   `cash_outs` tables, enables realtime, and opens public access.
+   `cash_outs` tables, enables realtime, and installs row-level security.
 
 ## 4. Configure environment variables
 
@@ -44,9 +45,8 @@ Follow these steps to run Ante locally and connect it to Supabase.
 
 ## 5. Enable authentication (optional)
 
-Supabase auth (email/password, Google OAuth, and magic-link email OTP) needs
-**no extra environment variables** — everything is configured in the Supabase
-dashboard.
+Email/password and magic-link auth are configured in the Supabase dashboard.
+Google OAuth also needs a public feature flag after its credentials are ready.
 
 1. Open **Dashboard → Authentication → Providers**.
 2. **Email**: make sure the **Email** provider is enabled. This covers
@@ -61,6 +61,9 @@ dashboard.
      Settings → General).
    - Paste the resulting **Client ID** and **Client secret** into
      Supabase's Google provider settings.
+   - Set `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true` in `.env.local`. Ante keeps
+     the Google button hidden until this flag is present, avoiding a dead
+     sign-in path while the provider is unconfigured.
 4. **Magic link**: enable the **Email OTP** provider. New users receive a
    one-time code / magic link they can use to sign in without a password.
 5. Re-run [`supabase/schema.sql`](supabase/schema.sql) in the SQL Editor so
@@ -98,3 +101,21 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 2. In the project's **Settings → Environment Variables**, add the same
    `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` values.
 3. Deploy — the production build behaves like the local Supabase setup.
+
+## 9. Agent-runner deployment
+
+The checked-in `deploy/ante.service` runs the production build on
+`127.0.0.1:3100` as a persistent user service. After a new build:
+
+```sh
+mkdir -p ~/.config/systemd/user
+cp deploy/ante.service ~/.config/systemd/user/ante.service
+systemctl --user daemon-reload
+systemctl --user enable --now ante.service
+```
+
+The runner exposes this private service to the tailnet on HTTPS port `8443`:
+
+```sh
+tailscale serve --bg --https=8443 http://127.0.0.1:3100
+```

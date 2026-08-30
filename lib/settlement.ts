@@ -1,13 +1,47 @@
+import type { BuyIn } from "./types";
+
 export interface Transfer {
   from: string;
   to: string;
   amount: number;
+  fromPlayerId: string | null;
+  toPlayerId: string | null;
 }
 
 export interface PlayerNet {
   playerId: string;
   name: string;
   net: number;
+}
+
+/**
+ * Applies who-paid-for-whom adjustments without changing chip accounting.
+ * The beneficiary still owns the buy-in and its chips; only the final debt is
+ * shifted from the beneficiary to the player who fronted the cash.
+ */
+export function applyFundingAdjustments(
+  players: PlayerNet[],
+  buyIns: BuyIn[]
+): PlayerNet[] {
+  const adjustments = new Map<string, number>();
+
+  for (const buyIn of buyIns) {
+    const lenderId = buyIn.fronted_by_player_id;
+    if (!lenderId || lenderId === buyIn.player_id) continue;
+    adjustments.set(
+      buyIn.player_id,
+      (adjustments.get(buyIn.player_id) ?? 0) - buyIn.amount
+    );
+    adjustments.set(
+      lenderId,
+      (adjustments.get(lenderId) ?? 0) + buyIn.amount
+    );
+  }
+
+  return players.map((player) => ({
+    ...player,
+    net: round2(player.net + (adjustments.get(player.playerId) ?? 0)),
+  }));
 }
 
 const EPSILON = 0.005;
@@ -47,6 +81,8 @@ export function calculateMinTransfers(players: PlayerNet[]): Transfer[] {
       from: debtor.name,
       to: creditor.name,
       amount: round2(transfer),
+      fromPlayerId: debtor.playerId,
+      toPlayerId: creditor.playerId,
     });
 
     creditor.net -= transfer;
@@ -89,12 +125,16 @@ export function calculateBankSettlement(
         from: player.name,
         to: "Bank",
         amount: round2(Math.abs(net)),
+        fromPlayerId: player.playerId,
+        toPlayerId: bankPlayerId,
       });
     } else {
       transfers.push({
         from: "Bank",
         to: player.name,
         amount: round2(net),
+        fromPlayerId: bankPlayerId,
+        toPlayerId: player.playerId,
       });
     }
   }

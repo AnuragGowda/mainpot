@@ -1,0 +1,15 @@
+[Unit]
+Description=Ante poker banking app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/agowda/ante
+Environment=NODE_ENV=production
+ExecStart=/usr/local/bin/mise exec node@22 -- npm run start -- --hostname 127.0.0.1 --port 3100
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

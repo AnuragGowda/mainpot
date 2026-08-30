@@ -1,51 +1,99 @@
+"use client";
+
+import { Circle, CircleCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
+import { useToast } from "@/components/ui/Toast";
 import { formatCurrency } from "@/lib/format";
+import { getBrowserSupabase } from "@/lib/supabase-browser";
+import { getSettlementPaymentStatuses, setSettlementPaymentStatus, settlementPaymentKey } from "@/lib/payments";
+import type { SettlementMode } from "@/lib/payments";
 import type { Transfer } from "@/lib/settlement";
 
 export interface TransferListProps {
   transfers: Transfer[];
+  gameId: string;
+  mode: SettlementMode;
 }
 
-/** A transfer party — either a player name or the literal "Bank". */
 function PartyName({ name }: { name: string }) {
-  if (name === "Bank") {
-    return <Badge variant="gray">Bank</Badge>;
-  }
+  if (name === "Bank") return <Badge variant="gray">Bank</Badge>;
   return <span className="font-medium text-gray-900">{name}</span>;
 }
 
-/**
- * Renders the list of settlement transfers ("[from] pays [to] amount").
- * Bank parties are rendered as gray badges to stand out from players.
- */
-export default function TransferList({ transfers }: TransferListProps) {
-  if (transfers.length === 0) {
-    return (
-      <p className="text-sm text-gray-500">
-        No transfers needed — everyone is square.
-      </p>
-    );
-  }
+export default function TransferList({ transfers, gameId, mode }: TransferListProps) {
+  const { toast } = useToast();
+  const [settledKeys, setSettledKeys] = useState<Set<string>>(new Set());
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = () => {
+      void getSettlementPaymentStatuses(gameId)
+        .then((statuses) => {
+          if (!cancelled) setSettledKeys(new Set(statuses.filter((item) => item.settled).map((item) => item.key)));
+        })
+        .catch(() => undefined);
+    };
+    refresh();
+    const supabase = getBrowserSupabase();
+    const channel = supabase
+      ?.channel(`settlement-payments-${gameId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "settlement_payments", filter: `game_id=eq.${gameId}` }, refresh)
+      .subscribe();
+    return () => {
+      cancelled = true;
+      if (channel && supabase) void supabase.removeChannel(channel);
+    };
+  }, [gameId]);
+
+  if (!transfers.length) return <p className="text-sm text-gray-500">No transfers needed — everyone is square.</p>;
 
   return (
     <Card padding="none">
       <ul className="divide-y divide-gray-100">
-        {transfers.map((transfer, index) => (
-          <li
-            key={index}
-            className="flex items-center justify-between gap-3 px-4 py-3"
-          >
-            <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-              <PartyName name={transfer.from} />
-              <span className="text-gray-500">pays</span>
-              <PartyName name={transfer.to} />
-            </div>
-            <span className="shrink-0 font-semibold text-gray-900">
-              {formatCurrency(transfer.amount)}
-            </span>
-          </li>
-        ))}
+        {transfers.map((transfer) => {
+          const key = settlementPaymentKey(mode, transfer);
+          const settled = settledKeys.has(key);
+          return (
+            <li key={key} className={`flex flex-col gap-3 px-4 py-3 transition sm:flex-row sm:items-center sm:justify-between ${settled ? "bg-emerald-50/60" : ""}`}>
+              <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                <PartyName name={transfer.from} />
+                <span className="text-gray-500">pays</span>
+                <PartyName name={transfer.to} />
+              </div>
+              <div className="flex items-center justify-between gap-3 sm:justify-end">
+                <span className={`font-semibold ${settled ? "text-emerald-800" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
+                <button
+                  type="button"
+                  disabled={busyKey === key}
+                  aria-pressed={settled}
+                  onClick={async () => {
+                    setBusyKey(key);
+                    try {
+                      await setSettlementPaymentStatus(gameId, mode, transfer, !settled);
+                      setSettledKeys((current) => {
+                        const next = new Set(current);
+                        if (settled) next.delete(key); else next.add(key);
+                        return next;
+                      });
+                      toast(settled ? "Payment reopened" : "Payment marked paid", "success");
+                    } catch (error) {
+                      toast(error instanceof Error ? error.message : "Could not update payment.", "error");
+                    } finally {
+                      setBusyKey(null);
+                    }
+                  }}
+                  className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:opacity-50 ${settled ? "text-emerald-800 hover:bg-emerald-100" : "text-gray-500 hover:bg-gray-100 hover:text-gray-950"}`}
+                >
+                  {settled ? <CircleCheck aria-hidden size={17} /> : <Circle aria-hidden size={17} />}
+                  {settled ? "Paid" : "Mark paid"}
+                </button>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </Card>
   );

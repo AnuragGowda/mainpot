@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   if (!supabase) {
     // Supabase is not configured — nothing to exchange.
     return NextResponse.redirect(

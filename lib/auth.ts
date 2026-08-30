@@ -14,7 +14,7 @@ export interface AuthUserResult {
  * client. Returns null when Supabase is unconfigured or no session exists.
  */
 export async function getSession(): Promise<Session | null> {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   if (!supabase) {
     return null;
   }
@@ -29,7 +29,7 @@ export async function getSession(): Promise<Session | null> {
  * when Supabase is unconfigured or there is no active session.
  */
 export async function getUser(): Promise<AuthUserResult | null> {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
   if (!supabase) {
     return null;
   }

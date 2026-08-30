@@ -14,11 +14,13 @@ import { getPlayerCashOut, playerInvested, totalPot } from "@/lib/game";
 import { round2 } from "@/lib/format";
 import { getSessionId } from "@/lib/session";
 import {
+  applyFundingAdjustments,
   calculateBankSettlement,
   calculateMinTransfers,
 } from "@/lib/settlement";
 import type { GameSnapshot, GameStatus } from "@/lib/types";
 import CashOutEntry from "./CashOutEntry";
+import FundingNotes from "./FundingNotes";
 import NetList from "./NetList";
 import ReconciliationBar from "./ReconciliationBar";
 import SettlementSummary from "./SettlementSummary";
@@ -48,7 +50,7 @@ function defaultBankId(players: GameSnapshot["players"]): string {
 function tabClass(selected: boolean): string {
   return [
     "inline-flex h-11 items-center rounded-md px-4 text-sm font-medium transition-colors duration-150",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-1",
     selected ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900",
   ].join(" ");
 }
@@ -62,7 +64,9 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const { toast } = useToast();
 
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [mode, setMode] = useState<SettlementMode>("entry");
+  const [mode, setMode] = useState<SettlementMode>(() =>
+    snapshot.game.status === "ended" ? "results" : "entry"
+  );
   const [tab, setTab] = useState<ResultsTab>("min");
   const [bankPlayerId, setBankPlayerId] = useState<string>(() =>
     defaultBankId(snapshot.players)
@@ -72,6 +76,12 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   useEffect(() => {
     setSessionId(getSessionId());
   }, []);
+
+  useEffect(() => {
+    if (snapshot.game.status === "ended") {
+      setMode("results");
+    }
+  }, [snapshot.game.status]);
 
   // Keep the selected bank valid when the player list changes.
   useEffect(() => {
@@ -98,14 +108,17 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const currentPlayerId = currentPlayer?.id ?? null;
   const isHost = currentPlayer?.is_host === true;
 
-  const nets = players.map((player) => ({
-    playerId: player.id,
-    name: player.name,
-    net: round2(
-      (getPlayerCashOut(snapshot, player.id)?.amount ?? 0) -
-        playerInvested(snapshot, player.id)
-    ),
-  }));
+  const nets = applyFundingAdjustments(
+    players.map((player) => ({
+      playerId: player.id,
+      name: player.name,
+      net: round2(
+        (getPlayerCashOut(snapshot, player.id)?.amount ?? 0) -
+          playerInvested(snapshot, player.id)
+      ),
+    })),
+    snapshot.buyIns
+  );
 
   const minTransfers = calculateMinTransfers(nets);
   const bankPlayer =
@@ -194,7 +207,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             </div>
           </div>
 
-          {isHost && snapshot.game.status === "settling" ? (
+          {isHost && snapshot.game.status === "settling" && mode === "results" ? (
             <ConfirmButton
               variant="primary"
               size="md"
@@ -221,6 +234,8 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             balanced={balanced}
           />
 
+          <FundingNotes snapshot={snapshot} />
+
           <CashOutEntry
             snapshot={snapshot}
             currentPlayerId={currentPlayerId}
@@ -239,20 +254,18 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             </Button>
 
             {!balanced ? (
-              <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3">
-                <p className="text-sm font-medium text-red-600">
-                  Cash-outs don&apos;t match buy-ins. Check the amounts.
+              <div className="flex flex-col items-center gap-2 pt-1 text-center sm:flex-row sm:justify-center">
+                <p className="text-sm text-gray-500">
+                  Need to settle with a discrepancy?
                 </p>
-                <div className="mt-2.5">
-                  <ConfirmButton
-                    variant="secondary"
-                    size="md"
-                    confirmLabel="Calculate anyway?"
-                    onConfirm={() => setMode("results")}
-                  >
-                    Calculate anyway
-                  </ConfirmButton>
-                </div>
+                <ConfirmButton
+                  variant="ghost"
+                  size="sm"
+                  confirmLabel="Calculate anyway?"
+                  onConfirm={() => setMode("results")}
+                >
+                  Calculate anyway
+                </ConfirmButton>
               </div>
             ) : null}
           </div>
@@ -297,6 +310,8 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             </Button>
           </div>
 
+          <FundingNotes snapshot={snapshot} />
+
           {tab === "min" ? (
             <div
               id="panel-min"
@@ -311,7 +326,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 >
                   Min transfers
                 </h2>
-                <TransferList transfers={minTransfers} />
+                <TransferList transfers={minTransfers} gameId={snapshot.game.id} mode="min" />
               </section>
 
               <section aria-labelledby="nets-min-heading">
@@ -342,7 +357,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   id="bank-player-select"
                   value={bankPlayerId}
                   onChange={(event) => setBankPlayerId(event.target.value)}
-                  className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10"
                 >
                   {players.map((player) => (
                     <option key={player.id} value={player.id}>
@@ -359,7 +374,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 >
                   Bank settlements
                 </h2>
-                <TransferList transfers={bankTransfers} />
+                <TransferList transfers={bankTransfers} gameId={snapshot.game.id} mode="bank" />
               </section>
 
               <section aria-labelledby="nets-bank-heading">

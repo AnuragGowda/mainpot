@@ -4,6 +4,7 @@ export interface Game {
   id: string;
   code: string;
   name: string;
+  host_user_id: string | null;
   host_session_id: string;
   host_name: string;
   buy_in_amount: number;
@@ -31,6 +32,8 @@ export interface BuyIn {
   player_id: string;
   amount: number;
   type: BuyInType;
+  /** Another player who covered this buy-in; affects settlement, not the pot. */
+  fronted_by_player_id: string | null;
   verified: boolean;
   created_at: string;
 }
@@ -43,11 +46,47 @@ export interface CashOut {
   created_at: string;
 }
 
+export type GameEventType =
+  | "game_created"
+  | "player_joined"
+  | "buy_in_added"
+  | "buy_in_updated"
+  | "buy_in_removed"
+  | "buy_in_verified"
+  | "player_left"
+  | "player_removed"
+  | "host_transferred"
+  | "cash_out_updated"
+  | "game_settling"
+  | "game_finalized";
+
+export interface GameEventMetadata {
+  player_name?: string;
+  buy_in_id?: string;
+  buy_in_type?: BuyInType;
+  previous_amount?: number;
+  fronted_by_name?: string;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+/** Immutable audit entry for activity that happened during a game. */
+export interface GameEvent {
+  id: string;
+  game_id: string;
+  event_type: GameEventType;
+  actor_player_id: string | null;
+  subject_player_id: string | null;
+  amount: number | null;
+  metadata: GameEventMetadata;
+  created_at: string;
+}
+
 export interface GameSnapshot {
   game: Game;
   players: Player[];
   buyIns: BuyIn[];
   cashOuts: CashOut[];
+  events: GameEvent[];
 }
 
 export interface Profile {
@@ -107,4 +146,21 @@ export interface FriendStats {
   avatarUrl: string | null;
   totalPL: number;
   gamesPlayed: number;
+}
+
+export type GameInviteStatus = "pending" | "accepted" | "declined";
+
+export interface GameInvite {
+  id: string;
+  game_id: string;
+  inviter_id: string;
+  invitee_id: string;
+  status: GameInviteStatus;
+  created_at: string;
+  responded_at: string | null;
+}
+
+export interface IncomingGameInvite extends GameInvite {
+  game: Pick<Game, "id" | "code" | "name" | "buy_in_amount" | "host_name" | "status">;
+  inviter: Pick<Profile, "id" | "username" | "display_name" | "avatar_url"> | null;
 }

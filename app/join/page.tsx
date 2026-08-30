@@ -1,14 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
+import GameSetupShell from "@/components/GameSetupShell";
 import { useToast } from "@/components/ui/Toast";
 import { joinGame } from "@/lib/data";
+import { getCurrentUserId } from "@/lib/auth-client";
 import { normalizeRoomCode } from "@/lib/roomcode";
 import { getPlayerName, setActiveGame, setPlayerName } from "@/lib/session";
 
@@ -66,7 +66,8 @@ export default function JoinGamePage() {
     setLoading(true);
     try {
       setPlayerName(trimmedName);
-      await joinGame(normalizedCode, trimmedName);
+      const userId = await getCurrentUserId();
+      await joinGame(normalizedCode, trimmedName, userId);
       setActiveGame(normalizedCode);
       toast("Joined the game!", "success");
       router.push(`/game/${normalizedCode}`);
@@ -87,24 +88,17 @@ export default function JoinGamePage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-16 sm:px-6">
-      <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors duration-150 hover:text-gray-900"
-        >
-          <span aria-hidden="true">←</span>
-          Back
-        </Link>
-        <Card padding="lg">
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-            Join a game
-          </h1>
-          <p className="mt-1.5 text-sm text-gray-500">
-            Enter the room code your host shared with you.
-          </p>
+    <GameSetupShell
+      eyebrow="Join the table"
+      title="One code. You’re in."
+      description="Use the private room code from your host. Your buy-ins and rebuys will appear in the shared game ledger."
+    >
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight text-gray-950">Enter your invite</h2>
+            <p className="mt-1 text-sm text-gray-500">Codes are six characters and never use 0, 1, I, or O.</p>
+          </div>
 
-          <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-5">
             <Input
               id="join-name"
               label="Your name"
@@ -129,7 +123,7 @@ export default function JoinGamePage() {
               spellCheck={false}
               autoComplete="off"
               autoCapitalize="characters"
-              className="font-mono uppercase tracking-[0.2em]"
+              className="h-14 text-center font-mono text-xl font-semibold uppercase tracking-[0.28em]"
               error={errors.code}
             />
             {joinError ? (
@@ -141,8 +135,9 @@ export default function JoinGamePage() {
               Join game
             </Button>
           </form>
-        </Card>
-      </div>
-    </main>
+          <p className="mt-4 text-center text-xs leading-5 text-gray-400">
+            You can also paste the full invite link here.
+          </p>
+    </GameSetupShell>
   );
 }

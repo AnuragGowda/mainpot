@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Copy, RefreshCw, Share2 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
@@ -76,7 +77,7 @@ export default function SettlementSummary({
         Settlement summary
       </h2>
 
-      <pre className="mt-3 whitespace-pre-wrap rounded-md bg-gray-50 p-4 font-mono text-sm text-gray-800">
+      <pre className="mt-3 whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50/80 p-4 font-mono text-sm leading-6 text-gray-800">
         {summaryText}
       </pre>
 
@@ -87,20 +88,20 @@ export default function SettlementSummary({
           onClick={handleCopy}
           className="sm:flex-1"
         >
-          Copy summary
+          <Copy aria-hidden size={16} /> Copy summary
         </Button>
         <Button size="md" onClick={handleShare} className="sm:flex-1">
-          Share
+          <Share2 aria-hidden size={16} /> Share
         </Button>
       </div>
 
       <Link
-        href="/create"
+        href={`/create?name=${encodeURIComponent(game.name)}&buyin=${game.buy_in_amount}`}
         onClick={() => clearActiveGame()}
         className="mt-2 block"
       >
         <Button variant="ghost" size="md" fullWidth>
-          New game
+          <RefreshCw aria-hidden size={16} /> Play again
         </Button>
       </Link>
     </Card>

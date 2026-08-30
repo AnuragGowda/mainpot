@@ -10,8 +10,45 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Ante — Poker money tracking",
-  description: "Track buy-ins. Settle up. Square everyone.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ??
+      "https://agent-runner.tail3ff4e2.ts.net:8443"
+  ),
+  title: {
+    default: "Ante — The poker night ledger",
+    template: "%s · Ante",
+  },
+  description:
+    "Track poker buy-ins and rebuys, reconcile the bank, and settle every home game with fewer payments.",
+  applicationName: "Ante",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Ante",
+  },
+  keywords: [
+    "poker tracker",
+    "poker settlement calculator",
+    "home game ledger",
+    "poker buy-in tracker",
+    "poker banking app",
+  ],
+  openGraph: {
+    type: "website",
+    siteName: "Ante",
+    title: "Ante — The poker night ledger",
+    description:
+      "Track the bank from the first chip to the final payment.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ante — The poker night ledger",
+    description:
+      "Track the bank from the first chip to the final payment.",
+    images: ["/opengraph-image"],
+  },
+  alternates: { canonical: "/" },
 };
 
 export default function RootLayout({
@@ -21,7 +58,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="min-h-screen bg-[#FAFAFA] text-gray-900 font-sans">
+      <body className="min-h-screen bg-[#f7f8f6] font-sans text-gray-900">
         <Providers>{children}</Providers>
       </body>
     </html>

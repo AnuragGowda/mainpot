@@ -1,12 +1,166 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --ante-canvas: #f7f8f6;
+  --ante-surface: #ffffff;
+  --ante-ink: #111512;
+  --ante-muted: #69716b;
+  --ante-border: #e3e7e3;
+  --ante-brand: #171917;
+  --ante-brand-dark: #0a0b0a;
+}
 
 html {
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background-color: #fafafa;
-  color: #111827;
+  background: var(--ante-canvas);
+  color: var(--ante-ink);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+::selection {
+  background: #dfe2de;
+  color: #111512;
+}
+
+.ante-dot-grid {
+  background-image: radial-gradient(rgba(17, 24, 39, 0.26) 1px, transparent 1px);
+  background-position: 0 0;
+  background-size: 21px 21px;
+  mask-image: radial-gradient(ellipse 88% 78% at 50% 35%, black 10%, rgba(0, 0, 0, 0.72) 58%, transparent 100%);
+  opacity: 0.68;
+}
+
+.ante-hero {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(244, 243, 255, 0.88) 42%, rgba(235, 245, 255, 0.9) 74%, rgba(247, 248, 246, 0.96));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+.ante-hero-glow {
+  background:
+    linear-gradient(118deg, rgba(255, 255, 255, 0.62), transparent 38%),
+    linear-gradient(152deg, transparent 42%, rgba(151, 172, 255, 0.28) 72%, rgba(203, 188, 255, 0.2));
+  animation: ante-mesh 14s ease-in-out infinite alternate;
+  transform: scale(1.04);
+}
+
+.ante-card-halo {
+  background: linear-gradient(135deg, rgba(111, 129, 255, 0.32), rgba(197, 176, 255, 0.2), rgba(255, 255, 255, 0.1));
+  filter: blur(22px);
+}
+
+.ante-card-float {
+  animation: ante-float 7s ease-in-out infinite;
+}
+
+.ante-card-float::before {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.09), transparent 24%, transparent 73%, rgba(151, 172, 255, 0.08));
+  content: "";
+  pointer-events: none;
+}
+
+.ante-suit-card {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  height: 3.25rem;
+  width: 2.55rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.78);
+  color: #111318;
+  font-size: 1.25rem;
+  box-shadow: 0 12px 30px rgba(31, 35, 48, 0.14);
+  backdrop-filter: blur(14px);
+}
+
+.ante-suit-card-one {
+  right: -0.7rem;
+  top: -1.15rem;
+  transform: rotate(11deg);
+  animation: ante-card-one 8s ease-in-out infinite;
+}
+
+.ante-suit-card-two {
+  bottom: -1.1rem;
+  left: -0.7rem;
+  transform: rotate(-10deg);
+  animation: ante-card-two 9s ease-in-out 0.8s infinite;
+}
+
+.ante-intro {
+  animation: ante-rise 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ante-intro-delay-1 { animation-delay: 80ms; }
+.ante-intro-delay-2 { animation-delay: 160ms; }
+.ante-intro-delay-3 { animation-delay: 240ms; }
+
+.ante-live-dot {
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.45);
+  animation: ante-pulse 2.4s ease-out infinite;
+}
+
+.ante-step:hover {
+  background: #f7f8fa;
+}
+
+.ante-cta {
+  position: relative;
+  background-image:
+    radial-gradient(circle at 85% 0%, rgba(126, 144, 255, 0.2), transparent 34%),
+    linear-gradient(135deg, #111318, #08090b);
+}
+
+@keyframes ante-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ante-mesh {
+  from { transform: scale(1.04) translate3d(-0.6%, -0.5%, 0); }
+  to { transform: scale(1.1) translate3d(1.1%, 0.8%, 0); }
+}
+
+@keyframes ante-float {
+  0%, 100% { transform: translateY(0) rotate(-0.35deg); }
+  50% { transform: translateY(-8px) rotate(0.35deg); }
+}
+
+@keyframes ante-card-one {
+  0%, 100% { transform: translateY(0) rotate(11deg); }
+  50% { transform: translateY(-7px) rotate(14deg); }
+}
+
+@keyframes ante-card-two {
+  0%, 100% { transform: translateY(0) rotate(-10deg); }
+  50% { transform: translateY(6px) rotate(-13deg); }
+}
+
+@keyframes ante-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.42); }
+  70%, 100% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

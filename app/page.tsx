@@ -1,87 +1,133 @@
 import Link from "next/link";
 import ResumeBanner from "@/components/ResumeBanner";
+import SiteFooter from "@/components/SiteFooter";
+import SiteNav from "@/components/SiteNav";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
 const linkBaseClasses =
-  "inline-flex h-11 items-center justify-center rounded-md text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2";
+  "inline-flex h-12 items-center justify-center rounded-lg px-6 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2";
 
 const steps = [
-  {
-    number: 1,
-    title: "Create",
-    description: "Host creates a game and sets the buy-in.",
-  },
-  {
-    number: 2,
-    title: "Play",
-    description: "Everyone logs buy-ins and rebuys in realtime.",
-  },
-  {
-    number: 3,
-    title: "Settle",
-    description: "Cash out, reconcile, and see who owes whom.",
-  },
+  { number: "01", title: "Open the table", description: "Name the game, set the buy-in, and share one room code." },
+  { number: "02", title: "Run the ledger", description: "Log every buy-in and rebuy while the cards are in the air." },
+  { number: "03", title: "Settle cleanly", description: "Reconcile the bank and generate the fewest possible payments." },
 ];
 
 export default function HomePage() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Ante",
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Any",
+    description:
+      "A shared poker night ledger for tracking buy-ins, rebuys, cash-outs, and settlement payments.",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  };
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 sm:px-6">
-      <ResumeBanner />
-      <section className="flex flex-1 flex-col items-center justify-center py-24 text-center sm:py-32">
-        <p className="mb-5 text-xs font-medium uppercase tracking-widest text-gray-500">
-          Poker money tracking
-        </p>
-        <h1 className="text-5xl font-semibold tracking-tight text-gray-900 sm:text-6xl">
-          Ante
-        </h1>
-        <p className="mt-5 text-xl text-gray-500">
-          Track buy-ins. Settle up. Square everyone.
-        </p>
-        <div className="mt-10 flex w-full max-w-sm flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:gap-4">
-          <Link
-            href="/create"
-            className={`${linkBaseClasses} bg-emerald-600 text-white hover:bg-emerald-500`}
-          >
-            Create a game
-          </Link>
-          <Link
-            href="/join"
-            className={`${linkBaseClasses} border border-gray-300 bg-white text-gray-900 hover:bg-gray-50`}
-          >
-            Join a game
-          </Link>
-        </div>
-      </section>
+    <div className="min-h-screen bg-[#f7f8f6]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <SiteNav />
+      <main>
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <section className="ante-hero relative -mx-4 overflow-hidden px-4 py-16 sm:-mx-6 sm:rounded-[2rem] sm:px-10 sm:py-24 lg:px-14 lg:py-28">
+            <div aria-hidden="true" className="ante-hero-glow absolute inset-0" />
+            <div aria-hidden="true" className="ante-dot-grid absolute inset-0" />
+            <div className="relative grid items-center gap-14 xl:grid-cols-[1.05fr_0.95fr]">
+              <div>
+                <div className="ante-intro inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-gray-700 shadow-sm backdrop-blur-xl">
+                  <span aria-hidden="true">♠</span>
+                  The poker night ledger
+                </div>
+                <h1 className="ante-intro ante-intro-delay-1 mt-6 max-w-2xl text-5xl font-semibold tracking-[-0.055em] text-gray-950 sm:text-6xl lg:text-7xl">
+                  Keep the game friendly. Keep the money exact.
+                </h1>
+                <p className="ante-intro ante-intro-delay-2 mt-6 max-w-xl text-lg leading-8 text-gray-600">
+                  Ante tracks the bank from the first chip to the final payment—without spreadsheets, group-chat math, or awkward IOUs.
+                </p>
+                <div className="ante-intro ante-intro-delay-3 mt-9 flex flex-col gap-3 sm:flex-row">
+                  <Link href="/create" className={`${linkBaseClasses} bg-gray-950 text-white shadow-lg shadow-gray-950/10 hover:bg-gray-800`}>
+                    Start a game
+                  </Link>
+                  <Link href="/join" className={`${linkBaseClasses} border border-gray-300 bg-white text-gray-900 shadow-sm hover:border-gray-400 hover:bg-gray-50`}>
+                    Join with a code
+                  </Link>
+                </div>
+                <p className="ante-intro ante-intro-delay-3 mt-4 text-xs text-gray-500">
+                  No account required · {isSupabaseConfigured ? "Live sync across every device" : "Works in private local mode"}
+                </p>
+                <div className="ante-intro ante-intro-delay-3 mt-5 min-h-5">
+                  <ResumeBanner />
+                </div>
+              </div>
 
-      <section aria-label="How it works" className="pb-24">
-        <h2 className="text-center text-sm font-medium uppercase tracking-widest text-gray-500">
-          How it works
-        </h2>
-        <div className="mt-10 grid gap-12 sm:grid-cols-3 sm:gap-8">
-          {steps.map((step) => (
-            <div
-              key={step.number}
-              className="flex flex-col items-center text-center"
-            >
-              <span
-                aria-hidden="true"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-sm font-semibold text-emerald-600"
-              >
-                {step.number}
-              </span>
-              <h3 className="mt-4 text-base font-semibold text-gray-900">
-                {step.title}
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
-                {step.description}
-              </p>
+              <div className="ante-intro ante-intro-delay-2 relative mx-auto w-full max-w-lg">
+                <div aria-hidden="true" className="ante-card-halo absolute -inset-8 rounded-[3rem]" />
+                <div aria-hidden="true" className="ante-suit-card ante-suit-card-one">♠</div>
+                <div aria-hidden="true" className="ante-suit-card ante-suit-card-two">♣</div>
+                <div className="ante-card-float relative rounded-3xl border border-white/10 bg-[#0b0c0e] p-5 text-white shadow-2xl shadow-gray-950/25 sm:p-7">
+                  <div className="flex items-start justify-between">
+                    <div><p className="text-xs uppercase tracking-[0.18em] text-gray-400">Friday night</p><h2 className="mt-1 text-xl font-semibold">The Basement Game</h2></div>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-gray-200"><span className="ante-live-dot h-1.5 w-1.5 rounded-full bg-emerald-400" />Live</span>
+                  </div>
+                  <div className="mt-8 grid grid-cols-3 gap-3">
+                    <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-400">Bank</p><p className="mt-1 text-lg font-semibold">$380</p></div>
+                    <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-400">Buy-in</p><p className="mt-1 text-lg font-semibold">$40</p></div>
+                    <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-400">Players</p><p className="mt-1 text-lg font-semibold">6</p></div>
+                  </div>
+                  <div className="mt-5 overflow-hidden rounded-xl bg-white text-gray-900">
+                    {[
+                      ["AP", "Alex", "$80", "Verified"],
+                      ["MK", "Morgan", "$120", "Verified"],
+                      ["SR", "Sam", "$80", "Verified"],
+                      ["JT", "Jordan", "$100", "Pending"],
+                    ].map(([initials, name, amount, status], index) => (
+                      <div key={name} className={`flex items-center gap-3 px-4 py-3 ${index ? "border-t border-gray-100" : ""}`}>
+                        <span className="grid h-8 w-8 place-items-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">{initials}</span>
+                        <span className="flex-1 text-sm font-medium">{name}</span>
+                        <span className="text-sm font-semibold tabular-nums">{amount}</span>
+                        <span className={`w-14 text-right text-[10px] font-medium ${status === "Verified" ? "text-emerald-600" : "text-amber-600"}`}>{status}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-5 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                    <div><p className="text-xs text-gray-400">Room code</p><p className="mt-0.5 font-mono text-lg font-semibold tracking-[0.2em]">RIVER7</p></div>
+                    <span className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-gray-950">Copy code</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          ))}
+          </section>
         </div>
-      </section>
 
-      <footer className="pb-8 text-center text-sm text-gray-400">
-        Ante — keep the math honest at your next game night.
-      </footer>
-    </main>
+        <section className="border-y border-gray-200 bg-white">
+          <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-3 md:py-20">
+            {steps.map((step) => (
+              <div key={step.number} className="ante-step rounded-2xl p-4 transition-colors">
+                <span className="font-mono text-sm font-semibold text-gray-950">{step.number}</span>
+                <h2 className="mt-3 text-lg font-semibold text-gray-950">{step.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-gray-600">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+          <div className="ante-cta grid gap-10 overflow-hidden rounded-3xl bg-gray-950 px-6 py-10 text-white sm:px-10 lg:grid-cols-[1fr_auto] lg:items-center lg:px-14 lg:py-14">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">When the game ends</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">One clean settlement. Zero debate.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">Ante checks that every chip is accounted for, then reduces the table to the smallest practical set of payments.</p>
+            </div>
+            <Link href="/create" className={`${linkBaseClasses} bg-white text-gray-950 hover:bg-gray-100`}>Open the table</Link>
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

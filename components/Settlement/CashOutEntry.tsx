@@ -103,8 +103,7 @@ function CashOutRow({
   const hint = !editable && player.left_at ? "Host will enter" : null;
 
   return (
-    <Card padding="md">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold text-gray-900">{player.name}</h3>
@@ -135,7 +134,6 @@ function CashOutRow({
           {hint ? <p className="mt-1 text-xs text-gray-400">{hint}</p> : null}
         </div>
       </div>
-    </Card>
   );
 }
 
@@ -157,7 +155,7 @@ export default function CashOutEntry({
       >
         Cash-outs
       </h2>
-      <div className="space-y-3">
+      <Card padding="none" className="divide-y divide-gray-100 overflow-hidden">
         {snapshot.players.map((player) => {
           const editable = isHost || player.id === currentPlayerId;
           return (
@@ -171,7 +169,7 @@ export default function CashOutEntry({
             />
           );
         })}
-      </div>
+      </Card>
     </section>
   );
 }

@@ -7,6 +7,7 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import { useToast } from "@/components/ui/Toast";
 import { joinGame } from "@/lib/data";
+import { getCurrentUserId } from "@/lib/auth-client";
 import { getPlayerName, setPlayerName } from "@/lib/session";
 
 export interface JoinPromptProps {
@@ -36,7 +37,8 @@ export default function JoinPrompt({ code, onJoined }: JoinPromptProps) {
     setLoading(true);
     try {
       setPlayerName(trimmedName);
-      await joinGame(code, trimmedName);
+      const userId = await getCurrentUserId();
+      await joinGame(code, trimmedName, userId);
       toast("Joined!", "success");
       onJoined();
     } catch (err) {

@@ -53,9 +53,9 @@ export default function ReconciliationBar({
   balanced,
 }: ReconciliationBarProps) {
   return (
-    <Card padding="md">
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        <div className="min-w-0">
+    <Card padding="none" className="overflow-hidden">
+      <div className="grid grid-cols-3 divide-x divide-gray-100">
+        <div className="min-w-0 px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
             Total bought in
           </p>
@@ -63,7 +63,7 @@ export default function ReconciliationBar({
             {formatCurrency(totalBoughtIn)}
           </p>
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
             Total cashed out
           </p>
@@ -71,7 +71,7 @@ export default function ReconciliationBar({
             {formatCurrency(totalCashedOut)}
           </p>
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
             Difference
           </p>
@@ -86,11 +86,11 @@ export default function ReconciliationBar({
         </div>
       </div>
 
-      <div className="mt-4 border-t border-gray-100 pt-3">
+      <div className={`border-t px-4 py-3 sm:px-5 ${balanced ? "border-emerald-100 bg-emerald-50/70" : "border-red-100 bg-red-50/70"}`}>
         {balanced ? (
           <p className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">
             <CheckIcon />
-            Balanced!
+            Bank reconciled
           </p>
         ) : (
           <p className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600">

@@ -22,7 +22,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       {label ? (
         <label
           htmlFor={inputId}
-          className="mb-1 block text-sm font-medium text-gray-700"
+          className="mb-1.5 block text-sm font-medium text-gray-700"
         >
           {label}
         </label>
@@ -42,11 +42,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-invalid={error ? true : undefined}
           aria-describedby={errorId}
           className={[
-            "h-11 w-full rounded-md border bg-white px-3 text-gray-900 placeholder-gray-400",
-            "focus:outline-none focus:border-emerald-500 focus:ring-2",
+            "h-11 w-full rounded-lg border bg-white px-3 text-gray-900 shadow-[0_1px_1px_rgba(16,24,16,0.02)] placeholder-gray-400 transition",
+            "focus:outline-none focus:border-gray-950 focus:ring-2",
             error
               ? "border-red-500 focus:ring-red-500/20"
-              : "border-gray-300 focus:ring-emerald-500/20",
+              : "border-gray-300 focus:ring-gray-950/10",
             prefix ? "pl-8" : "",
             className ?? "",
           ].join(" ")}

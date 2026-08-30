@@ -1,14 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
+import GameSetupShell from "@/components/GameSetupShell";
 import { useToast } from "@/components/ui/Toast";
 import { createGame } from "@/lib/data";
+import { getCurrentUserId } from "@/lib/auth-client";
 import { getPlayerName, setActiveGame, setPlayerName } from "@/lib/session";
 
 interface FormErrors {
@@ -29,6 +29,13 @@ export default function CreateGamePage() {
 
   useEffect(() => {
     setName(getPlayerName() ?? "");
+    const params = new URLSearchParams(window.location.search);
+    const suggestedName = params.get("name")?.trim().slice(0, 80);
+    const suggestedBuyIn = Number(params.get("buyin"));
+    if (suggestedName) setGameName(suggestedName);
+    if (Number.isFinite(suggestedBuyIn) && suggestedBuyIn > 0) {
+      setBuyIn(String(suggestedBuyIn));
+    }
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -56,10 +63,12 @@ export default function CreateGamePage() {
     setLoading(true);
     try {
       setPlayerName(trimmedName);
+      const userId = await getCurrentUserId();
       const { code } = await createGame(
         trimmedGameName,
         trimmedName,
-        parsedBuyIn
+        parsedBuyIn,
+        userId
       );
       setActiveGame(code);
       toast("Game created!", "success");
@@ -75,24 +84,20 @@ export default function CreateGamePage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-16 sm:px-6">
-      <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors duration-150 hover:text-gray-900"
-        >
-          <span aria-hidden="true">←</span>
-          Back
-        </Link>
-        <Card padding="lg">
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-            Create a game
-          </h1>
-          <p className="mt-1.5 text-sm text-gray-500">
-            Set up a game, pick a buy-in, and share the room code.
-          </p>
+    <GameSetupShell
+      eyebrow="Host a table"
+      title="Start the game in under a minute."
+      description="Set the opening buy-in, invite the table, and keep every chip accounted for from the first hand."
+    >
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight text-gray-950">Game details</h2>
+              <p className="mt-1 text-sm text-gray-500">You can edit buy-ins during the game.</p>
+            </div>
+            <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">Host</span>
+          </div>
 
-          <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-5">
             <Input
               id="create-name"
               label="Your name"
@@ -124,11 +129,12 @@ export default function CreateGamePage() {
               error={errors.buyIn}
             />
             <Button type="submit" fullWidth loading={loading}>
-              Create game
+              Create game room
             </Button>
           </form>
-        </Card>
-      </div>
-    </main>
+          <p className="mt-4 text-center text-xs leading-5 text-gray-400">
+            A private six-character code is created for your table.
+          </p>
+    </GameSetupShell>
   );
 }

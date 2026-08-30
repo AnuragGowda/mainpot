@@ -13,12 +13,12 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
  * not configured. Must be called within a request context (route handlers,
  * server components, server actions).
  */
-export function createServerSupabase(): SupabaseClient | null {
+export async function createServerSupabase(): Promise<SupabaseClient | null> {
   if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) {
     return null;
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {

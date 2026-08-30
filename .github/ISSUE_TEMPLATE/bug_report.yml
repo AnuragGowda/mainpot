@@ -1,0 +1,33 @@
+name: Bug report
+description: Tell us about something that is not working correctly.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve the poker ledger.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Include what you expected to happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open a game\n2. Add a rebuy\n3. ..."
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Safari on iPhone 15, Chrome on macOS, etc.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots are useful, but please remove private game or payment information.
+

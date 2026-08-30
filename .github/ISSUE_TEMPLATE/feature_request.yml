@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest an improvement for poker night.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the poker-night moment or workflow that is difficult today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would a good solution feel like?
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Who benefits most?
+      options:
+        - Host
+        - Player
+        - Both
+    validations:
+      required: true
+

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getGame } from "@/lib/data";
 import { getActiveGame } from "@/lib/session";
@@ -11,7 +12,7 @@ import { getActiveGame } from "@/lib/session";
  * against the data layer, and only renders when a non-ended game exists.
  */
 export default function ResumeBanner() {
-  const [code, setCode] = useState<string | null>(null);
+  const [game, setGame] = useState<{ code: string; name: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -22,7 +23,7 @@ export default function ResumeBanner() {
     getGame(activeCode)
       .then((game) => {
         if (!cancelled && game && game.status !== "ended") {
-          setCode(game.code);
+          setGame({ code: game.code, name: game.name });
         }
       })
       .catch(() => {
@@ -33,18 +34,18 @@ export default function ResumeBanner() {
     };
   }, []);
 
-  if (!code) {
+  if (!game) {
     return null;
   }
 
   return (
-    <div className="flex justify-center pt-8">
-      <Link
-        href={`/game/${code}`}
-        className="inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-600 transition-colors duration-150 hover:bg-emerald-100 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
-      >
-        Resume your game
-      </Link>
-    </div>
+    <Link
+      href={`/game/${game.code}`}
+      className="group inline-flex items-center gap-2 text-sm font-semibold text-gray-700 transition hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
+    >
+      <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.10)]" aria-hidden="true" />
+      Continue {game.name}
+      <ArrowRight aria-hidden size={15} className="transition-transform group-hover:translate-x-0.5" />
+    </Link>
   );
 }

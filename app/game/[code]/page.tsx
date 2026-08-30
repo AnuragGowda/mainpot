@@ -7,8 +7,11 @@ import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
 import GameHeader from "@/components/GameRoom/GameHeader";
 import PlayerList from "@/components/GameRoom/PlayerList";
+import ActivityFeed from "@/components/GameRoom/ActivityFeed";
 import BuyInActions from "@/components/GameRoom/BuyInActions";
 import JoinPrompt from "@/components/GameRoom/JoinPrompt";
+import HostControls from "@/components/GameRoom/HostControls";
+import PendingApprovals from "@/components/GameRoom/PendingApprovals";
 import SettlementScreen from "@/components/Settlement/SettlementScreen";
 import {
   addBuyIn,
@@ -20,6 +23,7 @@ import {
   removePlayer,
   subscribeToGame,
   updateBuyIn,
+  transferHost,
   usingLocalStorage,
   verifyBuyIn,
 } from "@/lib/data";
@@ -34,7 +38,7 @@ function LoadingScreen() {
       aria-label="Loading game"
       className="flex min-h-screen items-center justify-center"
     >
-      <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-200 border-t-emerald-600" />
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-gray-200 border-t-gray-950" />
       <span className="sr-only">Loading game…</span>
     </main>
   );
@@ -52,7 +56,7 @@ function NotFoundScreen() {
         </p>
         <Link
           href="/join"
-          className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-emerald-600 px-6 text-sm font-medium text-white transition-colors duration-150 hover:bg-emerald-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-gray-950 px-6 text-sm font-medium text-white transition-colors duration-150 hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
         >
           Find a game
         </Link>
@@ -162,13 +166,19 @@ export default function GameRoomPage() {
     }
   }
 
-  async function handleRebuy(amount: number) {
+  async function handleRebuy(amount: number, frontedByPlayerId?: string | null) {
     if (!snapshot || !currentPlayer) {
       return;
     }
     try {
-      await addBuyIn(snapshot.game.id, currentPlayer.id, amount, "rebuy");
-      toast("Rebuy added", "success");
+      await addBuyIn(
+        snapshot.game.id,
+        currentPlayer.id,
+        amount,
+        "rebuy",
+        frontedByPlayerId
+      );
+      toast(frontedByPlayerId ? "Fronted rebuy added" : "Rebuy added", "success");
     } catch (err) {
       toast(
         err instanceof Error ? err.message : "Failed to add rebuy.",
@@ -261,6 +271,16 @@ export default function GameRoomPage() {
     }
   }
 
+  async function handleTransferHost(playerId: string) {
+    if (!snapshot) return;
+    try {
+      await transferHost(snapshot.game.id, playerId);
+      toast("Host controls transferred", "success");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Failed to transfer host controls.", "error");
+    }
+  }
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -295,9 +315,23 @@ export default function GameRoomPage() {
         ending={ending}
       />
 
-      <div className="mt-6">
+      <div className="mt-7 space-y-8">
+        <PendingApprovals
+          snapshot={snapshot}
+          isHost={isHost}
+          onVerify={handleVerify}
+          onEdit={handleEdit}
+          onRemove={handleRemoveBuyIn}
+        />
         <PlayerList
           players={snapshot.players}
+          snapshot={snapshot}
+          currentPlayerId={currentPlayer?.id ?? null}
+        />
+        {isHost && currentPlayer ? (
+          <HostControls players={snapshot.players} currentPlayerId={currentPlayer.id} onTransfer={handleTransferHost} />
+        ) : null}
+        <ActivityFeed
           snapshot={snapshot}
           isHost={isHost}
           currentPlayerId={currentPlayer?.id ?? null}
@@ -313,6 +347,8 @@ export default function GameRoomPage() {
           <div className="mx-auto flex w-full max-w-3xl gap-2">
             <BuyInActions
               game={snapshot.game}
+              players={snapshot.players}
+              currentPlayerId={currentPlayer.id}
               onBuyIn={handleBuyIn}
               onRebuy={handleRebuy}
               onLeave={handleLeave}
