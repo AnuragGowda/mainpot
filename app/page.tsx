@@ -17,7 +17,7 @@ export default function HomePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "Ante",
+    name: "Mainpot",
     applicationCategory: "FinanceApplication",
     operatingSystem: "Any",
     description:
@@ -33,7 +33,7 @@ export default function HomePage() {
       />
       <SiteNav />
       <main>
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-12 sm:px-6 sm:pb-16">
           <section className="ante-hero relative -mx-4 overflow-hidden px-4 py-16 sm:-mx-6 sm:rounded-[2rem] sm:px-10 sm:py-24 lg:px-14 lg:py-28">
             <div aria-hidden="true" className="ante-hero-glow absolute inset-0" />
             <div aria-hidden="true" className="ante-dot-grid absolute inset-0" />
@@ -47,7 +47,7 @@ export default function HomePage() {
                   Keep the game friendly. Keep the money exact.
                 </h1>
                 <p className="ante-intro ante-intro-delay-2 mt-6 max-w-xl text-lg leading-8 text-gray-600">
-                  Ante tracks the bank from the first chip to the final payment—without spreadsheets, group-chat math, or awkward IOUs.
+                  Mainpot tracks the bank from the first chip to the final payment—without spreadsheets, group-chat math, or awkward IOUs.
                 </p>
                 <div className="ante-intro ante-intro-delay-3 mt-9 flex flex-col gap-3 sm:flex-row">
                   <Link href="/create" className={`${linkBaseClasses} bg-gray-950 text-white shadow-lg shadow-gray-950/10 hover:bg-gray-800`}>
@@ -104,24 +104,30 @@ export default function HomePage() {
           </section>
         </div>
 
-        <section className="border-y border-gray-200 bg-white">
-          <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-3 md:py-20">
-            {steps.map((step) => (
-              <div key={step.number} className="ante-step rounded-2xl p-4 transition-colors">
-                <span className="font-mono text-sm font-semibold text-gray-950">{step.number}</span>
-                <h2 className="mt-3 text-lg font-semibold text-gray-950">{step.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-gray-600">{step.description}</p>
-              </div>
-            ))}
+        <section className="px-4 pb-16 sm:px-6 md:pb-24">
+          <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+            <div className="border-b border-gray-200 px-6 py-7 sm:px-8 sm:py-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Simple by design</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">From first chip to final payment.</h2>
+            </div>
+            <div className="grid divide-y divide-gray-200 md:grid-cols-3 md:divide-x md:divide-y-0">
+              {steps.map((step) => (
+                <div key={step.number} className="ante-step p-6 transition-colors sm:p-8">
+                  <span className="font-mono text-sm font-semibold text-gray-950">{step.number}</span>
+                  <h3 className="mt-3 text-lg font-semibold text-gray-950">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">{step.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+        <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 md:pb-24">
           <div className="ante-cta grid gap-10 overflow-hidden rounded-3xl bg-gray-950 px-6 py-10 text-white sm:px-10 lg:grid-cols-[1fr_auto] lg:items-center lg:px-14 lg:py-14">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">When the game ends</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">One clean settlement. Zero debate.</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">Ante checks that every chip is accounted for, then reduces the table to the smallest practical set of payments.</p>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">Mainpot checks that every chip is accounted for, then reduces the table to the smallest practical set of payments.</p>
             </div>
             <Link href="/create" className={`${linkBaseClasses} bg-white text-gray-950 hover:bg-gray-100`}>Open the table</Link>
           </div>

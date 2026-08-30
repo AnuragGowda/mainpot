@@ -1059,7 +1059,7 @@ async function removeBuyInSupabase(buyInId: string): Promise<void> {
   const { client } = await ensureSupabaseReady();
   const { data: buyIn, error: lookupError } = await client
     .from("buy_ins")
-    .select("*, players(name)")
+    .select("*, player:players!buy_ins_player_id_fkey(name)")
     .eq("id", buyInId)
     .maybeSingle();
   if (lookupError) throw lookupError;
@@ -1068,14 +1068,14 @@ async function removeBuyInSupabase(buyInId: string): Promise<void> {
     throw error;
   }
   if (buyIn) {
-    const row = buyIn as unknown as BuyIn & { players?: { name?: string } };
+    const row = buyIn as unknown as BuyIn & { player?: { name?: string } };
     await addSupabaseEvent(client, {
       gameId: row.game_id,
       eventType: "buy_in_removed",
       subjectPlayerId: row.player_id,
       amount: Number(row.amount),
       metadata: {
-        player_name: row.players?.name,
+        player_name: row.player?.name,
         buy_in_id: row.id,
         buy_in_type: row.type,
       },
@@ -1089,19 +1089,19 @@ async function verifyBuyInSupabase(buyInId: string): Promise<void> {
     .from("buy_ins")
     .update({ verified: true })
     .eq("id", buyInId)
-    .select("*, players(name)")
+    .select("*, player:players!buy_ins_player_id_fkey(name)")
     .single();
   if (error) {
     throw error;
   }
-  const row = data as unknown as BuyIn & { players?: { name?: string } };
+  const row = data as unknown as BuyIn & { player?: { name?: string } };
   await addSupabaseEvent(client, {
     gameId: row.game_id,
     eventType: "buy_in_verified",
     subjectPlayerId: row.player_id,
     amount: Number(row.amount),
     metadata: {
-      player_name: row.players?.name,
+      player_name: row.player?.name,
       buy_in_id: row.id,
       buy_in_type: row.type,
     },
@@ -1112,7 +1112,7 @@ async function updateBuyInSupabase(buyInId: string, amount: number): Promise<voi
   const { client } = await ensureSupabaseReady();
   const { data: existing, error: lookupError } = await client
     .from("buy_ins")
-    .select("*, players(name)")
+    .select("*, player:players!buy_ins_player_id_fkey(name)")
     .eq("id", buyInId)
     .single();
   if (lookupError) throw lookupError;
@@ -1126,14 +1126,14 @@ async function updateBuyInSupabase(buyInId: string, amount: number): Promise<voi
     throw error;
   }
   const row = data as BuyIn;
-  const previous = existing as unknown as BuyIn & { players?: { name?: string } };
+  const previous = existing as unknown as BuyIn & { player?: { name?: string } };
   await addSupabaseEvent(client, {
     gameId: row.game_id,
     eventType: "buy_in_updated",
     subjectPlayerId: row.player_id,
     amount,
     metadata: {
-      player_name: previous.players?.name,
+      player_name: previous.player?.name,
       buy_in_id: row.id,
       buy_in_type: row.type,
       previous_amount: Number(previous.amount),

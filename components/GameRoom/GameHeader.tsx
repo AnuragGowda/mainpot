@@ -73,7 +73,7 @@ export default function GameHeader({
 
   async function handleShare() {
     const url = inviteUrl || `${window.location.origin}/game/${game.code}`;
-    const text = `Join ${game.name} on Ante. Room code: ${game.code}`;
+    const text = `Join ${game.name} on Mainpot. Room code: ${game.code}`;
 
     if (navigator.share) {
       try {

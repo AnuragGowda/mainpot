@@ -15,16 +15,16 @@ export const metadata: Metadata = {
       "https://agent-runner.tail3ff4e2.ts.net:8443"
   ),
   title: {
-    default: "Ante — The poker night ledger",
-    template: "%s · Ante",
+    default: "Mainpot — The poker night ledger",
+    template: "%s · Mainpot",
   },
   description:
     "Track poker buy-ins and rebuys, reconcile the bank, and settle every home game with fewer payments.",
-  applicationName: "Ante",
+  applicationName: "Mainpot",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Ante",
+    title: "Mainpot",
   },
   keywords: [
     "poker tracker",
@@ -35,15 +35,15 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: "website",
-    siteName: "Ante",
-    title: "Ante — The poker night ledger",
+    siteName: "Mainpot",
+    title: "Mainpot — The poker night ledger",
     description:
       "Track the bank from the first chip to the final payment.",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ante — The poker night ledger",
+    title: "Mainpot — The poker night ledger",
     description:
       "Track the bank from the first chip to the final payment.",
     images: ["/opengraph-image"],

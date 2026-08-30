@@ -1,5 +1,5 @@
 [Unit]
-Description=Ante poker banking app
+Description=Mainpot poker banking app
 After=network-online.target
 Wants=network-online.target
 

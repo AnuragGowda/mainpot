@@ -41,7 +41,7 @@ export default function ResumeBanner() {
   return (
     <Link
       href={`/game/${game.code}`}
-      className="group inline-flex items-center gap-2 text-sm font-semibold text-gray-700 transition hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
+      className="group inline-flex h-11 items-center gap-2.5 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition hover:-translate-y-0.5 hover:border-gray-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
     >
       <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.10)]" aria-hidden="true" />
       Continue {game.name}

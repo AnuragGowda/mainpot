@@ -24,7 +24,7 @@ export function buildSummaryText({
   totalBoughtIn,
 }: SummaryInput): string {
   const lines: string[] = [
-    `Ante — ${game.name}`,
+    `Mainpot — ${game.name}`,
     `Room code: ${game.code}`,
     `Buy-in: ${formatCurrency(game.buy_in_amount)}`,
     `Total pot: ${formatCurrency(totalBoughtIn)}`,

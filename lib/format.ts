@@ -10,7 +10,8 @@ export function formatCurrency(amount: number): string {
   if (typeof amount !== "number" || Number.isNaN(amount)) {
     return currencyFormatter.format(0);
   }
-  return currencyFormatter.format(amount);
+  const normalizedAmount = Math.abs(amount) < 0.005 ? 0 : amount;
+  return currencyFormatter.format(normalizedAmount);
 }
 
 /** Rounds a number to 2 decimal places (half away from zero via Math.round). */

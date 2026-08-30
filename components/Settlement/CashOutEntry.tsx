@@ -155,6 +155,10 @@ export default function CashOutEntry({
       >
         Cash-outs
       </h2>
+      <p className="mb-4 max-w-2xl text-sm leading-6 text-gray-500">
+        Enter each player&apos;s final chip value, not their profit. Players can
+        enter their own amount; the host can correct any row.
+      </p>
       <Card padding="none" className="divide-y divide-gray-100 overflow-hidden">
         {snapshot.players.map((player) => {
           const editable = isHost || player.id === currentPlayerId;

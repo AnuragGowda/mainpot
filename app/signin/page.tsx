@@ -142,7 +142,7 @@ export default function SignInPage() {
                 Accounts aren&apos;t connected yet
               </h1>
               <p className="mt-2 text-sm leading-6 text-gray-600">
-                Ante is running in private, single-device mode. You can still create games and use the full banking flow on this Mac.
+                Mainpot is running in private, single-device mode. You can still create games and use the full banking flow on this Mac.
               </p>
               <Link
                 href="/create"
@@ -204,7 +204,7 @@ export default function SignInPage() {
                 Email me a magic link
               </button>
               <p className="mt-7 text-center text-sm text-gray-500">
-                {mode === "signin" ? "New to Ante?" : "Already have an account?"}{" "}
+                {mode === "signin" ? "New to Mainpot?" : "Already have an account?"}{" "}
                 <button type="button" onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="font-medium text-gray-900 hover:text-gray-600">
                   {mode === "signin" ? "Create an account" : "Sign in"}
                 </button>

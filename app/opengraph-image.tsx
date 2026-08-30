@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Ante — Keep the game friendly. Keep the money exact.";
+export const alt = "Mainpot — Keep the game friendly. Keep the money exact.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -37,7 +37,7 @@ export default function OpenGraphImage() {
             >
               <div style={{ border: "3px solid white", borderRadius: 3, display: "flex", height: 22, width: 34 }} />
             </div>
-            Ante
+            Mainpot
           </div>
           <div style={{ fontSize: 72, fontWeight: 700, letterSpacing: -4, lineHeight: 1.02, marginTop: 54 }}>
             Keep the game friendly. Keep the money exact.

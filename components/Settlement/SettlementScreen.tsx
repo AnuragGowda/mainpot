@@ -99,7 +99,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     (sum, cashOut) => sum + cashOut.amount,
     0
   );
-  const difference = totalBoughtIn - totalCashedOut;
+  const difference = round2(totalBoughtIn - totalCashedOut);
   const balanced = Math.abs(difference) < 0.005;
 
   const currentPlayer = sessionId

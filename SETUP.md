@@ -1,6 +1,6 @@
-# Ante — Setup
+# Mainpot — Setup
 
-Follow these steps to run Ante locally and connect it to Supabase.
+Follow these steps to run Mainpot locally and connect it to Supabase.
 
 ## 1. Prerequisites
 
@@ -61,7 +61,7 @@ Google OAuth also needs a public feature flag after its credentials are ready.
      Settings → General).
    - Paste the resulting **Client ID** and **Client secret** into
      Supabase's Google provider settings.
-   - Set `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true` in `.env.local`. Ante keeps
+   - Set `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true` in `.env.local`. Mainpot keeps
      the Google button hidden until this flag is present, avoiding a dead
      sign-in path while the provider is unconfigured.
 4. **Magic link**: enable the **Email OTP** provider. New users receive a

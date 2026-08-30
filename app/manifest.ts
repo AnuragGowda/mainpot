@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Ante — Poker Night Ledger",
-    short_name: "Ante",
+    name: "Mainpot — Poker Night Ledger",
+    short_name: "Mainpot",
     description:
       "Track poker buy-ins, reconcile the bank, and settle every home game.",
     start_url: "/",

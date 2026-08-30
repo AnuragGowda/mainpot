@@ -1,4 +1,4 @@
-# Ante
+# Mainpot
 
 An open-source, realtime ledger for home poker games. Track buy-ins and rebuys, reconcile the bank, and calculate a clean settlement without a spreadsheet.
 
@@ -40,4 +40,3 @@ Feature requests and reproducible bug reports are welcome through GitHub Issues.
 ## License
 
 MIT
-

@@ -58,7 +58,7 @@ export default function SiteNav() {
         <Link href="/" className="group inline-flex items-center gap-2.5">
           <BrandMark className="h-8 w-8 shadow-sm transition group-hover:bg-gray-800" />
           <span className="text-lg font-semibold tracking-tight text-gray-950">
-            Ante
+            Mainpot
           </span>
         </Link>
 

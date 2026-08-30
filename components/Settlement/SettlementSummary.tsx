@@ -58,7 +58,7 @@ export default function SettlementSummary({
   async function handleShare() {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ title: "Ante settlement", text: summaryText });
+        await navigator.share({ title: "Mainpot settlement", text: summaryText });
       } catch (err) {
         // User cancelled the share sheet — nothing to do.
         if (err instanceof DOMException && err.name === "AbortError") {
