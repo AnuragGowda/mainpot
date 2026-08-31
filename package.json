@@ -16,7 +16,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:realtime": "node scripts/test-realtime.mjs"
   },
   "engines": {
     "node": ">=22.0.0"

@@ -12,7 +12,7 @@ jobs:
   verify:
     name: Lint, unit tests, and browser smoke tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,3 +24,4 @@ jobs:
       - run: npm test
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run test:e2e:realtime

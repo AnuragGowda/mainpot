@@ -5,6 +5,9 @@ const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  testMatch: process.env.PLAYWRIGHT_REALTIME === "1"
+    ? "**/realtime.spec.ts"
+    : "**/smoke.spec.ts",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,

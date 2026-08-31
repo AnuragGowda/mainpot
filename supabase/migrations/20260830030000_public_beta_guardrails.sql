@@ -338,10 +338,10 @@ begin
   on conflict on constraint game_access_pkey do update set granted_at = now();
 
   select * into found_player
-  from public.players
-  where game_id = found_game.id
-    and (user_id = auth.uid() or session_id = input_session_id)
-  order by joined_at
+  from public.players as player
+  where player.game_id = found_game.id
+    and (player.user_id = auth.uid() or player.session_id = input_session_id)
+  order by player.joined_at
   limit 1;
 
   if found then
@@ -350,8 +350,8 @@ begin
   end if;
 
   select count(*) into active_players
-  from public.players
-  where game_id = found_game.id and left_at is null;
+  from public.players as player
+  where player.game_id = found_game.id and player.left_at is null;
   if active_players >= config.max_players_per_game then
     raise exception 'This game already has the maximum number of players.';
   end if;
@@ -418,6 +418,7 @@ drop policy if exists "games create as host" on public.games;
 drop policy if exists "players join as self" on public.players;
 
 drop policy if exists "players read same game" on public.players;
+drop policy if exists "players read with room access" on public.players;
 create policy "players read with room access" on public.players
   for select to authenticated
   using (
@@ -427,18 +428,22 @@ create policy "players read with room access" on public.players
   );
 
 drop policy if exists "buy ins read by participants" on public.buy_ins;
+drop policy if exists "buy ins read with room access" on public.buy_ins;
 create policy "buy ins read with room access" on public.buy_ins
   for select to authenticated using (public.has_game_access(game_id));
 
 drop policy if exists "cash outs read by participants" on public.cash_outs;
+drop policy if exists "cash outs read with room access" on public.cash_outs;
 create policy "cash outs read with room access" on public.cash_outs
   for select to authenticated using (public.has_game_access(game_id));
 
 drop policy if exists "events read by participants" on public.game_events;
+drop policy if exists "events read with room access" on public.game_events;
 create policy "events read with room access" on public.game_events
   for select to authenticated using (public.has_game_access(game_id));
 
 drop policy if exists "settlement payments read by participants" on public.settlement_payments;
+drop policy if exists "settlement payments read with room access" on public.settlement_payments;
 create policy "settlement payments read with room access" on public.settlement_payments
   for select to authenticated using (public.has_game_access(game_id));
 
