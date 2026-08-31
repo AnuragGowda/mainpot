@@ -55,18 +55,18 @@ const navigation = [
 ] as const;
 
 const exampleRows = [
-  { player: "Alex", purchases: "$40 + $40", totalIn: "$80", cashOut: "$20", net: "−$60", tone: "text-red-700" },
-  { player: "Morgan", purchases: "$40", totalIn: "$40", cashOut: "$130", net: "+$90", tone: "text-emerald-700" },
-  { player: "Sam", purchases: "$40 + $40", totalIn: "$80", cashOut: "$60", net: "−$20", tone: "text-red-700" },
-  { player: "Jordan", purchases: "$40 + $20", totalIn: "$60", cashOut: "$100", net: "+$40", tone: "text-emerald-700" },
-  { player: "Casey", purchases: "$40 + $10", totalIn: "$50", cashOut: "$0", net: "−$50", tone: "text-red-700" },
+  { player: "Alex", purchases: "$40 + $40", totalIn: "$80.00", cashOut: "$18.75", net: "−$61.25", tone: "text-red-700" },
+  { player: "Morgan", purchases: "$40", totalIn: "$40.00", cashOut: "$132.25", net: "+$92.25", tone: "text-emerald-700" },
+  { player: "Sam", purchases: "$40 + $40", totalIn: "$80.00", cashOut: "$58.50", net: "−$21.50", tone: "text-red-700" },
+  { player: "Jordan", purchases: "$40 + $20", totalIn: "$60.00", cashOut: "$100.50", net: "+$40.50", tone: "text-emerald-700" },
+  { player: "Casey", purchases: "$40 + $10", totalIn: "$50.00", cashOut: "$0.00", net: "−$50.00", tone: "text-red-700" },
 ] as const;
 
 const payments = [
-  { from: "Alex", to: "Morgan", amount: "$60", note: "Alex’s full loss" },
-  { from: "Sam", to: "Morgan", amount: "$20", note: "Sam’s full loss" },
-  { from: "Casey", to: "Morgan", amount: "$10", note: "Finishes Morgan’s $90 win" },
-  { from: "Casey", to: "Jordan", amount: "$40", note: "Finishes Jordan’s $40 win" },
+  { from: "Alex", to: "Morgan", amount: "$61.25", note: "Alex’s full loss" },
+  { from: "Sam", to: "Morgan", amount: "$21.50", note: "Sam’s full loss" },
+  { from: "Casey", to: "Morgan", amount: "$9.50", note: "Finishes Morgan’s $92.25 win" },
+  { from: "Casey", to: "Jordan", amount: "$40.50", note: "Finishes Jordan’s $40.50 win" },
 ] as const;
 
 const faqs = [
@@ -141,6 +141,7 @@ export default function PokerSettlementCalculatorPage() {
         <section className="relative overflow-hidden border-b border-gray-200 px-4 py-14 sm:px-6 sm:py-20 lg:py-24">
           <div aria-hidden="true" className="ante-page-washes absolute inset-0" />
           <div aria-hidden="true" className="ante-page-glow absolute inset-x-0 top-0" />
+          <div aria-hidden="true" className="ante-page-dot-arch absolute inset-x-0 top-0" />
           <div className="relative mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end lg:gap-20">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-gray-700 shadow-sm backdrop-blur-xl">
@@ -154,7 +155,7 @@ export default function PokerSettlementCalculatorPage() {
                 A home poker settlement is not just a final calculation. It is a chain of records that must agree: every purchase, every final stack, every player’s net result, and every payment.
               </p>
               <p className="mt-4 max-w-3xl text-base leading-8 text-gray-600">
-                This guide follows one five-player game end to end, including a missing entry that leaves the bank $10 out of balance. You will see where the error appears, how correcting it changes the results, and how the balanced table becomes a short payment list.
+                This guide follows one five-player $0.25/$0.50 game end to end, including a missing entry that leaves the bank $10.00 out of balance. You will see where the error appears, how correcting it changes the results, and how the balanced table becomes a short payment list.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
@@ -262,13 +263,13 @@ export default function PokerSettlementCalculatorPage() {
 
             <section id="example" className="mt-16 scroll-mt-24 border-t border-gray-200 pt-16 sm:mt-20 sm:pt-20">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Five-player example</p>
-              <h2 className={`mt-3 ${sectionHeading}`}>A missing add-on puts the game $10 out of balance.</h2>
+              <h2 className={`mt-3 ${sectionHeading}`}>A missing add-on puts the game $10.00 out of balance.</h2>
               <div className="mt-6 space-y-5">
                 <p className={prose}>
-                  The game opens with a $40 buy-in. Alex and Sam each rebuy once. Jordan adds another $20. Casey buys an additional $10 in chips, but that last purchase never reaches the ledger. The recorded bank therefore shows $300 even though $310 in chips are in circulation.
+                  The game runs with $0.25/$0.50 blinds and a $40 opening buy-in. Alex and Sam each rebuy once. Jordan adds another $20, and Casey takes an additional $10 in chips. Casey’s add-on never reaches the ledger, so the recorded bank shows $300.00 even though $310.00 in chips are in circulation.
                 </p>
                 <p className={prose}>
-                  When the last hand ends, the five cash-outs total $310. This is not a rounding issue and it is not a reason to split the difference. It is evidence that one side of the ledger is incomplete.
+                  When the last hand ends, stacks such as $18.75 and $132.25 are normal for these stakes. Together, the five cash-outs total $310.00. The cents are not a rounding problem; the unexplained $10.00 gap is evidence that one side of the ledger is incomplete.
                 </p>
               </div>
 
@@ -278,22 +279,22 @@ export default function PokerSettlementCalculatorPage() {
                   <div>
                     <h3 className="font-semibold text-amber-950">The calculator should stop here.</h3>
                     <p className="mt-1 text-sm leading-6 text-amber-900/75">
-                      Recorded buy-ins are $300. Final stacks are $310. The table needs to find the missing $10 before calculating payments.
+                      Recorded buy-ins are $300.00. Final stacks are $310.00. The table needs to find the missing $10.00 before calculating payments.
                     </p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 divide-x divide-amber-200 bg-white/55">
                   <div className="p-4 sm:p-5">
                     <p className="text-xs text-amber-800/70">Money in</p>
-                    <p className="mt-1 text-xl font-semibold text-amber-950">$300</p>
+                    <p className="mt-1 text-xl font-semibold text-amber-950">$300.00</p>
                   </div>
                   <div className="p-4 sm:p-5">
                     <p className="text-xs text-amber-800/70">Stacks out</p>
-                    <p className="mt-1 text-xl font-semibold text-amber-950">$310</p>
+                    <p className="mt-1 text-xl font-semibold text-amber-950">$310.00</p>
                   </div>
                   <div className="p-4 sm:p-5">
                     <p className="text-xs text-amber-800/70">Difference</p>
-                    <p className="mt-1 text-xl font-semibold text-red-700">−$10</p>
+                    <p className="mt-1 text-xl font-semibold text-red-700">−$10.00</p>
                   </div>
                 </div>
               </div>
@@ -305,9 +306,9 @@ export default function PokerSettlementCalculatorPage() {
                   </span>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Correction</p>
-                    <h3 className="mt-1 text-xl font-semibold tracking-tight text-gray-950">Add Casey’s missing $10 purchase.</h3>
+                    <h3 className="mt-1 text-xl font-semibold tracking-tight text-gray-950">Add Casey’s missing $10.00 purchase.</h3>
                     <p className="mt-2 text-sm leading-6 text-gray-600">
-                      Casey’s total money in changes from $40 to $50. The bank becomes $310, which now matches the $310 in final stacks. That correction also changes Casey’s loss from $40 to $50.
+                      Casey’s total money in changes from $40.00 to $50.00. The bank becomes $310.00, which now matches the $310.00 in final stacks. That correction also changes Casey’s loss from $40.00 to $50.00.
                     </p>
                   </div>
                 </div>
@@ -343,9 +344,9 @@ export default function PokerSettlementCalculatorPage() {
                     <tr>
                       <th scope="row" className="px-5 py-4 sm:px-6">Totals</th>
                       <td className="px-4 py-4 text-gray-400">Balanced</td>
-                      <td className="px-4 py-4 text-right tabular-nums">$310</td>
-                      <td className="px-4 py-4 text-right tabular-nums">$310</td>
-                      <td className="px-5 py-4 text-right tabular-nums text-emerald-300 sm:px-6">$0</td>
+                      <td className="px-4 py-4 text-right tabular-nums">$310.00</td>
+                      <td className="px-4 py-4 text-right tabular-nums">$310.00</td>
+                      <td className="px-5 py-4 text-right tabular-nums text-emerald-300 sm:px-6">$0.00</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -370,34 +371,34 @@ export default function PokerSettlementCalculatorPage() {
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-sm text-gray-400">Morgan</p>
-                    <p className="mt-2 font-mono text-lg">$130 − $40 = <span className="text-emerald-300">+$90</span></p>
+                    <p className="mt-2 font-mono text-lg">$132.25 − $40.00 = <span className="text-emerald-300">+$92.25</span></p>
                   </div>
                   <div className="rounded-xl border border-white/10 bg-white/5 p-4">
                     <p className="text-sm text-gray-400">Casey</p>
-                    <p className="mt-2 font-mono text-lg">$0 − $50 = <span className="text-red-300">−$50</span></p>
+                    <p className="mt-2 font-mono text-lg">$0.00 − $50.00 = <span className="text-red-300">−$50.00</span></p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-8 space-y-5">
                 <p className={prose}>
-                  The positive results are Morgan at $90 and Jordan at $40, for $130 total. The negative results are Alex at $60, Sam at $20, and Casey at $50, also $130 total. That equality is the second reconciliation check: all player results must add up to zero.
+                  The positive results are Morgan at $92.25 and Jordan at $40.50, for $132.75 total. The negative results are Alex at $61.25, Sam at $21.50, and Casey at $50.00, also $132.75 total. That equality is the second reconciliation check: all player results must add up to zero.
                 </p>
                 <p className={prose}>
-                  Notice why the missing add-on had to be fixed first. Without it, Casey would appear to lose only $40, the negative results would total $120, and the table would be unable to fund the full $130 owed to the winners.
+                  Notice why the missing add-on had to be fixed first. Without it, Casey would appear to lose only $40.00, the negative results would total $122.75, and the table would be unable to fund the full $132.75 owed to the winners.
                 </p>
               </div>
             </section>
 
             <section id="payments" className="mt-16 scroll-mt-24 border-t border-gray-200 pt-16 sm:mt-20 sm:pt-20">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Build the payment list</p>
-              <h2 className={`mt-3 ${sectionHeading}`}>Move $130 without replaying every exchange.</h2>
+              <h2 className={`mt-3 ${sectionHeading}`}>Move $132.75 without replaying every exchange.</h2>
               <div className="mt-6 space-y-5">
                 <p className={prose}>
                   A settlement does not reverse individual hands or remember who won chips from whom. It works from the final net positions. The three players with negative results fund the two players with positive results until every balance reaches zero.
                 </p>
                 <p className={prose}>
-                  For this particular set of balances, four payments are required. Casey must split the $50 loss because Morgan needs $10 after receiving Alex’s and Sam’s payments, while Jordan still needs $40.
+                  For this particular set of balances, four payments are required. Casey must split the $50.00 loss because Morgan still needs $9.50 after receiving Alex’s and Sam’s payments, while Jordan needs $40.50.
                 </p>
               </div>
 
@@ -424,12 +425,12 @@ export default function PokerSettlementCalculatorPage() {
                 <div className="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Before payments</p>
                   <p className="mt-3 text-2xl font-semibold text-gray-950">Five open balances</p>
-                  <p className="mt-2 text-sm leading-6 text-gray-600">Two players must receive $130. Three players owe $130.</p>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">Two players must receive $132.75. Three players owe $132.75.</p>
                 </div>
                 <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 sm:p-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">After payments</p>
-                  <p className="mt-3 text-2xl font-semibold text-emerald-950">Every balance is $0</p>
-                  <p className="mt-2 text-sm leading-6 text-emerald-900/70">The full $130 has moved once, with no extra round trips.</p>
+                  <p className="mt-3 text-2xl font-semibold text-emerald-950">Every balance is $0.00</p>
+                  <p className="mt-2 text-sm leading-6 text-emerald-900/70">The full $132.75 has moved once, with no extra round trips.</p>
                 </div>
               </div>
             </section>

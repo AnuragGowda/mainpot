@@ -93,15 +93,16 @@ body {
 }
 
 .ante-section-atmosphere-cta {
+  height: calc(100% + 8rem);
   background:
     radial-gradient(ellipse 42% 76% at 8% 48%, rgba(216, 238, 255, 0.56), transparent 76%),
     radial-gradient(ellipse 40% 75% at 92% 50%, rgba(227, 216, 255, 0.48), transparent 78%);
 }
 
 .ante-section-atmosphere-cta::after {
-  background-image: radial-gradient(rgba(83, 94, 114, 0.3) 0.9px, transparent 1px);
+  background-image: radial-gradient(rgba(65, 76, 96, 0.4) 1px, transparent 1.2px);
   mask-image: radial-gradient(ellipse 70% 94% at 50% 52%, transparent 12%, rgba(0, 0, 0, 0.92) 45%, transparent 90%);
-  opacity: 0.92;
+  opacity: 0.96;
 }
 
 .ante-hero {
