@@ -104,6 +104,9 @@ export default function HomePage() {
                   <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />No account required</span>
                   <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />{isSupabaseConfigured ? "Live sync across devices" : "Runs locally"}</span>
                 </div>
+                <Link href="/poker-settlement-calculator" className="ante-intro ante-intro-delay-3 mt-4 inline-flex text-sm font-semibold text-gray-700 underline decoration-gray-300 underline-offset-4 transition hover:text-gray-950 hover:decoration-gray-500">
+                  See how poker settlement works →
+                </Link>
                 <div className="ante-intro ante-intro-delay-3 mt-3 sm:mt-5 sm:min-h-5">
                   <ResumeBanner />
                 </div>
