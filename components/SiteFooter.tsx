@@ -17,6 +17,7 @@ export default function SiteFooter() {
           </div>
         </div>
         <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <Link href="/self-host" className={footerLink}>Self-host</Link>
           <Link href="/feedback" className={footerLink}>Feedback</Link>
           <Link href="/terms" className={footerLink}>Terms</Link>
           <Link href="/privacy" className={footerLink}>Privacy</Link>
