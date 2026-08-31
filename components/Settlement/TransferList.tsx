@@ -100,7 +100,7 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
                     href={venmoUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-700 transition hover:border-gray-300 hover:text-gray-950"
+                    className="inline-flex h-11 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-700 transition hover:border-gray-300 hover:text-gray-950 sm:h-9"
                   >
                     Venmo <ExternalLink aria-hidden size={14} />
                   </a>
@@ -116,7 +116,7 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
                         .then(() => toast("Zelle details copied", "success"))
                         .catch(() => toast("Could not copy Zelle details", "error"));
                     }}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-700 transition hover:border-gray-300 hover:text-gray-950"
+                    className="inline-flex h-11 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 text-xs font-semibold text-gray-700 transition hover:border-gray-300 hover:text-gray-950 sm:h-9"
                   >
                     Zelle <Copy aria-hidden size={14} />
                   </a>
@@ -141,7 +141,7 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
                       setBusyKey(null);
                     }
                   }}
-                  className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:opacity-50 ${settled ? "text-emerald-800 hover:bg-emerald-100" : "text-gray-500 hover:bg-gray-100 hover:text-gray-950"}`}
+                  className={`inline-flex h-11 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:opacity-50 sm:h-9 ${settled ? "text-emerald-800 hover:bg-emerald-100" : "text-gray-500 hover:bg-gray-100 hover:text-gray-950"}`}
                 >
                   {settled ? <CircleCheck aria-hidden size={17} /> : <Circle aria-hidden size={17} />}
                   {settled ? "Paid" : "Mark paid"}

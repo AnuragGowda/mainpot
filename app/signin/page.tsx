@@ -122,13 +122,13 @@ export default function SignInPage() {
       <main className="mx-auto grid w-full max-w-5xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_440px] lg:py-24">
         <section className="hidden lg:block">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-700">
-            Your poker ledger
+            Keep your history
           </p>
-          <h1 className="mt-4 max-w-xl text-5xl font-semibold tracking-tight text-gray-950">
-            Every game tells a story. Keep the score.
-          </h1>
+          <h2 className="mt-4 max-w-xl text-5xl font-semibold tracking-tight text-gray-950">
+            Keep every settled game in one place.
+          </h2>
           <p className="mt-5 max-w-lg text-lg leading-8 text-gray-600">
-            Create an account to carry your results across game nights, find your regulars, and see your long-term record.
+            Sign in to save results, find regular players, and track your record over time.
           </p>
         </section>
 
@@ -139,19 +139,19 @@ export default function SignInPage() {
                 ♠
               </span>
               <h1 className="mt-5 text-2xl font-semibold tracking-tight text-gray-950">
-                Accounts aren&apos;t connected yet
+                Accounts are off in local mode
               </h1>
               <p className="mt-2 text-sm leading-6 text-gray-600">
-                Mainpot is running in private, single-device mode. You can still create games and use the full banking flow on this Mac.
+                Games stay on this device, so you can run the full ledger without signing in.
               </p>
               <Link
                 href="/create"
                 className="mt-7 inline-flex h-11 w-full items-center justify-center rounded-lg bg-gray-950 px-4 text-sm font-medium text-white transition hover:bg-gray-800"
               >
-                Start a local game
+                Start a game
               </Link>
               <p className="mt-4 text-xs text-gray-400">
-                Connect Supabase to enable accounts and multiplayer sync.
+                Account history and live sync are unavailable in this setup.
               </p>
             </div>
           ) : magicLinkSent ? (
@@ -173,7 +173,7 @@ export default function SignInPage() {
                 {mode === "signin" ? "Welcome back" : "Create your account"}
               </h1>
               <p className="mt-1.5 text-sm text-gray-500">
-                {mode === "signin" ? "Sign in to see your poker history." : "Start building your poker record."}
+                {mode === "signin" ? "View your saved games and results." : "Save games and track results over time."}
               </p>
 
               {googleAuthEnabled ? (

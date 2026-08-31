@@ -161,7 +161,7 @@ export default function ActivityFeed({
       <div className="mb-3 flex items-end justify-between">
         <div>
           <h2 id="activity-heading" className="text-base font-semibold text-gray-950">Activity</h2>
-          <p className="text-sm text-gray-500">Every change at the table, newest first.</p>
+          <p className="text-sm text-gray-500">Newest first.</p>
         </div>
         <span className="text-xs text-gray-400">{events.length} events</span>
       </div>
@@ -202,7 +202,7 @@ export default function ActivityFeed({
                       aria-label="Activity actions"
                       aria-expanded={openEventId === event.id}
                       onClick={() => setOpenEventId((current) => current === event.id ? null : event.id)}
-                      className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-lg leading-none text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-lg leading-none text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"
                     >
                       ···
                     </button>

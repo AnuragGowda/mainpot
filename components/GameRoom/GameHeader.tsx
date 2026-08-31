@@ -179,7 +179,7 @@ export default function GameHeader({
       {isLocalMode ? (
         <div className="mt-4 flex items-center gap-2 text-xs text-amber-700">
           <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-          Local mode · connect Supabase for live multiplayer
+          Saved on this device · live sync is off
         </div>
       ) : null}
 
@@ -208,7 +208,7 @@ export default function GameHeader({
                 type="button"
                 aria-label="Close invite"
                 onClick={() => setInviteOpen(false)}
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-800"
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"
               >
                 <X aria-hidden size={18} />
               </button>

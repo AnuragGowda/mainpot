@@ -289,7 +289,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 onClick={() => setTab("min")}
                 className={tabClass(tab === "min")}
               >
-                Min transfers
+                Fewest payments
               </button>
               <button
                 type="button"
@@ -324,7 +324,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   id="transfers-min-heading"
                   className="mb-2 text-sm font-medium uppercase tracking-widest text-gray-500"
                 >
-                  Min transfers
+                  Fewest payments
                 </h2>
                 <TransferList transfers={minTransfers} gameId={snapshot.game.id} mode="min" />
               </section>

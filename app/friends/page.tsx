@@ -143,7 +143,7 @@ export default function FriendsPage() {
                   <Avatar profile={profile} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-gray-900">{profile.display_name || profile.username || "Player"}</p>
-                    <p className="truncate text-xs text-gray-500">{profile.username ? `@${profile.username}` : profile.bio || "Mainpot player"}</p>
+                    <p className="truncate text-xs text-gray-500">{profile.username ? `@${profile.username}` : profile.bio || "No username yet"}</p>
                   </div>
                   <Button size="sm" variant="secondary" loading={busyId === profile.id} onClick={() => addFriend(profile)}>Add</Button>
                 </li>
@@ -178,7 +178,7 @@ export default function FriendsPage() {
                 {friends.map(({ friendship, profile }) => (
                   <li key={friendship.id} className="flex items-center gap-3 px-5 py-4">
                     <Avatar profile={profile} />
-                    <div className="min-w-0 flex-1"><p className="truncate font-medium text-gray-900">{profile.display_name || profile.username || "Player"}</p><p className="truncate text-xs text-gray-500">{profile.username ? `@${profile.username}` : profile.bio || "Mainpot player"}</p></div>
+                    <div className="min-w-0 flex-1"><p className="truncate font-medium text-gray-900">{profile.display_name || profile.username || "Player"}</p><p className="truncate text-xs text-gray-500">{profile.username ? `@${profile.username}` : profile.bio || "No username yet"}</p></div>
                     <Button size="sm" variant="ghost" loading={busyId === friendship.id} onClick={() => act(friendship.id, () => removeFriend(friendship.id), "Friend removed")}>Remove</Button>
                   </li>
                 ))}

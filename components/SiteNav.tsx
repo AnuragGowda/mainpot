@@ -11,7 +11,7 @@ import { isSupabaseConfigured } from "@/lib/supabase";
 import BrandMark from "@/components/BrandMark";
 
 const navLink =
-  "rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-950";
+  "min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2";
 
 export default function SiteNav() {
   const pathname = usePathname();
@@ -65,11 +65,14 @@ export default function SiteNav() {
 
   const inAccountArea = pathname === "/dashboard" || pathname === "/friends";
   const hasAccount = Boolean(user && !user.is_anonymous);
+  const publicAction = pathname === "/create"
+    ? { href: "/join", desktop: "Join a game", mobile: "Join" }
+    : { href: "/create", desktop: "Start a game", mobile: "Start" };
 
   return (
     <header className="sticky top-0 z-30 border-b border-gray-200/80 bg-white/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="group inline-flex items-center gap-2">
+        <Link href="/" className="group inline-flex min-h-11 items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
           <BrandMark className="h-7 w-7 shadow-sm transition group-hover:bg-gray-800" />
           <span className="text-lg font-semibold tracking-tight text-gray-950">
             Mainpot
@@ -81,7 +84,7 @@ export default function SiteNav() {
             <>
               <Link
                 href="/dashboard"
-                className={`${navLink} ${
+                className={`${navLink} inline-flex ${
                   inAccountArea ? "bg-gray-100 text-gray-950" : ""
                 }`}
               >
@@ -99,7 +102,7 @@ export default function SiteNav() {
                 onClick={handleSignOut}
                 aria-label="Sign out"
                 title="Sign out"
-                className={`${navLink} grid h-9 w-9 place-items-center px-0 sm:hidden`}
+                className={`${navLink} grid h-11 w-11 place-items-center px-0 sm:hidden`}
               >
                 <LogOut aria-hidden className="h-4 w-4" />
               </button>
@@ -118,20 +121,20 @@ export default function SiteNav() {
                 href="/signin"
                 aria-label="Sign in"
                 title="Sign in"
-                className={`${navLink} grid h-9 w-9 place-items-center px-0 sm:hidden`}
+                className={`${navLink} grid h-11 w-11 place-items-center px-0 sm:hidden`}
               >
                 <LogIn aria-hidden className="h-4 w-4" />
               </Link>
               <Link
-                href="/create"
-                className="ml-1 rounded-lg bg-gray-950 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-gray-800"
+                href={publicAction.href}
+                className="ml-1 inline-flex min-h-11 items-center rounded-lg bg-gray-950 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
               >
-                <span className="hidden sm:inline">Start a game</span>
-                <span className="sm:hidden">Play</span>
+                <span className="hidden sm:inline">{publicAction.desktop}</span>
+                <span className="sm:hidden">{publicAction.mobile}</span>
               </Link>
             </>
           ) : (
-            <span className="h-9 w-28 animate-pulse rounded-md bg-gray-100" />
+            <span className="h-11 w-28 animate-pulse rounded-md bg-gray-100" />
           )}
         </nav>
       </div>

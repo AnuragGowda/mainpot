@@ -21,7 +21,7 @@ export default function PlayerList({ players, snapshot, currentPlayerId }: Playe
     <section aria-labelledby="table-heading">
       <div className="mb-3">
         <h2 id="table-heading" className="text-base font-semibold text-gray-950">At the table</h2>
-        <p className="text-sm text-gray-500">Current money in, at a glance.</p>
+        <p className="text-sm text-gray-500">Buy-ins by player.</p>
       </div>
       <Card padding="none" className="overflow-hidden rounded-xl shadow-none">
         <ul className="divide-y divide-gray-100">

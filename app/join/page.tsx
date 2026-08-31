@@ -90,11 +90,11 @@ export default function JoinGamePage() {
   return (
     <GameSetupShell
       eyebrow="Join the table"
-      title="One code. You’re in."
-      description="Use the private room code from your host. Your buy-ins and rebuys will appear in the shared game ledger."
+      title="Enter the room code."
+      description="Use the six-character code from the host to join the table’s ledger."
     >
           <div>
-            <h2 className="text-xl font-semibold tracking-tight text-gray-950">Enter your invite</h2>
+            <h2 className="text-xl font-semibold tracking-tight text-gray-950">Join a game</h2>
             <p className="mt-1 text-sm text-gray-500">Codes are six characters and never use 0, 1, I, or O.</p>
           </div>
 
@@ -136,7 +136,7 @@ export default function JoinGamePage() {
             </Button>
           </form>
           <p className="mt-4 text-center text-xs leading-5 text-gray-400">
-            You can also paste the full invite link here.
+            Full invite links work here too.
           </p>
     </GameSetupShell>
   );

@@ -4,6 +4,8 @@ import { GITHUB_URL } from "@/lib/product";
 import SuitIcon from "@/components/SuitIcon";
 
 export default function SiteFooter() {
+  const footerLink = "inline-flex min-h-11 items-center transition hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2";
+
   return (
     <footer className="relative border-t border-gray-200 bg-white/60 px-4 py-8 text-sm text-gray-500 backdrop-blur-sm">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -15,10 +17,10 @@ export default function SiteFooter() {
           </div>
         </div>
         <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <Link href="/feedback" className="transition hover:text-gray-950">Feedback</Link>
-          <Link href="/terms" className="transition hover:text-gray-950">Terms</Link>
-          <Link href="/privacy" className="transition hover:text-gray-950">Privacy</Link>
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 transition hover:text-gray-950">
+          <Link href="/feedback" className={footerLink}>Feedback</Link>
+          <Link href="/terms" className={footerLink}>Terms</Link>
+          <Link href="/privacy" className={footerLink}>Privacy</Link>
+          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className={`${footerLink} gap-1.5`}>
             <Code2 aria-hidden size={16} /> Open source
           </a>
         </nav>

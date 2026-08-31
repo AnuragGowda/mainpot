@@ -32,7 +32,7 @@ export function buildSummaryText({
   ];
 
   const settlementLabel =
-    mode === "min" ? "min transfers" : `bank: ${bankName ?? ""}`;
+    mode === "min" ? "fewest payments" : `bank: ${bankName ?? ""}`;
   lines.push(`Settlements (${settlementLabel}):`);
   if (transfers.length === 0) {
     lines.push("No transfers needed.");

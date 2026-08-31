@@ -195,7 +195,7 @@ export default function DashboardPage() {
               </p>
               <label className="sm:col-span-2">
                 <span className="mb-1 block text-sm font-medium text-gray-700">Bio</span>
-                <textarea value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} maxLength={160} rows={3} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" placeholder="Weekly home game enthusiast." />
+                <textarea value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} maxLength={160} rows={3} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" placeholder="Tuesday $20 home game" />
               </label>
               <div className="sm:col-span-2">
                 <Button type="submit" loading={saving}>Save profile</Button>
@@ -287,7 +287,7 @@ export default function DashboardPage() {
             ) : (
               <div className="px-6 py-14 text-center">
                 <p className="text-sm font-medium text-gray-700">No settled games yet</p>
-                <p className="mt-1 text-sm text-gray-500">Finish your first game and the result will land here.</p>
+                <p className="mt-1 text-sm text-gray-500">Finish your first game and the result appears here.</p>
                 <Link href="/create" className="mt-5 inline-block text-sm font-semibold text-gray-900">Create a game →</Link>
               </div>
             )}

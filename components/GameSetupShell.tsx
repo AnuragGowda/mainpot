@@ -28,16 +28,6 @@ export default function GameSetupShell({
           <p className="mt-4 max-w-lg text-base leading-7 text-gray-600 sm:text-lg sm:leading-8">
             {description}
           </p>
-          <div className="mt-8 hidden space-y-3 text-sm text-gray-600 lg:block">
-            {["No account required", "Everyone sees the same ledger", "Settlement math is handled for you"].map((item) => (
-              <div key={item} className="flex items-center gap-3">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-gray-950 text-[11px] font-bold text-white" aria-hidden="true">
-                  ✓
-                </span>
-                {item}
-              </div>
-            ))}
-          </div>
         </section>
 
         <section className="rounded-2xl border border-gray-200/90 bg-white p-5 shadow-[0_18px_50px_rgba(17,24,20,0.07)] sm:p-8">

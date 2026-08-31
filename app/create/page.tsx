@@ -86,8 +86,8 @@ export default function CreateGamePage() {
   return (
     <GameSetupShell
       eyebrow="Host a table"
-      title="Start the game in under a minute."
-      description="Set the opening buy-in, invite the table, and keep every chip accounted for from the first hand."
+      title="Start a game. Share one code."
+      description="Set the buy-in and create a ledger everyone at the table can follow."
     >
           <div className="flex items-center justify-between gap-4">
             <div>
@@ -129,11 +129,11 @@ export default function CreateGamePage() {
               error={errors.buyIn}
             />
             <Button type="submit" fullWidth loading={loading}>
-              Create game room
+              Create game
             </Button>
           </form>
           <p className="mt-4 text-center text-xs leading-5 text-gray-400">
-            A private six-character code is created for your table.
+            You’ll get a private six-character code to share.
           </p>
     </GameSetupShell>
   );

@@ -37,21 +37,21 @@ export const metadata: Metadata = {
 const steps = [
   {
     number: "01",
-    title: "Track the money in",
+    title: "Open the ledger",
     description:
-      "Record every opening buy-in and rebuy as it happens, so the table always knows the size of the bank.",
+      "Set the buy-in, name the game, and share the room code.",
   },
   {
     number: "02",
-    title: "Enter the cash-outs",
+    title: "Keep the bank current",
     description:
-      "At the end of the game, each player enters the value of their stack. Mainpot shows any difference before anyone settles up.",
+      "Record purchases during the game, then enter every final stack.",
   },
   {
     number: "03",
-    title: "Settle with fewer payments",
+    title: "Get the payment list",
     description:
-      "Once the bank balances, Mainpot turns each player’s result into the smallest practical set of transfers.",
+      "Once totals match, Mainpot reduces the tab to as few transfers as possible.",
   },
 ];
 
@@ -91,7 +91,7 @@ export default function PokerSettlementCalculatorPage() {
                 Settle a home poker game with fewer payments.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600">
-                Mainpot keeps the poker bank current from the first buy-in to the final cash-out, then calculates who pays whom when the game ends.
+                Track the bank as chips change hands. When the game ends, Mainpot checks the totals and shows exactly who pays whom.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -108,7 +108,7 @@ export default function PokerSettlementCalculatorPage() {
                 </a>
               </div>
               <p className="mt-5 text-sm leading-6 text-gray-500">
-                No account or app download required for a friendly home game.
+                Free to use. No account or download needed.
               </p>
             </div>
             <div className="mx-auto w-full max-w-lg lg:max-w-none">
@@ -122,7 +122,7 @@ export default function PokerSettlementCalculatorPage() {
             <div className="border-b border-gray-200 px-6 py-7 sm:px-8 sm:py-8">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">How it works</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">
-                The calculator is built into the game ledger.
+                The calculator stays with the game.
               </h2>
             </div>
             <div className="grid divide-y divide-gray-200 md:grid-cols-3 md:divide-x md:divide-y-0">
@@ -199,7 +199,7 @@ export default function PokerSettlementCalculatorPage() {
           <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-6 rounded-3xl bg-gray-950 px-6 py-10 text-white sm:px-10 sm:py-12 lg:flex-row lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Ready for the next game?</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Keep the table friendly and the money exact.</h2>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">Create the ledger before the first hand.</h2>
             </div>
             <Link
               href="/create"

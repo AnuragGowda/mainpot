@@ -34,9 +34,9 @@ export default function FeedbackPage() {
       <SiteNav />
       <main className="mx-auto w-full max-w-4xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Built in public</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Feedback</p>
           <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-gray-950 sm:text-5xl">Help make poker night smoother.</h1>
-          <p className="mt-5 text-lg leading-8 text-gray-600">This project is open source. Feedback, fixes, and thoughtful ideas are welcome on GitHub.</p>
+          <p className="mt-5 text-lg leading-8 text-gray-600">Found an issue or have an idea? Choose the right GitHub form below.</p>
         </div>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -60,12 +60,12 @@ export default function FeedbackPage() {
             <p className="font-medium text-gray-950">Want to contribute code?</p>
             <p className="mt-0.5 text-sm text-gray-500">Browse the source, roadmap, and open issues.</p>
           </div>
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50">
+          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50">
             <Code2 aria-hidden size={17} /> View GitHub
           </a>
         </div>
 
-        <Link href="/" className="mt-8 inline-block text-sm font-medium text-gray-600 hover:text-gray-950">← Back home</Link>
+        <Link href="/" className="mt-6 inline-flex min-h-11 items-center rounded-lg text-sm font-medium text-gray-600 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">← Back home</Link>
       </main>
       <SiteFooter />
     </div>
