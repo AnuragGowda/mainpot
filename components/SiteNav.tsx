@@ -17,16 +17,29 @@ export default function SiteNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(!isSupabaseConfigured);
 
   useEffect(() => {
     let active = true;
-    void getCurrentUser().then((currentUser) => {
-      if (active) {
-        setUser(currentUser);
-        setReady(true);
-      }
-    });
+    const readyFallback = isSupabaseConfigured
+      ? window.setTimeout(() => {
+          if (active) setReady(true);
+        }, 2500)
+      : undefined;
+
+    void getCurrentUser()
+      .then((currentUser) => {
+        if (active) {
+          setUser(currentUser);
+          setReady(true);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setUser(null);
+          setReady(true);
+        }
+      });
 
     const supabase = getBrowserSupabase();
     const subscription = supabase?.auth.onAuthStateChange((_event, session) => {
@@ -38,6 +51,7 @@ export default function SiteNav() {
 
     return () => {
       active = false;
+      if (readyFallback !== undefined) window.clearTimeout(readyFallback);
       subscription?.unsubscribe();
     };
   }, []);

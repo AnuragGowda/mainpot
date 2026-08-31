@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
 import Providers from "@/components/Providers";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -10,17 +11,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ??
-      "https://mainpot.app"
-  ),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Mainpot — The poker night ledger",
-    template: "%s · Mainpot",
+    default: "Mainpot — Poker Buy-In & Settlement Tracker",
+    template: "%s | Mainpot",
   },
   description:
-    "Track poker buy-ins and rebuys, reconcile the bank, and settle every home game with fewer payments.",
+    "Track poker buy-ins, rebuys, cash-outs, and settlement payments for every home game in one shared ledger.",
   applicationName: "Mainpot",
+  category: "Poker",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -37,29 +36,39 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Mainpot",
   },
-  keywords: [
-    "poker tracker",
-    "poker settlement calculator",
-    "home game ledger",
-    "poker buy-in tracker",
-    "poker banking app",
-  ],
   openGraph: {
     type: "website",
     siteName: "Mainpot",
-    title: "Mainpot — The poker night ledger",
+    title: "Mainpot — Poker Buy-In & Settlement Tracker",
     description:
-      "Track the bank from the first chip to the final payment.",
+      "Track the bank from the first chip to the final settlement.",
     url: "/",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Mainpot — Keep the game friendly. Keep the money exact.",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mainpot — The poker night ledger",
+    title: "Mainpot — Poker Buy-In & Settlement Tracker",
     description:
-      "Track the bank from the first chip to the final payment.",
-    images: ["/opengraph-image"],
+      "Track the bank from the first chip to the final settlement.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Mainpot — Keep the game friendly. Keep the money exact.",
+      },
+    ],
   },
-  alternates: { canonical: "/" },
+  // Most routes are private game or account flows. The public homepage opts in
+  // to indexing with route-specific metadata.
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {

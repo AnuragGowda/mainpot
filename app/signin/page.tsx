@@ -181,6 +181,9 @@ export default function SignInPage() {
                   <Button fullWidth variant="secondary" className="mt-7" onClick={handleGoogle} leftIcon={<GoogleMark className="h-4 w-4" />}>
                     Continue with Google
                   </Button>
+                  <p className="mt-2 text-center text-xs leading-5 text-gray-500">
+                    Google securely shares only your basic profile and email with Mainpot.
+                  </p>
                   <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wider text-gray-400">
                     <span className="h-px flex-1 bg-gray-200" />or<span className="h-px flex-1 bg-gray-200" />
                   </div>
