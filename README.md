@@ -72,6 +72,10 @@ npm test
 npm run build
 ```
 
+## Optional Product Ops telemetry
+
+Mainpot never requires analytics or a central service. The Product Ops integration is disabled by default and remains a no-op unless `NEXT_PUBLIC_PRODUCT_OPS_ENABLED=true` plus all three server-only `PRODUCT_OPS_*` variables are configured. Mainpot forwards only a short allowlisted event name, a HMAC-derived anonymous actor/session ID, and safe controlled values. It never sends player names, room codes, game contents, payment handles, auth data, or feedback text. Telemetry failures are ignored.
+
 ## Contributing
 
 Feature requests and reproducible bug reports are welcome through GitHub Issues. Please avoid including private game, account, or payment details in screenshots and logs.

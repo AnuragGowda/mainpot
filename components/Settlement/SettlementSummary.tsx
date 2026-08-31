@@ -7,6 +7,7 @@ import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
 import { clearActiveGame } from "@/lib/session";
+import { trackProductOpsEvent } from "@/lib/product-ops";
 import { buildSummaryText } from "@/lib/summary";
 import type { PlayerNet, Transfer } from "@/lib/settlement";
 import type { Game } from "@/lib/types";
@@ -18,6 +19,7 @@ export interface SettlementSummaryProps {
   mode: "min" | "bank";
   bankName?: string;
   totalBoughtIn: number;
+  isHost: boolean;
 }
 
 /**
@@ -30,6 +32,7 @@ export default function SettlementSummary({
   mode,
   bankName,
   totalBoughtIn,
+  isHost,
 }: SettlementSummaryProps) {
   const { toast } = useToast();
 
@@ -117,7 +120,7 @@ export default function SettlementSummary({
 
       <Link
         href={`/create?name=${encodeURIComponent(game.name)}&buyin=${game.buy_in_amount}`}
-        onClick={() => clearActiveGame()}
+        onClick={() => { if (isHost) trackProductOpsEvent("host.returned_to_create"); clearActiveGame(); }}
         className="mt-2 block"
       >
         <Button variant="ghost" size="md" fullWidth>

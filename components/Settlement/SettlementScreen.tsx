@@ -400,6 +400,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             mode={tab}
             bankName={bankPlayer?.name}
             totalBoughtIn={totalBoughtIn}
+            isHost={isHost}
           />
         </div>
       )}

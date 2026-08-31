@@ -16,6 +16,7 @@ import type {
 import { generateRoomCode, normalizeRoomCode } from "./roomcode";
 import { getSessionId, randomUUID } from "./session";
 import { round2 } from "./format";
+import { productOpsEnabled, trackProductOpsEvent } from "./product-ops";
 
 export { isSupabaseConfigured };
 
@@ -1256,9 +1257,12 @@ export async function createGame(
   buyInAmount: number,
   userId?: string | null
 ): Promise<{ code: string; gameId: string }> {
-  return usingLocalStorage()
+  const localStorageMode = usingLocalStorage();
+  const result = await (localStorageMode
     ? createGameLocal(name, hostName, buyInAmount, userId)
-    : createGameSupabase(name, hostName, buyInAmount, userId);
+    : createGameSupabase(name, hostName, buyInAmount, userId));
+  trackProductOpsEvent("game.created", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
+  return result;
 }
 
 export async function joinGame(
@@ -1266,9 +1270,16 @@ export async function joinGame(
   playerName: string,
   userId?: string | null
 ): Promise<{ gameId: string; playerId: string }> {
-  return usingLocalStorage()
+  const localStorageMode = usingLocalStorage();
+  const result = await (localStorageMode
     ? joinGameLocal(code, playerName, userId)
-    : joinGameSupabase(code, playerName, userId);
+    : joinGameSupabase(code, playerName, userId));
+  if (productOpsEnabled()) {
+    void getGameSnapshot(result.gameId).then((snapshot) => {
+      if (snapshot.players.length === 2) trackProductOpsEvent("game.second_player_joined", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
+    }).catch(() => {});
+  }
+  return result;
 }
 
 export async function getGame(code: string): Promise<Game | null> {
@@ -1352,11 +1363,15 @@ export async function updateCashOut(
 }
 
 export async function endGame(gameId: string): Promise<void> {
-  return usingLocalStorage() ? endGameLocal(gameId) : endGameSupabase(gameId);
+  const localStorageMode = usingLocalStorage();
+  await (localStorageMode ? endGameLocal(gameId) : endGameSupabase(gameId));
+  trackProductOpsEvent("game.entered_settling", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
 }
 
 export async function markEnded(gameId: string): Promise<void> {
-  return usingLocalStorage() ? markEndedLocal(gameId) : markEndedSupabase(gameId);
+  const localStorageMode = usingLocalStorage();
+  await (localStorageMode ? markEndedLocal(gameId) : markEndedSupabase(gameId));
+  trackProductOpsEvent("game.finalized", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
 }
 
 export async function getGameSnapshot(gameId: string): Promise<GameSnapshot> {
