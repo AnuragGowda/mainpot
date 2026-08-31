@@ -13,6 +13,18 @@ export interface Game {
   expires_at: string | null;
   created_at: string;
   ended_at: string | null;
+  acquisition_source?: AcquisitionSource | null;
+}
+
+export type AcquisitionSource = "personal_invite" | "poker_group" | "search" | "other";
+
+export interface GameFeedback {
+  id: string;
+  game_id: string;
+  player_id: string | null;
+  score: number;
+  confusing: string | null;
+  created_at: string;
 }
 
 export interface Player {
@@ -60,7 +72,8 @@ export type GameEventType =
   | "host_transferred"
   | "cash_out_updated"
   | "game_settling"
-  | "game_finalized";
+  | "game_finalized"
+  | "host_returned_to_create";
 
 export interface GameEventMetadata {
   player_name?: string;

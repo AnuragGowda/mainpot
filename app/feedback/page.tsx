@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Bug, Code2, Lightbulb } from "lucide-react";
+import { ArrowUpRight, Bug, Code2, Lightbulb, Mail } from "lucide-react";
 import SiteFooter from "@/components/SiteFooter";
 import SiteNav from "@/components/SiteNav";
 import Card from "@/components/ui/Card";
-import { BUG_REPORT_URL, FEATURE_REQUEST_URL, GITHUB_URL } from "@/lib/product";
+import { BUG_REPORT_URL, FEATURE_REQUEST_URL, GITHUB_URL, SUPPORT_EMAIL } from "@/lib/product";
 
 export const metadata: Metadata = {
   title: "Feedback",
@@ -62,6 +62,16 @@ export default function FeedbackPage() {
           </div>
           <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50">
             <Code2 aria-hidden size={17} /> View GitHub
+          </a>
+        </div>
+
+        <div className="mt-4 flex flex-col items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 sm:flex-row sm:items-center">
+          <div>
+            <p className="font-medium text-gray-950">Need private help?</p>
+            <p className="mt-0.5 text-sm text-gray-500">For account, data, or game-access help, email the support team.</p>
+          </div>
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="inline-flex h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50">
+            <Mail aria-hidden size={17} /> Email support
           </a>
         </div>
 

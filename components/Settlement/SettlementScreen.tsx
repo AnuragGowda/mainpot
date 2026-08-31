@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import Badge from "@/components/ui/Badge";
 import type { BadgeVariant } from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -9,7 +9,7 @@ import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
 import ConfirmButton from "@/components/GameRoom/ConfirmButton";
 import { copyText } from "@/lib/clipboard";
-import { addCashOut, markEnded } from "@/lib/data";
+import { addCashOut, markEnded, submitGameFeedback } from "@/lib/data";
 import { getPlayerCashOut, playerInvested, totalPot } from "@/lib/game";
 import { round2 } from "@/lib/format";
 import { getSessionId } from "@/lib/session";
@@ -72,6 +72,10 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     defaultBankId(snapshot.players)
   );
   const [finalizing, setFinalizing] = useState(false);
+  const [feedbackScore, setFeedbackScore] = useState<number | null>(null);
+  const [confusing, setConfusing] = useState("");
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackSaving, setFeedbackSaving] = useState(false);
 
   useEffect(() => {
     setSessionId(getSessionId());
@@ -160,6 +164,21 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
       );
     } finally {
       setFinalizing(false);
+    }
+  }
+
+  async function handleFeedbackSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (feedbackScore == null) return;
+    setFeedbackSaving(true);
+    try {
+      await submitGameFeedback(snapshot.game.id, feedbackScore, confusing);
+      setFeedbackSent(true);
+      toast("Thanks — that helps us improve.", "success");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Couldn't save feedback.", "error");
+    } finally {
+      setFeedbackSaving(false);
     }
   }
 
@@ -394,6 +413,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
           )}
 
           <SettlementSummary
+            snapshot={snapshot}
             game={snapshot.game}
             transfers={activeTabTransfers}
             nets={nets}
@@ -401,7 +421,36 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             bankName={bankPlayer?.name}
             totalBoughtIn={totalBoughtIn}
             isHost={isHost}
+            finalized={snapshot.game.status === "ended"}
+            playerCount={players.length}
           />
+
+          {snapshot.game.status === "ended" && !feedbackSent ? (
+            <Card padding="md" className="border-gray-200 bg-gray-50">
+              <h2 className="font-semibold text-gray-950">How did game night go?</h2>
+              <p className="mt-1 text-sm text-gray-600">A quick note helps us make the next game smoother.</p>
+              <form onSubmit={handleFeedbackSubmit} className="mt-4 space-y-4">
+                <fieldset>
+                  <legend className="text-sm font-medium text-gray-700">How easy was Mainpot to use?</legend>
+                  <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Ease of use score">
+                    {[1, 2, 3, 4, 5].map((score) => (
+                      <button key={score} type="button" role="radio" aria-checked={feedbackScore === score}
+                        onClick={() => setFeedbackScore(score)}
+                        className={`grid h-10 w-10 place-items-center rounded-lg border text-sm font-semibold ${feedbackScore === score ? "border-gray-950 bg-gray-950 text-white" : "border-gray-300 bg-white text-gray-700"}`}>
+                        {score}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="feedback-confusing">
+                  What was confusing? <span className="font-normal text-gray-400">(optional)</span>
+                  <textarea id="feedback-confusing" value={confusing} onChange={(event) => setConfusing(event.target.value)} maxLength={1000} rows={3}
+                    className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" />
+                </label>
+                <Button type="submit" size="md" disabled={feedbackScore == null} loading={feedbackSaving}>Send feedback</Button>
+              </form>
+            </Card>
+          ) : null}
         </div>
       )}
     </main>

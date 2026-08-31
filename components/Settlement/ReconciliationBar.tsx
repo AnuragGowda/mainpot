@@ -55,15 +55,27 @@ export default function ReconciliationBar({
 
       <div className={`border-t px-4 py-3 sm:px-5 ${balanced ? "border-emerald-100 bg-emerald-50/70" : "border-red-100 bg-red-50/70"}`}>
         {balanced ? (
-          <p className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">
-            <Check aria-hidden className="h-4 w-4" />
-            Bank reconciled
-          </p>
+          <div>
+            <p className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+              <Check aria-hidden className="h-4 w-4" />
+              Bank reconciled
+            </p>
+            <p className="mt-1 text-xs leading-5 text-emerald-800/80">
+              Every chip is accounted for. Next, calculate the payments; each player&apos;s result is their cash-out minus everything they bought in for.
+            </p>
+          </div>
         ) : (
-          <p className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600">
-            <TriangleAlert aria-hidden className="h-4 w-4" />
-            Cash-outs don&apos;t match buy-ins. Check the amounts.
-          </p>
+          <div>
+            <p className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700">
+              <TriangleAlert aria-hidden className="h-4 w-4" />
+              Cash-outs don&apos;t match buy-ins
+            </p>
+            <p className="mt-1 text-xs leading-5 text-red-800/80">
+              {difference > 0
+                ? `${formatCurrency(difference)} is still missing from the cash-out total. Recheck final stacks or add the missing cash-out.`
+                : `${formatCurrency(Math.abs(difference))} more has been recorded as cash-outs than was bought in. Recheck final stacks or buy-ins.`} You can calculate anyway if the difference is intentional.
+            </p>
+          </div>
         )}
       </div>
     </Card>

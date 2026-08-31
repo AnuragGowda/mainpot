@@ -87,6 +87,10 @@ function eventText(event: GameEvent, actorName: string | null): string {
       return `${actorName ?? "The host"} closed the table for settlement`;
     case "game_finalized":
       return `${actorName ?? "The host"} finalized the game`;
+    case "host_returned_to_create":
+      return `${actorName ?? "The host"} started another game`;
+    default:
+      return "Updated the game";
   }
 }
 

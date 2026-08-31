@@ -13,6 +13,7 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import { useToast } from "@/components/ui/Toast";
 import { linkSessionToUser } from "@/lib/accounts";
+import { exportMyAccountData, requestAccountDeletion } from "@/lib/account-data";
 import { getCurrentUser } from "@/lib/auth-client";
 import { formatCurrency, formatSignedNet } from "@/lib/format";
 import { getProfileById, isUsernameTaken, updateProfile } from "@/lib/friends";
@@ -60,6 +61,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({
     display_name: "",
     username: "",
@@ -135,6 +138,38 @@ export default function DashboardPage() {
       toast(error instanceof Error ? error.message : "Could not save your profile.", "error");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function exportData() {
+    setExporting(true);
+    try {
+      const data = await exportMyAccountData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mainpot-data-export-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast("Your data export is downloading.", "success");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Couldn't export your data.", "error");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function requestDeletion() {
+    if (!window.confirm("Request deletion of your Mainpot account? This cannot be undone once support completes it.")) return;
+    setDeleting(true);
+    try {
+      await requestAccountDeletion();
+      toast("Deletion requested. Support will process your account and confirm by email.", "success");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Couldn't request deletion.", "error");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -324,6 +359,16 @@ export default function DashboardPage() {
             )}
           </Card>
         </div>
+
+        <Card className="mt-6 border-gray-200">
+          <h2 className="font-semibold text-gray-950">Your data</h2>
+          <p className="mt-1 text-sm leading-6 text-gray-600">Download the information tied to your account, or submit a deletion request for the support team to fulfill.</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button variant="secondary" onClick={exportData} loading={exporting}>Export my data</Button>
+            <Button variant="danger" onClick={requestDeletion} loading={deleting}>Request account deletion</Button>
+          </div>
+          <p className="mt-3 text-xs leading-5 text-gray-500">Export files can include personal details and game history. Keep them private.</p>
+        </Card>
       </main>
     </div>
   );

@@ -10,6 +10,8 @@ import type {
   GameEvent,
   GameEventMetadata,
   GameEventType,
+  GameFeedback,
+  AcquisitionSource,
   GameSnapshot,
   Player,
 } from "./types";
@@ -91,12 +93,13 @@ interface LocalStore {
   buyIns: BuyIn[];
   cashOuts: CashOut[];
   events: GameEvent[];
+  feedback: GameFeedback[];
 }
 
 const subscribers = new Map<string, Set<(snapshot: GameSnapshot) => void>>();
 
 function emptyStore(): LocalStore {
-  return { games: [], players: [], buyIns: [], cashOuts: [], events: [] };
+  return { games: [], players: [], buyIns: [], cashOuts: [], events: [], feedback: [] };
 }
 
 function loadStore(): LocalStore {
@@ -115,6 +118,7 @@ function loadStore(): LocalStore {
       buyIns: parsed.buyIns ?? [],
       cashOuts: parsed.cashOuts ?? [],
       events: parsed.events ?? [],
+      feedback: parsed.feedback ?? [],
     };
   } catch (err) {
     console.error("Failed to read ante local store:", err);
@@ -221,7 +225,8 @@ async function createGameLocal(
   name: string,
   hostName: string,
   buyInAmount: number,
-  userId?: string | null
+  userId?: string | null,
+  acquisitionSource?: AcquisitionSource | null
 ): Promise<{ code: string; gameId: string }> {
   const store = loadStore();
   const sessionId = getSessionId();
@@ -242,6 +247,7 @@ async function createGameLocal(
     expires_at: userId == null ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null,
     created_at: now,
     ended_at: null,
+    acquisition_source: acquisitionSource ?? null,
   };
 
   const player: Player = {
@@ -737,7 +743,8 @@ async function createGameSupabase(
   name: string,
   hostName: string,
   buyInAmount: number,
-  _userId?: string | null
+  _userId?: string | null,
+  acquisitionSource?: AcquisitionSource | null
 ): Promise<{ code: string; gameId: string }> {
   const { client } = await ensureSupabaseReady();
   const sessionId = getSessionId();
@@ -756,6 +763,13 @@ async function createGameSupabase(
 
     if (!error && data) {
       const row = data as { code: string; game_id: string };
+      if (acquisitionSource) {
+        const { error: sourceError } = await client
+          .from("games")
+          .update({ acquisition_source: acquisitionSource })
+          .eq("id", row.game_id);
+        if (sourceError) throw sourceError;
+      }
       return { code: row.code, gameId: row.game_id };
     }
     if (error?.code === "23505") {
@@ -1255,14 +1269,55 @@ export async function createGame(
   name: string,
   hostName: string,
   buyInAmount: number,
-  userId?: string | null
+  userId?: string | null,
+  acquisitionSource?: AcquisitionSource | null
 ): Promise<{ code: string; gameId: string }> {
   const localStorageMode = usingLocalStorage();
   const result = await (localStorageMode
-    ? createGameLocal(name, hostName, buyInAmount, userId)
-    : createGameSupabase(name, hostName, buyInAmount, userId));
+    ? createGameLocal(name, hostName, buyInAmount, userId, acquisitionSource)
+    : createGameSupabase(name, hostName, buyInAmount, userId, acquisitionSource));
   trackProductOpsEvent("game.created", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
   return result;
+
+export async function recordGameEvent(
+  gameId: string,
+  eventType: GameEventType,
+  metadata: GameEventMetadata = {}
+): Promise<void> {
+  if (usingLocalStorage()) {
+    const store = loadStore();
+    addLocalEvent(store, { gameId, eventType, metadata });
+    persistStore(store);
+    emitSnapshot(gameId, store);
+    return;
+  }
+  await addSupabaseEvent(assertSupabase(), { gameId, eventType, metadata });
+}
+
+export async function submitGameFeedback(
+  gameId: string,
+  score: number,
+  confusing: string
+): Promise<void> {
+  if (!Number.isInteger(score) || score < 1 || score > 5) {
+    throw new Error("Choose a score from 1 to 5.");
+  }
+  const playerId = usingLocalStorage()
+    ? (() => currentLocalPlayerId(loadStore(), gameId))()
+    : await currentSupabasePlayerId(assertSupabase(), gameId);
+  if (usingLocalStorage()) {
+    const store = loadStore();
+    store.feedback.push({
+      id: randomUUID(), game_id: gameId, player_id: playerId,
+      score, confusing: confusing.trim() || null, created_at: new Date().toISOString(),
+    });
+    persistStore(store);
+    return;
+  }
+  const { error } = await assertSupabase().from("game_feedback").insert({
+    game_id: gameId, player_id: playerId, score, confusing: confusing.trim() || null,
+  });
+  if (error) throw error;
 }
 
 export async function joinGame(

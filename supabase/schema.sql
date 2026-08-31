@@ -10,6 +10,8 @@ create table games (
   created_at timestamptz default now(),
   ended_at timestamptz
 );
+alter table games add column if not exists acquisition_source text
+  check (acquisition_source is null or acquisition_source in ('personal_invite', 'poker_group', 'search', 'other'));
 -- Players table
 create table players (
   id uuid default gen_random_uuid() primary key,
@@ -112,7 +114,7 @@ create table if not exists game_events (
   event_type text not null check (event_type in (
     'game_created', 'player_joined', 'buy_in_added', 'buy_in_updated',
     'buy_in_removed', 'buy_in_verified', 'player_left', 'player_removed',
-    'cash_out_updated', 'game_settling', 'game_finalized'
+    'cash_out_updated', 'game_settling', 'game_finalized', 'host_returned_to_create'
   )),
   actor_player_id uuid references players on delete set null,
   subject_player_id uuid references players on delete set null,
@@ -122,6 +124,16 @@ create table if not exists game_events (
 );
 create index if not exists game_events_game_created_idx
   on game_events(game_id, created_at);
+
+create table if not exists game_feedback (
+  id uuid default gen_random_uuid() primary key,
+  game_id uuid not null references games on delete cascade,
+  player_id uuid references players on delete set null,
+  score integer not null check (score between 1 and 5),
+  confusing text,
+  created_at timestamptz not null default now()
+);
+alter table game_feedback enable row level security;
 
 do $$
 begin

@@ -13,7 +13,7 @@ export default function SiteFooter() {
           <span aria-hidden="true" className="grid h-8 w-7 place-items-center rounded-md border border-gray-200 bg-white text-gray-900 shadow-sm"><SuitIcon className="h-3.5 w-3.5" suit="spade" /></span>
           <div>
             <p className="font-medium text-gray-700">Built for home games.</p>
-            <p className="mt-1 text-xs">© {new Date().getFullYear()} Mainpot contributors · Open source under the MIT License.</p>
+            <p className="mt-1 text-xs">© {new Date().getFullYear()} Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.</p>
           </div>
         </div>
         <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-x-5 gap-y-2">

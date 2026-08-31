@@ -7,6 +7,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteNav from "@/components/SiteNav";
 import SuitIcon from "@/components/SuitIcon";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { GITHUB_URL } from "@/lib/product";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -28,8 +29,8 @@ const linkBaseClasses =
   "inline-flex h-12 items-center justify-center rounded-lg px-4 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:px-6";
 
 const steps = [
-  { number: "01", eyebrow: "Start", title: "Open the room", description: "Name the game, set the buy-in, and share the six-character code." },
-  { number: "02", eyebrow: "Track", title: "Keep it current", description: "Players log each purchase; the host reviews every change." },
+  { number: "01", eyebrow: "Start", title: "Open the room", description: "Name the game, set the buy-in, and share the code or QR link." },
+  { number: "02", eyebrow: "Track", title: "Keep it current", description: "Players add their own buy-ins and cash-outs; the host can verify and correct." },
   { number: "03", eyebrow: "Settle", title: "Close the books", description: "Enter final stacks, catch mismatches, and settle in fewer payments." },
 ];
 
@@ -88,7 +89,7 @@ export default function HomePage() {
                   Keep the game friendly. Keep the money exact.
                 </h1>
                 <p className="ante-intro ante-intro-delay-2 mt-6 max-w-xl text-lg leading-8 text-gray-600">
-                  Track every buy-in and cash-out together, then settle the table with the fewest payments.
+                  Track buy-ins, rebuys, and cash-outs together in real time. Mainpot keeps the table balanced and tells everyone exactly who to pay.
                 </p>
                 <div className="ante-intro ante-intro-delay-3 mt-7 flex gap-3 sm:mt-9">
                   <Link href="/create" className={`${linkBaseClasses} flex-1 bg-gray-950 text-white shadow-lg shadow-gray-950/10 hover:bg-gray-800 sm:flex-none`}>
@@ -100,7 +101,8 @@ export default function HomePage() {
                 </div>
                 <div className="ante-intro ante-intro-delay-3 mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-gray-600 sm:mt-5">
                   <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />No download</span>
-                  <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />No account to play</span>
+                  <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />No player account</span>
+                  <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />Scan and join</span>
                   <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />{isSupabaseConfigured ? "Syncs across devices" : "Saved on this device"}</span>
                 </div>
                 <Link href="/poker-settlement-calculator" className="ante-intro ante-intro-delay-3 mt-2 inline-flex min-h-11 items-center rounded-lg text-sm font-semibold text-gray-700 underline decoration-gray-300 underline-offset-4 transition hover:text-gray-950 hover:decoration-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
@@ -144,6 +146,20 @@ export default function HomePage() {
 
           <LandingFaq />
         </div>
+
+        <section className="relative px-4 pb-16 sm:px-6 md:pb-24">
+          <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-5 rounded-2xl border border-gray-200 bg-white/80 px-6 py-6 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Open source</p>
+              <h2 className="mt-1 text-xl font-semibold tracking-tight text-gray-950">Use Mainpot your way.</h2>
+              <p className="mt-1 text-sm leading-6 text-gray-600">Play at mainpot.app, or run Mainpot on infrastructure you control.</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/self-host" className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">Explore self-hosting</Link>
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold text-gray-700 underline decoration-gray-300 underline-offset-4 transition hover:text-gray-950 hover:decoration-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">View source</a>
+            </div>
+          </div>
+        </section>
 
         <section className="relative z-30 px-4 pb-16 sm:px-6 md:pb-24">
           <div aria-hidden="true" className="ante-section-atmosphere ante-section-atmosphere-cta absolute inset-x-0 top-0" />

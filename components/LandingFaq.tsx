@@ -1,7 +1,7 @@
 const faqs = [
   {
     question: "Who can change the ledger?",
-    answer: "Players can request buy-ins and enter their own cash-out. The host approves purchases, corrects entries, and starts settlement.",
+    answer: "Players add their own buy-ins and cash-outs. The host can verify buy-ins, correct entries, and start settlement.",
   },
   {
     question: "Can the host fix a mistake?",
@@ -19,8 +19,8 @@ export default function LandingFaq() {
       <div className="relative z-10 mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Built-in guardrails</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">Clear roles. Visible changes.</h2>
-          <p className="mt-3 max-w-sm text-sm leading-6 text-gray-600">What happens when someone adds chips, fixes a mistake, or the totals are off.</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">No more wondering why the table is $20 short.</h2>
+          <p className="mt-3 max-w-sm text-sm leading-6 text-gray-600">Everyone uses the same live ledger, so mistakes surface before settlement.</p>
         </div>
         <div className="border-y border-gray-200">
           {faqs.map((faq, index) => (

@@ -91,7 +91,7 @@ export default function JoinGamePage() {
     <GameSetupShell
       eyebrow="Join the table"
       title="Enter the room code."
-      description="Use the six-character code from the host to join the table’s ledger."
+      description="Open the host’s QR or invite link, or enter the six-character code to join the table’s ledger."
     >
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-gray-950">Join a game</h2>

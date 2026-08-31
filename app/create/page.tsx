@@ -7,9 +7,11 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import GameSetupShell from "@/components/GameSetupShell";
 import { useToast } from "@/components/ui/Toast";
-import { createGame } from "@/lib/data";
-import { getCurrentUserId } from "@/lib/auth-client";
-import { getPlayerName, setActiveGame, setPlayerName } from "@/lib/session";
+import { createGame, getGame, recordGameEvent } from "@/lib/data";
+import { getGameTemplates, saveGameTemplate, type GameTemplate } from "@/lib/account-data";
+import type { AcquisitionSource } from "@/lib/types";
+import { getCurrentUser, getCurrentUserId } from "@/lib/auth-client";
+import { getPlayerName, getSessionId, setActiveGame, setPlayerName } from "@/lib/session";
 
 interface FormErrors {
   name?: string;
@@ -24,11 +26,29 @@ export default function CreateGamePage() {
   const [name, setName] = useState("");
   const [gameName, setGameName] = useState("");
   const [buyIn, setBuyIn] = useState("");
+  const [acquisitionSource, setAcquisitionSource] = useState<AcquisitionSource | "">("");
+  const [templates, setTemplates] = useState<GameTemplate[]>([]);
+  const [canSaveTemplate, setCanSaveTemplate] = useState(false);
+  const [saveTemplate, setSaveTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [preferredRoster, setPreferredRoster] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setName(getPlayerName() ?? "");
+    const previousGame = window.localStorage.getItem("ante_active_game");
+    if (previousGame && !window.sessionStorage.getItem(`returned:${previousGame}`)) {
+      window.sessionStorage.setItem(`returned:${previousGame}`, "1");
+      void getGame(previousGame).then(async (game) => {
+        if (!game || game.status !== "ended") return;
+        const userId = await getCurrentUserId();
+        const isHost = game.host_user_id
+          ? game.host_user_id === userId
+          : game.host_session_id === getSessionId();
+        if (isHost) await recordGameEvent(game.id, "host_returned_to_create");
+      }).catch(() => undefined);
+    }
     const params = new URLSearchParams(window.location.search);
     const suggestedName = params.get("name")?.trim().slice(0, 80);
     const suggestedBuyIn = Number(params.get("buyin"));
@@ -36,6 +56,12 @@ export default function CreateGamePage() {
     if (Number.isFinite(suggestedBuyIn) && suggestedBuyIn > 0) {
       setBuyIn(String(suggestedBuyIn));
     }
+    void getCurrentUser().then((currentUser) => {
+      if (currentUser && !currentUser.is_anonymous) {
+        setCanSaveTemplate(true);
+        return getGameTemplates(currentUser.id).then(setTemplates);
+      }
+    }).catch(() => undefined);
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -68,8 +94,22 @@ export default function CreateGamePage() {
         trimmedGameName,
         trimmedName,
         parsedBuyIn,
-        userId
+        userId,
+        acquisitionSource || null
       );
+      if (saveTemplate && canSaveTemplate && userId) {
+        try {
+          await saveGameTemplate({
+            userId,
+            name: templateName.trim() || trimmedGameName,
+            gameName: trimmedGameName,
+            buyInAmount: parsedBuyIn,
+            preferredRoster: preferredRoster.split(","),
+          });
+        } catch {
+          toast("Game created, but the recurring template could not be saved.", "error");
+        }
+      }
       setActiveGame(code);
       toast("Game created!", "success");
       router.push(`/game/${code}`);
@@ -98,6 +138,26 @@ export default function CreateGamePage() {
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-5">
+            {templates.length ? (
+              <label htmlFor="create-template" className="block text-sm font-medium text-gray-700">
+                Start from a recurring game <span className="font-normal text-gray-400">(optional)</span>
+                <select
+                  id="create-template"
+                  defaultValue=""
+                  onChange={(event) => {
+                    const template = templates.find((item) => item.id === event.target.value);
+                    if (!template) return;
+                    setGameName(template.game_name);
+                    setBuyIn(String(template.buy_in_amount));
+                    setPreferredRoster(template.preferred_roster.join(", "));
+                  }}
+                  className="mt-2 h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10"
+                >
+                  <option value="">Choose a template</option>
+                  {templates.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
+                </select>
+              </label>
+            ) : null}
             <Input
               id="create-name"
               label="Your name"
@@ -128,6 +188,30 @@ export default function CreateGamePage() {
               placeholder="20"
               error={errors.buyIn}
             />
+            <label htmlFor="create-source" className="block text-sm font-medium text-gray-700">
+              How did you hear about Mainpot? <span className="font-normal text-gray-400">(optional)</span>
+              <select id="create-source" value={acquisitionSource} onChange={(event) => setAcquisitionSource(event.target.value as AcquisitionSource | "")}
+                className="mt-2 h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10">
+                <option value="">Choose one</option>
+                <option value="personal_invite">Personal invite</option>
+                <option value="poker_group">Poker group</option>
+                <option value="search">Search</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            {canSaveTemplate ? <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
+              <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-800">
+                <input type="checkbox" checked={saveTemplate} onChange={(event) => setSaveTemplate(event.target.checked)} className="h-4 w-4 rounded border-gray-300" />
+                Save these details as a recurring game
+              </label>
+              {saveTemplate ? (
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <Input label="Template name" value={templateName} onChange={(event) => setTemplateName(event.target.value)} placeholder="Friday game" />
+                  <Input label="Preferred roster" value={preferredRoster} onChange={(event) => setPreferredRoster(event.target.value)} placeholder="Alex, Sam, Jordan" />
+                </div>
+              ) : null}
+              {saveTemplate ? <p className="mt-2 text-xs leading-5 text-gray-500">Roster names are a reminder for the host; players still join with the private game link.</p> : null}
+            </div> : null}
             <Button type="submit" fullWidth loading={loading}>
               Create game
             </Button>

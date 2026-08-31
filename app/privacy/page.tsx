@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SUPPORT_EMAIL } from "@/lib/product";
 import LegalPage, { LegalSection } from "@/components/LegalPage";
 import { GITHUB_URL } from "@/lib/product";
 
@@ -35,7 +36,7 @@ export default function PrivacyPage() {
 
       <LegalSection title="Retention, choices, and deletion">
         <p>Account game history is retained while needed to provide the service. Temporary request counters are retained briefly to prevent abuse, and unused anonymous authentication records are periodically removed. You can avoid optional profile fields and use guest mode where available.</p>
-        <p>For an access or deletion request, contact the maintainers privately through the repository&apos;s security contact rather than posting personal information in a public issue.</p>
+        <p>Permanent-account holders can export their data or request deletion from the Dashboard. For help, contact <a className="font-medium text-gray-900 underline" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> privately rather than posting personal information in a public issue.</p>
       </LegalSection>
 
       <LegalSection title="Security and age">
