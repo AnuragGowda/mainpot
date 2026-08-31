@@ -168,6 +168,10 @@ body {
   animation-play-state: paused !important;
 }
 
+.ante-walkthrough-panel {
+  animation: ante-rise 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .ante-cashout-typing {
   display: inline-block;
   width: 0;
