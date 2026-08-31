@@ -1278,6 +1278,7 @@ export async function createGame(
     : createGameSupabase(name, hostName, buyInAmount, userId, acquisitionSource));
   trackProductOpsEvent("game.created", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
   return result;
+}
 
 export async function recordGameEvent(
   gameId: string,
