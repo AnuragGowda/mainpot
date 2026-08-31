@@ -126,13 +126,62 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
   stack and supplies its generated connection values automatically. Use
   `npm run dev:app` when relying on `.env.local` instead.
 
-## 8. Optional: deploy to Vercel
+## 8. Production launch checklist
+
+Before pointing a public domain at Mainpot, complete the following in a
+separate production Supabase project. Do not reuse local or staging keys.
+
+1. Apply the schema and every migration in filename order. In the Supabase SQL
+   editor, verify that `games read with room access` is present on `games` and
+   that `game_access` has RLS enabled. These are the policies that prevent a
+   signed-in user from reading arbitrary room codes.
+2. Enable daily database backups and point-in-time recovery in Supabase for the
+   production project. Confirm the backup retention and a restoration owner
+   before inviting beta users.
+3. Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+   `NEXT_PUBLIC_SITE_URL`, and `NEXT_PUBLIC_SUPPORT_EMAIL` to the production
+   environment only. Keep staging in a separate deployment and Supabase
+   project with its own keys.
+4. Configure an uptime monitor to request `https://<production-domain>/api/health`
+   every few minutes and alert on a non-200 response. Connect your host's error
+   tracking integration (for example, its built-in runtime error alerts) and
+   route alerts to the launch owner.
+5. Set the Supabase Auth Site URL and redirect URLs to the production domain,
+   then test both password and magic-link authentication there.
+6. Run the manual smoke test below from at least two browsers/devices before
+   announcing the beta. Record the deployment, migration version, and result
+   in the release notes.
+
+### Production smoke test
+
+1. Create a game as the host and open its invite on a second device/browser.
+2. Join as a second player; verify both devices see the same roster.
+3. Record a buy-in and a rebuy, then verify the bank totals and activity feed
+   agree on both devices.
+4. Cash out every player, enter settlement, finalize the game, and confirm the
+   result survives a page refresh and appears in account history.
+5. Use the support link and check that it opens the configured private inbox.
+
+### Account-data requests
+
+Permanent-account holders can download a JSON export and submit an in-product
+deletion request from **Dashboard → Your data**. Before launch, give the launch
+owner a private Supabase-dashboard view of `account_deletion_requests` and a
+support mailbox to reply from. At least weekly, process pending requests by
+verifying the requester's email and deleting the matching user through the
+Supabase Auth Users dashboard (or the Admin API). This removes the profile and
+account-owned template data automatically. Mark the request `completed`, record
+the completion time, and reply to the requester. Do not use a public issue for
+this workflow.
+
+## 9. Optional: deploy to Vercel
 
 1. Push the repo to GitHub and import it into [Vercel](https://vercel.com).
 2. In the project's **Settings → Environment Variables**, add:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `NEXT_PUBLIC_SITE_URL=https://mainpot.app`
+   - `NEXT_PUBLIC_SUPPORT_EMAIL=support@your-domain.example`
    - `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true` only after Google is configured
 3. Add `mainpot.app` in **Settings → Domains**, then use the DNS records Vercel
    provides. Keep the registrar nameservers unchanged unless you deliberately
@@ -140,7 +189,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 4. Deploy and verify `/manifest.webmanifest`, `/sw.js`, Google sign-in, email
    confirmation, and a game invite on the production domain.
 
-## 9. PWA behavior
+## 10. PWA behavior
 
 The production build registers a dependency-free service worker over HTTPS.
 It provides install metadata and icons, caches versioned static assets, and
@@ -152,7 +201,7 @@ back online. A new worker takes control without forcing a mid-game page reload;
 the newest app is used on the next navigation. Service-worker registration is
 disabled in development to avoid stale local bundles.
 
-## 10. Agent-runner deployment
+## 11. Agent-runner deployment
 
 The checked-in `deploy/ante.service` runs the production build on
 `127.0.0.1:3100` as a persistent user service. After a new build:
