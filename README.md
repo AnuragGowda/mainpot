@@ -17,15 +17,52 @@ An open-source, realtime ledger for home poker games. Track buy-ins and rebuys, 
 
 Next.js, React, TypeScript, Tailwind CSS, Supabase, and Lucide.
 
-## Local development
+## Local self-hosting with Docker
+
+Mainpot can run entirely on your machine. The local Supabase stack provides
+PostgreSQL, authentication, the REST API, Realtime, and a development email
+inbox; no Supabase account or external authentication provider is required.
+
+Prerequisites:
+
+- Node.js 22+
+- OrbStack on macOS, or another Docker-compatible runtime on other platforms
+
+Clone the repository, then run:
 
 ```bash
 npm install
-cp .env.example .env.local
 npm run dev
 ```
 
-The app falls back to private, single-browser storage when Supabase environment variables are absent. See `SETUP.md` for the hosted Supabase, OAuth, PWA, and Vercel setup.
+On the first run, the pinned Supabase CLI downloads its Docker images, creates
+the local database, and applies every migration. Later starts reuse the same
+containers and persisted data. The launcher prints all local URLs, including:
+
+- Mainpot: [http://localhost:3000](http://localhost:3000)
+- Supabase Studio: [http://127.0.0.1:54323](http://127.0.0.1:54323)
+- Local email inbox: [http://127.0.0.1:54324](http://127.0.0.1:54324)
+
+Password accounts work immediately. Magic-link messages are captured by the
+local email inbox instead of being sent externally. Google and other OAuth
+providers are disabled. Mainpot also enables anonymous Supabase users because
+account-free game participants need an identity for database authorization.
+
+Useful database commands:
+
+```bash
+npm run db:status  # Show local service URLs and status
+npm run db:stop    # Stop containers without deleting data
+npm run db:start   # Start the Supabase containers only
+npm run db:reset   # Delete local data and replay all migrations
+```
+
+To run only the Next.js app in private, single-browser `localStorage` mode,
+without starting Docker, use `npm run dev:app` with no Supabase variables.
+
+See `SETUP.md` when connecting Mainpot to a hosted Supabase project or deploying
+the application outside this local development stack. The Supabase CLI stack is
+intended for local development, not as a hardened internet-facing deployment.
 
 ## Verification
 

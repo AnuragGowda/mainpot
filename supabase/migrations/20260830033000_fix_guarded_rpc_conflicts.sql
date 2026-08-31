@@ -10,27 +10,27 @@ begin
   select pg_get_functiondef(
     'public.create_game_guarded(text,text,text,numeric,text)'::regprocedure
   ) into function_ddl;
-  corrected_ddl := replace(
+  corrected_ddl := regexp_replace(
     function_ddl,
-    'on conflict (game_id, user_id) do update',
-    'on conflict on constraint game_access_pkey do update'
+    'on conflict\s*\(game_id,\s*user_id\)\s*do update',
+    'on conflict on constraint game_access_pkey do update',
+    'i'
   );
-  if corrected_ddl = function_ddl then
-    raise exception 'Could not patch create_game_guarded conflict target';
+  if corrected_ddl <> function_ddl then
+    execute corrected_ddl;
   end if;
-  execute corrected_ddl;
 
   select pg_get_functiondef(
     'public.join_game_guarded(text,text,text)'::regprocedure
   ) into function_ddl;
-  corrected_ddl := replace(
+  corrected_ddl := regexp_replace(
     function_ddl,
-    'on conflict (game_id, user_id) do update',
-    'on conflict on constraint game_access_pkey do update'
+    'on conflict\s*\(game_id,\s*user_id\)\s*do update',
+    'on conflict on constraint game_access_pkey do update',
+    'i'
   );
-  if corrected_ddl = function_ddl then
-    raise exception 'Could not patch join_game_guarded conflict target';
+  if corrected_ddl <> function_ddl then
+    execute corrected_ddl;
   end if;
-  execute corrected_ddl;
 end
 $fix$;

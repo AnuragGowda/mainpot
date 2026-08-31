@@ -6,7 +6,12 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
+    "dev:app": "next dev",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset --local",
+    "db:status": "supabase status",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -32,6 +37,7 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.3",
     "postcss": "^8.5.26",
+    "supabase": "2.116.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11"

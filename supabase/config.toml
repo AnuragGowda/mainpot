@@ -1,0 +1,72 @@
+# Local, Docker-backed Supabase configuration for Mainpot development.
+# Run it through the pinned CLI with `npm run dev` or `npm run db:start`.
+project_id = "mainpot"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.migrations]
+enabled = true
+schema_paths = []
+
+[db.seed]
+enabled = false
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://127.0.0.1"
+
+# Local auth emails are captured here instead of being delivered externally.
+[local_smtp]
+enabled = true
+port = 54324
+
+# Mainpot does not currently use Supabase Storage or Edge Functions.
+[storage]
+enabled = false
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+  "http://localhost:3000/auth/callback",
+  "http://127.0.0.1:3000/auth/callback",
+]
+enable_signup = true
+# Guest game participants still need a trusted identity for row-level security.
+enable_anonymous_sign_ins = true
+minimum_password_length = 6
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+# Keep password signup frictionless locally. Magic-link messages still appear
+# in the local email inbox at http://127.0.0.1:54324.
+enable_confirmations = false
+secure_password_change = false
+max_frequency = "1s"
+otp_length = 6
+otp_expiry = 3600
+
+[auth.sms]
+enable_signup = false
+enable_confirmations = false
+
+[edge_runtime]
+enabled = false
+
+[analytics]
+enabled = false

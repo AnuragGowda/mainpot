@@ -1,6 +1,15 @@
-# Mainpot — Setup
+# Mainpot — Hosted setup
 
-Follow these steps to run Mainpot locally and connect it to Supabase.
+The default contributor workflow is fully local and Docker-backed:
+
+```sh
+npm install
+npm run dev
+```
+
+See `README.md` for the local service URLs, authentication behavior, and database
+commands. Follow this guide only when connecting Mainpot to a hosted Supabase
+project or deploying the application outside the local development stack.
 
 ## 1. Prerequisites
 
@@ -101,7 +110,7 @@ in single-device localStorage mode.
 
 ```sh
 npm install
-npm run dev
+npm run dev:app
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -113,6 +122,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
   `localStorage`. There is no cross-device realtime sync.
 - **With** the env vars set, the app uses **Supabase realtime**: games,
   buy-ins, and cash-outs sync live across devices.
+- The default `npm run dev` command starts the local Docker-backed Supabase
+  stack and supplies its generated connection values automatically. Use
+  `npm run dev:app` when relying on `.env.local` instead.
 
 ## 8. Optional: deploy to Vercel
 
