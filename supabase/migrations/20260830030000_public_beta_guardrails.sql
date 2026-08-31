@@ -250,7 +250,7 @@ begin
 
   insert into public.game_access(game_id, user_id)
   values (created_game.id, auth.uid())
-  on conflict (game_id, user_id) do update set granted_at = now();
+  on conflict on constraint game_access_pkey do update set granted_at = now();
 
   return query select created_game.code::text, created_game.id, created_player.id;
 end;
@@ -335,7 +335,7 @@ begin
 
   insert into public.game_access(game_id, user_id)
   values (found_game.id, auth.uid())
-  on conflict (game_id, user_id) do update set granted_at = now();
+  on conflict on constraint game_access_pkey do update set granted_at = now();
 
   select * into found_player
   from public.players
