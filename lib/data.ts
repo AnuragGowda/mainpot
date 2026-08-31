@@ -893,7 +893,14 @@ function subscribeToGameSupabase(
         void refreshSnapshot(gameId, callback);
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      // A mutation can land after the initial snapshot loads but before this
+      // channel is fully subscribed. Refreshing at that boundary closes the
+      // gap so hosts do not remain on a stale roster until the next event.
+      if (status === "SUBSCRIBED") {
+        void refreshSnapshot(gameId, callback);
+      }
+    });
 
   return () => {
     void client.removeChannel(channel);
