@@ -35,7 +35,7 @@ export function generateRoomCode(): string {
  * 1. Trim + uppercase.
  * 2. Strip any query string / hash fragment.
  * 3. Split on "/" and "\" — when segments exist, the LAST segment is the
- *    candidate (so "https://ante.app/game/ABC123" yields "ABC123"); otherwise
+ *    candidate (so "https://mainpot.app/game/ABC123" yields "ABC123"); otherwise
  *    the whole (query-stripped) string is the candidate.
  * 4. Remove every character that cannot appear in a generated code.
  * 5. Extract the first run of exactly 6 allowed characters.

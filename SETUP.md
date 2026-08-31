@@ -21,9 +21,12 @@ Follow these steps to run Mainpot locally and connect it to Supabase.
 
 1. Open your project's **SQL Editor** (Dashboard → SQL Editor).
 2. Open [`supabase/schema.sql`](supabase/schema.sql), copy the entire file,
-   and paste it into the SQL Editor.
-3. Click **Run**. This creates the `games`, `players`, `buy_ins`, and
-   `cash_outs` tables, enables realtime, and installs row-level security.
+   paste it into the SQL Editor, and click **Run**.
+3. Run the additive files in [`supabase/migrations`](supabase/migrations) in
+   filename order, starting with `20260830010000_product_roadmap.sql`. This
+   adds invitations, settlement tracking, public-beta guardrails, retention,
+   and the final row-level security policies. The `initial` migration mirrors
+   `schema.sql` and does not need to be run twice.
 
 ## 4. Configure environment variables
 
@@ -43,15 +46,19 @@ Follow these steps to run Mainpot locally and connect it to Supabase.
    Replace the placeholders with the **Project URL** and **anon key** from
    step 2.
 
-## 5. Enable authentication (optional)
+## 5. Configure authentication (optional)
 
 Email/password and magic-link auth are configured in the Supabase dashboard.
 Google OAuth also needs a public feature flag after its credentials are ready.
 
 1. Open **Dashboard → Authentication → Providers**.
-2. **Email**: make sure the **Email** provider is enabled. This covers
+2. Open **Dashboard → Authentication → URL Configuration** and set:
+   - **Site URL**: `https://mainpot.app`
+   - **Redirect URLs**: `https://mainpot.app/auth/callback` and
+     `http://localhost:3000/auth/callback`
+3. **Email**: make sure the **Email** provider is enabled. This covers
    email/password sign-ups and (optionally) password resets.
-3. **Google OAuth**:
+4. **Google OAuth**:
    - Create OAuth credentials in the [Google Cloud
      Console](https://console.cloud.google.com) (Credentials → Create
      credentials → OAuth client ID, application type **Web application**).
@@ -64,15 +71,27 @@ Google OAuth also needs a public feature flag after its credentials are ready.
    - Set `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true` in `.env.local`. Mainpot keeps
      the Google button hidden until this flag is present, avoiding a dead
      sign-in path while the provider is unconfigured.
-4. **Magic link**: enable the **Email OTP** provider. New users receive a
+5. **Magic link**: enable the **Email OTP** provider. New users receive a
    one-time code / magic link they can use to sign in without a password.
-5. Re-run [`supabase/schema.sql`](supabase/schema.sql) in the SQL Editor so
-   the updated script creates `profiles`, `friendships`, and
-   `game_participants`, adds `players.user_id`, and installs the
-   `handle_new_user` and `handle_game_ended` triggers.
-6. Optional: set `NEXT_PUBLIC_SITE_URL=http://localhost:3000` in `.env.local`
-   as the base URL for auth redirects. When unset the app falls back to the
-   request origin at runtime.
+6. If you are upgrading an existing installation, apply any new files in
+   [`supabase/migrations`](supabase/migrations) that have not yet been run.
+7. Set `NEXT_PUBLIC_SITE_URL=https://mainpot.app` in Vercel. Use
+   `http://localhost:3000` in `.env.local` while developing locally.
+
+### Apple sign-in
+
+Do not expose an Apple button until the provider is fully configured and
+tested. Apple sign-in requires an active Apple Developer membership, an App ID
+with Sign in with Apple enabled, a website Services ID, and a signing key. The
+Services ID return URL must be:
+
+```text
+https://<project-ref>.supabase.co/auth/v1/callback
+```
+
+After those credentials exist, enable the Apple provider in Supabase, test the
+complete callback flow on `https://mainpot.app`, and only then add the button.
+There is intentionally no inactive Apple button in the current UI.
 
 When the Supabase env vars are missing entirely, the auth UI shows the
 **"Connect Supabase to enable accounts"** fallback and the app keeps working
@@ -98,11 +117,30 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## 8. Optional: deploy to Vercel
 
 1. Push the repo to GitHub and import it into [Vercel](https://vercel.com).
-2. In the project's **Settings → Environment Variables**, add the same
-   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` values.
-3. Deploy — the production build behaves like the local Supabase setup.
+2. In the project's **Settings → Environment Variables**, add:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SITE_URL=https://mainpot.app`
+   - `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED=true` only after Google is configured
+3. Add `mainpot.app` in **Settings → Domains**, then use the DNS records Vercel
+   provides. Keep the registrar nameservers unchanged unless you deliberately
+   want Vercel to manage all DNS.
+4. Deploy and verify `/manifest.webmanifest`, `/sw.js`, Google sign-in, email
+   confirmation, and a game invite on the production domain.
 
-## 9. Agent-runner deployment
+## 9. PWA behavior
+
+The production build registers a dependency-free service worker over HTTPS.
+It provides install metadata and icons, caches versioned static assets, and
+shows a small branded shell when a navigation happens offline. Live game
+actions still require a network connection so the shared ledger cannot drift.
+
+The service worker checks for an update hourly and whenever the browser comes
+back online. A new worker takes control without forcing a mid-game page reload;
+the newest app is used on the next navigation. Service-worker registration is
+disabled in development to avoid stale local bundles.
+
+## 10. Agent-runner deployment
 
 The checked-in `deploy/ante.service` runs the production build on
 `127.0.0.1:3100` as a persistent user service. After a new build:

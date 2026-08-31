@@ -11,6 +11,18 @@ interface FriendshipWithOtherProfiles extends Friendship {
   addressee_profile: Profile;
 }
 
+const publicProfileSelection =
+  "id, username, display_name, avatar_url, bio, plan, created_at, updated_at";
+
+function toPublicProfile(row: Omit<Profile, "venmo_handle" | "zelle_handle" | "supporter_until">): Profile {
+  return {
+    ...row,
+    venmo_handle: null,
+    zelle_handle: null,
+    supporter_until: null,
+  };
+}
+
 function toFriendship(row: Friendship): Friendship {
   return {
     id: row.id,
@@ -37,13 +49,13 @@ export async function searchUsers(query: string): Promise<Profile[]> {
   }
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select(publicProfileSelection)
     .or(`username.ilike.%${trimmed}%,display_name.ilike.%${trimmed}%`)
     .limit(10);
   if (error) {
     throw new Error(`Failed to search users: ${error.message}`);
   }
-  return (data ?? []) as Profile[];
+  return ((data ?? []) as Array<Omit<Profile, "venmo_handle" | "zelle_handle" | "supporter_until">>).map(toPublicProfile);
 }
 
 /**
@@ -144,7 +156,7 @@ export async function getIncomingRequests(
   }
   const { data, error } = await supabase
     .from("friendships")
-    .select("*, profiles!friendships_requester_id_fkey(*)")
+    .select(`*, profiles!friendships_requester_id_fkey(${publicProfileSelection})`)
     .eq("addressee_id", userId)
     .eq("status", "pending");
   if (error) {
@@ -152,7 +164,7 @@ export async function getIncomingRequests(
   }
   return ((data ?? []) as FriendshipWithProfile[]).map((row) => ({
     friendship: toFriendship(row),
-    profile: row.profiles,
+    profile: toPublicProfile(row.profiles),
   }));
 }
 
@@ -169,7 +181,7 @@ export async function getOutgoingRequests(
   }
   const { data, error } = await supabase
     .from("friendships")
-    .select("*, profiles!friendships_addressee_id_fkey(*)")
+    .select(`*, profiles!friendships_addressee_id_fkey(${publicProfileSelection})`)
     .eq("requester_id", userId)
     .eq("status", "pending");
   if (error) {
@@ -177,7 +189,7 @@ export async function getOutgoingRequests(
   }
   return ((data ?? []) as FriendshipWithProfile[]).map((row) => ({
     friendship: toFriendship(row),
-    profile: row.profiles,
+    profile: toPublicProfile(row.profiles),
   }));
 }
 
@@ -195,7 +207,7 @@ export async function getFriends(
   const { data, error } = await supabase
     .from("friendships")
     .select(
-      "*, requester_profile:profiles!friendships_requester_id_fkey(*), addressee_profile:profiles!friendships_addressee_id_fkey(*)"
+      `*, requester_profile:profiles!friendships_requester_id_fkey(${publicProfileSelection}), addressee_profile:profiles!friendships_addressee_id_fkey(${publicProfileSelection})`
     )
     .eq("status", "accepted")
     .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
@@ -206,7 +218,7 @@ export async function getFriends(
     const otherProfile =
       row.requester_id === userId ? row.addressee_profile : row.requester_profile;
     return {
-      profile: otherProfile,
+      profile: toPublicProfile(otherProfile),
       friendship: toFriendship(row),
     };
   });
@@ -248,13 +260,15 @@ export async function getProfileByUsername(
   }
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select(publicProfileSelection)
     .ilike("username", username.trim())
     .maybeSingle();
   if (error) {
     throw new Error(`Failed to load profile: ${error.message}`);
   }
-  return (data ?? null) as Profile | null;
+  return data
+    ? toPublicProfile(data as Omit<Profile, "venmo_handle" | "zelle_handle" | "supporter_until">)
+    : null;
 }
 
 /** Fetches a profile by id, or null. */
@@ -263,10 +277,12 @@ export async function getProfileById(userId: string): Promise<Profile | null> {
   if (!supabase) {
     return null;
   }
+  const currentUserId = await getCurrentUserId();
+  if (currentUserId !== userId) {
+    return null;
+  }
   const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
+    .rpc("get_my_profile")
     .maybeSingle();
   if (error) {
     throw new Error(`Failed to load profile: ${error.message}`);
@@ -308,16 +324,14 @@ export async function updateProfile(
     return getProfileById(userId);
   }
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("profiles")
     .update(updates)
-    .eq("id", userId)
-    .select()
-    .maybeSingle();
+    .eq("id", userId);
   if (error) {
     throw new Error(`Failed to update profile: ${error.message}`);
   }
-  return (data ?? null) as Profile | null;
+  return getProfileById(userId);
 }
 
 /**

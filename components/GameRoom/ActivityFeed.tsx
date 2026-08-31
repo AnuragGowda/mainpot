@@ -70,7 +70,7 @@ function eventText(event: GameEvent, actorName: string | null): string {
     case "buy_in_added":
       return `${playerName} ${event.metadata.buy_in_type === "rebuy" ? "rebought" : "bought in"} for ${amount}${event.metadata.fronted_by_name ? `, fronted by ${event.metadata.fronted_by_name}` : ""}`;
     case "buy_in_updated":
-      return `${actor} corrected ${possession} buy-in from ${formatCurrency(Number(event.metadata.previous_amount ?? 0))} to ${amount}`;
+      return `${actor} edited ${possession} buy-in from ${formatCurrency(Number(event.metadata.previous_amount ?? 0))} to ${amount}`;
     case "buy_in_removed":
       return `${actor} removed ${possession} ${amount} buy-in`;
     case "buy_in_verified":
@@ -213,7 +213,7 @@ export default function ActivityFeed({
                   <div className="ml-11 mt-3 rounded-lg bg-gray-50 p-3">
                     {editing && buyIn ? (
                       <div className="flex items-end gap-2">
-                        <Input aria-label="Correct buy-in amount" type="number" min={0.01} step={0.01} inputMode="decimal" prefix="$" value={editValue} onChange={(event) => setEditValue(event.target.value)} />
+                        <Input aria-label="Edit buy-in amount" type="number" min={0.01} step={0.01} inputMode="decimal" prefix="$" value={editValue} onChange={(event) => setEditValue(event.target.value)} />
                         <Button size="sm" onClick={() => saveEdit(buyIn.id)}>Save</Button>
                         <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
                       </div>
@@ -222,7 +222,7 @@ export default function ActivityFeed({
                         {canManageBuyIn && buyIn ? (
                           <>
                             {!buyIn.verified ? <Button size="sm" variant="ghost" onClick={() => onVerify(buyIn.id)}>Verify</Button> : null}
-                            <Button size="sm" variant="ghost" onClick={() => startEdit(event.id, buyIn.amount)}>Correct</Button>
+                            <Button size="sm" variant="ghost" onClick={() => startEdit(event.id, buyIn.amount)}>Edit</Button>
                             <ConfirmButton size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" onConfirm={() => onRemoveBuyIn(buyIn.id)}>Remove buy-in</ConfirmButton>
                           </>
                         ) : null}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Copy, DoorOpen, HandCoins, ListPlus, QrCode } from "lucide-react";
 import ResumeBanner from "@/components/ResumeBanner";
 import SiteFooter from "@/components/SiteFooter";
 import SiteNav from "@/components/SiteNav";
@@ -8,9 +9,9 @@ const linkBaseClasses =
   "inline-flex h-12 items-center justify-center rounded-lg px-6 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2";
 
 const steps = [
-  { number: "01", title: "Open the table", description: "Name the game, set the buy-in, and share one room code." },
-  { number: "02", title: "Run the ledger", description: "Log every buy-in and rebuy while the cards are in the air." },
-  { number: "03", title: "Settle cleanly", description: "Reconcile the bank and generate the fewest possible payments." },
+  { number: "01", icon: DoorOpen, title: "Open the table", description: "Name the game, set the buy-in, and share one room code." },
+  { number: "02", icon: ListPlus, title: "Run the ledger", description: "Log every buy-in and rebuy while the cards are in the air." },
+  { number: "03", icon: HandCoins, title: "Settle cleanly", description: "Reconcile the bank and generate the fewest possible payments." },
 ];
 
 export default function HomePage() {
@@ -58,7 +59,7 @@ export default function HomePage() {
                   </Link>
                 </div>
                 <p className="ante-intro ante-intro-delay-3 mt-4 text-xs text-gray-500">
-                  No account required · {isSupabaseConfigured ? "Live sync across every device" : "Works in private local mode"}
+                  No account required · {isSupabaseConfigured ? "Live sync across every device" : "Works in private local mode"} · Free during beta
                 </p>
                 <div className="ante-intro ante-intro-delay-3 mt-5 min-h-5">
                   <ResumeBanner />
@@ -75,16 +76,16 @@ export default function HomePage() {
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-gray-200"><span className="ante-live-dot h-1.5 w-1.5 rounded-full bg-emerald-400" />Live</span>
                   </div>
                   <div className="mt-8 grid grid-cols-3 gap-3">
-                    <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-400">Bank</p><p className="mt-1 text-lg font-semibold">$380</p></div>
+                    <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-400">Bank</p><p className="mt-1 text-lg font-semibold">$360</p></div>
                     <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-400">Buy-in</p><p className="mt-1 text-lg font-semibold">$40</p></div>
-                    <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-400">Players</p><p className="mt-1 text-lg font-semibold">6</p></div>
+                    <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-400">Players</p><p className="mt-1 text-lg font-semibold">4</p></div>
                   </div>
                   <div className="mt-5 overflow-hidden rounded-xl bg-white text-gray-900">
                     {[
                       ["AP", "Alex", "$80", "Verified"],
                       ["MK", "Morgan", "$120", "Verified"],
                       ["SR", "Sam", "$80", "Verified"],
-                      ["JT", "Jordan", "$100", "Pending"],
+                      ["JT", "Jordan", "$80", "Pending"],
                     ].map(([initials, name, amount, status], index) => (
                       <div key={name} className={`flex items-center gap-3 px-4 py-3 ${index ? "border-t border-gray-100" : ""}`}>
                         <span className="grid h-8 w-8 place-items-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">{initials}</span>
@@ -96,7 +97,14 @@ export default function HomePage() {
                   </div>
                   <div className="mt-5 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
                     <div><p className="text-xs text-gray-400">Room code</p><p className="mt-0.5 font-mono text-lg font-semibold tracking-[0.2em]">RIVER7</p></div>
-                    <span className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-gray-950">Copy code</span>
+                    <div className="flex items-center gap-2" aria-label="Share room code">
+                      <span aria-label="Copy room code" className="grid h-9 w-9 place-items-center rounded-lg bg-white text-gray-950 shadow-sm" role="img">
+                        <Copy aria-hidden="true" className="h-4 w-4" />
+                      </span>
+                      <span aria-label="Show room QR code" className="grid h-9 w-9 place-items-center rounded-lg border border-white/15 bg-white/10 text-white" role="img">
+                        <QrCode aria-hidden="true" className="h-4 w-4" />
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -111,13 +119,22 @@ export default function HomePage() {
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">From first chip to final payment.</h2>
             </div>
             <div className="grid divide-y divide-gray-200 md:grid-cols-3 md:divide-x md:divide-y-0">
-              {steps.map((step) => (
-                <div key={step.number} className="ante-step p-6 transition-colors sm:p-8">
-                  <span className="font-mono text-sm font-semibold text-gray-950">{step.number}</span>
+              {steps.map((step) => {
+                const StepIcon = step.icon;
+
+                return (
+                <div key={step.number} className="ante-step group relative p-6 transition-colors sm:p-8">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-semibold text-gray-500">{step.number}</span>
+                    <span className="grid h-9 w-9 place-items-center rounded-lg border border-gray-200 bg-gray-50 text-gray-700 transition group-hover:-translate-y-0.5 group-hover:border-gray-300 group-hover:bg-white group-hover:text-gray-950">
+                      <StepIcon aria-hidden="true" className="h-4 w-4" strokeWidth={1.8} />
+                    </span>
+                  </div>
                   <h3 className="mt-3 text-lg font-semibold text-gray-950">{step.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-gray-600">{step.description}</p>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>

@@ -24,7 +24,8 @@ export default function PrivacyPage() {
       </LegalSection>
 
       <LegalSection title="Guest and local use">
-        <p>Guest sessions use an anonymous identifier so participants can share a live game without creating an account. In local mode, game information can remain in that browser&apos;s storage instead of being synchronized to the hosted database.</p>
+        <p>Guest sessions use an anonymous identifier so participants can share a live game without creating an account. Hosted guest games are temporary: they expire within 48 hours after settlement and no later than seven days after creation. They are not attached to an account dashboard or permanent history.</p>
+        <p>In self-hosted local mode, game information can remain in that browser&apos;s storage instead of being synchronized to a hosted database.</p>
       </LegalSection>
 
       <LegalSection title="Service providers and sharing">
@@ -33,7 +34,8 @@ export default function PrivacyPage() {
       </LegalSection>
 
       <LegalSection title="Retention, choices, and deletion">
-        <p>Information is retained while needed to operate the service and preserve game history. You can avoid optional profile fields and use guest mode where available. For an access or deletion request, contact the maintainers privately through the repository&apos;s security contact rather than posting personal information in a public issue.</p>
+        <p>Account game history is retained while needed to provide the service. Temporary request counters are retained briefly to prevent abuse, and unused anonymous authentication records are periodically removed. You can avoid optional profile fields and use guest mode where available.</p>
+        <p>For an access or deletion request, contact the maintainers privately through the repository&apos;s security contact rather than posting personal information in a public issue.</p>
       </LegalSection>
 
       <LegalSection title="Security and age">

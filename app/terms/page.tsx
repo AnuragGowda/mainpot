@@ -30,6 +30,7 @@ export default function TermsPage() {
 
       <LegalSection title="Accounts and acceptable use">
         <p>You may use guest mode or create an account where available. Do not interfere with the service, access another person&apos;s account or game without permission, upload unlawful content, or use Mainpot to facilitate illegal activity.</p>
+        <p>During the public beta, features are free subject to fair-use limits that protect the shared service. We may limit excessive room creation, automated requests, player counts, or ledger activity.</p>
       </LegalSection>
 
       <LegalSection title="Open-source software">

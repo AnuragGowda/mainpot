@@ -22,7 +22,7 @@ describe("generateRoomCode", () => {
 
 describe("normalizeRoomCode", () => {
   it("extracts the last path segment from a full URL", () => {
-    expect(normalizeRoomCode("https://ante.app/game/ABC234")).toBe("ABC234");
+    expect(normalizeRoomCode("https://mainpot.app/game/ABC234")).toBe("ABC234");
   });
 
   it("uppercases lowercase input", () => {
@@ -34,7 +34,7 @@ describe("normalizeRoomCode", () => {
   });
 
   it("ignores query strings", () => {
-    expect(normalizeRoomCode("https://ante.app/game/ABC234?x=1")).toBe(
+    expect(normalizeRoomCode("https://mainpot.app/game/ABC234?x=1")).toBe(
       "ABC234"
     );
   });

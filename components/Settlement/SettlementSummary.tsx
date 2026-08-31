@@ -56,19 +56,39 @@ export default function SettlementSummary({
   }
 
   async function handleShare() {
+    const gameUrl = typeof window !== "undefined"
+      ? `${window.location.origin}/game/${game.code}`
+      : "";
+    const shareText = gameUrl ? `${summaryText}\n\nView this game: ${gameUrl}` : summaryText;
+
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ title: "Mainpot settlement", text: summaryText });
+        await navigator.share({
+          title: `${game.name} settlement · Mainpot`,
+          text: summaryText,
+          ...(gameUrl ? { url: gameUrl } : {}),
+        });
       } catch (err) {
         // User cancelled the share sheet — nothing to do.
         if (err instanceof DOMException && err.name === "AbortError") {
           return;
         }
-        await copyFallback();
+        try {
+          await copyText(shareText);
+          toast("Settlement and game link copied", "success");
+        } catch {
+          toast("Couldn't share the settlement.", "error");
+        }
       }
       return;
     }
-    await copyFallback();
+
+    try {
+      await copyText(shareText);
+      toast("Settlement and game link copied", "success");
+    } catch {
+      toast("Couldn't share the settlement.", "error");
+    }
   }
 
   return (

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
 import Providers from "@/components/Providers";
@@ -12,7 +12,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ??
-      "https://agent-runner.tail3ff4e2.ts.net:8443"
+      "https://mainpot.app"
   ),
   title: {
     default: "Mainpot — The poker night ledger",
@@ -21,6 +21,17 @@ export const metadata: Metadata = {
   description:
     "Track poker buy-ins and rebuys, reconcile the bank, and settle every home game with fewer payments.",
   applicationName: "Mainpot",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -49,6 +60,11 @@ export const metadata: Metadata = {
     images: ["/opengraph-image"],
   },
   alternates: { canonical: "/" },
+};
+
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#f7f8f6",
 };
 
 export default function RootLayout({

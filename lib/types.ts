@@ -9,6 +9,8 @@ export interface Game {
   host_name: string;
   buy_in_amount: number;
   status: GameStatus;
+  host_is_anonymous: boolean;
+  expires_at: string | null;
   created_at: string;
   ended_at: string | null;
 }
@@ -97,6 +99,8 @@ export interface Profile {
   venmo_handle: string | null;
   zelle_handle: string | null;
   bio: string | null;
+  plan: "free" | "supporter";
+  supporter_until: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -237,6 +237,8 @@ async function createGameLocal(
     host_name: hostName,
     buy_in_amount: round2(buyInAmount),
     status: "active",
+    host_is_anonymous: userId == null,
+    expires_at: userId == null ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null,
     created_at: now,
     ended_at: null,
   };
@@ -734,184 +736,63 @@ async function createGameSupabase(
   name: string,
   hostName: string,
   buyInAmount: number,
-  userId?: string | null
+  _userId?: string | null
 ): Promise<{ code: string; gameId: string }> {
-  const { client, userId: guestUserId } = await ensureSupabaseReady();
+  const { client } = await ensureSupabaseReady();
   const sessionId = getSessionId();
 
-  let code = "";
   for (let attempt = 0; attempt < 10; attempt++) {
-    const candidate = generateRoomCode();
-    const { data: existing, error: lookupError } = await client
-      .from("games")
-      .select("id")
-      .eq("code", candidate)
-      .maybeSingle();
-    if (lookupError) {
-      throw lookupError;
+    const code = generateRoomCode();
+    const { data, error } = await client
+      .rpc("create_game_guarded", {
+        input_code: code,
+        input_game_name: name,
+        input_host_name: hostName,
+        input_buy_in: buyInAmount,
+        input_session_id: sessionId,
+      })
+      .single();
+
+    if (!error && data) {
+      const row = data as { code: string; game_id: string };
+      return { code: row.code, gameId: row.game_id };
     }
-    if (!existing) {
-      code = candidate;
-      break;
+    if (error?.code === "23505") {
+      continue;
     }
+    throw error ?? new Error("Could not create the game.");
   }
-  if (!code) {
-    throw new Error("Could not generate a unique room code. Please try again.");
-  }
-
-  const { data: game, error: gameError } = await client
-    .from("games")
-    .insert({
-      code,
-      name,
-      host_user_id: guestUserId,
-      host_session_id: sessionId,
-      host_name: hostName,
-      buy_in_amount: buyInAmount,
-      status: "active",
-    })
-    .select()
-    .single();
-  if (gameError) {
-    throw gameError;
-  }
-
-  const gameId = (game as Game).id;
-
-  const { data: player, error: playerError } = await client
-    .from("players")
-    .insert({
-      game_id: gameId,
-      session_id: sessionId,
-      name: hostName,
-      is_host: true,
-      user_id: userId ?? guestUserId,
-    })
-    .select()
-    .single();
-  if (playerError) {
-    throw playerError;
-  }
-
-  const { error: buyInError } = await client.from("buy_ins").insert({
-    game_id: gameId,
-    player_id: (player as Player).id,
-    amount: buyInAmount,
-    type: "buy_in",
-    verified: true,
-  });
-  if (buyInError) {
-    throw buyInError;
-  }
-
-  const createdPlayer = player as Player;
-  await addSupabaseEvent(client, {
-    gameId,
-    eventType: "game_created",
-    actorPlayerId: createdPlayer.id,
-    subjectPlayerId: createdPlayer.id,
-    metadata: { player_name: hostName },
-  });
-  await addSupabaseEvent(client, {
-    gameId,
-    eventType: "player_joined",
-    actorPlayerId: createdPlayer.id,
-    subjectPlayerId: createdPlayer.id,
-    metadata: { player_name: hostName },
-  });
-  const { data: firstBuyIn } = await client
-    .from("buy_ins")
-    .select("id")
-    .eq("game_id", gameId)
-    .eq("player_id", createdPlayer.id)
-    .single();
-  await addSupabaseEvent(client, {
-    gameId,
-    eventType: "buy_in_added",
-    actorPlayerId: createdPlayer.id,
-    subjectPlayerId: createdPlayer.id,
-    amount: buyInAmount,
-    metadata: {
-      player_name: hostName,
-      buy_in_id: (firstBuyIn as { id?: string } | null)?.id,
-      buy_in_type: "buy_in",
-    },
-  });
-
-  return { code, gameId };
+  throw new Error("Could not generate a unique room code. Please try again.");
 }
 
 async function joinGameSupabase(
   code: string,
   playerName: string,
-  userId?: string | null
+  _userId?: string | null
 ): Promise<{ gameId: string; playerId: string }> {
-  const { client, userId: guestUserId } = await ensureSupabaseReady();
+  const { client } = await ensureSupabaseReady();
   const sessionId = getSessionId();
   const normalized = normalizeRoomCode(code);
 
-  const { data: game, error: gameError } = await client
-    .from("games")
-    .select("*")
-    .ilike("code", normalized)
-    .maybeSingle();
-  if (gameError) {
-    throw gameError;
-  }
-  if (!game) {
-    throw new Error("Game not found.");
-  }
-  if ((game as Game).status === "ended") {
-    throw new Error("This game has already ended.");
-  }
-
-  const gameId = (game as Game).id;
-
-  const { data: existing, error: existingError } = await client
-    .from("players")
-    .select("*")
-    .eq("game_id", gameId)
-    .eq("session_id", sessionId)
-    .maybeSingle();
-  if (existingError) {
-    throw existingError;
-  }
-  if (existing) {
-    return { gameId, playerId: (existing as Player).id };
-  }
-
-  const { data: player, error: playerError } = await client
-    .from("players")
-    .insert({
-      game_id: gameId,
-      session_id: sessionId,
-      name: playerName,
-      user_id: userId ?? guestUserId,
+  const { data, error } = await client
+    .rpc("join_game_guarded", {
+      input_code: normalized,
+      input_player_name: playerName,
+      input_session_id: sessionId,
     })
-    .select()
     .single();
-  if (playerError) {
-    throw playerError;
+  if (error) {
+    throw error;
   }
-
-  await addSupabaseEvent(client, {
-    gameId,
-    eventType: "player_joined",
-    actorPlayerId: (player as Player).id,
-    subjectPlayerId: (player as Player).id,
-    metadata: { player_name: playerName },
-  });
-
-  return { gameId, playerId: (player as Player).id };
+  const row = data as { game_id: string; player_id: string };
+  return { gameId: row.game_id, playerId: row.player_id };
 }
 
 async function getGameSupabase(code: string): Promise<Game | null> {
   const { client } = await ensureSupabaseReady();
   const normalized = normalizeRoomCode(code);
   const { data, error } = await client
-    .from("games")
-    .select("*")
-    .ilike("code", normalized)
+    .rpc("get_game_by_code", { input_code: normalized })
     .maybeSingle();
   if (error) {
     throw error;

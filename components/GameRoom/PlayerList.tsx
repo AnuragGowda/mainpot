@@ -35,9 +35,9 @@ export default function PlayerList({ players, snapshot, currentPlayerId }: Playe
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <p className="truncate text-sm font-medium text-gray-900">{player.name}</p>
-                    {player.is_host ? <Badge variant="gray">Host</Badge> : null}
-                    {player.id === currentPlayerId ? <Badge variant="green">You</Badge> : null}
-                    {player.left_at ? <Badge variant="amber">Left</Badge> : null}
+                    {player.is_host ? <Badge variant="gray" className="px-1.5 py-0.5 text-[10px] leading-none">Host</Badge> : null}
+                    {player.id === currentPlayerId ? <Badge variant="green" className="px-1.5 py-0.5 text-[10px] leading-none">You</Badge> : null}
+                    {player.left_at ? <Badge variant="amber" className="px-1.5 py-0.5 text-[10px] leading-none">Left</Badge> : null}
                   </div>
                   <p className="mt-0.5 text-xs text-gray-500">{buyIns.length} {buyIns.length === 1 ? "entry" : "entries"}</p>
                 </div>

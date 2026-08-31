@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f8f6" />
+    <title>Offline · Mainpot</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        background: #f7f8f6;
+        color: #111318;
+        font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      main { width: min(100% - 2rem, 28rem); text-align: center; }
+      .mark {
+        width: 3rem;
+        height: 3rem;
+        margin: 0 auto 1.25rem;
+        display: grid;
+        place-items: center;
+        border-radius: .85rem;
+        background: #111318;
+        color: #fff;
+        font-size: 1.35rem;
+      }
+      h1 { margin: 0; font-size: 1.75rem; letter-spacing: -.04em; }
+      p { margin: .75rem auto 0; max-width: 23rem; color: #5f6368; line-height: 1.6; }
+      a {
+        display: inline-flex;
+        margin-top: 1.5rem;
+        min-height: 2.75rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: .65rem;
+        background: #111318;
+        padding: 0 1rem;
+        color: #fff;
+        font-size: .875rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">♠</div>
+      <h1>You’re offline</h1>
+      <p>Mainpot needs a connection to sync the table. Reconnect, then try again.</p>
+      <a href="/">Try again</a>
+    </main>
+  </body>
+</html>

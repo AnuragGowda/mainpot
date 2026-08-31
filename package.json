@@ -1,6 +1,9 @@
 {
   "name": "mainpot",
   "version": "0.1.0",
+  "description": "An open-source, realtime ledger for home poker games.",
+  "homepage": "https://mainpot.app",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",

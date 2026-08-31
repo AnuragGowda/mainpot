@@ -11,6 +11,7 @@ An open-source, realtime ledger for home poker games. Track buy-ins and rebuys, 
 - Optional Venmo and Zelle shortcuts for completing settlements
 - Friends, direct table invitations, game history, and player statistics
 - Host handoff, audit log, and one-click rematches
+- Installable PWA with a branded offline shell
 
 ## Stack
 
@@ -24,7 +25,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-The app falls back to private, single-browser storage when Supabase environment variables are absent. See `SETUP.md` for the hosted Supabase setup and migrations.
+The app falls back to private, single-browser storage when Supabase environment variables are absent. See `SETUP.md` for the hosted Supabase, OAuth, PWA, and Vercel setup.
 
 ## Verification
 

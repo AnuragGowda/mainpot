@@ -31,15 +31,16 @@ body {
 }
 
 .ante-dot-grid {
-  background-image: radial-gradient(rgba(17, 24, 39, 0.26) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(17, 24, 39, 0.24) 1px, transparent 1px);
   background-position: 0 0;
   background-size: 21px 21px;
-  mask-image: radial-gradient(ellipse 88% 78% at 50% 35%, black 10%, rgba(0, 0, 0, 0.72) 58%, transparent 100%);
-  opacity: 0.68;
+  mask-image: radial-gradient(ellipse 78% 88% at 50% -6%, rgba(0, 0, 0, 0.08) 0%, black 28%, rgba(0, 0, 0, 0.82) 61%, transparent 92%);
+  opacity: 0.72;
 }
 
 .ante-hero {
   background:
+    linear-gradient(to bottom, transparent 54%, rgba(247, 248, 246, 0.12) 72%, #f7f8f6 100%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(244, 243, 255, 0.88) 42%, rgba(235, 245, 255, 0.9) 74%, rgba(247, 248, 246, 0.96));
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
 }
@@ -49,6 +50,7 @@ body {
     linear-gradient(118deg, rgba(255, 255, 255, 0.62), transparent 38%),
     linear-gradient(152deg, transparent 42%, rgba(151, 172, 255, 0.28) 72%, rgba(203, 188, 255, 0.2));
   animation: ante-mesh 14s ease-in-out infinite alternate;
+  mask-image: linear-gradient(to bottom, black 0%, black 58%, rgba(0, 0, 0, 0.62) 76%, transparent 100%);
   transform: scale(1.04);
 }
 
@@ -115,6 +117,24 @@ body {
 
 .ante-step:hover {
   background: #f7f8fa;
+}
+
+.ante-step::after {
+  position: absolute;
+  right: 2rem;
+  bottom: 0;
+  left: 2rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(17, 24, 39, 0.14), transparent);
+  content: "";
+  opacity: 0;
+  transform: scaleX(0.65);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.ante-step:hover::after {
+  opacity: 1;
+  transform: scaleX(1);
 }
 
 .ante-cta {

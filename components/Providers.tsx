@@ -1,8 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
+import PwaRegistration from "@/components/PwaRegistration";
 import { ToastProvider } from "@/components/ui/Toast";
 
 export default function Providers({ children }: { children: ReactNode }) {
-  return <ToastProvider>{children}</ToastProvider>;
+  return (
+    <ToastProvider>
+      <PwaRegistration />
+      {children}
+    </ToastProvider>
+  );
 }
