@@ -32,9 +32,12 @@ function run(command, args, options = {}) {
   return result.stdout ?? "";
 }
 
-function verifyOrbStackContext() {
+function verifyDockerContext() {
   const activeContext = run("docker", ["context", "show"], { capture: true }).trim();
-  if (activeContext !== "orbstack") {
+  // macOS development is standardized on OrbStack. GitHub's Linux runners
+  // correctly use Docker's default context and must remain eligible for this
+  // disposable Supabase test stack.
+  if (process.platform === "darwin" && activeContext !== "orbstack") {
     throw new Error(`Realtime tests require the OrbStack Docker context; active context is ${activeContext || "unknown"}.`);
   }
 }
@@ -99,7 +102,7 @@ process.once("SIGTERM", () => exitAfterSignal("SIGTERM"));
 try {
   acquireStackLock();
   lockHeld = true;
-  verifyOrbStackContext();
+  verifyDockerContext();
   workdir = createTestWorkdir();
   console.log("Starting disposable Supabase test stack…");
   run(supabaseCommand, ["--workdir", workdir, "start"], { capture: true });
