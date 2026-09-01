@@ -24,17 +24,16 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByRole("heading", { name: "Friday test game" })).toBeVisible();
     await expect(page.getByText("Saved on this device · live sync is off")).toBeVisible();
 
-    await expect(page.getByText("Total pot", { exact: true }).locator("..").getByText("$20.00", { exact: true })).toBeVisible();
-    await page.getByRole("button", { name: "Buy in · $20.00" }).click();
-    await expect(page.getByText("Buy-in added")).toBeVisible();
-    await expect(page.getByText("Total pot", { exact: true }).locator("..").getByText("$40.00", { exact: true })).toBeVisible();
+    await expect(page.getByText("Verified pot", { exact: true }).locator("..").getByText("$20.00", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Add a rebuy" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Buy in ·/ })).toHaveCount(0);
 
     await page.getByRole("button", { name: "End game" }).click();
-    await page.getByRole("button", { name: "Confirm?" }).click();
+    await page.getByRole("button", { name: "End game and start cash-outs?" }).click();
     await expect(page.getByRole("heading", { name: "Cash-outs" })).toBeVisible();
 
     const cashOut = page.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
-    await cashOut.fill("40");
+    await cashOut.fill("20");
     await cashOut.blur();
     await expect(page.getByText("Bank reconciled", { exact: true })).toBeVisible();
 
