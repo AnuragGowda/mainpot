@@ -8,6 +8,11 @@ export interface Transfer {
   toPlayerId: string | null;
 }
 
+export interface PlayerTransfers {
+  outgoing: Transfer[];
+  incoming: Transfer[];
+}
+
 export interface PlayerNet {
   playerId: string;
   name: string;
@@ -20,6 +25,27 @@ export interface DiscrepancyAllocation {
   method: DiscrepancyAllocationMethod;
   /** Player ids sharing the adjustment. Empty means every eligible player. */
   playerIds: string[];
+}
+
+/** Returns only the payments that involve one player, with actions first. */
+export function getPlayerTransfers(
+  transfers: Transfer[],
+  playerId: string
+): PlayerTransfers {
+  return {
+    outgoing: transfers.filter((transfer) => transfer.fromPlayerId === playerId),
+    incoming: transfers.filter((transfer) => transfer.toPlayerId === playerId),
+  };
+}
+
+export function isPlayerInTransfer(
+  transfer: Transfer,
+  playerId: string | null
+): boolean {
+  return Boolean(
+    playerId
+      && (transfer.fromPlayerId === playerId || transfer.toPlayerId === playerId)
+  );
 }
 
 /**

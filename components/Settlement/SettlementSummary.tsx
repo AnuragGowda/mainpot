@@ -3,21 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  ArrowUpRight,
   CheckCircle2,
   Copy,
   RefreshCw,
   Share2,
-  Sparkles,
-  Trophy,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
-import { formatCurrency, formatSignedNet } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { defaultRecapPrivacy, deriveRecapData } from "@/lib/recap";
-import { getRecapPersona } from "@/lib/recap-personality";
 import { clearActiveGame } from "@/lib/session";
 import { trackProductOpsEvent } from "@/lib/product-ops";
 import { buildSummaryText } from "@/lib/summary";
@@ -36,12 +32,12 @@ export interface SettlementSummaryProps {
   totalBoughtIn: number;
   isHost: boolean;
   finalized?: boolean;
-  playerCount?: number;
+  presentation?: "card" | "record";
   discrepancyAllocation?: DiscrepancyAllocation | null;
   discrepancyAmount?: number;
 }
 
-/** Finished-game hero plus the quieter, auditable settlement record. */
+/** Finished-game recap card and the quieter, auditable settlement record. */
 export default function SettlementSummary({
   snapshot,
   game,
@@ -52,7 +48,7 @@ export default function SettlementSummary({
   totalBoughtIn,
   isHost,
   finalized = false,
-  playerCount,
+  presentation = "card",
   discrepancyAllocation,
   discrepancyAmount,
 }: SettlementSummaryProps) {
@@ -70,10 +66,7 @@ export default function SettlementSummary({
     discrepancyAmount,
   });
   const recapData = deriveRecapData(snapshot, nets, transfers);
-  const recapPlayerCount = playerCount ?? recapData.playerCount;
-  const playerLabel = `${recapPlayerCount} ${recapPlayerCount === 1 ? "player" : "players"}`;
   const topFinisher = recapData.players[0] ?? null;
-  const previewPersona = getRecapPersona(recapData, topFinisher?.id, 0, false);
 
   async function copyFallback() {
     try {
@@ -124,75 +117,32 @@ export default function SettlementSummary({
     }
   }
 
+  if (finalized && presentation === "card") {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setShowGameRecap(true)}
+          aria-label="Open shareable game card"
+          className="mx-auto block w-full max-w-[320px] rounded-[18px] text-left transition duration-200 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
+        >
+          <RecapStoryCard
+            data={recapData}
+            privacy={defaultRecapPrivacy}
+            mode="summary"
+            featuredPlayerId={topFinisher?.id}
+            decorative
+          />
+        </button>
+        {showGameRecap ? <GameRecapDialog snapshot={snapshot} nets={nets} transfers={transfers} onClose={() => setShowGameRecap(false)} /> : null}
+      </>
+    );
+  }
+
   return (
-    <Card padding={finalized ? "none" : "md"} className={finalized ? "overflow-hidden" : undefined}>
+    <Card padding="md">
       {finalized ? (
-        <>
-          <section
-            aria-labelledby="share-night-heading"
-            className="relative isolate overflow-hidden bg-[#111512] px-5 py-7 text-white sm:px-8 sm:py-8"
-          >
-            <div aria-hidden className="absolute -right-20 -top-24 -z-10 h-72 w-72 rounded-full bg-[#dceabf]/15 blur-3xl" />
-            <div aria-hidden className="absolute -bottom-28 -left-20 -z-10 h-64 w-64 rounded-full bg-blue-300/10 blur-3xl" />
-            <div className="grid grid-cols-[minmax(0,1fr)_104px] items-center gap-4 sm:grid-cols-[minmax(0,1fr)_176px] sm:gap-7">
-              <div>
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.13em] text-[#dceabf] sm:gap-2 sm:px-3 sm:text-[11px] sm:tracking-[0.16em]">
-                  <Sparkles aria-hidden size={13} /> Game night captured
-                </div>
-                <h2
-                  id="share-night-heading"
-                  className="mt-3 max-w-lg text-2xl font-semibold tracking-[-0.04em] text-white sm:mt-4 sm:text-4xl"
-                >
-                  Your game card is ready.
-                </h2>
-                <p className="mt-2 max-w-xl text-xs leading-5 text-gray-300 sm:mt-3 sm:text-sm sm:leading-6">
-                  <span className="sm:hidden">Deal a nickname and share the night. Private by default.</span>
-                  <span className="hidden sm:inline">Pick a player, deal a poker nickname, and post the night. Your card starts private—names, losses, and dollar amounts stay hidden.</span>
-                </p>
-
-                <div className="mt-3 flex flex-wrap gap-1.5 text-[11px] font-semibold text-gray-200 sm:mt-4 sm:gap-2 sm:text-xs">
-                  {topFinisher ? (
-                    <span className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/10 px-3 py-2 sm:inline-flex">
-                      <Trophy aria-hidden size={14} className="text-[#dceabf]" />
-                      {topFinisher.displayName} {formatSignedNet(topFinisher.net)}
-                    </span>
-                  ) : null}
-                  <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1.5 sm:px-3 sm:py-2">{playerLabel}</span>
-                  <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1.5 sm:px-3 sm:py-2">{formatCurrency(totalBoughtIn)} in play</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowGameRecap(true)}
-                aria-label="Open shareable game card"
-                className="group relative mx-auto w-[104px] rotate-[2deg] rounded-[14px] text-left transition duration-200 hover:-translate-y-1 hover:rotate-0 focus-visible:rotate-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#dceabf] focus-visible:ring-offset-4 focus-visible:ring-offset-[#111512] sm:w-[154px] sm:rounded-[18px]"
-              >
-                <RecapStoryCard
-                  data={recapData}
-                  privacy={defaultRecapPrivacy}
-                  mode="summary"
-                  featuredPlayerId={topFinisher?.id}
-                  persona={previewPersona}
-                  decorative
-                />
-                <span className="absolute -bottom-2 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-[#dceabf] px-2 py-1.5 text-[8px] font-black uppercase tracking-wider text-[#111512] shadow-lg transition group-hover:-translate-y-0.5 sm:-bottom-3 sm:px-3 sm:py-2 sm:text-[10px]">
-                  Customize <ArrowUpRight aria-hidden size={10} className="sm:h-3 sm:w-3" />
-                </span>
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowGameRecap(true)}
-              className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#dceabf] px-5 text-sm font-bold text-[#111512] shadow-lg shadow-black/20 transition hover:bg-[#e8f2d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#111512] sm:mt-8 sm:w-auto"
-            >
-              Open & share game card
-              <ArrowUpRight aria-hidden size={17} />
-            </button>
-          </section>
-
-          <div className="p-5 sm:p-7">
+          <div>
             <div className="flex items-start gap-3">
               <CheckCircle2 aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
               <div>
@@ -230,7 +180,6 @@ export default function SettlementSummary({
               <RefreshCw aria-hidden size={16} /> Play again
             </Link>
           </div>
-        </>
       ) : (
         <>
           <h2 className="text-lg font-semibold tracking-tight text-gray-900">Settlement summary</h2>

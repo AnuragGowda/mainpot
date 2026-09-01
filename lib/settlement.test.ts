@@ -4,6 +4,8 @@ import {
   applyDiscrepancyAllocation,
   calculateBankSettlement,
   calculateMinTransfers,
+  getPlayerTransfers,
+  isPlayerInTransfer,
 } from "./settlement";
 import type { PlayerNet } from "./settlement";
 import type { BuyIn } from "./types";
@@ -57,6 +59,32 @@ describe("calculateBankSettlement", () => {
       { from: "Bank", to: "B", amount: 30, fromPlayerId: "A", toPlayerId: "B" },
       { from: "C", to: "Bank", amount: 15, fromPlayerId: "C", toPlayerId: "A" },
     ]);
+  });
+});
+
+describe("player settlement views", () => {
+  const transfers = [
+    { from: "A", to: "B", amount: 30, fromPlayerId: "A", toPlayerId: "B" },
+    { from: "C", to: "B", amount: 20, fromPlayerId: "C", toPlayerId: "B" },
+    { from: "D", to: "E", amount: 10, fromPlayerId: "D", toPlayerId: "E" },
+  ];
+
+  it("prioritizes only a player's outgoing and incoming payments", () => {
+    expect(getPlayerTransfers(transfers, "A")).toEqual({
+      outgoing: [transfers[0]],
+      incoming: [],
+    });
+    expect(getPlayerTransfers(transfers, "B")).toEqual({
+      outgoing: [],
+      incoming: [transfers[0], transfers[1]],
+    });
+  });
+
+  it("recognizes only payers and recipients as parties to a payment", () => {
+    expect(isPlayerInTransfer(transfers[0], "A")).toBe(true);
+    expect(isPlayerInTransfer(transfers[0], "B")).toBe(true);
+    expect(isPlayerInTransfer(transfers[0], "C")).toBe(false);
+    expect(isPlayerInTransfer(transfers[0], null)).toBe(false);
   });
 });
 

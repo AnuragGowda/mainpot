@@ -1,7 +1,7 @@
 "use client";
 
 import { Circle, CircleCheck, Copy, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
@@ -16,12 +16,15 @@ import type { PlayerPaymentHandles } from "@/lib/payment-links";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import { getSettlementPaymentStatuses, setSettlementPaymentStatus, settlementPaymentKey } from "@/lib/payments";
 import type { SettlementMode } from "@/lib/payments";
+import { isPlayerInTransfer } from "@/lib/settlement";
 import type { Transfer } from "@/lib/settlement";
 
 export interface TransferListProps {
   transfers: Transfer[];
   gameId: string;
   mode: SettlementMode;
+  currentPlayerId?: string | null;
+  isHost?: boolean;
   onStatusChange?: (mode: SettlementMode, settledKeys: Set<string>) => void;
 }
 
@@ -30,8 +33,16 @@ function PartyName({ name }: { name: string }) {
   return <span className="font-medium text-gray-900">{name}</span>;
 }
 
-export default function TransferList({ transfers, gameId, mode, onStatusChange }: TransferListProps) {
+export default function TransferList({
+  transfers,
+  gameId,
+  mode,
+  currentPlayerId = null,
+  isHost = false,
+  onStatusChange,
+}: TransferListProps) {
   const { toast } = useToast();
+  const channelId = useId().replaceAll(":", "");
   const [settledKeys, setSettledKeys] = useState<Set<string>>(new Set());
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [paymentHandles, setPaymentHandles] = useState<Map<string, PlayerPaymentHandles>>(new Map());
@@ -52,18 +63,19 @@ export default function TransferList({ transfers, gameId, mode, onStatusChange }
     refresh();
     const supabase = getBrowserSupabase();
     const channel = supabase
-      ?.channel(`settlement-payments-${gameId}`)
+      ?.channel(`settlement-payments-${gameId}-${mode}-${channelId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "settlement_payments", filter: `game_id=eq.${gameId}` }, refresh)
       .subscribe();
     return () => {
       cancelled = true;
       if (channel && supabase) void supabase.removeChannel(channel);
     };
-  }, [gameId, mode, onStatusChange]);
+  }, [channelId, gameId, mode, onStatusChange]);
 
   useEffect(() => {
     let cancelled = false;
     const recipientIds = transfers
+      .filter((transfer) => isHost || transfer.fromPlayerId === currentPlayerId)
       .map((transfer) => transfer.toPlayerId)
       .filter((id): id is string => Boolean(id));
     void getPlayerPaymentHandles(recipientIds)
@@ -74,7 +86,7 @@ export default function TransferList({ transfers, gameId, mode, onStatusChange }
     return () => {
       cancelled = true;
     };
-  }, [transfers]);
+  }, [currentPlayerId, isHost, transfers]);
 
   if (!transfers.length) return <p className="text-sm text-gray-500">No transfers needed — everyone is square.</p>;
 
@@ -84,11 +96,13 @@ export default function TransferList({ transfers, gameId, mode, onStatusChange }
         {transfers.map((transfer) => {
           const key = settlementPaymentKey(mode, transfer);
           const settled = settledKeys.has(key);
+          const canManage = isHost || isPlayerInTransfer(transfer, currentPlayerId);
+          const canUsePaymentShortcut = isHost || transfer.fromPlayerId === currentPlayerId;
           const handles = transfer.toPlayerId ? paymentHandles.get(transfer.toPlayerId) : undefined;
-          const venmoUrl = handles?.venmo
+          const venmoUrl = canUsePaymentShortcut && handles?.venmo
             ? buildVenmoPaymentUrl(handles.venmo, transfer.amount)
             : null;
-          const zelleText = handles?.zelle
+          const zelleText = canUsePaymentShortcut && handles?.zelle
             ? buildZellePaymentText(handles.zelle, transfer.amount)
             : null;
           return (
@@ -126,30 +140,37 @@ export default function TransferList({ transfers, gameId, mode, onStatusChange }
                     Zelle <Copy aria-hidden size={14} />
                   </a>
                 ) : null}
-                <button
-                  type="button"
-                  disabled={busyKey === key}
-                  aria-pressed={settled}
-                  onClick={async () => {
-                    setBusyKey(key);
-                    try {
-                      await setSettlementPaymentStatus(gameId, mode, transfer, !settled);
-                      const next = new Set(settledKeys);
-                      if (settled) next.delete(key); else next.add(key);
-                      setSettledKeys(next);
-                      onStatusChange?.(mode, next);
-                      toast(settled ? "Payment reopened" : "Payment marked paid", "success");
-                    } catch (error) {
-                      toast(error instanceof Error ? error.message : "Could not update payment.", "error");
-                    } finally {
-                      setBusyKey(null);
-                    }
-                  }}
-                  className={`inline-flex h-11 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:opacity-50 sm:h-9 ${settled ? "text-emerald-800 hover:bg-emerald-100" : "text-gray-500 hover:bg-gray-100 hover:text-gray-950"}`}
-                >
-                  {settled ? <CircleCheck aria-hidden size={17} /> : <Circle aria-hidden size={17} />}
-                  {settled ? "Paid" : "Mark paid"}
-                </button>
+                {canManage ? (
+                  <button
+                    type="button"
+                    disabled={busyKey === key}
+                    aria-pressed={settled}
+                    onClick={async () => {
+                      setBusyKey(key);
+                      try {
+                        await setSettlementPaymentStatus(gameId, mode, transfer, !settled);
+                        const next = new Set(settledKeys);
+                        if (settled) next.delete(key); else next.add(key);
+                        setSettledKeys(next);
+                        onStatusChange?.(mode, next);
+                        toast(settled ? "Payment reopened" : "Payment marked paid", "success");
+                      } catch (error) {
+                        toast(error instanceof Error ? error.message : "Could not update payment.", "error");
+                      } finally {
+                        setBusyKey(null);
+                      }
+                    }}
+                    className={`inline-flex h-11 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:opacity-50 sm:h-9 ${settled ? "text-emerald-800 hover:bg-emerald-100" : "text-gray-500 hover:bg-gray-100 hover:text-gray-950"}`}
+                  >
+                    {settled ? <CircleCheck aria-hidden size={17} /> : <Circle aria-hidden size={17} />}
+                    {settled ? "Paid" : "Mark paid"}
+                  </button>
+                ) : (
+                  <span className={`inline-flex h-9 items-center gap-1.5 px-2.5 text-xs font-semibold ${settled ? "text-emerald-800" : "text-gray-400"}`}>
+                    {settled ? <CircleCheck aria-hidden size={17} /> : <Circle aria-hidden size={17} />}
+                    {settled ? "Paid" : "Open"}
+                  </span>
+                )}
               </div>
             </li>
           );
