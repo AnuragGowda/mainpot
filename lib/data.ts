@@ -389,9 +389,16 @@ async function addBuyInLocal(
   playerId: string,
   amount: number,
   type: BuyInType,
-  frontedByPlayerId?: string | null
+  frontedByPlayerId: string | null,
+  operationKey: string
 ): Promise<BuyIn> {
   const store = loadStore();
+  const existing = store.buyIns.find(
+    (buyIn) => buyIn.operation_key === operationKey
+  );
+  if (existing) {
+    return existing;
+  }
   const buyIn: BuyIn = {
     id: randomUUID(),
     game_id: gameId,
@@ -401,6 +408,7 @@ async function addBuyInLocal(
     fronted_by_player_id: frontedByPlayerId ?? null,
     verified: false,
     created_at: new Date().toISOString(),
+    operation_key: operationKey,
   };
   store.buyIns.push(buyIn);
   const player = store.players.find((item) => item.id === playerId);
@@ -912,25 +920,30 @@ async function addBuyInSupabase(
   playerId: string,
   amount: number,
   type: BuyInType,
-  frontedByPlayerId?: string | null
+  frontedByPlayerId: string | null,
+  operationKey: string
 ): Promise<BuyIn> {
   const { client } = await ensureSupabaseReady();
-  const { data, error } = await client
-    .from("buy_ins")
-    .insert({
-      game_id: gameId,
-      player_id: playerId,
-      amount,
-      type,
-      fronted_by_player_id: frontedByPlayerId ?? null,
-      verified: false,
-    })
-    .select()
-    .single();
+  const { data, error } = await client.rpc("create_buy_in_idempotent", {
+    input_game_id: gameId,
+    input_player_id: playerId,
+    input_amount: amount,
+    input_type: type,
+    input_fronted_by_player_id: frontedByPlayerId,
+    input_operation_key: operationKey,
+  });
   if (error) {
     throw error;
   }
-  const buyIn = toBuyIn(data as BuyIn);
+  const result = data?.[0] as (BuyIn & { created: boolean }) | undefined;
+  if (!result) {
+    throw new Error("Could not create or find the buy-in.");
+  }
+  const { created, ...row } = result;
+  const buyIn = toBuyIn(row);
+  if (!created) {
+    return buyIn;
+  }
   const { data: player } = await client
     .from("players")
     .select("name")
@@ -1363,11 +1376,12 @@ export async function addBuyIn(
   playerId: string,
   amount: number,
   type: BuyInType,
-  frontedByPlayerId?: string | null
+  frontedByPlayerId: string | null,
+  operationKey: string
 ): Promise<BuyIn> {
   return usingLocalStorage()
-    ? addBuyInLocal(gameId, playerId, amount, type, frontedByPlayerId)
-    : addBuyInSupabase(gameId, playerId, amount, type, frontedByPlayerId);
+    ? addBuyInLocal(gameId, playerId, amount, type, frontedByPlayerId, operationKey)
+    : addBuyInSupabase(gameId, playerId, amount, type, frontedByPlayerId, operationKey);
 }
 
 export async function removeBuyIn(buyInId: string): Promise<void> {

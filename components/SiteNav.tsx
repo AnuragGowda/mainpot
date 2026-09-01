@@ -67,7 +67,7 @@ export default function SiteNav() {
   const hasAccount = Boolean(user && !user.is_anonymous);
   const publicAction = pathname === "/create"
     ? { href: "/join", desktop: "Join a game", mobile: "Join" }
-    : { href: "/create", desktop: "Start a game", mobile: "Start" };
+    : { href: "/create", desktop: "Start a game", mobile: "Start game" };
 
   return (
     <header className="sticky top-0 z-30 border-b border-gray-200/80 bg-white/85 backdrop-blur-xl">

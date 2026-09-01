@@ -17,7 +17,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:e2e:realtime": "node scripts/test-realtime.mjs"
+    "test:e2e:realtime": "node scripts/test-realtime.mjs",
+    "test:db:assurance": "node scripts/test-database-assurance.mjs"
   },
   "engines": {
     "node": ">=22.0.0"

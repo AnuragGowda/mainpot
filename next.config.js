@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Keep the disposable browser-test build separate from the developer's
+  // normal `.next` output, which may be used by a concurrent dev server.
+  distDir: process.env.NEXT_E2E_DIST_DIR ?? ".next",
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: ["lucide-react"],

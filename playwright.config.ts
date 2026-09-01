@@ -1,12 +1,16 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const port = 3100;
+const isRealtimeSuite = process.env.PLAYWRIGHT_REALTIME === "1";
+const port = Number(process.env.PLAYWRIGHT_PORT ?? "3100");
+if (!Number.isInteger(port) || port < 1 || port > 65535) {
+  throw new Error(`PLAYWRIGHT_PORT must be a valid TCP port, received: ${process.env.PLAYWRIGHT_PORT}`);
+}
 const localBaseURL = `http://127.0.0.1:${port}`;
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? localBaseURL;
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: process.env.PLAYWRIGHT_REALTIME === "1"
+  testMatch: isRealtimeSuite
     ? "**/realtime.spec.ts"
     : "**/smoke.spec.ts",
   fullyParallel: true,
@@ -27,6 +31,8 @@ export default defineConfig({
     command: `npm run build && npm run start -- --hostname 127.0.0.1 --port ${port}`,
     url: localBaseURL,
     timeout: 120_000,
-    reuseExistingServer: !process.env.CI,
+    // Realtime tests must start their own app server. Reusing a developer's
+    // server could send the test browser to the normal local database.
+    reuseExistingServer: !isRealtimeSuite && !process.env.CI,
   },
 });

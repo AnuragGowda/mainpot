@@ -50,6 +50,8 @@ export interface BuyIn {
   fronted_by_player_id: string | null;
   verified: boolean;
   created_at: string;
+  /** Client-generated key used to make retried ledger entries idempotent. */
+  operation_key?: string | null;
 }
 
 export interface CashOut {

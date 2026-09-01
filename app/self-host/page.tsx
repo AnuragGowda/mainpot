@@ -294,14 +294,14 @@ export default function SelfHostPage() {
           </div>
         </section>
 
-        <section className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1fr_1fr] lg:gap-16">
-          <div>
+        <section className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Local quick start</p>
             <h2 className={`mt-3 ${sectionHeading}`}>Clone, install, run.</h2>
             <p className="mt-5 text-base leading-8 text-gray-600">
               The default development command starts both the application and its local Supabase services. The first run downloads the required container images and applies the database migrations.
             </p>
-            <pre className="mt-7 overflow-x-auto rounded-2xl bg-gray-950 p-5 text-sm leading-7 text-gray-200 shadow-lg shadow-gray-950/10"><code>{`git clone ${GITHUB_URL}.git
+            <pre className="mt-7 max-w-full overflow-x-auto rounded-2xl bg-gray-950 p-5 text-sm leading-7 text-gray-200 shadow-lg shadow-gray-950/10"><code>{`git clone ${GITHUB_URL}.git
 cd mainpot
 npm install
 npm run dev`}</code></pre>
@@ -310,7 +310,7 @@ npm run dev`}</code></pre>
             </p>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Production reality</p>
             <h2 className={`mt-3 ${sectionHeading}`}>Control comes with operational work.</h2>
             <div className="mt-7 space-y-3">
@@ -321,15 +321,15 @@ npm run dev`}</code></pre>
                 "Back up the database, monitor the health endpoint, and plan how updates will be applied.",
                 "Keep service-role credentials out of the browser and separate production from development.",
               ].map((item) => (
-                <div key={item} className="flex gap-3 rounded-xl border border-gray-200 bg-white p-4">
+                <div key={item} className="flex min-w-0 gap-3 rounded-xl border border-gray-200 bg-white p-4">
                   <Check aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                  <p className="text-sm leading-6 text-gray-700">{item}</p>
+                  <p className="min-w-0 text-sm leading-6 text-gray-700">{item}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-4 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <div className="mt-4 flex min-w-0 gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
               <AlertTriangle aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
-              <p className="text-sm leading-6 text-amber-950">
+              <p className="min-w-0 text-sm leading-6 text-amber-950">
                 Do not expose the bundled local Supabase development stack directly to the public internet.
               </p>
             </div>
@@ -356,7 +356,7 @@ npm run dev`}</code></pre>
 
         <section className="px-4 pb-16 sm:px-6 sm:pb-24">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 overflow-hidden rounded-3xl bg-gray-950 px-6 py-10 text-white sm:px-10 sm:py-12 lg:flex-row lg:items-end lg:justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">Ready to inspect the stack?</p>
               <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">The source and full deployment guide are public.</h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-400">

@@ -11,6 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import SettlementWalkthrough from "@/components/SettlementWalkthrough";
+import SettlementCalculator from "@/components/SettlementCalculator";
 import SiteFooter from "@/components/SiteFooter";
 import SiteNav from "@/components/SiteNav";
 import SuitIcon from "@/components/SuitIcon";
@@ -201,6 +202,8 @@ export default function PokerSettlementCalculatorPage() {
             </aside>
           </div>
         </section>
+
+        <SettlementCalculator />
 
         <div className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-16">
           <aside className="hidden lg:block">

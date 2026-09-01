@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Game, Player } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { formatCurrency } from "@/lib/format";
+import { randomUUID } from "@/lib/session";
 import ConfirmButton from "./ConfirmButton";
 
 export interface BuyInActionsProps {
   game: Game;
   players: Player[];
   currentPlayerId: string;
-  onBuyIn: () => void;
-  onRebuy: (amount: number, frontedByPlayerId?: string | null) => void;
+  onBuyIn: (operationKey: string) => Promise<boolean>;
+  onRebuy: (amount: number, frontedByPlayerId: string | null, operationKey: string) => Promise<boolean>;
+  ledgerAction: "buy-in" | "rebuy" | null;
   onLeave: () => void;
   leaving: boolean;
   left: boolean;
@@ -24,6 +26,7 @@ export default function BuyInActions({
   currentPlayerId,
   onBuyIn,
   onRebuy,
+  ledgerAction,
   onLeave,
   leaving,
   left,
@@ -31,21 +34,44 @@ export default function BuyInActions({
   const [rebuyOpen, setRebuyOpen] = useState(false);
   const [rebuyAmount, setRebuyAmount] = useState(String(game.buy_in_amount));
   const [frontedByPlayerId, setFrontedByPlayerId] = useState("");
+  const buyInOperationKey = useRef<string | null>(null);
+  const rebuyOperationKey = useRef<string | null>(null);
 
   function openRebuy() {
     setRebuyAmount(String(game.buy_in_amount));
     setFrontedByPlayerId("");
+    rebuyOperationKey.current = null;
     setRebuyOpen(true);
   }
 
-  function submitRebuy() {
+  function closeRebuy() {
+    rebuyOperationKey.current = null;
+    setRebuyOpen(false);
+  }
+
+  async function submitRebuy() {
     const parsed = Number(rebuyAmount);
     if (!Number.isFinite(parsed) || parsed <= 0) {
       return;
     }
-    onRebuy(parsed, frontedByPlayerId || null);
-    setRebuyOpen(false);
+    const operationKey = rebuyOperationKey.current ?? randomUUID();
+    rebuyOperationKey.current = operationKey;
+    const added = await onRebuy(parsed, frontedByPlayerId || null, operationKey);
+    if (added) {
+      closeRebuy();
+    }
   }
+
+  async function submitBuyIn() {
+    const operationKey = buyInOperationKey.current ?? randomUUID();
+    buyInOperationKey.current = operationKey;
+    const added = await onBuyIn(operationKey);
+    if (added) {
+      buyInOperationKey.current = null;
+    }
+  }
+
+  const submitting = ledgerAction !== null;
 
   if (left) {
     return null;
@@ -66,6 +92,7 @@ export default function BuyInActions({
               onChange={(event) => setRebuyAmount(event.target.value)}
               aria-label="Rebuy amount"
               autoFocus
+              disabled={submitting}
             />
           </div>
           <label className="min-w-0">
@@ -73,6 +100,7 @@ export default function BuyInActions({
             <select
               value={frontedByPlayerId}
               onChange={(event) => setFrontedByPlayerId(event.target.value)}
+              disabled={submitting}
               className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10"
             >
               <option value="">Me</option>
@@ -83,14 +111,15 @@ export default function BuyInActions({
                 ))}
             </select>
           </label>
-          <Button size="md" onClick={submitRebuy} aria-label="Add rebuy">
-            Add rebuy
+          <Button size="md" onClick={submitRebuy} aria-label="Add rebuy" loading={ledgerAction === "rebuy"} disabled={submitting}>
+            {ledgerAction === "rebuy" ? "Adding…" : "Add rebuy"}
           </Button>
           <Button
             variant="ghost"
             size="md"
-            onClick={() => setRebuyOpen(false)}
+            onClick={closeRebuy}
             aria-label="Cancel rebuy"
+            disabled={submitting}
             className="hidden sm:inline-flex"
           >
             Cancel
@@ -99,14 +128,15 @@ export default function BuyInActions({
       ) : null}
 
       <div className="flex gap-2">
-        <Button className="flex-1" onClick={onBuyIn}>
-          Buy in · {formatCurrency(game.buy_in_amount)}
+        <Button className="flex-1" onClick={() => void submitBuyIn()} loading={ledgerAction === "buy-in"} disabled={submitting}>
+          {ledgerAction === "buy-in" ? "Adding buy-in…" : `Buy in · ${formatCurrency(game.buy_in_amount)}`}
         </Button>
         <Button
           variant="secondary"
           className="flex-1"
-          onClick={() => setRebuyOpen((open) => !open)}
+          onClick={() => (rebuyOpen ? closeRebuy() : openRebuy())}
           aria-expanded={rebuyOpen}
+          disabled={submitting}
         >
           Rebuy
         </Button>

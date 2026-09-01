@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
 import GameHeader from "@/components/GameRoom/GameHeader";
@@ -77,6 +77,8 @@ export default function GameRoomPage() {
   const [joinDismissed, setJoinDismissed] = useState(false);
   const [ending, setEnding] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [ledgerAction, setLedgerAction] = useState<"buy-in" | "rebuy" | null>(null);
+  const ledgerActionInFlight = useRef(false);
 
   useEffect(() => {
     setSessionId(getSessionId());
@@ -146,44 +148,67 @@ export default function GameRoomPage() {
   const isHost = currentPlayer?.is_host === true;
   const leftGame = currentPlayer?.left_at != null;
 
-  async function handleBuyIn() {
-    if (!snapshot || !currentPlayer) {
-      return;
+  async function handleBuyIn(operationKey: string): Promise<boolean> {
+    if (ledgerActionInFlight.current || !snapshot || !currentPlayer) {
+      return false;
     }
+
+    ledgerActionInFlight.current = true;
+    setLedgerAction("buy-in");
     try {
       await addBuyIn(
         snapshot.game.id,
         currentPlayer.id,
         snapshot.game.buy_in_amount,
-        "buy_in"
+        "buy_in",
+        null,
+        operationKey
       );
       toast("Buy-in added", "success");
+      return true;
     } catch (err) {
       toast(
         err instanceof Error ? err.message : "Failed to add buy-in.",
         "error"
       );
+      return false;
+    } finally {
+      ledgerActionInFlight.current = false;
+      setLedgerAction(null);
     }
   }
 
-  async function handleRebuy(amount: number, frontedByPlayerId?: string | null) {
-    if (!snapshot || !currentPlayer) {
-      return;
+  async function handleRebuy(
+    amount: number,
+    frontedByPlayerId: string | null,
+    operationKey: string
+  ): Promise<boolean> {
+    if (ledgerActionInFlight.current || !snapshot || !currentPlayer) {
+      return false;
     }
+
+    ledgerActionInFlight.current = true;
+    setLedgerAction("rebuy");
     try {
       await addBuyIn(
         snapshot.game.id,
         currentPlayer.id,
         amount,
         "rebuy",
-        frontedByPlayerId
+        frontedByPlayerId,
+        operationKey
       );
       toast(frontedByPlayerId ? "Fronted rebuy added" : "Rebuy added", "success");
+      return true;
     } catch (err) {
       toast(
         err instanceof Error ? err.message : "Failed to add rebuy.",
         "error"
       );
+      return false;
+    } finally {
+      ledgerActionInFlight.current = false;
+      setLedgerAction(null);
     }
   }
 
@@ -351,6 +376,7 @@ export default function GameRoomPage() {
               currentPlayerId={currentPlayer.id}
               onBuyIn={handleBuyIn}
               onRebuy={handleRebuy}
+              ledgerAction={ledgerAction}
               onLeave={handleLeave}
               leaving={leaving}
               left={false}

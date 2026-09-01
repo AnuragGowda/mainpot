@@ -1,7 +1,7 @@
 const faqs = [
   {
     question: "Who can change the ledger?",
-    answer: "Players add their own buy-ins and cash-outs. The host can verify buy-ins, correct entries, and start settlement.",
+    answer: "Players add their own buy-ins and rebuys, then enter their own final stacks. The host can verify buy-ins, correct ledger entries, and edit any final stack.",
   },
   {
     question: "Can the host fix a mistake?",
@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "What if the bank does not balance?",
-    answer: "Mainpot shows the exact difference and holds settlement until total buy-ins and cash-outs match.",
+    answer: "Mainpot shows the exact difference between money in and final stacks before settlement. The host can review the records, correct a mistake, or explicitly calculate with the discrepancy.",
   },
 ];
 
@@ -19,8 +19,8 @@ export default function LandingFaq() {
       <div className="relative z-10 mx-auto grid max-w-6xl gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Built-in guardrails</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">No more wondering why the table is $20 short.</h2>
-          <p className="mt-3 max-w-sm text-sm leading-6 text-gray-600">Everyone uses the same live ledger, so mistakes surface before settlement.</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950 sm:text-3xl">Know whether the table is balanced before anyone pays.</h2>
+          <p className="mt-3 max-w-sm text-sm leading-6 text-gray-600">The shared ledger makes the money in and final stacks visible to the whole table before the payment list appears.</p>
         </div>
         <div className="border-y border-gray-200">
           {faqs.map((faq, index) => (

@@ -42,7 +42,7 @@ body {
   background:
     radial-gradient(ellipse 44% 42% at 72% 38%, rgba(159, 180, 255, 0.26), transparent 72%),
     radial-gradient(ellipse 38% 45% at 30% 22%, rgba(255, 255, 255, 0.76), transparent 74%);
-  animation: ante-mesh 14s ease-in-out infinite alternate;
+  animation: ante-mesh 1.2s ease-out both;
   mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.82) 63%, transparent 100%);
   pointer-events: none;
 }
@@ -110,6 +110,7 @@ body {
 }
 
 .ante-card-halo {
+  z-index: -1;
   background: linear-gradient(135deg, rgba(111, 129, 255, 0.32), rgba(197, 176, 255, 0.2), rgba(255, 255, 255, 0.1));
   filter: blur(22px);
 }
@@ -124,6 +125,23 @@ body {
   transform: perspective(1200px) rotateX(var(--ante-tilt-y)) rotateY(var(--ante-tilt-x));
   transition: transform 180ms ease-out;
   will-change: transform;
+}
+
+.ante-demo-tilt {
+  --ante-suit-one-x: 0px;
+  --ante-suit-one-y: 0px;
+  --ante-suit-two-x: 0px;
+  --ante-suit-two-y: 0px;
+  isolation: isolate;
+  touch-action: pan-y;
+  animation: ante-demo-tilt 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (hover: none) {
+  .ante-demo-tilt {
+    animation: ante-demo-tilt-mobile 10s ease-in-out infinite;
+  }
 }
 
 .ante-demo-stage {
@@ -162,11 +180,6 @@ body {
   justify-content: center;
   padding: 1.5rem;
   text-align: center;
-}
-
-.ante-demo-paused,
-.ante-demo-paused * {
-  animation-play-state: paused !important;
 }
 
 .ante-walkthrough-panel {
@@ -261,11 +274,17 @@ body {
 .ante-suit-card-one {
   right: 0;
   top: 0;
+  transform: translate(var(--ante-suit-one-x), var(--ante-suit-one-y));
+  transition: transform 220ms ease-out;
+  will-change: transform;
 }
 
 .ante-suit-card-two {
   bottom: 0;
   left: 0;
+  transform: translate(var(--ante-suit-two-x), var(--ante-suit-two-y));
+  transition: transform 220ms ease-out;
+  will-change: transform;
 }
 
 .ante-suit-card-one .ante-suit-card-surface {
@@ -277,12 +296,12 @@ body {
 }
 
 .ante-intro {
-  animation: ante-rise 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: ante-rise 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.ante-intro-delay-1 { animation-delay: 80ms; }
-.ante-intro-delay-2 { animation-delay: 160ms; }
-.ante-intro-delay-3 { animation-delay: 240ms; }
+.ante-intro-delay-1 { animation-delay: 140ms; }
+.ante-intro-delay-2 { animation-delay: 280ms; }
+.ante-intro-delay-3 { animation-delay: 420ms; }
 
 .ante-live-dot {
   box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.45);
@@ -303,6 +322,15 @@ body {
   .ante-step {
     overflow: hidden;
     transition: transform 220ms ease, box-shadow 220ms ease;
+    animation: ante-step-highlight 7.2s ease-in-out infinite;
+  }
+
+  .ante-step:nth-child(2) {
+    animation-delay: 2.4s;
+  }
+
+  .ante-step:nth-child(3) {
+    animation-delay: 4.8s;
   }
 
   .ante-step::before {
@@ -317,6 +345,15 @@ body {
     opacity: 0;
     transform: scaleX(0.3);
     transition: opacity 220ms ease, transform 220ms ease;
+    animation: ante-step-line 7.2s ease-in-out infinite;
+  }
+
+  .ante-step:nth-child(2)::before {
+    animation-delay: 2.4s;
+  }
+
+  .ante-step:nth-child(3)::before {
+    animation-delay: 4.8s;
   }
 
   .ante-step-marker {
@@ -326,6 +363,15 @@ body {
     padding: 0.2rem 0.45rem;
     background: #f8faf8;
     transition: border-color 220ms ease, background 220ms ease, color 220ms ease;
+    animation: ante-step-marker 7.2s ease-in-out infinite;
+  }
+
+  .ante-step:nth-child(2) .ante-step-marker {
+    animation-delay: 2.4s;
+  }
+
+  .ante-step:nth-child(3) .ante-step-marker {
+    animation-delay: 4.8s;
   }
 }
 
@@ -373,6 +419,40 @@ body {
   background: rgba(255, 255, 255, 0.055);
   padding: 1rem;
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.ante-cta-ledger-row {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.ante-cta-action.is-visible .ante-cta-ledger-row {
+  animation: ante-cta-ledger-row 800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ante-cta-action.is-visible .ante-cta-ledger-row:nth-child(2) {
+  animation-delay: 360ms;
+}
+
+.ante-cta-button {
+  gap: 0.45rem;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.ante-cta-button-arrow {
+  transition: transform 180ms ease;
+}
+
+.ante-cta-button:hover,
+.ante-cta-button:focus-visible {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
+  transform: translateY(-2px);
+}
+
+.ante-cta-button:hover .ante-cta-button-arrow,
+.ante-cta-button:focus-visible .ante-cta-button-arrow {
+  transform: translateX(3px);
 }
 
 .ante-cta-suit-card {
@@ -436,6 +516,18 @@ body {
   50% { transform: translateY(-8px) rotate(0.35deg); }
 }
 
+@keyframes ante-demo-tilt {
+  0%, 100% { transform: perspective(1200px) rotateX(1.5deg) rotateY(-3deg); }
+  25% { transform: perspective(1200px) rotateX(-1deg) rotateY(3deg); }
+  50% { transform: perspective(1200px) rotateX(1deg) rotateY(4deg); }
+  75% { transform: perspective(1200px) rotateX(-1.5deg) rotateY(-2deg); }
+}
+
+@keyframes ante-demo-tilt-mobile {
+  0%, 100% { transform: perspective(1200px) translateY(0) rotateX(1.75deg) rotateY(-3.25deg); }
+  50% { transform: perspective(1200px) translateY(-5px) rotateX(-1.75deg) rotateY(3.25deg); }
+}
+
 @keyframes ante-card-one {
   0%, 100% { transform: translate(-50%, -50%) translateY(2px) rotate(8deg); }
   50% { transform: translate(-50%, -50%) translateY(-6px) rotate(11deg); }
@@ -456,6 +548,11 @@ body {
   50% { transform: translate(-50%, -50%) translateY(6px) rotate(-10deg); }
 }
 
+@keyframes ante-cta-ledger-row {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes ante-cashout-type {
   to { width: 3ch; }
 }
@@ -473,6 +570,21 @@ body {
   70%, 100% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
 }
 
+@keyframes ante-step-highlight {
+  0%, 8%, 28%, 100% { background: transparent; transform: translateY(0); box-shadow: none; }
+  14%, 22% { background: #f7f8fa; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(17, 24, 39, 0.06); }
+}
+
+@keyframes ante-step-line {
+  0%, 8%, 28%, 100% { opacity: 0; transform: scaleX(0.3); }
+  14%, 22% { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes ante-step-marker {
+  0%, 8%, 28%, 100% { border-color: #e0e5e0; background: #f8faf8; color: #6b7280; }
+  14%, 22% { border-color: #111512; background: #111512; color: white; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -481,12 +593,6 @@ body {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-  }
-}
-
-@media (hover: none) {
-  .ante-demo-card {
-    transform: none;
   }
 }
 

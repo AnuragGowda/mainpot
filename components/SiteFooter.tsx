@@ -4,19 +4,19 @@ import { GITHUB_URL } from "@/lib/product";
 import SuitIcon from "@/components/SuitIcon";
 
 export default function SiteFooter() {
-  const footerLink = "inline-flex min-h-11 items-center transition hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2";
+  const footerLink = "inline-flex min-h-8 items-center transition hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:min-h-11";
 
   return (
     <footer className="relative border-t border-gray-200 bg-white/60 px-4 py-8 text-sm text-gray-500 backdrop-blur-sm">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="grid h-8 w-7 place-items-center rounded-md border border-gray-200 bg-white text-gray-900 shadow-sm"><SuitIcon className="h-3.5 w-3.5" suit="spade" /></span>
-          <div>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex min-w-0 items-start gap-3 md:items-center">
+          <span aria-hidden="true" className="grid h-12 w-10 shrink-0 place-items-center rounded-lg border border-gray-200 bg-white text-gray-900 shadow-sm sm:h-8 sm:w-7 sm:rounded-md"><SuitIcon className="h-5 w-5 sm:h-3.5 sm:w-3.5" suit="spade" /></span>
+          <div className="min-w-0">
             <p className="font-medium text-gray-700">Built for home games.</p>
             <p className="mt-1 text-xs">© {new Date().getFullYear()} Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.</p>
           </div>
         </div>
-        <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <nav aria-label="Footer navigation" className="grid grid-cols-3 justify-items-center gap-x-4 gap-y-1 text-center sm:flex sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 sm:text-left">
           <Link href="/self-host" className={footerLink}>Self-host</Link>
           <Link href="/feedback" className={footerLink}>Feedback</Link>
           <Link href="/terms" className={footerLink}>Terms</Link>

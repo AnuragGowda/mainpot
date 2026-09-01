@@ -15,8 +15,8 @@ const players = [
 
 export default function HeroGameDemo() {
   const [demoState, setDemoState] = useState<DemoState>("live");
-  const [paused, setPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const demoRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const elapsedRef = useRef(0);
 
@@ -36,7 +36,7 @@ export default function HeroGameDemo() {
   }, []);
 
   useEffect(() => {
-    if (paused || prefersReducedMotion) return;
+    if (prefersReducedMotion) return;
 
     const cycleLength = 10400;
     const cycleStartedAt = performance.now() - elapsedRef.current;
@@ -56,27 +56,43 @@ export default function HeroGameDemo() {
       if (timer) window.clearTimeout(timer);
       elapsedRef.current = (performance.now() - cycleStartedAt) % cycleLength;
     };
-  }, [paused, prefersReducedMotion]);
+  }, [prefersReducedMotion]);
 
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
-    if (event.pointerType !== "mouse" || !cardRef.current) return;
+    if ((event.pointerType !== "mouse" && event.pointerType !== "touch") || !cardRef.current || !demoRef.current) return;
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - bounds.left) / bounds.width - 0.5;
     const y = (event.clientY - bounds.top) / bounds.height - 0.5;
     cardRef.current.style.setProperty("--ante-tilt-x", `${x * 4}deg`);
     cardRef.current.style.setProperty("--ante-tilt-y", `${y * -4}deg`);
+    demoRef.current.style.setProperty("--ante-suit-one-x", `${x * 10}px`);
+    demoRef.current.style.setProperty("--ante-suit-one-y", `${y * 8}px`);
+    demoRef.current.style.setProperty("--ante-suit-two-x", `${x * -8}px`);
+    demoRef.current.style.setProperty("--ante-suit-two-y", `${y * -6}px`);
   }
 
   function resetTilt() {
     cardRef.current?.style.setProperty("--ante-tilt-x", "0deg");
     cardRef.current?.style.setProperty("--ante-tilt-y", "0deg");
+    demoRef.current?.style.setProperty("--ante-suit-one-x", "0px");
+    demoRef.current?.style.setProperty("--ante-suit-one-y", "0px");
+    demoRef.current?.style.setProperty("--ante-suit-two-x", "0px");
+    demoRef.current?.style.setProperty("--ante-suit-two-y", "0px");
   }
 
   const isSettled = demoState === "settled";
   const isSettling = demoState === "settling" || demoState === "balancing";
 
   return (
-    <div className={`relative mx-auto w-[calc(100%_-_1rem)] max-w-lg sm:w-full ${paused ? "ante-demo-paused" : ""}`} onPointerMove={handlePointerMove} onPointerEnter={() => setPaused(true)} onPointerLeave={() => { resetTilt(); setPaused(false); }}>
+    <div
+      ref={demoRef}
+      className="ante-demo-tilt relative mx-auto w-[calc(100%_-_1rem)] max-w-lg sm:w-full"
+      onPointerDown={handlePointerMove}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetTilt}
+      onPointerUp={resetTilt}
+      onPointerCancel={resetTilt}
+    >
       <div aria-hidden="true" className="ante-card-halo absolute -inset-8 rounded-[3rem]" />
       <div aria-hidden="true" className="ante-suit-card ante-suit-card-one"><span className="ante-suit-card-surface"><SuitIcon suit="spade" /></span></div>
       <div aria-hidden="true" className="ante-suit-card ante-suit-card-two"><span className="ante-suit-card-surface"><SuitIcon suit="club" /></span></div>
@@ -105,7 +121,7 @@ export default function HeroGameDemo() {
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">{initials}</span>
                 <span className="flex-1 text-sm font-medium">{name}</span>
                 <span className="text-sm font-semibold tabular-nums">{amount}</span>
-                <span className="w-14 text-right text-[10px] font-medium text-emerald-600">Verified</span>
+                <span className="w-14 text-right text-[10px] font-medium text-emerald-700">Verified</span>
               </div>
             ))}
           </div>
