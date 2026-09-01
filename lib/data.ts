@@ -1333,12 +1333,14 @@ export async function submitGameFeedback(
       score, confusing: confusing.trim() || null, created_at: new Date().toISOString(),
     });
     persistStore(store);
+    trackProductOpsEvent("feedback.submitted", { score, feedback_present: Boolean(confusing.trim()) });
     return;
   }
   const { error } = await assertSupabase().from("game_feedback").insert({
     game_id: gameId, player_id: playerId, score, confusing: confusing.trim() || null,
   });
   if (error) throw error;
+  trackProductOpsEvent("feedback.submitted", { score, feedback_present: Boolean(confusing.trim()) });
 }
 
 export async function joinGame(

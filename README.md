@@ -76,6 +76,8 @@ npm run build
 
 Mainpot never requires analytics or a central service. The Product Ops integration is disabled by default and remains a no-op unless `NEXT_PUBLIC_PRODUCT_OPS_ENABLED=true` plus all three server-only `PRODUCT_OPS_*` variables are configured. Mainpot forwards only a short allowlisted event name, a HMAC-derived anonymous actor/session ID, and safe controlled values. It never sends player names, room codes, game contents, payment handles, auth data, or feedback text. Telemetry failures are ignored.
 
+The dashboard receives acquisition, the game-completion funnel (`created → second player → settling → finalized`), optional feedback score/presence, and a repeat-host signal. Its core measures are active and new users, returning users and returning-user rate (the share of users active in the selected period whose first recorded activity predates that period), funnel conversion, acquisition source, and feedback distribution. Configure the endpoint, an ingestion key created for the `mainpot` app, and a private HMAC salt only in the Mainpot deployment environment.
+
 ## Contributing
 
 Feature requests and reproducible bug reports are welcome through GitHub Issues. Please avoid including private game, account, or payment details in screenshots and logs.
