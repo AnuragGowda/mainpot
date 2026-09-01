@@ -11,6 +11,20 @@ export default function PwaRegistration() {
       return;
     }
 
+    // Next's development bundles change on every edit. A service worker that
+    // caches them can serve an older client bundle alongside freshly rendered
+    // HTML, which produces hydration mismatches during local development.
+    if (process.env.NODE_ENV === "development") {
+      void navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          if (new URL(registration.scope).pathname === "/") {
+            void registration.unregister();
+          }
+        }
+      });
+      return;
+    }
+
     let disposed = false;
     let registration: ServiceWorkerRegistration | null = null;
 

@@ -145,8 +145,12 @@ body {
 }
 
 .ante-demo-stage {
-  min-height: 15.75rem;
+  height: 15.75rem;
   background: #f3f5f2;
+}
+
+.ante-demo-out-of-view {
+  animation-play-state: paused;
 }
 
 .ante-demo-live,

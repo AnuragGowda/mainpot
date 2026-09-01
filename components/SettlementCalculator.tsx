@@ -4,9 +4,9 @@ import {
   AlertTriangle,
   ArrowRight,
   Check,
-  Minus,
   Plus,
   Users,
+  X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { formatCurrency, formatSignedNet, round2 } from "@/lib/format";
@@ -288,7 +288,7 @@ export default function SettlementCalculator() {
                       aria-label={`Remove ${player.name || `player ${index + 1}`}`}
                       className="mt-[1.375rem] grid h-11 w-11 place-items-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-30 sm:mt-0"
                     >
-                      <Minus aria-hidden className="h-4 w-4" />
+                      <X aria-hidden className="h-4 w-4" />
                     </button>
                   </div>
                 ))}

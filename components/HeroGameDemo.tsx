@@ -16,6 +16,7 @@ const players = [
 export default function HeroGameDemo() {
   const [demoState, setDemoState] = useState<DemoState>("live");
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isInView, setIsInView] = useState(false);
   const demoRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const elapsedRef = useRef(0);
@@ -36,7 +37,20 @@ export default function HeroGameDemo() {
   }, []);
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    const demo = demoRef.current;
+    if (!demo) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { threshold: 0.15 },
+    );
+
+    observer.observe(demo);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion || !isInView) return;
 
     const cycleLength = 10400;
     const cycleStartedAt = performance.now() - elapsedRef.current;
@@ -56,7 +70,7 @@ export default function HeroGameDemo() {
       if (timer) window.clearTimeout(timer);
       elapsedRef.current = (performance.now() - cycleStartedAt) % cycleLength;
     };
-  }, [prefersReducedMotion]);
+  }, [isInView, prefersReducedMotion]);
 
   function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
     if ((event.pointerType !== "mouse" && event.pointerType !== "touch") || !cardRef.current || !demoRef.current) return;
@@ -86,7 +100,7 @@ export default function HeroGameDemo() {
   return (
     <div
       ref={demoRef}
-      className="ante-demo-tilt relative mx-auto w-[calc(100%_-_1rem)] max-w-lg sm:w-full"
+      className={`ante-demo-tilt relative mx-auto w-[calc(100%_-_1rem)] max-w-lg sm:w-full ${isInView ? "ante-demo-in-view" : "ante-demo-out-of-view"}`}
       onPointerDown={handlePointerMove}
       onPointerMove={handlePointerMove}
       onPointerLeave={resetTilt}

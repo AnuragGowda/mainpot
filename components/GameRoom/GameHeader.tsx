@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Copy, QrCode, Share2, X } from "lucide-react";
+import { QrCode, X } from "lucide-react";
 import type { Game, GameStatus } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import { useToast } from "@/components/ui/Toast";
@@ -10,6 +10,7 @@ import { copyText } from "@/lib/clipboard";
 import { formatCurrency } from "@/lib/format";
 import ConfirmButton from "./ConfirmButton";
 import FriendInviteList from "./FriendInviteList";
+import Button from "@/components/ui/Button";
 
 export interface GameHeaderProps {
   game: Game;
@@ -126,70 +127,49 @@ export default function GameHeader({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-gray-900">
+            <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-gray-900" title={game.name}>
               {game.name}
             </h1>
             <Badge variant={status.variant}>{status.label}</Badge>
           </div>
-          <p className="mt-1 text-sm text-gray-500">Hosted by {game.host_name}</p>
+          <p className="mt-1 truncate text-sm text-gray-500" title={`Hosted by ${game.host_name}`}>
+            Hosted by {game.host_name}
+          </p>
         </div>
-        {isHost ? (
-          <div className="w-full min-w-0 text-left sm:w-auto sm:shrink-0 sm:text-right">
-            <ConfirmButton
+
+        <div className="w-full sm:w-auto sm:shrink-0">
+          <div className="flex w-full gap-2 sm:w-auto">
+            <Button
+              ref={inviteTriggerRef}
+              type="button"
               variant="secondary"
               size="sm"
-              confirmLabel="Start cash-outs?"
-              compact
-              onConfirm={onEndGame}
-              loading={ending}
-              disabled={pendingPot > 0}
+              onClick={() => setInviteOpen(true)}
+              aria-label="Invite players"
+              className="flex-1 sm:flex-none"
+              leftIcon={<QrCode aria-hidden size={18} />}
             >
-              End game
-            </ConfirmButton>
-            {pendingPot > 0 ? (
-              <p className="mt-1 max-w-40 text-xs leading-4 text-amber-700">Resolve pending entries first</p>
+              Invite
+            </Button>
+            {isHost ? (
+              <ConfirmButton
+                variant="dangerOutline"
+                size="sm"
+                confirmationTitle="End the game?"
+                confirmationDescription="This stops new buy-ins and moves everyone to cash-out entry."
+                confirmLabel="Start cash-outs"
+                onConfirm={onEndGame}
+                loading={ending}
+                disabled={pendingPot > 0}
+                className="flex-1 sm:flex-none"
+              >
+                End game
+              </ConfirmButton>
             ) : null}
           </div>
-        ) : null}
-      </div>
-
-      <div className="mt-6">
-        <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
-          Room code
-        </p>
-        <div className="mt-2 flex items-center gap-1.5 sm:gap-2">
-          <span className="font-mono text-3xl font-bold tracking-[0.2em] text-gray-900 sm:text-4xl">
-            {game.code}
-          </span>
-          <button
-            type="button"
-            onClick={handleCopy}
-            aria-label={`Copy room code ${game.code}`}
-            title="Copy room code"
-            className="hidden h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-600 transition-colors duration-150 hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:grid sm:h-9 sm:w-9"
-          >
-            <Copy aria-hidden size={18} />
-          </button>
-          <button
-            ref={inviteTriggerRef}
-            type="button"
-            onClick={() => setInviteOpen(true)}
-            aria-label="Invite players"
-            title="Invite players"
-            className="hidden h-11 shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors duration-150 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 max-sm:flex sm:h-9 sm:w-9 sm:justify-center sm:p-0"
-          >
-            <QrCode aria-hidden size={18} />
-            <span className="sm:hidden">Invite</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleShare}
-            aria-label={`Share invite for ${game.name}`}
-            title="Share invite"
-            className="hidden h-11 w-11 shrink-0 place-items-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-colors duration-150 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:grid sm:h-9 sm:w-9"
-          >
-            <Share2 aria-hidden size={18} />
-          </button>
+          {isHost && pendingPot > 0 ? (
+            <p className="mt-1 text-xs leading-4 text-amber-700 sm:max-w-40 sm:text-right">Resolve pending entries first</p>
+          ) : null}
         </div>
       </div>
 
@@ -204,14 +184,14 @@ export default function GameHeader({
         </div>
         <div className="px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
-            Verified pot
+            Pot
           </p>
           <p className="mt-1 text-lg font-semibold text-gray-950">
             {formatCurrency(verifiedPot)}
           </p>
           {pendingPot > 0 ? (
             <p className="mt-0.5 text-xs font-medium text-amber-700">
-              +{formatCurrency(pendingPot)} pending
+              (+{formatCurrency(pendingPot)})
             </p>
           ) : null}
         </div>

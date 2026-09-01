@@ -425,10 +425,12 @@ export default function PokerSettlementCalculatorPage() {
                   const Icon = item.icon;
                   return (
                     <div key={item.title} className="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
-                      <span className="grid h-10 w-10 place-items-center rounded-xl bg-gray-100 text-gray-700">
-                        <Icon aria-hidden className="h-4 w-4" />
-                      </span>
-                      <h3 className="mt-4 text-lg font-semibold text-gray-950">{item.title}</h3>
+                      <div className="flex items-center gap-3 sm:block">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gray-100 text-gray-700">
+                          <Icon aria-hidden className="h-4 w-4" />
+                        </span>
+                        <h3 className="text-lg font-semibold text-gray-950 sm:mt-4">{item.title}</h3>
+                      </div>
                       <p className="mt-2 text-sm leading-7 text-gray-600">{item.body}</p>
                     </div>
                   );
