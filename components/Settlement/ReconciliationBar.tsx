@@ -7,6 +7,8 @@ export interface ReconciliationBarProps {
   totalCashedOut: number;
   difference: number;
   balanced: boolean;
+  cashOutCount: number;
+  playerCount: number;
 }
 
 /**
@@ -18,7 +20,11 @@ export default function ReconciliationBar({
   totalCashedOut,
   difference,
   balanced,
+  cashOutCount,
+  playerCount,
 }: ReconciliationBarProps) {
+  const complete = cashOutCount >= playerCount;
+
   return (
     <Card padding="none" className="overflow-hidden">
       <div className="grid grid-cols-3 divide-x divide-gray-100">
@@ -45,7 +51,7 @@ export default function ReconciliationBar({
           <p
             className={[
               "mt-1 truncate text-base font-semibold sm:text-lg",
-              balanced ? "text-gray-900" : "text-red-600",
+              !complete || balanced ? "text-gray-900" : "text-red-600",
             ].join(" ")}
           >
             {formatCurrency(balanced ? 0 : difference)}
@@ -53,8 +59,17 @@ export default function ReconciliationBar({
         </div>
       </div>
 
-      <div className={`border-t px-4 py-3 sm:px-5 ${balanced ? "border-emerald-100 bg-emerald-50/70" : "border-red-100 bg-red-50/70"}`}>
-        {balanced ? (
+      <div className={`border-t px-4 py-3 sm:px-5 ${!complete ? "border-gray-100 bg-gray-50/80" : balanced ? "border-emerald-100 bg-emerald-50/70" : "border-red-100 bg-red-50/70"}`}>
+        {!complete ? (
+          <div>
+            <p className="text-sm font-medium text-gray-700">
+              {cashOutCount} of {playerCount} cash-outs entered
+            </p>
+            <p className="mt-1 text-xs leading-5 text-gray-500">
+              Enter every final stack before checking whether the table balances.
+            </p>
+          </div>
+        ) : balanced ? (
           <div>
             <p className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
               <Check aria-hidden className="h-4 w-4" />

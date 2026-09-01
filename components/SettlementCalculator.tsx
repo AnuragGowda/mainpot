@@ -1,9 +1,20 @@
 "use client";
 
-import { Minus, Plus } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Check,
+  Minus,
+  Plus,
+  Users,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { formatCurrency, formatSignedNet, round2 } from "@/lib/format";
-import { calculateMinTransfers } from "@/lib/settlement";
+import {
+  applyDiscrepancyAllocation,
+  calculateMinTransfers,
+  type DiscrepancyAllocationMethod,
+} from "@/lib/settlement";
 
 type CalculatorPlayer = {
   id: number;
@@ -20,6 +31,9 @@ const initialPlayers: CalculatorPlayer[] = [
   { id: 5, name: "Casey", moneyIn: "50", stacksOut: "0" },
 ];
 
+const inputClass =
+  "h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10";
+
 function amount(value: string) {
   const parsed = Number.parseFloat(value);
   return Number.isFinite(parsed) && parsed >= 0 ? round2(parsed) : 0;
@@ -27,6 +41,9 @@ function amount(value: string) {
 
 export default function SettlementCalculator() {
   const [players, setPlayers] = useState(initialPlayers);
+  const [allocationMethod, setAllocationMethod] =
+    useState<DiscrepancyAllocationMethod>("proportional");
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
 
   const result = useMemo(() => {
     const rows = players.map((player, index) => ({
@@ -35,78 +52,464 @@ export default function SettlementCalculator() {
       moneyIn: amount(player.moneyIn),
       stacksOut: amount(player.stacksOut),
     }));
-    const totalIn = round2(rows.reduce((total, player) => total + player.moneyIn, 0));
-    const totalOut = round2(rows.reduce((total, player) => total + player.stacksOut, 0));
+    const totalIn = round2(
+      rows.reduce((total, player) => total + player.moneyIn, 0)
+    );
+    const totalOut = round2(
+      rows.reduce((total, player) => total + player.stacksOut, 0)
+    );
     const difference = round2(totalIn - totalOut);
     const balanced = Math.abs(difference) < 0.005;
-    const transfers = balanced
-      ? calculateMinTransfers(rows.map((player) => ({
-          playerId: String(player.id),
-          name: player.name,
-          net: round2(player.stacksOut - player.moneyIn),
-        })))
+    const baseNets = rows.map((player) => ({
+      playerId: String(player.id),
+      name: player.name,
+      net: round2(player.stacksOut - player.moneyIn),
+    }));
+    const eligiblePlayers = baseNets.filter((player) =>
+      difference > 0 ? player.net < -0.005 : player.net > 0.005
+    );
+    const selectedEligiblePlayers = eligiblePlayers.filter((player) =>
+      selectedPlayerIds.includes(player.playerId)
+    );
+    const selectedCapacity = round2(
+      selectedEligiblePlayers.reduce(
+        (total, player) => total + Math.abs(player.net),
+        0
+      )
+    );
+    const allocationValid =
+      balanced ||
+      allocationMethod === "proportional" ||
+      selectedCapacity + 0.005 >= Math.abs(difference);
+    const adjustedNets = balanced
+      ? baseNets
+      : allocationValid
+        ? applyDiscrepancyAllocation(baseNets, difference, {
+            method: allocationMethod,
+            playerIds: selectedPlayerIds,
+          })
+        : baseNets;
+    const transfers = allocationValid
+      ? calculateMinTransfers(adjustedNets)
       : [];
 
-    return { rows, totalIn, totalOut, difference, balanced, transfers };
-  }, [players]);
+    return {
+      totalIn,
+      totalOut,
+      difference,
+      balanced,
+      eligiblePlayers,
+      selectedCapacity,
+      allocationValid,
+      transfers,
+    };
+  }, [allocationMethod, players, selectedPlayerIds]);
 
-  function updatePlayer(id: number, field: "name" | "moneyIn" | "stacksOut", value: string) {
-    setPlayers((current) => current.map((player) => player.id === id ? { ...player, [field]: value } : player));
+  const discrepancyAmount = Math.abs(result.difference);
+  const affectedSide = result.difference < 0 ? "winners" : "losing players";
+  const presetTitle =
+    result.difference < 0
+      ? "Winners cover the overage"
+      : "Share it across losing players";
+  const presetDescription =
+    result.difference < 0
+      ? "Reduce each winner’s result in proportion to their winnings."
+      : "Reduce each losing player’s recorded loss in proportion to their loss.";
+
+  function updatePlayer(
+    id: number,
+    field: "name" | "moneyIn" | "stacksOut",
+    value: string
+  ) {
+    setPlayers((current) =>
+      current.map((player) =>
+        player.id === id ? { ...player, [field]: value } : player
+      )
+    );
   }
 
   function addPlayer() {
-    setPlayers((current) => [...current, { id: Math.max(0, ...current.map((player) => player.id)) + 1, name: "", moneyIn: "", stacksOut: "" }]);
+    setPlayers((current) => [
+      ...current,
+      {
+        id: Math.max(0, ...current.map((player) => player.id)) + 1,
+        name: "",
+        moneyIn: "",
+        stacksOut: "",
+      },
+    ]);
   }
 
   function removePlayer(id: number) {
-    setPlayers((current) => current.length > 2 ? current.filter((player) => player.id !== id) : current);
+    setPlayers((current) =>
+      current.length > 2
+        ? current.filter((player) => player.id !== id)
+        : current
+    );
+    setSelectedPlayerIds((current) =>
+      current.filter((playerId) => playerId !== String(id))
+    );
+  }
+
+  function toggleSelectedPlayer(playerId: string) {
+    setSelectedPlayerIds((current) =>
+      current.includes(playerId)
+        ? current.filter((id) => id !== playerId)
+        : [...current, playerId]
+    );
   }
 
   return (
-    <section aria-labelledby="calculator-heading" className="border-b border-gray-200 bg-white px-4 py-14 sm:px-6 sm:py-16">
+    <section
+      id="calculator"
+      aria-labelledby="calculator-heading"
+      className="scroll-mt-20 border-b border-gray-200 bg-white px-4 py-12 sm:px-6 sm:py-16"
+    >
       <div className="mx-auto w-full max-w-6xl">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Free calculator</p>
-          <h2 id="calculator-heading" className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-gray-950 sm:text-4xl">Settle a game before you create a room.</h2>
-          <p className="mt-4 text-base leading-8 text-gray-600">No account needed. Enter each player&apos;s total money in and final stack; payments appear after the bank balances, or after the table explicitly allocates an intentional discrepancy.</p>
+        <div className="grid gap-6 border-b border-gray-300 pb-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              Free poker settlement calculator
+            </p>
+            <h2
+              id="calculator-heading"
+              className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-gray-950 sm:text-4xl"
+            >
+              Enter the ledger. Get the payment list.
+            </h2>
+          </div>
+          <p className="text-sm leading-7 text-gray-600">
+            No account needed. If the totals do not match, correct the entry or
+            record exactly who agreed to cover the difference.
+          </p>
         </div>
 
-        <div className="mt-8 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_18px_50px_rgba(17,24,20,0.07)]">
-          <div className="overflow-x-auto">
-            <div className="min-w-[42rem]">
-              <div className="grid grid-cols-[minmax(12rem,1fr)_9rem_9rem_3rem] gap-3 border-b border-gray-200 bg-gray-50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-gray-500 sm:px-6">
-                <span>Player</span><span>Money in</span><span>Stacks out</span><span className="sr-only">Remove player</span>
+        <div className="mt-8 overflow-hidden rounded-2xl border border-gray-300 bg-[#f4f5f2]">
+          <header className="flex flex-col gap-3 border-b border-gray-300 bg-[#111512] px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <span aria-hidden className="h-2 w-2 rounded-full bg-emerald-400" />
+                <h3 className="font-semibold">Settlement worksheet</h3>
               </div>
-              <div className="divide-y divide-gray-100">
+              <p className="mt-1 text-xs text-gray-400">
+                Values update as you type. Nothing is saved.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={addPlayer}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 text-sm font-semibold text-white transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              <Plus aria-hidden className="h-4 w-4" />
+              Add player
+            </button>
+          </header>
+
+          <div className="grid lg:grid-cols-[minmax(0,1.18fr)_minmax(21rem,0.82fr)]">
+            <div className="bg-white p-4 sm:p-6 lg:border-r lg:border-gray-300">
+              <div className="mb-3 hidden grid-cols-[minmax(10rem,1fr)_8.5rem_8.5rem_2.75rem] gap-3 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 sm:grid">
+                <span>Player</span>
+                <span>Money in</span>
+                <span>Final stack</span>
+                <span className="sr-only">Remove player</span>
+              </div>
+
+              <div className="space-y-3">
                 {players.map((player, index) => (
-                  <div key={player.id} className="grid grid-cols-[minmax(12rem,1fr)_9rem_9rem_3rem] items-center gap-3 px-5 py-3 sm:px-6">
-                    <label className="sr-only" htmlFor={`player-${player.id}`}>Player {index + 1} name</label>
-                    <input id={`player-${player.id}`} value={player.name} onChange={(event) => updatePlayer(player.id, "name", event.target.value)} placeholder={`Player ${index + 1}`} className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10" />
-                    <label className="sr-only" htmlFor={`money-in-${player.id}`}>Money in for {player.name || `player ${index + 1}`}</label>
-                    <input id={`money-in-${player.id}`} inputMode="decimal" min="0" step="0.01" type="number" value={player.moneyIn} onChange={(event) => updatePlayer(player.id, "moneyIn", event.target.value)} placeholder="0.00" className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm tabular-nums text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10" />
-                    <label className="sr-only" htmlFor={`stacks-out-${player.id}`}>Stacks out for {player.name || `player ${index + 1}`}</label>
-                    <input id={`stacks-out-${player.id}`} inputMode="decimal" min="0" step="0.01" type="number" value={player.stacksOut} onChange={(event) => updatePlayer(player.id, "stacksOut", event.target.value)} placeholder="0.00" className="h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm tabular-nums text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10" />
-                    <button type="button" onClick={() => removePlayer(player.id)} disabled={players.length <= 2} aria-label={`Remove ${player.name || `player ${index + 1}`}`} className="grid h-11 w-11 place-items-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-30"><Minus aria-hidden className="h-4 w-4" /></button>
+                  <div
+                    key={player.id}
+                    className="grid grid-cols-[1fr_1fr_2.75rem] gap-3 rounded-xl border border-gray-200 bg-white p-3 sm:grid-cols-[minmax(10rem,1fr)_8.5rem_8.5rem_2.75rem] sm:items-center sm:border-0 sm:p-0"
+                  >
+                    <div className="col-span-3 sm:col-span-1">
+                      <label
+                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500 sm:sr-only"
+                        htmlFor={`player-${player.id}`}
+                      >
+                        Player {index + 1}
+                      </label>
+                      <input
+                        id={`player-${player.id}`}
+                        value={player.name}
+                        onChange={(event) =>
+                          updatePlayer(player.id, "name", event.target.value)
+                        }
+                        placeholder={`Player ${index + 1}`}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500 sm:sr-only"
+                        htmlFor={`money-in-${player.id}`}
+                      >
+                        Money in
+                      </label>
+                      <input
+                        id={`money-in-${player.id}`}
+                        inputMode="decimal"
+                        min="0"
+                        step="0.01"
+                        type="number"
+                        value={player.moneyIn}
+                        onChange={(event) =>
+                          updatePlayer(player.id, "moneyIn", event.target.value)
+                        }
+                        placeholder="0.00"
+                        aria-label={`Money in for ${player.name || `player ${index + 1}`}`}
+                        className={`${inputClass} tabular-nums`}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500 sm:sr-only"
+                        htmlFor={`stacks-out-${player.id}`}
+                      >
+                        Final stack
+                      </label>
+                      <input
+                        id={`stacks-out-${player.id}`}
+                        inputMode="decimal"
+                        min="0"
+                        step="0.01"
+                        type="number"
+                        value={player.stacksOut}
+                        onChange={(event) =>
+                          updatePlayer(player.id, "stacksOut", event.target.value)
+                        }
+                        placeholder="0.00"
+                        aria-label={`Final stack for ${player.name || `player ${index + 1}`}`}
+                        className={`${inputClass} tabular-nums`}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removePlayer(player.id)}
+                      disabled={players.length <= 2}
+                      aria-label={`Remove ${player.name || `player ${index + 1}`}`}
+                      className="mt-[1.375rem] grid h-11 w-11 place-items-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-30 sm:mt-0"
+                    >
+                      <Minus aria-hidden className="h-4 w-4" />
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
+
+            <aside aria-live="polite" className="min-w-0 p-4 sm:p-6">
+              <div className="grid grid-cols-2 gap-x-5 border-b border-gray-300 pb-5">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+                    Money in
+                  </p>
+                  <p className="mt-1 text-xl font-semibold tabular-nums text-gray-950">
+                    {formatCurrency(result.totalIn)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+                    Final stacks
+                  </p>
+                  <p className="mt-1 text-xl font-semibold tabular-nums text-gray-950">
+                    {formatCurrency(result.totalOut)}
+                  </p>
+                </div>
+              </div>
+
+              {result.balanced ? (
+                <div className="flex items-start gap-3 border-b border-gray-300 py-5">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-emerald-700 text-white">
+                    <Check aria-hidden className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <p className="font-semibold text-gray-950">Bank balanced</p>
+                    <p className="mt-1 text-sm leading-6 text-gray-600">
+                      The payment list uses the recorded results as entered.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="border-b border-gray-300 py-5">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle
+                      aria-hidden
+                      className="mt-0.5 h-5 w-5 shrink-0 text-amber-700"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-950">
+                        {formatCurrency(discrepancyAmount)} needs a decision
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-gray-600">
+                        The ledger is {formatSignedNet(result.difference)} out.
+                        Correct a mistake above, or record how the table wants to
+                        absorb it.
+                      </p>
+                    </div>
+                  </div>
+
+                  <fieldset className="mt-5 space-y-2">
+                    <legend className="sr-only">Discrepancy allocation</legend>
+                    <label
+                      className={`block cursor-pointer rounded-xl border p-4 transition ${
+                        allocationMethod === "proportional"
+                          ? "border-gray-950 bg-white"
+                          : "border-gray-300 bg-transparent hover:bg-white/70"
+                      }`}
+                    >
+                      <span className="flex gap-3">
+                        <input
+                          type="radio"
+                          name="calculator-allocation"
+                          checked={allocationMethod === "proportional"}
+                          onChange={() => setAllocationMethod("proportional")}
+                          className="mt-1 h-4 w-4"
+                        />
+                        <span>
+                          <span className="block text-sm font-semibold text-gray-950">
+                            {presetTitle}
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-gray-600">
+                            {presetDescription}
+                          </span>
+                        </span>
+                      </span>
+                    </label>
+                    <label
+                      className={`block cursor-pointer rounded-xl border p-4 transition ${
+                        allocationMethod === "selected"
+                          ? "border-gray-950 bg-white"
+                          : "border-gray-300 bg-transparent hover:bg-white/70"
+                      }`}
+                    >
+                      <span className="flex gap-3">
+                        <input
+                          type="radio"
+                          name="calculator-allocation"
+                          checked={allocationMethod === "selected"}
+                          onChange={() => setAllocationMethod("selected")}
+                          className="mt-1 h-4 w-4"
+                        />
+                        <span>
+                          <span className="block text-sm font-semibold text-gray-950">
+                            Choose specific players
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-gray-600">
+                            Assign the difference only to selected eligible {affectedSide}.
+                          </span>
+                        </span>
+                      </span>
+                    </label>
+                  </fieldset>
+
+                  {allocationMethod === "selected" ? (
+                    <fieldset className="mt-4">
+                      <legend className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-gray-600">
+                        <Users aria-hidden className="h-3.5 w-3.5" />
+                        Select {affectedSide}
+                      </legend>
+                      <div className="mt-2 divide-y divide-gray-200 rounded-xl border border-gray-300 bg-white px-3">
+                        {result.eligiblePlayers.map((player) => (
+                          <label
+                            key={player.playerId}
+                            className="flex min-h-11 cursor-pointer items-center justify-between gap-3 py-2 text-sm"
+                          >
+                            <span className="font-medium text-gray-800">
+                              {player.name}
+                            </span>
+                            <span className="flex items-center gap-3">
+                              <span className="text-xs tabular-nums text-gray-500">
+                                {formatCurrency(Math.abs(player.net))} capacity
+                              </span>
+                              <input
+                                type="checkbox"
+                                checked={selectedPlayerIds.includes(
+                                  player.playerId
+                                )}
+                                onChange={() =>
+                                  toggleSelectedPlayer(player.playerId)
+                                }
+                                className="h-4 w-4"
+                              />
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                      {!result.allocationValid ? (
+                        <p className="mt-2 text-xs leading-5 text-red-700">
+                          Select enough result value to cover {formatCurrency(discrepancyAmount)}.
+                          {" "}Selected: {formatCurrency(result.selectedCapacity)}.
+                        </p>
+                      ) : null}
+                    </fieldset>
+                  ) : null}
+                </div>
+              )}
+
+              <div className="pt-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+                      {result.balanced ? "Payment list" : "Adjusted payment list"}
+                    </p>
+                    {!result.balanced && result.allocationValid ? (
+                      <p className="mt-1 text-xs text-gray-500">
+                        Includes the {formatCurrency(discrepancyAmount)} recorded adjustment.
+                      </p>
+                    ) : null}
+                  </div>
+                  <span className="text-xs font-medium text-gray-500">
+                    {result.allocationValid
+                      ? `${result.transfers.length} ${result.transfers.length === 1 ? "payment" : "payments"}`
+                      : "Waiting"}
+                  </span>
+                </div>
+
+                {result.allocationValid ? (
+                  result.transfers.length ? (
+                    <ol className="mt-4 divide-y divide-gray-200 border-y border-gray-300">
+                      {result.transfers.map((transfer) => (
+                        <li
+                          key={`${transfer.fromPlayerId}-${transfer.toPlayerId}`}
+                          className="flex items-center gap-3 py-3 text-sm"
+                        >
+                          <span className="min-w-0 flex-1">
+                            <strong className="font-semibold text-gray-950">
+                              {transfer.from}
+                            </strong>
+                            <ArrowRight
+                              aria-label="pays"
+                              className="mx-2 inline h-3.5 w-3.5 text-gray-400"
+                            />
+                            <strong className="font-semibold text-gray-950">
+                              {transfer.to}
+                            </strong>
+                          </span>
+                          <span className="shrink-0 font-semibold tabular-nums text-gray-950">
+                            {formatCurrency(transfer.amount)}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p className="mt-3 text-sm text-gray-600">
+                      No payments needed — everyone is square.
+                    </p>
+                  )
+                ) : (
+                  <p className="mt-3 text-sm leading-6 text-gray-600">
+                    Choose players who can cover the full difference to reveal
+                    the payments.
+                  </p>
+                )}
+
+                <a
+                  href="/create"
+                  className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg bg-gray-950 px-4 text-sm font-semibold text-white transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
+                >
+                  Track the next game in Mainpot
+                </a>
+              </div>
+            </aside>
           </div>
-          <div className="border-t border-gray-200 px-5 py-4 sm:px-6">
-            <button type="button" onClick={addPlayer} className="inline-flex h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-700 transition hover:border-gray-400 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"><Plus aria-hidden className="h-4 w-4" />Add player</button>
-          </div>
-          <div className="grid border-t border-gray-200 sm:grid-cols-3 sm:divide-x sm:divide-gray-200">
-            <div className="px-5 py-4 sm:px-6"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Money in</p><p className="mt-1 text-xl font-semibold tabular-nums text-gray-950">{formatCurrency(result.totalIn)}</p></div>
-            <div className="border-t border-gray-200 px-5 py-4 sm:border-t-0 sm:px-6"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Stacks out</p><p className="mt-1 text-xl font-semibold tabular-nums text-gray-950">{formatCurrency(result.totalOut)}</p></div>
-            <div className={`border-t px-5 py-4 sm:border-t-0 sm:px-6 ${result.balanced ? "bg-emerald-50/70" : "bg-amber-50/70"}`}><p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">{result.balanced ? "Bank status" : "Mismatch"}</p><p className={`mt-1 text-xl font-semibold tabular-nums ${result.balanced ? "text-emerald-800" : "text-amber-900"}`}>{result.balanced ? "Balanced" : formatSignedNet(result.difference)}</p></div>
-          </div>
-          {result.balanced ? (
-            <div className="border-t border-emerald-100 bg-emerald-50/70 px-5 py-5 sm:px-6">
-              <p className="text-sm font-semibold text-emerald-900">Payment list</p>
-              {result.transfers.length ? <ul className="mt-3 divide-y divide-emerald-100 rounded-xl border border-emerald-100 bg-white/75">{result.transfers.map((transfer) => <li key={`${transfer.fromPlayerId}-${transfer.toPlayerId}`} className="flex items-center justify-between gap-4 px-4 py-3 text-sm"><span className="text-gray-700"><strong className="font-semibold text-gray-950">{transfer.from}</strong> pays <strong className="font-semibold text-gray-950">{transfer.to}</strong></span><span className="shrink-0 font-semibold tabular-nums text-emerald-800">{formatCurrency(transfer.amount)}</span></li>)}</ul> : <p className="mt-1 text-sm text-emerald-800">No payments needed — everyone is square.</p>}
-              <a href="/create" className="mt-5 inline-flex h-11 items-center justify-center rounded-lg bg-gray-950 px-4 text-sm font-semibold text-white transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">Track the next game in Mainpot</a>
-            </div>
-          ) : <div className="border-t border-amber-100 bg-amber-50/70 px-5 py-4 text-sm leading-6 text-amber-900 sm:px-6">Add or correct an entry until money in equals stacks out. Payments stay hidden until the bank is balanced.</div>}
         </div>
       </div>
     </section>

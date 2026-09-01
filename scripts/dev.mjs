@@ -41,6 +41,7 @@ run(supabaseCommand, ["migration", "up", "--local"]);
 const local = readLocalConfig();
 const apiUrl = local.API_URL;
 const publishableKey = local.PUBLISHABLE_KEY ?? local.ANON_KEY;
+const serviceRoleKey = local.SERVICE_ROLE_KEY;
 
 if (!apiUrl || !publishableKey) {
   console.error("Supabase did not report an API URL and publishable key.");
@@ -61,6 +62,7 @@ const child = spawn(nextCommand, ["dev", "--port", "3000", ...process.argv.slice
     // The existing variable name is retained for compatibility with hosted
     // projects; current local stacks supply a publishable key here.
     NEXT_PUBLIC_SUPABASE_ANON_KEY: publishableKey,
+    ...(serviceRoleKey ? { SUPABASE_SERVICE_ROLE_KEY: serviceRoleKey } : {}),
     NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
     NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: "false",
   },

@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy, QrCode, Share2, X } from "lucide-react";
 import type { Game, GameStatus } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
-import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
 import { formatCurrency } from "@/lib/format";
@@ -42,6 +41,8 @@ export default function GameHeader({
   const { toast } = useToast();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteUrl, setInviteUrl] = useState("");
+  const inviteDialogRef = useRef<HTMLDivElement>(null);
+  const inviteTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setInviteUrl(`${window.location.origin}/game/${game.code}`);
@@ -51,16 +52,38 @@ export default function GameHeader({
     if (!inviteOpen) return;
 
     const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const fallbackFocus = inviteTriggerRef.current;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setInviteOpen(false);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setInviteOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !inviteDialogRef.current) return;
+      const focusable = inviteDialogRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
 
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
+    requestAnimationFrame(() => inviteDialogRef.current?.querySelector<HTMLElement>("button")?.focus());
 
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
+      requestAnimationFrame(() => previousFocus?.focus?.() ?? fallbackFocus?.focus());
     };
   }, [inviteOpen]);
 
@@ -96,24 +119,14 @@ export default function GameHeader({
     }
   }
 
-  async function handleCopyLink() {
-    const url = inviteUrl || `${window.location.origin}/game/${game.code}`;
-    try {
-      await copyText(url);
-      toast("Invite link copied", "success");
-    } catch {
-      toast("Couldn't copy the invite link.", "error");
-    }
-  }
-
   const status = statusMeta[game.status];
 
   return (
     <header className="pt-8 md:pt-12">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-gray-900">
               {game.name}
             </h1>
             <Badge variant={status.variant}>{status.label}</Badge>
@@ -121,11 +134,12 @@ export default function GameHeader({
           <p className="mt-1 text-sm text-gray-500">Hosted by {game.host_name}</p>
         </div>
         {isHost ? (
-          <div className="shrink-0 text-right">
+          <div className="w-full min-w-0 text-left sm:w-auto sm:shrink-0 sm:text-right">
             <ConfirmButton
               variant="secondary"
               size="sm"
-              confirmLabel="End game and start cash-outs?"
+              confirmLabel="Start cash-outs?"
+              compact
               onConfirm={onEndGame}
               loading={ending}
               disabled={pendingPot > 0}
@@ -152,25 +166,27 @@ export default function GameHeader({
             onClick={handleCopy}
             aria-label={`Copy room code ${game.code}`}
             title="Copy room code"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-600 transition-colors duration-150 hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:h-9 sm:w-9"
+            className="hidden h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-600 transition-colors duration-150 hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:grid sm:h-9 sm:w-9"
           >
             <Copy aria-hidden size={18} />
           </button>
           <button
+            ref={inviteTriggerRef}
             type="button"
             onClick={() => setInviteOpen(true)}
-            aria-label="Show invite QR code"
-            title="Show QR code"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-colors duration-150 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:h-9 sm:w-9"
+            aria-label="Invite players"
+            title="Invite players"
+            className="hidden h-11 shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700 shadow-sm transition-colors duration-150 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 max-sm:flex sm:h-9 sm:w-9 sm:justify-center sm:p-0"
           >
             <QrCode aria-hidden size={18} />
+            <span className="sm:hidden">Invite</span>
           </button>
           <button
             type="button"
             onClick={handleShare}
             aria-label={`Share invite for ${game.name}`}
             title="Share invite"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-colors duration-150 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:h-9 sm:w-9"
+            className="hidden h-11 w-11 shrink-0 place-items-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-colors duration-150 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:grid sm:h-9 sm:w-9"
           >
             <Share2 aria-hidden size={18} />
           </button>
@@ -224,9 +240,10 @@ export default function GameHeader({
         >
           <div
             role="dialog"
+            ref={inviteDialogRef}
             aria-modal="true"
             aria-labelledby="invite-dialog-title"
-            className="w-full rounded-t-2xl border border-gray-200 bg-white p-6 shadow-2xl sm:max-w-sm sm:rounded-2xl"
+            className="max-h-[100dvh] w-full overflow-y-auto overscroll-contain rounded-t-2xl border border-gray-200 bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:max-w-sm sm:rounded-2xl sm:pb-6"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -276,11 +293,11 @@ export default function GameHeader({
               Scan with your camera · no account required
             </p>
 
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              <Button variant="secondary" onClick={handleCopyLink} leftIcon={<Copy size={16} />}>Copy link</Button>
-              <Button onClick={handleShare} leftIcon={<Share2 size={16} />}>Share invite</Button>
-            </div>
             <FriendInviteList gameId={game.id} isHost={isHost} />
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button type="button" onClick={handleCopy} className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-medium text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">Copy code</button>
+              <button type="button" onClick={handleShare} className="rounded-lg bg-gray-950 px-3 py-2.5 text-sm font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">Share invite</button>
+            </div>
           </div>
         </div>
       ) : null}

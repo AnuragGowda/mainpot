@@ -59,6 +59,7 @@ function eventText(event: GameEvent, actorName: string | null): string {
   const amount = event.amount == null ? null : formatCurrency(event.amount);
   const actor = actorName ?? "The host";
   const possession = actorName === playerName ? "their" : `${playerName}’s`;
+  const entryType = event.metadata.buy_in_type === "rebuy" ? "rebuy" : "buy-in";
 
   switch (event.event_type) {
     case "game_created":
@@ -68,11 +69,11 @@ function eventText(event: GameEvent, actorName: string | null): string {
     case "buy_in_added":
       return `${playerName} ${event.metadata.buy_in_type === "rebuy" ? "rebought" : "bought in"} for ${amount}${event.metadata.fronted_by_name ? `, fronted by ${event.metadata.fronted_by_name}` : ""}`;
     case "buy_in_updated":
-      return `${actor} edited ${possession} buy-in from ${formatCurrency(Number(event.metadata.previous_amount ?? 0))} to ${amount}`;
+      return `${actor} edited ${possession} ${entryType} from ${formatCurrency(Number(event.metadata.previous_amount ?? 0))} to ${amount}`;
     case "buy_in_removed":
-      return `${actor} removed ${possession} ${amount} buy-in`;
+      return `${actor} removed ${possession} ${amount} ${entryType}`;
     case "buy_in_verified":
-      return `${actor} verified ${possession} ${amount} buy-in`;
+      return `${actor} verified ${possession} ${amount} ${entryType}`;
     case "player_left":
       return `${playerName} left the table`;
     case "player_removed":

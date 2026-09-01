@@ -50,10 +50,55 @@ project or deploying the application outside the local development stack.
    ```sh
    NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
    ```
 
    Replace the placeholders with the **Project URL** and **anon key** from
-   step 2.
+   step 2. Copy the **service role key** only into the server deployment
+   environment; it must never be exposed through a `NEXT_PUBLIC_` variable.
+
+3. To enable installable-game push alerts, generate a VAPID key pair and add
+   the resulting values to the server environment:
+
+   ```sh
+   npm run push:generate-keys
+   ```
+
+   ```sh
+   VAPID_PUBLIC_KEY=your-public-key
+   VAPID_PRIVATE_KEY=your-private-key
+   VAPID_SUBJECT=mailto:your-private-support-address@example.com
+   ```
+
+   Keep the private key server-only. Mainpot hides the game-alert prompt until
+   the service role key and all three VAPID values are configured.
+
+4. Product Ops telemetry is optional and disabled by default. It uses the
+   existing server-only `SUPABASE_SERVICE_ROLE_KEY` to append to Mainpot's
+   private outbox; it does not call a Product Ops URL. To enable it, add:
+
+   ```sh
+   NEXT_PUBLIC_PRODUCT_OPS_ENABLED=true
+   PRODUCT_OPS_ACTOR_SALT=replace-with-a-long-random-server-secret
+   PRODUCT_OPS_COLLECTOR_KEY=replace-with-a-separate-random-secret-of-at-least-32-characters
+   MAINPOT_CANARY_KEY=replace-with-a-separate-random-secret-of-at-least-32-characters
+   ```
+
+   Do not prefix either secret with `NEXT_PUBLIC_`. Deploy the latest
+   `product_ops_outbox` migrations, then configure the tailnet collector with
+   the same collector key and `GET /api/product-ops/events`. It should advance
+   its own `after` cursor only after persisting each returned ascending page.
+   The collector does not receive a Supabase key, and the browser cannot read
+   or write the outbox table.
+
+   The migration schedules the hosted-Supabase `purge-expired-product-ops-outbox`
+   job daily. It deletes only pseudonymous outbox rows whose `received_at` is
+   older than 90 days.
+
+   A monitor can use `POST /api/health/canary` with
+   `Authorization: Bearer <MAINPOT_CANARY_KEY>` to check a dedicated private
+   canary table plus its Realtime publication. The probe inserts and removes
+   only its own synthetic row, never a customer game.
 
 ## 5. Configure authentication (optional)
 
@@ -139,9 +184,11 @@ separate production Supabase project. Do not reuse local or staging keys.
    production project. Confirm the backup retention and a restoration owner
    before inviting beta users.
 3. Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `NEXT_PUBLIC_SITE_URL`, and `NEXT_PUBLIC_SUPPORT_EMAIL` to the production
-   environment only. Keep staging in a separate deployment and Supabase
-   project with its own keys.
+   `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL`,
+   `NEXT_PUBLIC_SUPPORT_EMAIL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and
+   `VAPID_SUBJECT` to the production environment. Keep server-only values out
+   of browser-visible variables, and keep staging in a separate deployment and
+   Supabase project with its own keys.
 4. Configure an uptime monitor to request `https://<production-domain>/api/health`
    every few minutes and alert on a non-200 response. Connect your host's error
    tracking integration (for example, its built-in runtime error alerts) and
@@ -161,6 +208,9 @@ separate production Supabase project. Do not reuse local or staging keys.
 4. Cash out every player, enter settlement, finalize the game, and confirm the
    result survives a page refresh and appears in account history.
 5. Use the support link and check that it opens the configured private inbox.
+6. Install Mainpot on one iPhone/iPad and one Chromium device, enable game
+   alerts, then verify player-joined, cash-out, and finalized-settlement pushes
+   open the correct private game.
 
 ### Beta release evidence
 

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import GameSetupShell from "@/components/GameSetupShell";
 import { useToast } from "@/components/ui/Toast";
 import { createGame, getGame, recordGameEvent } from "@/lib/data";
@@ -12,11 +13,19 @@ import { getGameTemplates, saveGameTemplate, type GameTemplate } from "@/lib/acc
 import { getCurrentUser, getCurrentUserId } from "@/lib/auth-client";
 import { trackProductOpsEvent } from "@/lib/product-ops";
 import { getPlayerName, getSessionId, setActiveGame, setPlayerName } from "@/lib/session";
+import { markPostGameEntry } from "@/lib/push-client";
 
 interface FormErrors {
   name?: string;
   gameName?: string;
   buyIn?: string;
+}
+
+function toNumericAmount(value: string) {
+  const numericCharacters = value.replace(/[^0-9.]/g, "");
+  const [whole, ...decimalParts] = numericCharacters.split(".");
+
+  return decimalParts.length ? `${whole}.${decimalParts.join("")}` : whole;
 }
 
 export default function CreateGamePage() {
@@ -112,6 +121,7 @@ export default function CreateGamePage() {
         }
       }
       setActiveGame(code);
+      markPostGameEntry(code);
       window.sessionStorage.setItem("ante_post_create_source_game", code);
       toast("Game created!", "success");
       router.push(`/game/${code}`);
@@ -143,21 +153,22 @@ export default function CreateGamePage() {
             {templates.length ? (
               <label htmlFor="create-template" className="block text-sm font-medium text-gray-700">
                 Start from a recurring game <span className="font-normal text-gray-400">(optional)</span>
-                <select
-                  id="create-template"
-                  defaultValue=""
-                  onChange={(event) => {
-                    const template = templates.find((item) => item.id === event.target.value);
+                <Select
+                  onValueChange={(value) => {
+                    const template = templates.find((item) => item.id === value);
                     if (!template) return;
                     setGameName(template.game_name);
                     setBuyIn(String(template.buy_in_amount));
                     setPreferredRoster(template.preferred_roster.join(", "));
                   }}
-                  className="mt-2 h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10"
                 >
-                  <option value="">Choose a template</option>
-                  {templates.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
-                </select>
+                  <SelectTrigger id="create-template" className="mt-2">
+                    <SelectValue placeholder="Choose a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map((template) => <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </label>
             ) : null}
             <Input
@@ -180,13 +191,14 @@ export default function CreateGamePage() {
             <Input
               id="create-buy-in"
               label="Buy-in amount"
-              type="number"
+              type="text"
               min={1}
               step={0.01}
               inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
               prefix="$"
               value={buyIn}
-              onChange={(event) => setBuyIn(event.target.value)}
+              onChange={(event) => setBuyIn(toNumericAmount(event.target.value))}
               placeholder="20"
               error={errors.buyIn}
             />

@@ -137,6 +137,60 @@ create table if not exists game_feedback (
 );
 alter table game_feedback enable row level security;
 
+create table if not exists push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  endpoint text not null unique check (char_length(endpoint) between 12 and 2048),
+  p256dh text not null check (char_length(p256dh) between 8 and 512),
+  auth text not null check (char_length(auth) between 8 and 512),
+  user_agent text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists push_subscriptions_user_idx
+  on push_subscriptions(user_id);
+alter table push_subscriptions enable row level security;
+
+create table if not exists push_dispatches (
+  id uuid primary key default gen_random_uuid(),
+  game_id uuid not null references games(id) on delete cascade,
+  event_type text not null check (event_type in (
+    'player_joined', 'game_settling', 'game_finalized'
+  )),
+  dedupe_key text not null check (char_length(dedupe_key) between 1 and 128),
+  created_at timestamptz not null default now(),
+  unique(game_id, dedupe_key)
+);
+alter table push_dispatches enable row level security;
+
+-- Append-only, server-written Product Ops events. A private collector reads
+-- these by sequence, while browser-facing database roles receive no access.
+create table if not exists product_ops_outbox (
+  sequence bigint generated always as identity primary key,
+  environment text not null check (environment in ('development', 'staging', 'production')),
+  event_name text not null check (char_length(event_name) between 1 and 128),
+  occurred_at timestamptz not null,
+  actor_id text not null check (char_length(actor_id) between 1 and 128),
+  session_id text not null check (char_length(session_id) between 1 and 128),
+  journey_id text,
+  properties jsonb not null default '{}'::jsonb,
+  idempotency_key text not null unique check (char_length(idempotency_key) between 1 and 128),
+  received_at timestamptz not null default now()
+);
+create index if not exists product_ops_outbox_environment_sequence_idx
+  on product_ops_outbox (environment, sequence);
+create index if not exists product_ops_outbox_received_at_idx
+  on product_ops_outbox (received_at);
+alter table product_ops_outbox enable row level security;
+
+-- A server-only probe table exercises database and Realtime health without
+-- mutating customer games.
+create table if not exists product_ops_canary (
+  probe_id uuid primary key,
+  created_at timestamptz not null default now()
+);
+alter table product_ops_canary enable row level security;
+
 do $$
 begin
   if not exists (
@@ -147,12 +201,38 @@ begin
   ) then
     alter publication supabase_realtime add table game_events;
   end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'product_ops_canary'
+  ) then
+    alter publication supabase_realtime add table product_ops_canary;
+  end if;
 end $$;
 
 alter table profiles enable row level security;
 alter table friendships enable row level security;
 alter table game_participants enable row level security;
 alter table game_events enable row level security;
+
+create policy "users read own push subscriptions" on push_subscriptions
+  for select to authenticated using (auth.uid() = user_id);
+create policy "users create own push subscriptions" on push_subscriptions
+  for insert to authenticated with check (auth.uid() = user_id);
+create policy "users update own push subscriptions" on push_subscriptions
+  for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "users delete own push subscriptions" on push_subscriptions
+  for delete to authenticated using (auth.uid() = user_id);
+grant select, insert, update, delete on push_subscriptions to authenticated;
+revoke all on push_dispatches from anon, authenticated;
+revoke all on product_ops_outbox from anon, authenticated, service_role;
+revoke all on sequence product_ops_outbox_sequence_seq from anon, authenticated, service_role;
+grant select, insert on product_ops_outbox to service_role;
+grant usage on sequence product_ops_outbox_sequence_seq to service_role;
+revoke all on product_ops_canary from anon, authenticated, service_role;
+grant select, insert, delete on product_ops_canary to service_role;
 
 -- Replace the prototype's public-write policies. Anonymous Supabase users are
 -- still role `authenticated`, so guests can join without creating an account.
@@ -190,12 +270,23 @@ as $$
   );
 $$;
 
+create or replace function public.game_has_status(target_game_id uuid, target_status text)
+returns boolean language sql stable security definer set search_path = public
+as $$
+  select exists (
+    select 1 from games
+    where id = target_game_id and status = target_status
+  );
+$$;
+
 revoke all on function public.is_game_participant(uuid) from public;
 revoke all on function public.is_game_host(uuid) from public;
 revoke all on function public.owns_player(uuid) from public;
+revoke all on function public.game_has_status(uuid, text) from public;
 grant execute on function public.is_game_participant(uuid) to authenticated;
 grant execute on function public.is_game_host(uuid) to authenticated;
 grant execute on function public.owns_player(uuid) to authenticated;
+grant execute on function public.game_has_status(uuid, text) to authenticated;
 
 create policy "games read by code" on games for select to authenticated using (true);
 create policy "games create as host" on games for insert to authenticated
@@ -208,27 +299,30 @@ create policy "games host delete" on games for delete to authenticated
 create policy "players read same game" on players for select to authenticated
   using (auth.uid() = user_id or public.is_game_participant(game_id));
 create policy "players join as self" on players for insert to authenticated
-  with check (auth.uid() = user_id);
+  with check (auth.uid() = user_id and public.game_has_status(game_id, 'active'));
 create policy "players self or host update" on players for update to authenticated
-  using (auth.uid() = user_id or public.is_game_host(game_id));
+  using (public.game_has_status(game_id, 'active') and (auth.uid() = user_id or public.is_game_host(game_id)))
+  with check (public.game_has_status(game_id, 'active') and (auth.uid() = user_id or public.is_game_host(game_id)));
 create policy "players self or host delete" on players for delete to authenticated
-  using (auth.uid() = user_id or public.is_game_host(game_id));
+  using (public.game_has_status(game_id, 'active') and (auth.uid() = user_id or public.is_game_host(game_id)));
 
 create policy "buy ins read by participants" on buy_ins for select to authenticated
   using (public.is_game_participant(game_id));
 create policy "buy ins create by player or host" on buy_ins for insert to authenticated
-  with check (public.owns_player(player_id) or public.is_game_host(game_id));
+  with check (public.game_has_status(game_id, 'active') and (public.owns_player(player_id) or public.is_game_host(game_id)));
 create policy "buy ins update by player or host" on buy_ins for update to authenticated
-  using (public.owns_player(player_id) or public.is_game_host(game_id));
+  using (public.game_has_status(game_id, 'active') and (public.owns_player(player_id) or public.is_game_host(game_id)))
+  with check (public.game_has_status(game_id, 'active') and (public.owns_player(player_id) or public.is_game_host(game_id)));
 create policy "buy ins delete by player or host" on buy_ins for delete to authenticated
-  using (public.owns_player(player_id) or public.is_game_host(game_id));
+  using (public.game_has_status(game_id, 'active') and (public.owns_player(player_id) or public.is_game_host(game_id)));
 
 create policy "cash outs read by participants" on cash_outs for select to authenticated
   using (public.is_game_participant(game_id));
 create policy "cash outs create by player or host" on cash_outs for insert to authenticated
-  with check (public.owns_player(player_id) or public.is_game_host(game_id));
+  with check (public.game_has_status(game_id, 'settling') and (public.owns_player(player_id) or public.is_game_host(game_id)));
 create policy "cash outs update by player or host" on cash_outs for update to authenticated
-  using (public.owns_player(player_id) or public.is_game_host(game_id));
+  using (public.game_has_status(game_id, 'settling') and (public.owns_player(player_id) or public.is_game_host(game_id)))
+  with check (public.game_has_status(game_id, 'settling') and (public.owns_player(player_id) or public.is_game_host(game_id)));
 
 create policy "events read by participants" on game_events for select to authenticated
   using (public.is_game_participant(game_id));
@@ -324,3 +418,36 @@ drop trigger if exists on_game_ended on games;
 create trigger on_game_ended
   after update on games
   for each row execute procedure public.handle_game_ended();
+
+-- Retain pseudonymous Product Ops events for 90 days. The hosted Supabase
+-- cron job is idempotently replaced when this schema is applied again.
+create or replace function public.purge_expired_product_ops_outbox()
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  delete from public.product_ops_outbox
+  where received_at < now() - interval '90 days';
+$$;
+revoke all on function public.purge_expired_product_ops_outbox()
+  from public, anon, authenticated, service_role;
+
+create extension if not exists pg_cron;
+do $$
+declare
+  existing_job bigint;
+begin
+  select jobid into existing_job
+  from cron.job
+  where jobname = 'purge-expired-product-ops-outbox';
+  if existing_job is not null then
+    perform cron.unschedule(existing_job);
+  end if;
+  perform cron.schedule(
+    'purge-expired-product-ops-outbox',
+    '41 3 * * *',
+    'select public.purge_expired_product_ops_outbox()'
+  );
+end;
+$$;

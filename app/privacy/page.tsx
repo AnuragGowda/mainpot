@@ -18,6 +18,7 @@ export default function PrivacyPage() {
       <LegalSection title="Information we handle">
         <p>Game data can include display names, room details, buy-ins, rebuys, cash-outs, activity history, settlement transfers, and payment status. Optional profiles can include a username, bio, avatar, and payment handles.</p>
         <p>If you create an account or use Google sign-in, we receive basic account information such as your email address, name, avatar, and an authentication identifier. We do not receive your Google password.</p>
+        <p>If you turn on game alerts, we store a device-specific push subscription and basic browser information needed to deliver and troubleshoot those alerts. Mainpot does not use that subscription for advertising.</p>
       </LegalSection>
 
       <LegalSection title="How we use information">
@@ -30,12 +31,13 @@ export default function PrivacyPage() {
       </LegalSection>
 
       <LegalSection title="Service providers and sharing">
-        <p>Mainpot uses Supabase for database, synchronization, and authentication services. Google processes information when you choose Google sign-in. GitHub processes information you submit through public feedback or issue forms.</p>
+        <p>Mainpot uses Supabase for database, synchronization, and authentication services. Your browser or operating system&apos;s push service delivers optional game alerts. Google processes information when you choose Google sign-in. GitHub processes information you submit through public feedback or issue forms.</p>
         <p>Game information is shared with people who have access to that game. We do not sell personal information or use game data for targeted advertising.</p>
       </LegalSection>
 
       <LegalSection title="Retention, choices, and deletion">
         <p>Account game history is retained while needed to provide the service. Temporary request counters are retained briefly to prevent abuse, and unused anonymous authentication records are periodically removed. You can avoid optional profile fields and use guest mode where available.</p>
+        <p>Game alerts are optional. You can turn them off from the game room at any time; expired browser subscriptions are removed automatically.</p>
         <p>Permanent-account holders can export their data or request deletion from the Dashboard. For help, contact <a className="font-medium text-gray-900 underline" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a> privately rather than posting personal information in a public issue.</p>
       </LegalSection>
 

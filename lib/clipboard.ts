@@ -12,8 +12,18 @@ export async function copyText(text: string): Promise<void> {
     typeof navigator !== "undefined" &&
     navigator.clipboard
   ) {
-    await navigator.clipboard.writeText(text);
-    return;
+    try {
+      await Promise.race([
+        navigator.clipboard.writeText(text),
+        new Promise<never>((_, reject) => {
+          window.setTimeout(() => reject(new Error("Clipboard timed out")), 1_000);
+        }),
+      ]);
+      return;
+    } catch {
+      // Some mobile browsers expose Clipboard but leave the permission request
+      // unresolved. Fall through to the synchronous selection-based copy.
+    }
   }
 
   const textarea = document.createElement("textarea");

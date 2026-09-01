@@ -16,6 +16,8 @@ export interface ConfirmButtonProps
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  /** Uses a tighter two-button layout for constrained mobile toolbars. */
+  compact?: boolean;
   children: ReactNode;
 }
 
@@ -31,6 +33,7 @@ export default function ConfirmButton({
   variant = "danger",
   size = "md",
   loading = false,
+  compact = false,
   children,
   className,
   ...rest
@@ -52,17 +55,17 @@ export default function ConfirmButton({
 
   if (confirming) {
     return (
-      <span className="flex w-full items-center gap-1.5 sm:inline-flex sm:w-auto">
+      <span className={["flex w-full min-w-0 items-center gap-1.5 sm:inline-flex sm:w-auto", compact ? "text-sm" : ""].join(" ")}>
         <Button
           variant={variant}
           size={size}
-          className={["flex-1 sm:flex-none", className ?? ""].join(" ")}
+          className={["min-w-0 flex-1 sm:flex-none", compact ? "whitespace-normal leading-tight" : "", className ?? ""].join(" ")}
           onClick={handleConfirm}
           {...rest}
         >
           {confirmLabel}
         </Button>
-        <Button variant="ghost" size={size} className="flex-1 sm:flex-none" onClick={cancel}>
+        <Button variant="ghost" size={size} className="min-w-0 flex-1 sm:flex-none" onClick={cancel}>
           {cancelLabel}
         </Button>
       </span>

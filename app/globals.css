@@ -296,7 +296,7 @@ body {
 }
 
 .ante-intro {
-  animation: ante-rise 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: ante-rise 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .ante-intro-delay-1 { animation-delay: 140ms; }

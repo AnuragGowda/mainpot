@@ -39,6 +39,14 @@ function statLabel(value: string, label: string, x: number) {
   );
 }
 
+function tableSeat(index: number, count: number): { x: number; y: number } {
+  const angle = -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(count, 1);
+  return {
+    x: 260 + Math.cos(angle) * 244,
+    y: 144 + Math.sin(angle) * 124,
+  };
+}
+
 /** A self-contained SVG so preview and exported PNG always match exactly. */
 const RecapStoryCard = forwardRef<SVGSVGElement, RecapStoryCardProps>(function RecapStoryCard(
   { data, privacy, mode, decorative = false, featuredPlayerId, persona },
@@ -55,6 +63,9 @@ const RecapStoryCard = forwardRef<SVGSVGElement, RecapStoryCardProps>(function R
     privacy.showPlayerNames
   );
   const title = clip(data.gameName || "Poker night", 30);
+  const illustratedPlayers = data.players
+    .filter((player) => !privacy.hiddenPlayerIds.includes(player.id))
+    .slice(0, 6);
   const showLeaderboard = mode !== "summary" && players.length > 0;
   const showMoney = privacy.showDollarAmounts;
   const outcomeAccent = cardPersona.outcome === "big_win" || cardPersona.outcome === "win"
@@ -139,31 +150,53 @@ const RecapStoryCard = forwardRef<SVGSVGElement, RecapStoryCardProps>(function R
           })}
         </g>
       ) : (
-        <g transform="translate(118 830)">
-          <text x="0" y="0" fill={outcomeAccent} fontSize="22" fontWeight="750" letterSpacing="4">{cardPersona.eyebrow}</text>
-          <text x="0" y="92" fill="#fafaf9" fontSize="56" fontWeight="760">
-            {clip(cardPersona.title, 30)}
-          </text>
-          <text x="0" y="148" fill="#c4cac5" fontSize="27" fontWeight="550">
-            {clip(cardPersona.line, 60)}
-          </text>
-          <line x1="0" x2="844" y1="214" y2="214" stroke="#3c443e" strokeWidth="2" />
-          {featuredPlayer ? (
-            <>
-              <text x="0" y="282" fill="#929a94" fontSize="21" fontWeight="700" letterSpacing="3">
-                {privacy.showPlayerNames ? "PLAYER" : "TABLE RESULT"}
-              </text>
-              <text x="0" y="338" fill="#f5f5f4" fontSize="36" fontWeight="700">
-                {privacy.showPlayerNames ? clip(featuredPlayer.displayName, 25) : `FINISHED #${featuredPlayer.rank}`}
-              </text>
-              {showMoney ? (
-                <text x="844" y="338" textAnchor="end" fill={outcomeAccent} fontSize="54" fontWeight="780">
-                  {formatSignedNet(featuredPlayer.net)}
+        <>
+          <g transform="translate(118 830)">
+            <text x="0" y="0" fill={outcomeAccent} fontSize="22" fontWeight="750" letterSpacing="4">{cardPersona.eyebrow}</text>
+            <text x="0" y="92" fill="#fafaf9" fontSize="56" fontWeight="760">
+              {clip(cardPersona.title, 30)}
+            </text>
+            <text x="0" y="148" fill="#c4cac5" fontSize="27" fontWeight="550">
+              {clip(cardPersona.line, 60)}
+            </text>
+            <line x1="0" x2="844" y1="214" y2="214" stroke="#3c443e" strokeWidth="2" />
+            {featuredPlayer ? (
+              <>
+                <text x="0" y="282" fill="#929a94" fontSize="21" fontWeight="700" letterSpacing="3">
+                  {privacy.showPlayerNames ? "PLAYER" : "TABLE RESULT"}
                 </text>
-              ) : null}
-            </>
+                <text x="0" y="338" fill="#f5f5f4" fontSize="36" fontWeight="700">
+                  {privacy.showPlayerNames ? clip(featuredPlayer.displayName, 25) : `FINISHED #${featuredPlayer.rank}`}
+                </text>
+                {showMoney ? (
+                  <text x="844" y="338" textAnchor="end" fill={outcomeAccent} fontSize="54" fontWeight="780">
+                    {formatSignedNet(featuredPlayer.net)}
+                  </text>
+                ) : null}
+              </>
+            ) : null}
+          </g>
+
+          {illustratedPlayers.length > 0 ? (
+            <g transform="translate(280 1320)">
+              <ellipse cx="260" cy="144" rx="198" ry="84" fill="#1f2922" stroke="#56675b" strokeWidth="3" />
+              <ellipse cx="260" cy="144" rx="154" ry="56" fill="#18211b" stroke="#35443a" strokeWidth="2" />
+              <text x="260" y="137" textAnchor="middle" fill="#dceabf" fontSize="20" fontWeight="800" letterSpacing="3">THE TABLE</text>
+              <text x="260" y="170" textAnchor="middle" fill="#929a94" fontSize="18" fontWeight="650">{illustratedPlayers.length} players · one ledger</text>
+              {illustratedPlayers.map((player, index) => {
+                const seat = tableSeat(index, illustratedPlayers.length);
+                const isFeatured = player.id === featuredPlayer?.id;
+                return (
+                  <g key={player.id} transform={`translate(${seat.x} ${seat.y})`}>
+                    <circle r="42" fill={isFeatured ? outcomeAccent : "#252e28"} stroke={isFeatured ? "#f5f5f4" : "#657268"} strokeWidth={isFeatured ? "4" : "2"} />
+                    <circle cy="-11" r="10" fill={isFeatured ? "#172019" : "#aab2ac"} />
+                    <path d="M-17 18C-15 2 15 2 17 18Z" fill={isFeatured ? "#172019" : "#aab2ac"} />
+                  </g>
+                );
+              })}
+            </g>
           ) : null}
-        </g>
+        </>
       )}
 
       <g transform="translate(118 1700)">

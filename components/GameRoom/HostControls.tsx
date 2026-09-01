@@ -4,6 +4,7 @@ import { Crown } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Player } from "@/lib/types";
 import ConfirmButton from "./ConfirmButton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 
 interface HostControlsProps {
   players: Player[];
@@ -39,9 +40,12 @@ export default function HostControls({ players, currentPlayerId, onTransfer }: H
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="min-w-0 flex-1">
             <label htmlFor="next-host" className="mb-1.5 block text-sm font-medium text-gray-900">Pass host controls</label>
-            <select id="next-host" value={validPlayerId} onChange={(event) => setPlayerId(event.target.value)} className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10">
-              {candidates.map((player) => <option key={player.id} value={player.id}>{player.name}</option>)}
-            </select>
+            <Select value={validPlayerId} onValueChange={setPlayerId}>
+              <SelectTrigger id="next-host" className="h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {candidates.map((player) => <SelectItem key={player.id} value={player.id}>{player.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           <ConfirmButton
             variant="secondary"

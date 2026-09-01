@@ -22,6 +22,7 @@ export interface TransferListProps {
   transfers: Transfer[];
   gameId: string;
   mode: SettlementMode;
+  onStatusChange?: (mode: SettlementMode, settledKeys: Set<string>) => void;
 }
 
 function PartyName({ name }: { name: string }) {
@@ -29,7 +30,7 @@ function PartyName({ name }: { name: string }) {
   return <span className="font-medium text-gray-900">{name}</span>;
 }
 
-export default function TransferList({ transfers, gameId, mode }: TransferListProps) {
+export default function TransferList({ transfers, gameId, mode, onStatusChange }: TransferListProps) {
   const { toast } = useToast();
   const [settledKeys, setSettledKeys] = useState<Set<string>>(new Set());
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -40,7 +41,11 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
     const refresh = () => {
       void getSettlementPaymentStatuses(gameId)
         .then((statuses) => {
-          if (!cancelled) setSettledKeys(new Set(statuses.filter((item) => item.settled).map((item) => item.key)));
+          if (!cancelled) {
+            const next = new Set(statuses.filter((item) => item.settled).map((item) => item.key));
+            setSettledKeys(next);
+            onStatusChange?.(mode, next);
+          }
         })
         .catch(() => undefined);
     };
@@ -54,7 +59,7 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
       cancelled = true;
       if (channel && supabase) void supabase.removeChannel(channel);
     };
-  }, [gameId]);
+  }, [gameId, mode, onStatusChange]);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,11 +134,10 @@ export default function TransferList({ transfers, gameId, mode }: TransferListPr
                     setBusyKey(key);
                     try {
                       await setSettlementPaymentStatus(gameId, mode, transfer, !settled);
-                      setSettledKeys((current) => {
-                        const next = new Set(current);
-                        if (settled) next.delete(key); else next.add(key);
-                        return next;
-                      });
+                      const next = new Set(settledKeys);
+                      if (settled) next.delete(key); else next.add(key);
+                      setSettledKeys(next);
+                      onStatusChange?.(mode, next);
                       toast(settled ? "Payment reopened" : "Payment marked paid", "success");
                     } catch (error) {
                       toast(error instanceof Error ? error.message : "Could not update payment.", "error");

@@ -4,22 +4,51 @@ export const alt = "Mainpot — Keep the game friendly. Keep the money exact.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+function Spade({ size: iconSize }: { size: number }) {
+  return (
+    <svg
+      aria-hidden="true"
+      height={iconSize}
+      viewBox="0 0 24 24"
+      width={iconSize}
+    >
+      <path
+        d="M12 2C9.95 5.6 4 9.02 4 14.13A4.12 4.12 0 0 0 8.12 18.25c1.14 0 2.18-.47 2.94-1.23-.23 1.82-.97 3.23-2.31 4.98h6.5c-1.34-1.75-2.08-3.16-2.31-4.98a4.15 4.15 0 0 0 7.06-2.89C20 9.02 14.05 5.6 12 2Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export default function OpenGraphImage() {
   return new ImageResponse(
     (
       <div
         style={{
           alignItems: "center",
-          background:
-            "radial-gradient(circle at 80% 10%, #cbd5ff 0, transparent 35%), radial-gradient(circle at 25% 90%, #e2d7ff 0, transparent 34%), #f7f8fb",
+          background: "#f7f8fa",
           color: "#111318",
           display: "flex",
           height: "100%",
           justifyContent: "space-between",
+          overflow: "hidden",
           padding: "72px 78px",
+          position: "relative",
           width: "100%",
         }}
       >
+        <div
+          style={{
+            background: "#e8eaf3",
+            display: "flex",
+            height: 630,
+            position: "absolute",
+            right: 0,
+            top: 0,
+            width: 340,
+          }}
+        />
+
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 760 }}>
           <div style={{ alignItems: "center", display: "flex", fontSize: 34, fontWeight: 700 }}>
             <div
@@ -35,7 +64,7 @@ export default function OpenGraphImage() {
                 width: 58,
               }}
             >
-              <div style={{ border: "3px solid white", borderRadius: 3, display: "flex", height: 22, width: 34 }} />
+              <Spade size={30} />
             </div>
             Mainpot
           </div>
@@ -50,38 +79,36 @@ export default function OpenGraphImage() {
         <div style={{ display: "flex", height: 390, position: "relative", width: 290 }}>
           <div
             style={{
-              border: "4px solid rgba(17,19,24,.22)",
-              borderRadius: 34,
-              height: 300,
+              background: "#d9dce6",
+              border: "5px solid #8b909d",
+              borderRadius: 20,
+              height: 292,
               left: 0,
               position: "absolute",
-              top: 75,
-              transform: "rotate(-9deg)",
-              width: 190,
+              top: 70,
+              transform: "rotate(-7deg)",
+              width: 205,
             }}
           />
           <div
             style={{
-              alignItems: "flex-start",
+              alignItems: "center",
               background: "white",
-              border: "4px solid #111318",
-              borderRadius: 34,
-              boxShadow: "0 30px 70px rgba(17,19,24,.22)",
+              border: "5px solid #111318",
+              borderRadius: 20,
+              boxShadow: "10px 12px 0 #c4c8d3",
               color: "#111318",
               display: "flex",
-              fontSize: 72,
-              fontWeight: 800,
-              height: 320,
-              justifyContent: "flex-end",
-              left: 34,
+              height: 308,
+              justifyContent: "center",
+              left: 48,
               position: "absolute",
-              top: 10,
-              padding: 26,
-              transform: "rotate(5deg)",
-              width: 190,
+              top: 18,
+              transform: "rotate(4deg)",
+              width: 220,
             }}
           >
-            ♠
+            <Spade size={100} />
           </div>
         </div>
       </div>

@@ -12,7 +12,7 @@ export interface CashOutEntryProps {
   snapshot: GameSnapshot;
   currentPlayerId: string | null;
   isHost: boolean;
-  onSaveCashOut: (playerId: string, amount: number) => void;
+  onSaveCashOut: (playerId: string, amount: number) => Promise<boolean>;
 }
 
 interface CashOutRowProps {
@@ -20,8 +20,10 @@ interface CashOutRowProps {
   snapshot: GameSnapshot;
   editable: boolean;
   isCurrentUser: boolean;
-  onSaveCashOut: (playerId: string, amount: number) => void;
+  onSaveCashOut: (playerId: string, amount: number) => Promise<boolean>;
 }
+
+type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 const SAVE_DEBOUNCE_MS = 400;
 
@@ -40,6 +42,8 @@ function CashOutRow({
   const currentCashOut = getPlayerCashOut(snapshot, player.id);
   const propValue = currentCashOut ? String(currentCashOut.amount) : "";
   const [value, setValue] = useState(propValue);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [remoteUpdateNotice, setRemoteUpdateNotice] = useState(false);
   const focusedRef = useRef(false);
   const valueAtFocusRef = useRef("");
   const debounceRef = useRef<number | null>(null);
@@ -47,8 +51,19 @@ function CashOutRow({
   useEffect(() => {
     if (!focusedRef.current) {
       setValue(propValue);
+      return;
     }
-  }, [propValue]);
+
+    // A focused field that has not been edited locally is safe to reconcile.
+    // Keeping it in sync avoids showing a row amount that disagrees with the
+    // realtime totals while the user is simply reading the field.
+    if (value === valueAtFocusRef.current && value !== propValue) {
+      setValue(propValue);
+      valueAtFocusRef.current = propValue;
+      setSaveStatus("idle");
+      setRemoteUpdateNotice(true);
+    }
+  }, [propValue, value]);
 
   useEffect(() => {
     return () => {
@@ -59,7 +74,7 @@ function CashOutRow({
   }, []);
 
   /** Saves `raw` when it parses to a finite, non-negative amount. */
-  function commit(raw: string) {
+  async function commit(raw: string) {
     if (raw.trim() === "") {
       return;
     }
@@ -69,21 +84,26 @@ function CashOutRow({
     }
     const current = currentCashOut ? round2(currentCashOut.amount) : Number.NaN;
     if (Number.isNaN(current) || Math.abs(parsed - current) > 0.004) {
-      onSaveCashOut(player.id, parsed);
+      setSaveStatus("saving");
+      const saved = await onSaveCashOut(player.id, parsed);
+      setSaveStatus(saved ? "saved" : "error");
     }
   }
 
   function handleChange(raw: string) {
     setValue(raw);
+    setRemoteUpdateNotice(false);
     if (debounceRef.current !== null) {
       window.clearTimeout(debounceRef.current);
     }
-    debounceRef.current = window.setTimeout(() => commit(raw), SAVE_DEBOUNCE_MS);
+    setSaveStatus("idle");
+    debounceRef.current = window.setTimeout(() => void commit(raw), SAVE_DEBOUNCE_MS);
   }
 
   function handleFocus() {
     focusedRef.current = true;
     valueAtFocusRef.current = value;
+    setRemoteUpdateNotice(false);
   }
 
   function handleBlur() {
@@ -93,7 +113,7 @@ function CashOutRow({
       debounceRef.current = null;
     }
     if (value !== valueAtFocusRef.current) {
-      commit(value);
+      void commit(value);
     } else {
       setValue(propValue);
     }
@@ -131,7 +151,12 @@ function CashOutRow({
             onFocus={handleFocus}
             onBlur={handleBlur}
           />
-          {hint ? <p className="mt-1 text-xs text-gray-400">{hint}</p> : null}
+          <p
+            className={`mt-1 text-xs ${saveStatus === "error" ? "text-red-600" : saveStatus === "saved" ? "text-emerald-700" : "text-gray-400"}`}
+            aria-live="polite"
+          >
+            {hint ?? (remoteUpdateNotice ? "Updated by another player" : saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : saveStatus === "error" ? "Could not save" : editable ? "Saves automatically" : "Read only")}
+          </p>
         </div>
       </div>
   );
@@ -161,7 +186,7 @@ export default function CashOutEntry({
       </p>
       <Card padding="none" className="divide-y divide-gray-100 overflow-hidden">
         {snapshot.players.map((player) => {
-          const editable = isHost || player.id === currentPlayerId;
+          const editable = snapshot.game.status === "settling" && (isHost || player.id === currentPlayerId);
           return (
             <CashOutRow
               key={player.id}

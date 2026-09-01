@@ -4,17 +4,14 @@ import {
   AlertTriangle,
   ArrowRight,
   Calculator,
-  Check,
   CheckCircle2,
   ReceiptText,
   Scale,
-  ShieldCheck,
 } from "lucide-react";
 import SettlementWalkthrough from "@/components/SettlementWalkthrough";
 import SettlementCalculator from "@/components/SettlementCalculator";
 import SiteFooter from "@/components/SiteFooter";
 import SiteNav from "@/components/SiteNav";
-import SuitIcon from "@/components/SuitIcon";
 
 export const metadata: Metadata = {
   title: "Poker Settlement Calculator for Home Games",
@@ -139,67 +136,40 @@ export default function PokerSettlementCalculatorPage() {
       />
       <SiteNav />
       <main>
-        <section className="relative overflow-hidden border-b border-gray-200 px-4 py-14 sm:px-6 sm:py-20 lg:py-24">
-          <div aria-hidden="true" className="ante-page-washes absolute inset-0" />
-          <div aria-hidden="true" className="ante-page-glow absolute inset-x-0 top-0" />
-          <div aria-hidden="true" className="ante-page-dot-arch absolute inset-x-0 top-0" />
-          <div className="relative mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-end lg:gap-20">
-            <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-gray-700 shadow-sm backdrop-blur-xl">
-                <SuitIcon className="h-3 w-3" suit="spade" />
-                Poker settlement guide
+        <section className="border-b border-gray-300 bg-[#f7f8f6] px-4 py-10 sm:px-6 sm:py-20">
+          <div className="mx-auto w-full max-w-6xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+              Calculator + field guide
+            </p>
+            <h1 className="mt-4 max-w-5xl text-4xl font-semibold tracking-[-0.055em] text-gray-950 sm:mt-5 sm:text-6xl lg:text-7xl">
+              Poker settlement, without the guesswork.
+            </h1>
+            <div className="mt-8 grid gap-8 border-t border-gray-300 pt-7 lg:grid-cols-[minmax(0,1fr)_22rem]">
+              <p className="max-w-3xl text-base leading-7 text-gray-700 sm:text-xl sm:leading-9">
+                Enter every player&apos;s money in and final stack. Mainpot checks
+                the bank, handles an agreed discrepancy, and turns the results
+                into a clear who-pays-whom list.
               </p>
-              <h1 className="mt-6 max-w-4xl text-5xl font-semibold tracking-[-0.055em] text-gray-950 sm:text-6xl lg:text-7xl">
-                From first buy-in to final payment.
-              </h1>
-              <p className="mt-6 max-w-3xl text-xl leading-9 text-gray-700">
-                A home poker settlement is not just a final calculation. It is a chain of records that must agree: every purchase, every final stack, every player’s net result, and every payment.
+              <p className="hidden text-sm leading-7 text-gray-600 sm:block">
+                The guide below follows a five-player game from its first buy-in
+                through a $10 mismatch and the final payments.
               </p>
-              <p className="mt-4 max-w-3xl text-base leading-8 text-gray-600">
-                This guide follows one five-player $0.25/$0.50 game end to end, including a missing entry that leaves the bank $10.00 out of balance. You will see where the error appears, how correcting it changes the results, and how the balanced table becomes a short payment list.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#walkthrough"
-                  className="inline-flex h-12 items-center justify-center rounded-lg bg-gray-950 px-6 text-sm font-semibold text-white shadow-lg shadow-gray-950/10 transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
-                >
-                  Watch the walkthrough
-                </a>
-                <Link
-                  href="/create"
-                  className="inline-flex h-12 items-center justify-center rounded-lg border border-gray-300 bg-white px-6 text-sm font-semibold text-gray-900 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
-                >
-                  Start a game
-                </Link>
-              </div>
             </div>
-
-            <aside className="rounded-3xl border border-gray-200 bg-white/90 p-6 shadow-[0_18px_50px_rgba(17,24,20,0.07)] backdrop-blur-sm sm:p-8">
-              <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-xl bg-gray-950 text-white">
-                  <ShieldCheck aria-hidden className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">A correct settlement proves</p>
-                  <p className="mt-1 font-semibold text-gray-950">The books close from both directions.</p>
-                </div>
-              </div>
-              <div className="mt-6 space-y-4">
-                {[
-                  ["The bank balances", "Money in equals final stacks."],
-                  ["The results net to zero", "Losses exactly fund the wins."],
-                  ["The payments resolve every balance", "Nobody pays or receives too much."],
-                ].map(([title, description]) => (
-                  <div key={title} className="flex gap-3 border-t border-gray-100 pt-4 first:border-0 first:pt-0">
-                    <Check aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                    <div>
-                      <p className="text-sm font-semibold text-gray-950">{title}</p>
-                      <p className="mt-1 text-sm leading-6 text-gray-500">{description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </aside>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="#calculator"
+                className="inline-flex h-12 items-center justify-center rounded-lg bg-gray-950 px-6 text-sm font-semibold text-white transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
+              >
+                <span className="sm:hidden">Jump to calculator ↓</span>
+                <span className="hidden sm:inline">Use the calculator</span>
+              </a>
+              <Link
+                href="/create"
+                className="inline-flex h-12 items-center justify-center rounded-lg border border-gray-300 bg-white px-6 text-sm font-semibold text-gray-900 transition hover:border-gray-400 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
+              >
+                Track a live game
+              </Link>
+            </div>
           </div>
         </section>
 

@@ -11,6 +11,7 @@ import { joinGame } from "@/lib/data";
 import { getCurrentUserId } from "@/lib/auth-client";
 import { normalizeRoomCode } from "@/lib/roomcode";
 import { getPlayerName, setActiveGame, setPlayerName } from "@/lib/session";
+import { markPostGameEntry } from "@/lib/push-client";
 
 interface FormErrors {
   name?: string;
@@ -69,6 +70,7 @@ export default function JoinGamePage() {
       const userId = await getCurrentUserId();
       await joinGame(normalizedCode, trimmedName, userId);
       setActiveGame(normalizedCode);
+      markPostGameEntry(normalizedCode);
       toast("Joined the game!", "success");
       router.push(`/game/${normalizedCode}`);
     } catch (err) {
@@ -119,7 +121,7 @@ export default function JoinGamePage() {
                   setCode(extracted);
                 }
               }}
-              placeholder="ABC123"
+              placeholder="ABC234"
               spellCheck={false}
               autoComplete="off"
               autoCapitalize="characters"

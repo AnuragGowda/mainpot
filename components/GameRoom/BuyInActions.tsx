@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Game, Player } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { formatCurrency } from "@/lib/format";
 import { randomUUID } from "@/lib/session";
 import ConfirmButton from "./ConfirmButton";
@@ -20,6 +21,8 @@ export interface BuyInActionsProps {
   leaving: boolean;
   left: boolean;
 }
+
+const SELF_FUNDED_VALUE = "self-funded";
 
 export default function BuyInActions({
   game,
@@ -38,6 +41,28 @@ export default function BuyInActions({
   const [frontedByPlayerId, setFrontedByPlayerId] = useState("");
   const buyInOperationKey = useRef<string | null>(null);
   const rebuyOperationKey = useRef<string | null>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const submitting = ledgerAction !== null;
+
+  useEffect(() => {
+    if (!rebuyOpen) return;
+    const actions = actionsRef.current;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !submitting) {
+        event.preventDefault();
+        closeRebuy();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      window.requestAnimationFrame(() =>
+        actions
+          ?.querySelector<HTMLButtonElement>('[aria-controls="rebuy-panel"]')
+          ?.focus(),
+      );
+    };
+  }, [rebuyOpen, submitting]);
 
   function openRebuy() {
     setRebuyAmount(String(game.buy_in_amount));
@@ -73,8 +98,6 @@ export default function BuyInActions({
     }
   }
 
-  const submitting = ledgerAction !== null;
-
   if (left) {
     return null;
   }
@@ -82,7 +105,12 @@ export default function BuyInActions({
   return (
     <div className="w-full">
       {rebuyOpen ? (
-        <div className="mb-3 grid gap-2 rounded-xl border border-gray-200 bg-white p-3 shadow-lg shadow-gray-950/5 sm:grid-cols-[1fr_1.15fr_auto_auto] sm:items-end">
+        <div
+          id="rebuy-panel"
+          role="dialog"
+          aria-label="Add a rebuy"
+          className="fixed inset-x-0 bottom-0 z-40 grid max-h-[min(80dvh,32rem)] gap-2 overflow-y-auto rounded-t-2xl border border-gray-200 bg-white p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-2xl shadow-gray-950/20 sm:static sm:mb-3 sm:max-h-none sm:overflow-visible sm:rounded-xl sm:p-3 sm:shadow-lg sm:shadow-gray-950/5 sm:[grid-template-columns:1fr_1.15fr_auto_auto] sm:items-end"
+        >
           <div className="min-w-0 flex-1">
             <Input
               type="number"
@@ -99,19 +127,23 @@ export default function BuyInActions({
           </div>
           <label className="min-w-0">
             <span className="mb-1.5 block text-sm font-medium text-gray-700">Paid by</span>
-            <select
-              value={frontedByPlayerId}
-              onChange={(event) => setFrontedByPlayerId(event.target.value)}
+            <Select
+              value={frontedByPlayerId || SELF_FUNDED_VALUE}
+              onValueChange={(value) => setFrontedByPlayerId(value === SELF_FUNDED_VALUE ? "" : value)}
               disabled={submitting}
-              className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10"
             >
-              <option value="">Me</option>
+              <SelectTrigger aria-label="Paid by">
+                <SelectValue placeholder="Me" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={SELF_FUNDED_VALUE}>Me</SelectItem>
               {players
                 .filter((player) => player.id !== currentPlayerId && !player.left_at)
                 .map((player) => (
-                  <option key={player.id} value={player.id}>{player.name} (fronted)</option>
+                  <SelectItem key={player.id} value={player.id}>{player.name} (fronted)</SelectItem>
                 ))}
-            </select>
+              </SelectContent>
+            </Select>
           </label>
           <Button size="md" onClick={submitRebuy} aria-label="Add rebuy" loading={ledgerAction === "rebuy"} disabled={submitting}>
             {ledgerAction === "rebuy" ? "Adding…" : "Add rebuy"}
@@ -122,19 +154,20 @@ export default function BuyInActions({
             onClick={closeRebuy}
             aria-label="Cancel rebuy"
             disabled={submitting}
-            className="hidden sm:inline-flex"
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
         </div>
       ) : null}
 
-      <div className="flex gap-2">
+      <div ref={actionsRef} className="flex gap-2">
         {hasBuyIn ? (
           <Button
             className="flex-1"
             onClick={() => (rebuyOpen ? closeRebuy() : openRebuy())}
             aria-expanded={rebuyOpen}
+            aria-controls="rebuy-panel"
             disabled={submitting}
           >
             {rebuyOpen ? "Close rebuy" : "Add a rebuy"}

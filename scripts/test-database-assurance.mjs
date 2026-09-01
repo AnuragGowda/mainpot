@@ -92,6 +92,12 @@ async function run() {
   });
   assert(!otherGameBuyIn.error && otherGameBuyIn.data?.[0]?.id, "other game buy-in fixture is created");
   const otherGameBuyInId = otherGameBuyIn.data[0].id;
+  const otherGameSettling = await otherHost
+    .from("games")
+    .update({ status: "settling", ended_at: new Date().toISOString() })
+    .eq("id", gameB.game_id)
+    .select("id");
+  assert(!otherGameSettling.error && otherGameSettling.data?.[0]?.id, "other game enters settlement for its cash-out fixture");
   const otherGameCashOut = await otherHost.from("cash_outs").insert({
     game_id: gameB.game_id,
     player_id: otherPlayer.player_id,
@@ -131,6 +137,30 @@ async function run() {
   console.log("✓ idempotent buy-in create/retry/mismatch");
   const guestBuyIn = first.data[0];
 
+  const rebuyOperationKey = randomUUID();
+  const rebuy = await guestA.rpc("create_buy_in_idempotent", {
+    input_game_id: gameA.game_id,
+    input_player_id: playerA.player_id,
+    input_amount: 15,
+    input_type: "rebuy",
+    input_fronted_by_player_id: playerB.player_id,
+    input_operation_key: rebuyOperationKey,
+  });
+  assert(!rebuy.error && rebuy.data?.length === 1 && rebuy.data[0].created === true, "fronted rebuy is created");
+  assert(rebuy.data[0].type === "rebuy", "rebuy keeps its ledger type");
+  assert(rebuy.data[0].fronted_by_player_id === playerB.player_id, "rebuy keeps its funding player");
+  const retriedRebuy = await guestA.rpc("create_buy_in_idempotent", {
+    input_game_id: gameA.game_id,
+    input_player_id: playerA.player_id,
+    input_amount: 15,
+    input_type: "rebuy",
+    input_fronted_by_player_id: playerB.player_id,
+    input_operation_key: rebuyOperationKey,
+  });
+  assert(!retriedRebuy.error && retriedRebuy.data?.[0]?.created === false, "rebuy retry returns its original ledger entry");
+  assert(retriedRebuy.data[0].id === rebuy.data[0].id, "rebuy retry does not duplicate the ledger entry");
+  console.log("✓ idempotent fronted rebuy create/retry");
+
   await expectError(
     () => guestA.from("buy_ins").insert({ game_id: gameB.game_id, player_id: otherPlayer.player_id, amount: 12, type: "buy_in" }),
     "cross-game buy-in insert",
@@ -158,6 +188,50 @@ async function run() {
   }
   const hiddenGame = await outsider.from("games").select("id").eq("id", gameA.game_id);
   assert(!hiddenGame.error && hiddenGame.data?.length === 0, "outsider cannot read Game A");
+
+  const { data: { user: guestAUser } } = await guestA.auth.getUser();
+  assert(guestAUser, "guest A remains authenticated for push-subscription checks");
+  const pushEndpoint = `https://push.example.test/${randomUUID()}`;
+  const ownPushSubscription = await guestA.from("push_subscriptions").insert({
+    user_id: guestAUser.id,
+    endpoint: pushEndpoint,
+    p256dh: "test-p256dh-key",
+    auth: "test-auth-key",
+  }).select("id");
+  assert(!ownPushSubscription.error && ownPushSubscription.data?.[0]?.id, "player can create their own push subscription");
+  const hiddenPushSubscription = await guestB.from("push_subscriptions").select("id").eq("endpoint", pushEndpoint);
+  assert(!hiddenPushSubscription.error && hiddenPushSubscription.data?.length === 0, "other players cannot read a device push subscription");
+  await expectError(
+    () => guestB.from("push_subscriptions").delete().eq("endpoint", pushEndpoint).select("id"),
+    "other player push-subscription deletion",
+  );
+  await expectError(
+    () => guestA.from("push_dispatches").insert({ game_id: gameA.game_id, event_type: "game_settling", dedupe_key: "client-attempt" }).select("id"),
+    "client push dispatch claim",
+  );
+  const productOpsRead = await guestA.from("product_ops_outbox").select("sequence");
+  assert(productOpsRead.error || productOpsRead.data?.length === 0, "client cannot read Product Ops outbox");
+  const productOpsServerRead = await admin.from("product_ops_outbox").select("sequence").limit(1);
+  assert(!productOpsServerRead.error, "server role can read Product Ops outbox for the collector pull route");
+  await expectError(
+    () => guestA.from("product_ops_outbox").insert({
+      environment: "development",
+      event_name: "game.created",
+      occurred_at: new Date().toISOString(),
+      actor_id: "anon_client_attempt",
+      session_id: "sess_client_attempt",
+      idempotency_key: `evt_client_attempt_${randomUUID()}`,
+    }).select("sequence"),
+    "client Product Ops outbox append",
+  );
+  const canaryRead = await guestA.from("product_ops_canary").select("probe_id");
+  assert(canaryRead.error || canaryRead.data?.length === 0, "client cannot read the Product Ops canary table");
+  await expectError(
+    () => guestA.from("product_ops_canary").insert({ probe_id: randomUUID() }).select("probe_id"),
+    "client Product Ops canary append",
+  );
+  console.log("✓ push subscriptions stay private and delivery claims stay server-only");
+
   await expectError(
     () => outsider.from("players").update({ name: "Intruder" }).eq("id", playerA.player_id).select("id"),
     "outsider player update",

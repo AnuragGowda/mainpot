@@ -37,6 +37,10 @@ function safeRecapLink(): string {
   return `${window.location.origin}/?ref=game-recap`;
 }
 
+function playerInitial(name: string): string {
+  return name.trim().charAt(0).toUpperCase() || "?";
+}
+
 async function renderPng(svg: SVGSVGElement): Promise<Blob> {
   const source = new XMLSerializer().serializeToString(svg);
   const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
@@ -89,6 +93,7 @@ export default function GameRecapDialog({
   const { toast } = useToast();
   const svgRef = useRef<SVGSVGElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const data = deriveRecapData(snapshot, nets, transfers);
   const [mode, setMode] = useState<RecapMode>("summary");
   const [privacy, setPrivacy] = useState<RecapPrivacy>(defaultRecapPrivacy);
@@ -123,13 +128,39 @@ export default function GameRecapDialog({
       : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    dialogRef.current?.focus();
+    closeButtonRef.current?.focus();
 
     return () => {
       document.body.style.overflow = previousOverflow;
       previouslyFocused?.focus();
     };
   }, []);
+
+  function handleDialogKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      onClose();
+      return;
+    }
+    if (event.key !== "Tab") return;
+
+    const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusable?.length) {
+      event.preventDefault();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
 
   async function createPng() {
     if (!svgRef.current) throw new Error("The recap preview is still loading.");
@@ -193,7 +224,7 @@ export default function GameRecapDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-gray-950/60 p-0 backdrop-blur-md sm:p-4"
+      className="fixed inset-0 z-50 bg-gray-950/70 p-0 backdrop-blur-md sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -205,25 +236,24 @@ export default function GameRecapDialog({
         aria-modal="true"
         aria-labelledby="game-recap-title"
         aria-describedby="game-recap-description"
-        onKeyDown={(event) => {
-          if (event.key === "Escape") onClose();
-        }}
-        className="mx-auto min-h-full w-full max-w-5xl overflow-hidden bg-[#f7f8f6] shadow-2xl focus:outline-none sm:min-h-0 sm:rounded-2xl"
+        onKeyDown={handleDialogKeyDown}
+        className="mx-auto flex h-[100dvh] w-full max-w-6xl flex-col overflow-hidden bg-[#f7f8f6] shadow-2xl focus:outline-none sm:h-[calc(100dvh-2rem)] sm:rounded-2xl"
       >
-        <div className="flex items-start justify-between border-b border-gray-200 bg-white px-4 py-5 sm:px-7 sm:py-6">
+        <header className="flex shrink-0 items-start justify-between border-b border-gray-200 bg-white px-4 py-3.5 sm:px-7 sm:py-5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">Game card</p>
-            <h2 id="game-recap-title" className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-gray-950">Deal a table nickname</h2>
-            <p id="game-recap-description" className="mt-1 max-w-2xl text-sm leading-6 text-gray-600">Pick a player, tap the card until the line feels right, then choose what makes the final image.</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700 sm:text-xs">Mainpot game card</p>
+            <h2 id="game-recap-title" className="mt-0.5 text-xl font-semibold tracking-[-0.03em] text-gray-950 sm:text-2xl">Share the night</h2>
+            <p id="game-recap-description" className="mt-1 hidden max-w-2xl text-sm leading-6 text-gray-600 sm:block">Choose a player, deal a nickname, then decide what belongs on the final image.</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close game recap" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
+          <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="Close game recap" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
             <X aria-hidden size={20} />
           </button>
-        </div>
+        </header>
 
-        <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:p-7">
-          <div className="mx-auto w-full max-w-[430px] self-start">
-            <div className="mx-auto w-full max-w-[260px] rounded-[24px] border border-gray-200 bg-[#ecefe9] p-3 sm:max-w-[300px] sm:p-4">
+        <div className="min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:overflow-hidden">
+          <div className="min-h-0 min-w-0 px-4 py-4 sm:px-6 sm:py-5 lg:overflow-y-auto lg:p-7">
+            <div className="mx-auto w-full max-w-[520px]">
+              <div className="mx-auto w-[min(58vw,232px)] rounded-[24px] border border-gray-200 bg-[#ecefe9] p-2.5 shadow-sm sm:w-[280px] sm:p-3">
               {mode === "summary" ? (
                 <button
                   type="button"
@@ -247,22 +277,25 @@ export default function GameRecapDialog({
               ) : (
                 <RecapStoryCard ref={svgRef} data={data} privacy={privacy} mode={mode} />
               )}
-              <p className="pb-1 pt-3 text-center text-xs font-medium text-gray-500">1080 × 1920 · ready for Stories</p>
+                <p className="pb-0.5 pt-2 text-center text-[11px] font-medium text-gray-500">1080 × 1920 · Story ready</p>
             </div>
 
             {data.players.length > 0 ? (
-              <fieldset className="mt-4">
-                <legend className="text-xs font-bold uppercase tracking-[0.14em] text-gray-500">Featured player</legend>
-                <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+                <fieldset className="mt-4">
+                  <legend className="text-xs font-bold uppercase tracking-[0.14em] text-gray-500">Who gets the card?</legend>
+                  <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:justify-center sm:px-0">
                   {data.players.map((player) => (
                     <button
                       key={player.id}
                       type="button"
                       aria-pressed={featuredPlayer?.id === player.id && mode === "summary"}
                       onClick={() => featurePlayer(player.id)}
-                      className={`min-h-11 shrink-0 rounded-lg border px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 ${featuredPlayer?.id === player.id && mode === "summary" ? "border-gray-950 bg-gray-950 text-white" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"}`}
+                        className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 ${featuredPlayer?.id === player.id && mode === "summary" ? "border-gray-950 bg-gray-950 text-white" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"}`}
                     >
-                      {player.displayName}
+                        <span aria-hidden className={`grid h-8 w-8 place-items-center rounded-full text-xs font-bold ${featuredPlayer?.id === player.id && mode === "summary" ? "bg-[#dceabf] text-gray-950" : "bg-gray-100 text-gray-600"}`}>
+                          {playerInitial(player.displayName)}
+                        </span>
+                        {player.displayName}
                     </button>
                   ))}
                 </div>
@@ -270,21 +303,22 @@ export default function GameRecapDialog({
             ) : null}
 
             {mode === "summary" ? (
-              <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-3">
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Current nickname</p>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Dealt nickname</p>
                   <p aria-live="polite" className="mt-0.5 truncate text-sm font-semibold text-gray-900">{persona.title}</p>
                 </div>
                 <Button variant="secondary" size="sm" onClick={dealAnotherPersona} leftIcon={<RefreshCw aria-hidden size={14} />}>
-                  Deal another
+                    Another
                 </Button>
               </div>
             ) : null}
+            </div>
           </div>
 
-          <div className="space-y-6 rounded-xl border border-gray-200 bg-white p-5">
+          <aside className="min-w-0 space-y-6 border-t border-gray-200 bg-white p-5 lg:overflow-y-auto lg:border-l lg:border-t-0 lg:p-6">
             <fieldset>
-              <legend className="text-sm font-semibold text-gray-900">Card type</legend>
+              <legend className="text-sm font-semibold text-gray-900">Choose a layout</legend>
               <div className="mt-2 grid grid-cols-3 rounded-lg border border-gray-200 bg-gray-50 p-1">
                 {(["summary", "leaderboard", "full"] as const).map((option) => (
                   <button key={option} type="button" onClick={() => setMode(option)} className={`min-h-10 rounded-md px-2 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 ${mode === option ? "bg-white text-gray-950 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}>
@@ -295,8 +329,8 @@ export default function GameRecapDialog({
             </fieldset>
 
             <fieldset className="border-t border-gray-200 pt-5">
-              <legend className="text-sm font-semibold text-gray-900">Privacy</legend>
-              <p className="mt-1 text-sm leading-5 text-gray-500">These settings only change this card, never the game record.</p>
+              <legend className="text-sm font-semibold text-gray-900">What can people see?</legend>
+              <p className="mt-1 text-sm leading-5 text-gray-500">Private by default. These choices only affect the image.</p>
               <div className="mt-3 space-y-3">
                 <label className="flex cursor-pointer items-center justify-between gap-4 text-sm text-gray-700">
                   Show player names
@@ -335,6 +369,23 @@ export default function GameRecapDialog({
               <Button fullWidth variant="secondary" size="md" disabled={exporting} onClick={handleDownload} leftIcon={<Download aria-hidden size={16} />}>Save image</Button>
               <Button fullWidth variant="ghost" size="md" disabled={exporting} onClick={handleCopyLink} leftIcon={<Copy aria-hidden size={16} />}>Copy Mainpot link</Button>
             </div>
+          </aside>
+        </div>
+
+        <div className="shrink-0 border-t border-gray-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+          <div className="mx-auto grid max-w-lg grid-cols-[minmax(0,1fr)_52px] gap-2">
+            <Button fullWidth size="lg" loading={exporting} onClick={handleShare} leftIcon={<Share2 aria-hidden size={17} />}>
+              Share game card
+            </Button>
+            <button
+              type="button"
+              disabled={exporting}
+              onClick={handleDownload}
+              aria-label="Save game card image"
+              className="grid h-12 w-[52px] place-items-center rounded-lg border border-gray-300 bg-white text-gray-800 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Download aria-hidden size={18} />
+            </button>
           </div>
         </div>
       </div>

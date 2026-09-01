@@ -15,33 +15,67 @@ const options: Array<{ label: string; value: AcquisitionSource }> = [
   { label: "Other", value: "other" },
 ];
 
-export default function AcquisitionPrompt({ game }: { game: Game }) {
+export default function AcquisitionPrompt({
+  game,
+  onVisibilityChange,
+}: {
+  game: Game;
+  onVisibilityChange?: (visible: boolean) => void;
+}) {
   const { toast } = useToast();
   const [visible, setVisible] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState<AcquisitionSource | null>(null);
 
   useEffect(() => {
-    setVisible(
-      game.acquisition_source == null
-      && window.sessionStorage.getItem(POST_CREATE_SOURCE_KEY) === game.code
-    );
-  }, [game.acquisition_source, game.code]);
+    const nextVisible =
+      game.acquisition_source == null &&
+      window.sessionStorage.getItem(POST_CREATE_SOURCE_KEY) === game.code;
+    setVisible(nextVisible);
+    setExpanded(false);
+    onVisibilityChange?.(nextVisible);
+  }, [game.acquisition_source, game.code, onVisibilityChange]);
 
   function dismiss() {
     window.sessionStorage.removeItem(POST_CREATE_SOURCE_KEY);
     setVisible(false);
+    onVisibilityChange?.(false);
   }
 
   if (!visible) return null;
 
   return (
-    <section aria-labelledby="acquisition-heading" className="mt-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 id="acquisition-heading" className="text-sm font-semibold text-gray-950">One optional question</h2>
-          <p className="mt-1 text-sm text-gray-600">How did you hear about Mainpot?</p>
+    <section
+      aria-labelledby="acquisition-heading"
+      className="mt-4 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2
+            id="acquisition-heading"
+            className="text-sm font-medium text-gray-950"
+          >
+            A quick optional question
+          </h2>
+          <p className="mt-0.5 text-sm text-gray-600">
+            How did you hear about Mainpot?
+          </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => setExpanded((current) => !current)}
+          aria-expanded={expanded}
+          aria-controls="acquisition-options"
+        >
+          {expanded ? "Hide" : "Answer"}
+        </Button>
+      </div>
+      {expanded ? (
+        <div
+          id="acquisition-options"
+          className="mt-3 flex flex-wrap gap-2 border-t border-gray-100 pt-3"
+        >
           {options.map((option) => (
             <Button
               key={option.value}
@@ -56,7 +90,12 @@ export default function AcquisitionPrompt({ game }: { game: Game }) {
                   dismiss();
                   toast("Thanks — game on.", "success");
                 } catch (error) {
-                  toast(error instanceof Error ? error.message : "Could not save that answer.", "error");
+                  toast(
+                    error instanceof Error
+                      ? error.message
+                      : "Could not save that answer.",
+                    "error",
+                  );
                 } finally {
                   setSaving(null);
                 }
@@ -65,9 +104,16 @@ export default function AcquisitionPrompt({ game }: { game: Game }) {
               {option.label}
             </Button>
           ))}
-          <Button size="sm" variant="ghost" disabled={saving !== null} onClick={dismiss}>Not now</Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={saving !== null}
+            onClick={dismiss}
+          >
+            Not now
+          </Button>
         </div>
-      </div>
+      ) : null}
     </section>
   );
 }

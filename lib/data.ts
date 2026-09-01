@@ -20,8 +20,20 @@ import { generateRoomCode, normalizeRoomCode } from "./roomcode";
 import { getSessionId, randomUUID } from "./session";
 import { round2 } from "./format";
 import { productOpsEnabled, trackProductOpsEvent } from "./product-ops";
+import { dispatchGamePush } from "./push-client";
 
 export { isSupabaseConfigured };
+
+export type GameSyncStatus =
+  | "connecting"
+  | "connected"
+  | "reconnecting"
+  | "offline"
+  | "stale";
+
+interface GameSubscriptionOptions {
+  onStatusChange?: (status: GameSyncStatus) => void;
+}
 
 /** True when Supabase env vars are missing and the app runs on localStorage. */
 export function usingLocalStorage(): boolean {
@@ -362,8 +374,8 @@ async function joinGameLocal(
   if (!game) {
     throw new Error("Game not found.");
   }
-  if (game.status === "ended") {
-    throw new Error("This game has already ended.");
+  if (game.status !== "active") {
+    throw new Error("This game is no longer accepting players.");
   }
 
   const existing = store.players.find(
@@ -406,7 +418,8 @@ async function getGameLocal(code: string): Promise<Game | null> {
 
 function subscribeToGameLocal(
   gameId: string,
-  callback: (snapshot: GameSnapshot) => void
+  callback: (snapshot: GameSnapshot) => void,
+  options?: GameSubscriptionOptions,
 ): () => void {
   let callbacks = subscribers.get(gameId);
   if (!callbacks) {
@@ -414,6 +427,7 @@ function subscribeToGameLocal(
     subscribers.set(gameId, callbacks);
   }
   callbacks.add(callback);
+  options?.onStatusChange?.("connected");
 
   return () => {
     callbacks?.delete(callback);
@@ -557,6 +571,7 @@ async function updateBuyInLocal(buyInId: string, amount: number): Promise<void> 
 async function removePlayerLocal(playerId: string): Promise<void> {
   const store = loadStore();
   const player = store.players.find((p) => p.id === playerId);
+  if (player) requireLocalGameStatus(store, player.game_id, "active");
   if (player) {
     addLocalEvent(store, {
       gameId: player.game_id,
@@ -579,6 +594,7 @@ async function removePlayerLocal(playerId: string): Promise<void> {
 async function leaveGameLocal(playerId: string): Promise<void> {
   const store = loadStore();
   const player = store.players.find((p) => p.id === playerId);
+  if (player) requireLocalGameStatus(store, player.game_id, "active");
   if (player) {
     player.left_at = new Date().toISOString();
     addLocalEvent(store, {
@@ -598,7 +614,7 @@ async function leaveGameLocal(playerId: string): Promise<void> {
 
 async function transferHostLocal(gameId: string, targetPlayerId: string): Promise<void> {
   const store = loadStore();
-  const game = store.games.find((item) => item.id === gameId);
+  const game = requireLocalGameStatus(store, gameId, "active");
   const currentHost = store.players.find(
     (player) => player.game_id === gameId && player.is_host
   );
@@ -918,12 +934,24 @@ async function getGameSupabase(code: string): Promise<Game | null> {
 
 function subscribeToGameSupabase(
   gameId: string,
-  callback: (snapshot: GameSnapshot) => void
+  callback: (snapshot: GameSnapshot) => void,
+  options?: GameSubscriptionOptions,
 ): () => void {
   const client = assertSupabase();
   let disposed = false;
   let refreshInFlight = false;
   let refreshQueued = false;
+  let syncStatus: GameSyncStatus | null = null;
+  let browserOffline = !navigator.onLine;
+
+  function reportStatus(status: GameSyncStatus): boolean {
+    if (disposed || syncStatus === status) return false;
+    syncStatus = status;
+    options?.onStatusChange?.(status);
+    return true;
+  }
+
+  reportStatus(browserOffline ? "offline" : "connecting");
 
   // Several table changes can arrive at once. Serialize refreshes so an older
   // request can never finish last and overwrite a newer room snapshot.
@@ -939,9 +967,13 @@ function subscribeToGameSupabase(
         refreshQueued = false;
         try {
           const snapshot = await getGameSnapshot(gameId);
-          if (!disposed) callback(snapshot);
+          if (!disposed) {
+            callback(snapshot);
+            if (!browserOffline) reportStatus("connected");
+          }
         } catch (err) {
-          console.error("Failed to refresh game snapshot:", err);
+          const changed = reportStatus(browserOffline ? "offline" : "stale");
+          if (changed) console.error("Failed to refresh game snapshot:", err);
         }
       } while (refreshQueued && !disposed);
     } finally {
@@ -1019,12 +1051,30 @@ function subscribeToGameSupabase(
       // gap so hosts do not remain on a stale roster until the next event.
       if (status === "SUBSCRIBED") {
         void requestRefresh();
+      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        reportStatus(browserOffline ? "offline" : "reconnecting");
+      } else if (status === "CLOSED" && !disposed) {
+        reportStatus(browserOffline ? "offline" : "reconnecting");
       }
     });
+
+  const handleOffline = () => {
+    browserOffline = true;
+    reportStatus("offline");
+  };
+  const handleOnline = () => {
+    browserOffline = false;
+    reportStatus("reconnecting");
+    void requestRefresh();
+  };
+  window.addEventListener("offline", handleOffline);
+  window.addEventListener("online", handleOnline);
 
   return () => {
     disposed = true;
     window.clearInterval(reconciliation);
+    window.removeEventListener("offline", handleOffline);
+    window.removeEventListener("online", handleOnline);
     void client.removeChannel(channel);
   };
 }
@@ -1046,10 +1096,31 @@ async function addBuyInSupabase(
     input_fronted_by_player_id: frontedByPlayerId,
     input_operation_key: operationKey,
   });
-  if (error) {
+  let result = data?.[0] as (BuyIn & { created: boolean }) | undefined;
+  if (error && error.code !== "PGRST202") {
     throw error;
   }
-  const result = data?.[0] as (BuyIn & { created: boolean }) | undefined;
+  if (error?.code === "PGRST202") {
+    // Older self-hosted databases predate the idempotent RPC. Keep the ledger
+    // usable while the operator applies the current migration; the normal path
+    // above retains retry protection once that migration is present.
+    const { data: inserted, error: insertError } = await client
+      .from("buy_ins")
+      .insert({
+        game_id: gameId,
+        player_id: playerId,
+        amount,
+        type,
+        fronted_by_player_id: frontedByPlayerId,
+        verified: false,
+      })
+      .select()
+      .single();
+    if (insertError) {
+      throw insertError;
+    }
+    result = { ...(inserted as BuyIn), created: true };
+  }
   if (!result) {
     throw new Error("Could not create or find the buy-in.");
   }
@@ -1189,6 +1260,7 @@ async function removePlayerSupabase(playerId: string): Promise<void> {
     .single();
   if (lookupError) throw lookupError;
   const row = player as Player;
+  await requireSupabaseGameStatus(client, row.game_id, "active");
   const actorPlayerId = await currentSupabasePlayerId(client, row.game_id);
   await addSupabaseEvent(client, {
     gameId: row.game_id,
@@ -1205,6 +1277,13 @@ async function removePlayerSupabase(playerId: string): Promise<void> {
 
 async function leaveGameSupabase(playerId: string): Promise<void> {
   const { client } = await ensureSupabaseReady();
+  const { data: existing, error: lookupError } = await client
+    .from("players")
+    .select("game_id")
+    .eq("id", playerId)
+    .single();
+  if (lookupError) throw lookupError;
+  await requireSupabaseGameStatus(client, (existing as { game_id: string }).game_id, "active");
   const { data, error } = await client
     .from("players")
     .update({ left_at: new Date().toISOString() })
@@ -1226,6 +1305,7 @@ async function leaveGameSupabase(playerId: string): Promise<void> {
 
 async function transferHostSupabase(gameId: string, targetPlayerId: string): Promise<void> {
   const { client } = await ensureSupabaseReady();
+  await requireSupabaseGameStatus(client, gameId, "active");
   const { error } = await client.rpc("transfer_game_host", {
     target_game_id: gameId,
     target_player_id: targetPlayerId,
@@ -1529,6 +1609,9 @@ export async function joinGame(
       if (snapshot.players.length === 2) trackProductOpsEvent("game.second_player_joined", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, result.gameId);
     }).catch(() => {});
   }
+  if (!localStorageMode) {
+    dispatchGamePush(result.gameId, "player_joined", result.playerId);
+  }
   return result;
 }
 
@@ -1538,11 +1621,12 @@ export async function getGame(code: string): Promise<Game | null> {
 
 export function subscribeToGame(
   gameId: string,
-  callback: (snapshot: GameSnapshot) => void
+  callback: (snapshot: GameSnapshot) => void,
+  options?: GameSubscriptionOptions,
 ): () => void {
   return usingLocalStorage()
-    ? subscribeToGameLocal(gameId, callback)
-    : subscribeToGameSupabase(gameId, callback);
+    ? subscribeToGameLocal(gameId, callback, options)
+    : subscribeToGameSupabase(gameId, callback, options);
 }
 
 export async function addBuyIn(
@@ -1617,12 +1701,14 @@ export async function endGame(gameId: string): Promise<void> {
   const localStorageMode = usingLocalStorage();
   await (localStorageMode ? endGameLocal(gameId) : endGameSupabase(gameId));
   trackProductOpsEvent("game.entered_settling", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, gameId);
+  if (!localStorageMode) dispatchGamePush(gameId, "game_settling");
 }
 
 export async function markEnded(gameId: string): Promise<void> {
   const localStorageMode = usingLocalStorage();
   await (localStorageMode ? markEndedLocal(gameId) : markEndedSupabase(gameId));
   trackProductOpsEvent("game.finalized", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, gameId);
+  if (!localStorageMode) dispatchGamePush(gameId, "game_finalized");
 }
 
 export async function saveDiscrepancyAllocation(
