@@ -209,9 +209,11 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const bankPlayer =
     players.find((player) => player.id === bankPlayerId) ?? null;
   const bankTransfers = calculateBankSettlement(allocatedNets, bankPlayerId);
-  const activeTabTransfers = tab === "min" ? minTransfers : bankTransfers;
-  const activeTransferKeys = activeTabTransfers.map((transfer) => settlementPaymentKey(tab, transfer));
-  const unpaidCount = activeTransferKeys.filter((key) => !settledPaymentKeys[tab].has(key)).length;
+  // A finalized game has one stable, canonical plan rather than a view choice.
+  const displayedTab: ResultsTab = snapshot.game.status === "ended" ? "min" : tab;
+  const activeTabTransfers = displayedTab === "min" ? minTransfers : bankTransfers;
+  const activeTransferKeys = activeTabTransfers.map((transfer) => settlementPaymentKey(displayedTab, transfer));
+  const unpaidCount = activeTransferKeys.filter((key) => !settledPaymentKeys[displayedTab].has(key)).length;
 
   const status = statusMeta[snapshot.game.status];
 
@@ -505,6 +507,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             </summary>
 
             <div className="space-y-6 border-t border-gray-200 p-5">
+              {snapshot.game.status === "settling" ? (
               <div>
             <div
               role="tablist"
@@ -538,10 +541,11 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               </button>
             </div>
               </div>
+              ) : null}
 
               <FundingNotes snapshot={snapshot} />
 
-              {tab === "min" ? (
+              {displayedTab === "min" ? (
             <div
               id="panel-min"
               role="tabpanel"
@@ -643,7 +647,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   game={snapshot.game}
                   transfers={activeTabTransfers}
                   nets={allocatedNets}
-                  mode={tab}
+                  mode={displayedTab}
                   bankName={bankPlayer?.name}
                   totalBoughtIn={totalBoughtIn}
                   isHost={isHost}
@@ -658,7 +662,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   game={snapshot.game}
                   transfers={activeTabTransfers}
                   nets={allocatedNets}
-                  mode={tab}
+                  mode={displayedTab}
                   bankName={bankPlayer?.name}
                   totalBoughtIn={totalBoughtIn}
                   isHost={isHost}
