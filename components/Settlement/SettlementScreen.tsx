@@ -683,7 +683,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   Finalizing shares each player&apos;s payment instructions in the app—who to pay, who is paying them, or that they&apos;re square.
                 </p>
               </div>
-              <div className="mt-4 flex w-full shrink-0 flex-col gap-2 sm:mt-0 sm:w-auto sm:min-w-52">
+              <div className="mt-4 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-auto sm:min-w-52">
                 <ConfirmButton
                   variant="primary"
                   confirmVariant="primary"
