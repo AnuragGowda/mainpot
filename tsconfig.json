@@ -40,6 +40,6 @@
   ],
   "exclude": [
     "node_modules",
-    "scripts/service-worker.ts"
+    "scripts/sw.ts"
   ]
 }
