@@ -6,7 +6,7 @@
       "esnext"
     ],
     "target": "ES2017",
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -32,12 +32,14 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.mts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     ".next-e2e/types/**/*.ts",
     ".next-e2e/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "scripts/service-worker.ts"
   ]
 }

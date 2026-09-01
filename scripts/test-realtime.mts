@@ -14,8 +14,14 @@ const testDistDirectory = ".next-e2e";
 const testConfig = join(repositoryRoot, "tests", "supabase", "config.toml");
 const sourceMigrations = join(repositoryRoot, "supabase", "migrations");
 const stackLockDirectory = join(tmpdir(), "mainpot-e2e-supabase.lock");
+const databaseAssuranceOnly = process.argv.includes("--database-assurance-only");
 
-function run(command, args, options = {}) {
+type RunOptions = {
+  capture?: boolean;
+  env?: NodeJS.ProcessEnv;
+};
+
+function run(command: string, args: readonly string[], options: RunOptions = {}): string {
   const result = spawnSync(command, args, {
     encoding: options.capture ? "utf8" : undefined,
     stdio: options.capture ? ["ignore", "pipe", "pipe"] : "inherit",
@@ -29,7 +35,7 @@ function run(command, args, options = {}) {
       .replaceAll(/(key|secret|password)\s*[=:]\s*[^\s]+/gi, "$1=[redacted]");
     throw new Error(`${command} ${args.join(" ")} failed with exit code ${result.status ?? 1}.${detail ? `\n${detail}` : ""}`);
   }
-  return result.stdout ?? "";
+  return typeof result.stdout === "string" ? result.stdout : "";
 }
 
 function verifyDockerContext() {
@@ -68,7 +74,7 @@ function acquireStackLock() {
   }
 }
 
-let workdir;
+let workdir: string | undefined;
 let stackStarted = false;
 let lockHeld = false;
 let cleaningUp = false;
@@ -90,7 +96,7 @@ function cleanup() {
   if (lockHeld) rmSync(stackLockDirectory, { recursive: true, force: true });
 }
 
-function exitAfterSignal(signal) {
+function exitAfterSignal(signal: NodeJS.Signals) {
   process.exitCode = signal === "SIGINT" ? 130 : 143;
   cleanup();
   process.exit(process.exitCode);
@@ -119,23 +125,34 @@ try {
     throw new Error("Disposable Supabase stack did not report its expected local API configuration.");
   }
 
-  console.log("Running realtime browser tests…");
-  const result = spawnSync("npx", ["playwright", "test", "tests/e2e/realtime.spec.ts"], {
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      NEXT_PUBLIC_SUPABASE_URL: apiUrl,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey,
-      NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${testAppPort}`,
-      NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: "false",
-      NEXT_E2E_DIST_DIR: testDistDirectory,
-      PLAYWRIGHT_PORT: testAppPort,
-      PLAYWRIGHT_REALTIME: "1",
-    },
-  });
+  if (databaseAssuranceOnly) {
+    console.log("Running database assurance checks against the disposable migration stack…");
+    run(process.execPath, [join(scriptDirectory, "test-database-assurance.mts")], {
+      env: {
+        ...process.env,
+        SUPABASE_WORKDIR: workdir,
+        SUPABASE_EXPECTED_API_URL: apiUrl,
+      },
+    });
+  } else {
+    console.log("Running realtime browser tests…");
+    const result = spawnSync("npx", ["playwright", "test", "tests/e2e/realtime.spec.ts"], {
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        NEXT_PUBLIC_SUPABASE_URL: apiUrl,
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey,
+        NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${testAppPort}`,
+        NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: "false",
+        NEXT_E2E_DIST_DIR: testDistDirectory,
+        PLAYWRIGHT_PORT: testAppPort,
+        PLAYWRIGHT_REALTIME: "1",
+      },
+    });
 
-  if (result.error) throw result.error;
-  if (result.status !== 0) process.exitCode = result.status ?? 1;
+    if (result.error) throw result.error;
+    if (result.status !== 0) process.exitCode = result.status ?? 1;
+  }
 } finally {
   cleanup();
   process.removeAllListeners("SIGINT");

@@ -1,5 +1,6 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   // Keep the disposable browser-test build separate from the developer's
   // normal `.next` output, which may be used by a concurrent dev server.
   distDir: process.env.NEXT_E2E_DIST_DIR ?? ".next",
@@ -34,4 +35,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

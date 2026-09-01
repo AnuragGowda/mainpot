@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type RealtimeChannel } from "@supabase/supabase-js";
 
 const supabaseCommand = process.platform === "win32" ? "supabase.cmd" : "supabase";
 const timeoutMs = 3_000;
@@ -13,14 +13,14 @@ function localStatus() {
   return status;
 }
 
-function assert(condition, message) {
+function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(`Assertion failed: ${message}`);
 }
 
-function waitForSubscription(channel) {
+function waitForSubscription(channel: RealtimeChannel): Promise<boolean> {
   return new Promise((resolve) => {
     const timeout = setTimeout(() => resolve(false), timeoutMs);
-    channel.subscribe((status) => {
+    channel.subscribe((status: string) => {
       if (status === "SUBSCRIBED") {
         clearTimeout(timeout);
         resolve(true);
@@ -33,7 +33,7 @@ function waitForSubscription(channel) {
   });
 }
 
-function waitForChange(register) {
+function waitForChange(register: (handler: () => void) => void): Promise<boolean> {
   return new Promise((resolve) => {
     const timeout = setTimeout(() => resolve(false), timeoutMs);
     register(() => {
@@ -51,7 +51,7 @@ if (!url || !serviceKey) throw new Error("Local Supabase service-role credential
 const database = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
 const realtime = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
 const probeId = randomUUID();
-let acknowledgeChange;
+let acknowledgeChange: (() => void) | undefined;
 let inserted = false;
 const channel = realtime
   .channel(`mainpot-canary-test-${probeId}`)
@@ -68,7 +68,7 @@ try {
   const subscribed = await waitForSubscription(channel);
   assert(subscribed, "canary subscribes to the dedicated Realtime table");
 
-  const changed = waitForChange((handler) => { acknowledgeChange = handler; });
+  const changed = waitForChange((handler: () => void) => { acknowledgeChange = handler; });
   const { error: insertError } = await database.from("product_ops_canary").insert({ probe_id: probeId });
   assert(!insertError, "server role can insert a synthetic canary row");
   inserted = true;

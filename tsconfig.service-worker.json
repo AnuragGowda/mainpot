@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["ES2020", "WebWorker"],
+    "strict": true,
+    "skipLibCheck": true,
+    "module": "none",
+    "rootDir": "scripts",
+    "outFile": "public/sw.js",
+    "ignoreDeprecations": "6.0"
+  },
+  "files": ["scripts/service-worker.ts"]
+}

@@ -4,7 +4,9 @@ const isWindows = process.platform === "win32";
 const supabaseCommand = isWindows ? "supabase.cmd" : "supabase";
 const nextCommand = isWindows ? "next.cmd" : "next";
 
-function run(command, args, options = {}) {
+type RunOptions = { capture?: boolean };
+
+function run(command: string, args: readonly string[], options: RunOptions = {}): string {
   const result = spawnSync(command, args, {
     encoding: options.capture ? "utf8" : undefined,
     stdio: options.capture ? ["ignore", "pipe", "inherit"] : "inherit",
@@ -17,7 +19,7 @@ function run(command, args, options = {}) {
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
   }
-  return result.stdout ?? "";
+  return typeof result.stdout === "string" ? result.stdout : "";
 }
 
 function readLocalConfig() {

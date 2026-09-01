@@ -316,7 +316,7 @@ npm run dev`}</code></pre>
             <div className="mt-7 space-y-3">
               {[
                 "Use a production Supabase project or a hardened PostgreSQL and Supabase deployment.",
-                "Apply the schema and migrations in order, then verify row-level security policies.",
+                "Link the production Supabase project, run `npx supabase db push`, then verify row-level security policies.",
                 "Serve the application over HTTPS and configure authentication redirects for its real domain.",
                 "Back up the database, monitor the health endpoint, and plan how updates will be applied.",
                 "Keep service-role credentials out of the browser and separate production from development.",

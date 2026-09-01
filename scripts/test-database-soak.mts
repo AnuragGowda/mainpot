@@ -10,7 +10,7 @@ let completed = 0;
 
 console.log(`Running local database churn soak for ${Math.round(durationMs / 60_000)} minute(s)…`);
 while (Date.now() < deadline) {
-  const result = spawnSync(process.execPath, ["scripts/test-database-assurance.mjs"], { stdio: "inherit" });
+  const result = spawnSync(process.execPath, ["scripts/test-database-assurance.mts"], { stdio: "inherit" });
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status ?? 1);
   completed += 1;

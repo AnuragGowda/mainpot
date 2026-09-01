@@ -26,16 +26,39 @@ project or deploying the application outside the local development stack.
    **Connect** panel) and note the **Project URL** and the **anon public**
    key — you'll need both in step 4.
 
-## 3. Run the database schema
+## 3. Deploy database migrations
 
-1. Open your project's **SQL Editor** (Dashboard → SQL Editor).
-2. Open [`supabase/schema.sql`](supabase/schema.sql), copy the entire file,
-   paste it into the SQL Editor, and click **Run**.
-3. Run the additive files in [`supabase/migrations`](supabase/migrations) in
-   filename order, starting with `20260830010000_product_roadmap.sql`. This
-   adds invitations, settlement tracking, public-beta guardrails, retention,
-   and the final row-level security policies. The `initial` migration mirrors
-   `schema.sql` and does not need to be run twice.
+The committed files in [`supabase/migrations`](supabase/migrations) are the
+only database source of truth. Do not apply database changes in the Dashboard
+SQL Editor: that bypasses migration history and can make later deployments
+fail.
+
+1. Authenticate the pinned CLI and link this checkout to the new project:
+
+   ```sh
+   npx supabase login
+   npx supabase link --project-ref <your-project-ref>
+   ```
+
+   Find the project reference in **Project Settings → General**.
+
+2. Review the local and hosted migration history, then deploy the committed
+   migrations in order:
+
+   ```sh
+   npx supabase migration list
+   npx supabase db push
+   ```
+
+3. Run `npx supabase migration list` again and confirm every local migration
+   is recorded remotely before continuing.
+
+For any future database change, create and commit a migration locally, verify
+it with `npm run db:reset`, then deploy it with `npx supabase db push`. Do not
+use a schema snapshot or hand-run SQL as a second deployment path. If an
+existing hosted project was previously bootstrapped outside migration history,
+back it up and reconcile its migration history before running `db push`; do
+not mark migrations as applied by guessing.
 
 ## 4. Configure environment variables
 
@@ -176,10 +199,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 Before pointing a public domain at Mainpot, complete the following in a
 separate production Supabase project. Do not reuse local or staging keys.
 
-1. Apply the schema and every migration in filename order. In the Supabase SQL
-   editor, verify that `games read with room access` is present on `games` and
-   that `game_access` has RLS enabled. These are the policies that prevent a
-   signed-in user from reading arbitrary room codes.
+1. Link the production project, run `npx supabase migration list`, then deploy
+   the committed migrations with `npx supabase db push`; do not use the SQL
+   Editor as a second schema-deployment path. Afterward, verify that `games
+   read with room access` is present on `games` and that `game_access` has RLS
+   enabled. These are the policies that prevent a signed-in user from reading
+   arbitrary room codes.
 2. Enable daily database backups and point-in-time recovery in Supabase for the
    production project. Confirm the backup retention and a restoration owner
    before inviting beta users.

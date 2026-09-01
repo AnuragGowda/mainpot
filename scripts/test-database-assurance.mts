@@ -1,13 +1,24 @@
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseCommand = process.platform === "win32" ? "supabase.cmd" : "supabase";
+const supabaseWorkdir = process.env.SUPABASE_WORKDIR;
+const expectedApiUrl = process.env.SUPABASE_EXPECTED_API_URL;
 
 function localStatus() {
-  const status = JSON.parse(execFileSync(supabaseCommand, ["status", "--output", "json"], { encoding: "utf8" }));
+  const args = [
+    ...(supabaseWorkdir ? ["--workdir", supabaseWorkdir] : []),
+    "status",
+    "--output",
+    "json",
+  ];
+  const status = JSON.parse(execFileSync(supabaseCommand, args, { encoding: "utf8" }));
   if (!/^https?:\/\/(127\.0\.0\.1|localhost)(:|$)/.test(status.API_URL ?? "")) {
     throw new Error(`Refusing to run against non-local Supabase URL: ${status.API_URL}`);
+  }
+  if (expectedApiUrl && status.API_URL !== expectedApiUrl) {
+    throw new Error(`Supabase API URL did not match the disposable test stack: ${status.API_URL}`);
   }
   return status;
 }
@@ -19,24 +30,25 @@ const serviceKey = status.SERVICE_ROLE_KEY;
 if (!url || !anonKey || !serviceKey) throw new Error("Local Supabase credentials are incomplete.");
 
 const admin = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
-const clients = [];
-const games = [];
-const users = [];
+const clients: SupabaseClient[] = [];
+const games: string[] = [];
+const users: string[] = [];
 
-function assert(condition, message) {
+function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(`Assertion failed: ${message}`);
 }
 
-async function guest(label) {
+async function guest(label: string): Promise<SupabaseClient> {
   const client = createClient(url, anonKey, { auth: { autoRefreshToken: false, persistSession: false } });
   const { data, error } = await client.auth.signInAnonymously({ options: { data: { display_name: label } } });
   if (error) throw error;
+  assert(data.user, `${label} receives an authenticated user`);
   clients.push(client);
   users.push(data.user.id);
   return client;
 }
 
-async function createGame(client, name) {
+async function createGame(client: SupabaseClient, name: string) {
   const code = Array.from({ length: 6 }, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 30)]).join("");
   const { data, error } = await client.rpc("create_game_guarded", {
     input_code: code,
@@ -46,13 +58,17 @@ async function createGame(client, name) {
     input_session_id: randomUUID(),
   });
   if (error) throw error;
-  const row = Array.isArray(data) ? data[0] : data;
+  const row = (Array.isArray(data) ? data[0] : data) as {
+    game_id: string;
+    player_id: string;
+    code: string;
+  } | null;
   assert(row?.game_id && row?.player_id, "guarded game creation returns ids");
   games.push(row.game_id);
   return row;
 }
 
-async function join(client, code, name) {
+async function join(client: SupabaseClient, code: string, name: string) {
   const { data, error } = await client.rpc("join_game_guarded", {
     input_code: code,
     input_player_name: name,
@@ -62,9 +78,13 @@ async function join(client, code, name) {
   return Array.isArray(data) ? data[0] : data;
 }
 
-async function expectError(operation, label) {
+async function expectError(
+  operation: () => PromiseLike<{ data: unknown; error: unknown }>,
+  label: string,
+) {
   const result = await operation();
-  assert(result.error || !result.data?.length, `${label} is rejected`);
+  const data = result.data as { length?: number } | null;
+  assert(result.error || !data?.length, `${label} is rejected`);
   return result.error;
 }
 
