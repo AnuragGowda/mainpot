@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { formatCurrency, formatSignedNet } from "@/lib/format";
+import { getRecapPersona, type RecapPersona } from "@/lib/recap-personality";
 import {
   formatDuration,
   getRecapDisplayPlayers,
@@ -12,6 +13,9 @@ interface RecapStoryCardProps {
   data: RecapData;
   privacy: RecapPrivacy;
   mode: RecapMode;
+  decorative?: boolean;
+  featuredPlayerId?: string;
+  persona?: RecapPersona;
 }
 
 function clip(value: string, maxLength: number): string {
@@ -37,13 +41,27 @@ function statLabel(value: string, label: string, x: number) {
 
 /** A self-contained SVG so preview and exported PNG always match exactly. */
 const RecapStoryCard = forwardRef<SVGSVGElement, RecapStoryCardProps>(function RecapStoryCard(
-  { data, privacy, mode },
+  { data, privacy, mode, decorative = false, featuredPlayerId, persona },
   ref
 ) {
   const players = getRecapDisplayPlayers(data, privacy).slice(0, 6);
+  const featuredPlayer = data.players.find((player) => player.id === featuredPlayerId)
+    ?? data.players[0]
+    ?? null;
+  const cardPersona = persona ?? getRecapPersona(
+    data,
+    featuredPlayer?.id,
+    0,
+    privacy.showPlayerNames
+  );
   const title = clip(data.gameName || "Poker night", 30);
   const showLeaderboard = mode !== "summary" && players.length > 0;
   const showMoney = privacy.showDollarAmounts;
+  const outcomeAccent = cardPersona.outcome === "big_win" || cardPersona.outcome === "win"
+    ? "#dceabf"
+    : cardPersona.outcome === "even"
+      ? "#eadfb7"
+      : "#efb9ae";
   const footerText = mode === "summary"
     ? "Every entry reconciled before settlement."
     : "A shared ledger for poker night.";
@@ -59,26 +77,39 @@ const RecapStoryCard = forwardRef<SVGSVGElement, RecapStoryCardProps>(function R
       ref={ref}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 1080 1920"
-      role="img"
-      aria-label={`${data.gameName} game recap`}
+      role={decorative ? undefined : "img"}
+      aria-hidden={decorative || undefined}
+      aria-label={decorative ? undefined : `${data.gameName} game recap`}
+      focusable="false"
+      fontFamily="Inter, Arial, sans-serif"
       className="h-auto w-full overflow-hidden rounded-[22px] shadow-2xl"
     >
-      <rect width="1080" height="1920" fill="#121614" />
-      <circle cx="1000" cy="110" r="310" fill="#284237" opacity="0.82" />
-      <circle cx="-60" cy="1760" r="430" fill="#1d3028" opacity="0.9" />
-      <path d="M0 405C247 326 402 525 655 445S988 336 1080 385V0H0Z" fill="#17251f" opacity="0.8" />
-      <rect x="58" y="58" width="964" height="1804" rx="42" fill="#171b19" stroke="#4b5d52" strokeWidth="2" />
+      <rect width="1080" height="1920" fill="#111512" />
+      <g fill="#dfe7db" opacity="0.055">
+        <path d="M926 116l42 52-42 52-42-52z" />
+        <path d="M128 1680l56 69-56 69-56-69z" />
+        <circle cx="965" cy="1530" r="34" />
+        <circle cx="932" cy="1566" r="34" />
+        <circle cx="998" cy="1566" r="34" />
+        <path d="M965 1572l-35 76h70z" />
+      </g>
+      <rect x="58" y="58" width="964" height="1804" rx="42" fill="#151916" stroke="#59635b" strokeWidth="2" />
 
       <g transform="translate(118 158)">
-        <circle cx="18" cy="-8" r="18" fill="#d9e7be" />
-        <text x="52" y="0" fill="#d9e7be" fontSize="26" fontWeight="800" letterSpacing="5">MAINPOT</text>
+        <rect x="0" y="-28" width="36" height="36" rx="8" fill="#dceabf" />
+        <circle cx="18" cy="-16" r="7" fill="#182019" />
+        <circle cx="11" cy="-7" r="7" fill="#182019" />
+        <circle cx="25" cy="-7" r="7" fill="#182019" />
+        <path d="M18-7L10 8H26Z" fill="#182019" />
+        <text x="54" y="0" fill="#dceabf" fontSize="26" fontWeight="800" letterSpacing="5">MAINPOT</text>
         <text x="0" y="92" fill="#a3a3a3" fontSize="22" fontWeight="700" letterSpacing="4">GAME RECAP</text>
         <text x="0" y="165" fill="#fafaf9" fontSize="58" fontWeight="750">{title}</text>
         <text x="0" y="214" fill="#a3a3a3" fontSize="24" fontWeight="600" letterSpacing="2">{dateLabel(data.playedAt)}</text>
       </g>
 
-      <rect x="118" y="470" width="844" height="250" rx="30" fill="#202723" stroke="#4b5d52" strokeWidth="2" />
-      <g transform="translate(168 560)">
+      <line x1="118" x2="962" y1="468" y2="468" stroke="#4b544d" strokeWidth="2" />
+      <line x1="118" x2="962" y1="702" y2="702" stroke="#4b544d" strokeWidth="2" />
+      <g transform="translate(142 560)">
         {stats.map((stat, index) => statLabel(stat.value, stat.label, index * 255))}
       </g>
 
@@ -108,9 +139,30 @@ const RecapStoryCard = forwardRef<SVGSVGElement, RecapStoryCardProps>(function R
           })}
         </g>
       ) : (
-        <g transform="translate(118 920)">
-          <text x="0" y="0" fill="#d9e7be" fontSize="72" fontWeight="750">Game complete.</text>
-          <text x="0" y="60" fill="#d6d3d1" fontSize="30">The table is balanced and ready to settle.</text>
+        <g transform="translate(118 830)">
+          <text x="0" y="0" fill={outcomeAccent} fontSize="22" fontWeight="750" letterSpacing="4">{cardPersona.eyebrow}</text>
+          <text x="0" y="92" fill="#fafaf9" fontSize="56" fontWeight="760">
+            {clip(cardPersona.title, 30)}
+          </text>
+          <text x="0" y="148" fill="#c4cac5" fontSize="27" fontWeight="550">
+            {clip(cardPersona.line, 60)}
+          </text>
+          <line x1="0" x2="844" y1="214" y2="214" stroke="#3c443e" strokeWidth="2" />
+          {featuredPlayer ? (
+            <>
+              <text x="0" y="282" fill="#929a94" fontSize="21" fontWeight="700" letterSpacing="3">
+                {privacy.showPlayerNames ? "PLAYER" : "TABLE RESULT"}
+              </text>
+              <text x="0" y="338" fill="#f5f5f4" fontSize="36" fontWeight="700">
+                {privacy.showPlayerNames ? clip(featuredPlayer.displayName, 25) : `FINISHED #${featuredPlayer.rank}`}
+              </text>
+              {showMoney ? (
+                <text x="844" y="338" textAnchor="end" fill={outcomeAccent} fontSize="54" fontWeight="780">
+                  {formatSignedNet(featuredPlayer.net)}
+                </text>
+              ) : null}
+            </>
+          ) : null}
         </g>
       )}
 

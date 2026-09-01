@@ -9,12 +9,13 @@ import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
 import ConfirmButton from "@/components/GameRoom/ConfirmButton";
 import { copyText } from "@/lib/clipboard";
-import { addCashOut, markEnded, submitGameFeedback } from "@/lib/data";
+import { addCashOut, markEnded, saveDiscrepancyAllocation, submitGameFeedback } from "@/lib/data";
+import { formatCurrency, round2 } from "@/lib/format";
 import { getPlayerCashOut, playerInvested, totalPot } from "@/lib/game";
-import { round2 } from "@/lib/format";
 import { getSessionId } from "@/lib/session";
 import {
   applyFundingAdjustments,
+  applyDiscrepancyAllocation,
   calculateBankSettlement,
   calculateMinTransfers,
 } from "@/lib/settlement";
@@ -26,7 +27,7 @@ import ReconciliationBar from "./ReconciliationBar";
 import SettlementSummary from "./SettlementSummary";
 import TransferList from "./TransferList";
 
-type SettlementMode = "entry" | "results";
+type SettlementMode = "entry" | "allocation" | "results";
 type ResultsTab = "min" | "bank";
 
 export interface SettlementScreenProps {
@@ -72,6 +73,13 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     defaultBankId(snapshot.players)
   );
   const [finalizing, setFinalizing] = useState(false);
+  const [allocationMethod, setAllocationMethod] = useState<"proportional" | "selected">(
+    snapshot.game.discrepancy_allocation?.method ?? "proportional"
+  );
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>(
+    snapshot.game.discrepancy_allocation?.player_ids ?? []
+  );
+  const [allocationSaving, setAllocationSaving] = useState(false);
   const [feedbackScore, setFeedbackScore] = useState<number | null>(null);
   const [confusing, setConfusing] = useState("");
   const [feedbackSent, setFeedbackSent] = useState(false);
@@ -86,6 +94,13 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
       setMode("results");
     }
   }, [snapshot.game.status]);
+
+  useEffect(() => {
+    const saved = snapshot.game.discrepancy_allocation;
+    if (!saved) return;
+    setAllocationMethod(saved.method);
+    setSelectedPlayerIds(saved.player_ids);
+  }, [snapshot.game.discrepancy_allocation]);
 
   // Keep the selected bank valid when the player list changes.
   useEffect(() => {
@@ -124,10 +139,24 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     snapshot.buyIns
   );
 
-  const minTransfers = calculateMinTransfers(nets);
+  const allocationEligible = nets.filter((player) =>
+    difference > 0 ? player.net < -0.005 : player.net > 0.005
+  );
+  const allocation = !balanced
+    ? { method: allocationMethod, playerIds: selectedPlayerIds }
+    : null;
+  const allocatedNets = allocation
+    ? applyDiscrepancyAllocation(nets, difference, allocation)
+    : nets;
+  const selectedCapacity = allocationEligible
+    .filter((player) => selectedPlayerIds.includes(player.playerId))
+    .reduce((sum, player) => sum + Math.abs(player.net), 0);
+  const selectedAllocationValid = allocationMethod === "proportional"
+    || (selectedPlayerIds.length > 0 && selectedCapacity + 0.005 >= Math.abs(difference));
+  const minTransfers = calculateMinTransfers(allocatedNets);
   const bankPlayer =
     players.find((player) => player.id === bankPlayerId) ?? null;
-  const bankTransfers = calculateBankSettlement(nets, bankPlayerId);
+  const bankTransfers = calculateBankSettlement(allocatedNets, bankPlayerId);
   const activeTabTransfers = tab === "min" ? minTransfers : bankTransfers;
 
   const status = statusMeta[snapshot.game.status];
@@ -164,6 +193,23 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
       );
     } finally {
       setFinalizing(false);
+    }
+  }
+
+  async function handleAllocationContinue() {
+    if (!selectedAllocationValid) return;
+    setAllocationSaving(true);
+    try {
+      await saveDiscrepancyAllocation(snapshot.game.id, {
+        method: allocationMethod,
+        player_ids: allocationMethod === "selected" ? selectedPlayerIds : allocationEligible.map((player) => player.playerId),
+        amount: Math.abs(difference),
+      });
+      setMode("results");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Failed to save the discrepancy decision.", "error");
+    } finally {
+      setAllocationSaving(false);
     }
   }
 
@@ -211,7 +257,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
               Room code
@@ -227,15 +273,18 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
           </div>
 
           {isHost && snapshot.game.status === "settling" && mode === "results" ? (
-            <ConfirmButton
-              variant="primary"
-              size="md"
-              loading={finalizing}
-              confirmLabel="Finalize now?"
-              onConfirm={handleFinalize}
-            >
-              Finalize game
-            </ConfirmButton>
+            <div className="w-full sm:w-auto">
+              <ConfirmButton
+                variant="primary"
+                size="md"
+                className="w-full sm:w-auto"
+                loading={finalizing}
+                confirmLabel="Finalize now?"
+                onConfirm={handleFinalize}
+              >
+                Finalize game
+              </ConfirmButton>
+            </div>
           ) : null}
         </div>
       </header>
@@ -281,13 +330,53 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   variant="ghost"
                   size="sm"
                   confirmLabel="Calculate anyway?"
-                  onConfirm={() => setMode("results")}
+                  onConfirm={() => setMode("allocation")}
                 >
                   Calculate anyway
                 </ConfirmButton>
               </div>
             ) : null}
           </div>
+        </div>
+      ) : mode === "allocation" ? (
+        <div className="mt-6 space-y-6">
+          <Card padding="md" className="border-amber-200 bg-amber-50/60">
+            <p className="text-xs font-semibold uppercase tracking-widest text-amber-800">Discrepancy decision</p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight text-gray-950">Agree how to handle {formatCurrency(Math.abs(difference))} before payments.</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-700">
+              {difference < 0
+                ? "Cash-outs exceed buy-ins, so the adjustment reduces winnings."
+                : "Cash-outs are short of buy-ins, so the adjustment reduces recorded losses."} This choice is included in the settlement record.
+            </p>
+
+            <fieldset className="mt-5 space-y-3">
+              <legend className="text-sm font-semibold text-gray-900">Allocate the adjustment</legend>
+              <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 bg-white p-4">
+                <input type="radio" name="allocation-method" checked={allocationMethod === "proportional"} onChange={() => setAllocationMethod("proportional")} className="mt-0.5 h-4 w-4" />
+                <span><span className="block text-sm font-semibold text-gray-900">Split proportionally</span><span className="mt-1 block text-sm text-gray-600">Share it across every {difference < 0 ? "winner" : "losing player"} in proportion to their result.</span></span>
+              </label>
+              <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 bg-white p-4">
+                <input type="radio" name="allocation-method" checked={allocationMethod === "selected"} onChange={() => setAllocationMethod("selected")} className="mt-0.5 h-4 w-4" />
+                <span><span className="block text-sm font-semibold text-gray-900">Choose players</span><span className="mt-1 block text-sm text-gray-600">Use this when the table knows which results the discrepancy belongs to.</span></span>
+              </label>
+            </fieldset>
+
+            {allocationMethod === "selected" ? (
+              <fieldset className="mt-4 space-y-2">
+                <legend className="text-sm font-semibold text-gray-900">Players sharing the adjustment</legend>
+                {allocationEligible.map((player) => {
+                  const checked = selectedPlayerIds.includes(player.playerId);
+                  return <label key={player.playerId} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800"><span>{player.name} <span className="text-gray-500">({formatCurrency(Math.abs(player.net))})</span></span><input type="checkbox" checked={checked} onChange={() => setSelectedPlayerIds((current) => checked ? current.filter((id) => id !== player.playerId) : [...current, player.playerId])} className="h-4 w-4" /></label>;
+                })}
+                {!selectedAllocationValid ? <p className="text-sm text-red-700">Select players with at least {formatCurrency(Math.abs(difference))} in eligible results.</p> : null}
+              </fieldset>
+            ) : null}
+
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+              <Button variant="secondary" size="md" onClick={() => setMode("entry")}>Back to cash-outs</Button>
+              <Button size="md" onClick={handleAllocationContinue} disabled={!selectedAllocationValid} loading={allocationSaving}>Review adjusted settlement</Button>
+            </div>
+          </Card>
         </div>
       ) : (
         <div className="mt-6 space-y-6">
@@ -355,7 +444,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 >
                   Net results
                 </h2>
-                <NetList nets={nets} />
+                <NetList nets={allocatedNets} />
               </section>
             </div>
           ) : (
@@ -404,9 +493,9 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   Net results
                 </h2>
                 <NetList
-                  nets={nets}
+                  nets={allocatedNets}
                   bankPlayerId={bankPlayerId}
-                  bankResidual={difference}
+                  bankResidual={0}
                 />
               </section>
             </div>
@@ -416,13 +505,15 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             snapshot={snapshot}
             game={snapshot.game}
             transfers={activeTabTransfers}
-            nets={nets}
+            nets={allocatedNets}
             mode={tab}
             bankName={bankPlayer?.name}
             totalBoughtIn={totalBoughtIn}
             isHost={isHost}
             finalized={snapshot.game.status === "ended"}
             playerCount={players.length}
+            discrepancyAllocation={allocation}
+            discrepancyAmount={balanced ? 0 : Math.abs(difference)}
           />
 
           {snapshot.game.status === "ended" && !feedbackSent ? (

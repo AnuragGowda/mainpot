@@ -68,7 +68,7 @@ export default function SettlementCalculator() {
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Free calculator</p>
           <h2 id="calculator-heading" className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-gray-950 sm:text-4xl">Settle a game before you create a room.</h2>
-          <p className="mt-4 text-base leading-8 text-gray-600">No account needed. Enter each player&apos;s total money in and final stack; payments appear only after the bank balances.</p>
+          <p className="mt-4 text-base leading-8 text-gray-600">No account needed. Enter each player&apos;s total money in and final stack; payments appear after the bank balances, or after the table explicitly allocates an intentional discrepancy.</p>
         </div>
 
         <div className="mt-8 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_18px_50px_rgba(17,24,20,0.07)]">

@@ -79,7 +79,7 @@ const faqs = [
   {
     question: "Why do total buy-ins have to equal total cash-outs?",
     answer:
-      "The chips on the table represent the money that entered the game. If the two totals differ, an entry is missing, duplicated, or incorrect. Creating payments before the bank balances can move that error onto the players.",
+      "The chips on the table represent the money that entered the game. If the two totals differ, an entry may be missing, duplicated, or incorrect. Find the cause first; if the difference is intentional, the table should explicitly decide how it changes the results before creating payments.",
   },
   {
     question: "Do rebuys and add-ons count as buy-ins?",
@@ -99,7 +99,7 @@ const faqs = [
   {
     question: "Can a game be settled when the bank is still off?",
     answer:
-      "Mainpot can show a provisional result, but the safer workflow is to find the discrepancy first. A host should only override the warning when the table understands the difference and has agreed how to handle it.",
+      "Mainpot first asks the table to find the discrepancy. If it is intentional, the host can record an explicit allocation: split it proportionally across the affected winners or losers, or assign it to selected players. The adjusted result and the decision appear in the settlement record.",
   },
 ];
 

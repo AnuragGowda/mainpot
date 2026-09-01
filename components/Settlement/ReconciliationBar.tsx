@@ -73,7 +73,7 @@ export default function ReconciliationBar({
             <p className="mt-1 text-xs leading-5 text-red-800/80">
               {difference > 0
                 ? `${formatCurrency(difference)} is still missing from the cash-out total. Recheck final stacks or add the missing cash-out.`
-                : `${formatCurrency(Math.abs(difference))} more has been recorded as cash-outs than was bought in. Recheck final stacks or buy-ins.`} You can calculate anyway if the difference is intentional.
+                : `${formatCurrency(Math.abs(difference))} more has been recorded as cash-outs than was bought in. Recheck final stacks or buy-ins.`} If it is intentional, continue to choose and record how the adjustment is allocated.
             </p>
           </div>
         )}

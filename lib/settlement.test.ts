@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyFundingAdjustments,
+  applyDiscrepancyAllocation,
   calculateBankSettlement,
   calculateMinTransfers,
 } from "./settlement";
@@ -95,5 +96,23 @@ describe("applyFundingAdjustments", () => {
     expect(applyFundingAdjustments([player("A", 0)], [ordinaryBuyIn])).toEqual([
       player("A", 0),
     ]);
+  });
+});
+
+describe("applyDiscrepancyAllocation", () => {
+  it("reduces winnings proportionally when cash-outs exceed buy-ins", () => {
+    expect(applyDiscrepancyAllocation(
+      [player("A", 60), player("B", 40), player("C", -120)],
+      -20,
+      { method: "proportional", playerIds: [] }
+    )).toEqual([player("A", 48), player("B", 32), player("C", -120)]);
+  });
+
+  it("uses only selected eligible players when they can cover the discrepancy", () => {
+    expect(applyDiscrepancyAllocation(
+      [player("A", 60), player("B", 40), player("C", -120)],
+      -20,
+      { method: "selected", playerIds: ["B"] }
+    )).toEqual([player("A", 60), player("B", 20), player("C", -120)]);
   });
 });

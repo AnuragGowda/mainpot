@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Copy, Download, Share2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Copy, Download, RefreshCw, Share2, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
@@ -11,6 +11,7 @@ import {
   type RecapMode,
   type RecapPrivacy,
 } from "@/lib/recap";
+import { getRecapPersona } from "@/lib/recap-personality";
 import type { PlayerNet, Transfer } from "@/lib/settlement";
 import type { GameSnapshot } from "@/lib/types";
 import RecapStoryCard from "./RecapStoryCard";
@@ -87,10 +88,48 @@ export default function GameRecapDialog({
 }: GameRecapDialogProps) {
   const { toast } = useToast();
   const svgRef = useRef<SVGSVGElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const data = deriveRecapData(snapshot, nets, transfers);
   const [mode, setMode] = useState<RecapMode>("summary");
   const [privacy, setPrivacy] = useState<RecapPrivacy>(defaultRecapPrivacy);
+  const [featuredPlayerId, setFeaturedPlayerId] = useState(
+    () => data.players[0]?.id ?? ""
+  );
+  const [personaIndex, setPersonaIndex] = useState(0);
   const [exporting, setExporting] = useState(false);
-  const data = deriveRecapData(snapshot, nets, transfers);
+  const featuredPlayer = data.players.find((player) => player.id === featuredPlayerId)
+    ?? data.players[0]
+    ?? null;
+  const persona = getRecapPersona(
+    data,
+    featuredPlayer?.id,
+    personaIndex,
+    privacy.showPlayerNames
+  );
+
+  function dealAnotherPersona() {
+    setPersonaIndex((current) => current + 1);
+  }
+
+  function featurePlayer(playerId: string) {
+    setFeaturedPlayerId(playerId);
+    setPersonaIndex(0);
+    setMode("summary");
+  }
+
+  useEffect(() => {
+    const previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogRef.current?.focus();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
+    };
+  }, []);
 
   async function createPng() {
     if (!svgRef.current) throw new Error("The recap preview is still loading.");
@@ -153,36 +192,103 @@ export default function GameRecapDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-950/55 p-0 backdrop-blur-sm sm:p-4">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-gray-950/60 p-0 backdrop-blur-md sm:p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="game-recap-title"
-        className="mx-auto min-h-full w-full max-w-5xl bg-white shadow-2xl sm:min-h-0 sm:rounded-2xl"
+        aria-describedby="game-recap-description"
+        onKeyDown={(event) => {
+          if (event.key === "Escape") onClose();
+        }}
+        className="mx-auto min-h-full w-full max-w-5xl overflow-hidden bg-[#f7f8f6] shadow-2xl focus:outline-none sm:min-h-0 sm:rounded-2xl"
       >
-        <div className="flex items-start justify-between border-b border-gray-200 px-4 py-4 sm:px-6">
+        <div className="flex items-start justify-between border-b border-gray-200 bg-white px-4 py-5 sm:px-7 sm:py-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Finished game</p>
-            <h2 id="game-recap-title" className="mt-1 text-xl font-semibold tracking-tight text-gray-950">Share game recap</h2>
-            <p className="mt-1 text-sm text-gray-500">A 1080 × 1920 story image. Financial details stay hidden until you choose otherwise.</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">Game card</p>
+            <h2 id="game-recap-title" className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-gray-950">Deal a table nickname</h2>
+            <p id="game-recap-description" className="mt-1 max-w-2xl text-sm leading-6 text-gray-600">Pick a player, tap the card until the line feels right, then choose what makes the final image.</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close game recap" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
+          <button type="button" onClick={onClose} aria-label="Close game recap" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
             <X aria-hidden size={20} />
           </button>
         </div>
 
-        <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:p-7">
           <div className="mx-auto w-full max-w-[430px] self-start">
-            <RecapStoryCard ref={svgRef} data={data} privacy={privacy} mode={mode} />
+            <div className="mx-auto w-full max-w-[260px] rounded-[24px] border border-gray-200 bg-[#ecefe9] p-3 sm:max-w-[300px] sm:p-4">
+              {mode === "summary" ? (
+                <button
+                  type="button"
+                  onClick={dealAnotherPersona}
+                  aria-label={`Deal another nickname for ${featuredPlayer?.displayName ?? "the featured player"}`}
+                  className="group relative block w-full rounded-[18px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4 focus-visible:ring-offset-[#ecefe9]"
+                >
+                  <RecapStoryCard
+                    ref={svgRef}
+                    data={data}
+                    privacy={privacy}
+                    mode={mode}
+                    featuredPlayerId={featuredPlayer?.id}
+                    persona={persona}
+                    decorative
+                  />
+                  <span className="absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-md border border-white/15 bg-gray-950/90 px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-sm transition group-hover:-translate-y-0.5">
+                    <RefreshCw aria-hidden size={13} /> Tap for another
+                  </span>
+                </button>
+              ) : (
+                <RecapStoryCard ref={svgRef} data={data} privacy={privacy} mode={mode} />
+              )}
+              <p className="pb-1 pt-3 text-center text-xs font-medium text-gray-500">1080 × 1920 · ready for Stories</p>
+            </div>
+
+            {data.players.length > 0 ? (
+              <fieldset className="mt-4">
+                <legend className="text-xs font-bold uppercase tracking-[0.14em] text-gray-500">Featured player</legend>
+                <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+                  {data.players.map((player) => (
+                    <button
+                      key={player.id}
+                      type="button"
+                      aria-pressed={featuredPlayer?.id === player.id && mode === "summary"}
+                      onClick={() => featurePlayer(player.id)}
+                      className={`min-h-11 shrink-0 rounded-lg border px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 ${featuredPlayer?.id === player.id && mode === "summary" ? "border-gray-950 bg-gray-950 text-white" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"}`}
+                    >
+                      {player.displayName}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            ) : null}
+
+            {mode === "summary" ? (
+              <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white p-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Current nickname</p>
+                  <p aria-live="polite" className="mt-0.5 truncate text-sm font-semibold text-gray-900">{persona.title}</p>
+                </div>
+                <Button variant="secondary" size="sm" onClick={dealAnotherPersona} leftIcon={<RefreshCw aria-hidden size={14} />}>
+                  Deal another
+                </Button>
+              </div>
+            ) : null}
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 rounded-xl border border-gray-200 bg-white p-5">
             <fieldset>
-              <legend className="text-sm font-semibold text-gray-900">Card content</legend>
+              <legend className="text-sm font-semibold text-gray-900">Card type</legend>
               <div className="mt-2 grid grid-cols-3 rounded-lg border border-gray-200 bg-gray-50 p-1">
                 {(["summary", "leaderboard", "full"] as const).map((option) => (
                   <button key={option} type="button" onClick={() => setMode(option)} className={`min-h-10 rounded-md px-2 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 ${mode === option ? "bg-white text-gray-950 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}>
-                    {option === "summary" ? "Summary" : option === "leaderboard" ? "Leaderboard" : "Full stats"}
+                    {option === "summary" ? "Player" : option === "leaderboard" ? "Final table" : "Full stats"}
                   </button>
                 ))}
               </div>
@@ -194,29 +300,29 @@ export default function GameRecapDialog({
               <div className="mt-3 space-y-3">
                 <label className="flex cursor-pointer items-center justify-between gap-4 text-sm text-gray-700">
                   Show player names
-                  <input type="checkbox" checked={privacy.showPlayerNames} onChange={(event) => setBoolean("showPlayerNames", event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
+                  <input aria-label="Show player names" type="checkbox" checked={privacy.showPlayerNames} onChange={(event) => setBoolean("showPlayerNames", event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
                 </label>
                 <label className="flex cursor-pointer items-center justify-between gap-4 text-sm text-gray-700">
                   Show dollar amounts
-                  <input type="checkbox" checked={privacy.showDollarAmounts} onChange={(event) => setBoolean("showDollarAmounts", event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
+                  <input aria-label="Show dollar amounts" type="checkbox" checked={privacy.showDollarAmounts} onChange={(event) => setBoolean("showDollarAmounts", event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
                 </label>
                 <label className={`flex items-center justify-between gap-4 text-sm ${privacy.showDollarAmounts ? "cursor-pointer text-gray-700" : "cursor-not-allowed text-gray-400"}`}>
                   Show losses
-                  <input type="checkbox" disabled={!privacy.showDollarAmounts} checked={privacy.showLosses} onChange={(event) => setBoolean("showLosses", event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
+                  <input aria-label="Show losses" type="checkbox" disabled={!privacy.showDollarAmounts} checked={privacy.showLosses} onChange={(event) => setBoolean("showLosses", event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
                 </label>
               </div>
             </fieldset>
 
-            {data.players.length > 0 ? (
+            {data.players.length > 0 && mode !== "summary" ? (
               <fieldset className="border-t border-gray-200 pt-5">
-                <legend className="text-sm font-semibold text-gray-900">Hide players</legend>
+                <legend className="text-sm font-semibold text-gray-900">Leaderboard players</legend>
                 <div className="mt-3 max-h-40 space-y-2 overflow-y-auto pr-1">
                   {data.players.map((player) => {
                     const hidden = privacy.hiddenPlayerIds.includes(player.id);
                     return (
                       <label key={player.id} className="flex cursor-pointer items-center justify-between gap-4 text-sm text-gray-700">
                         <span className="truncate">{player.displayName}</span>
-                        <input type="checkbox" checked={!hidden} onChange={(event) => setPrivacy((current) => ({ ...current, hiddenPlayerIds: updateHiddenPlayer(current.hiddenPlayerIds, player.id, !event.target.checked) }))} className="h-4 w-4 shrink-0 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
+                        <input aria-label={`Include ${player.displayName}`} type="checkbox" checked={!hidden} onChange={(event) => setPrivacy((current) => ({ ...current, hiddenPlayerIds: updateHiddenPlayer(current.hiddenPlayerIds, player.id, !event.target.checked) }))} className="h-4 w-4 shrink-0 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
                       </label>
                     );
                   })}
@@ -225,8 +331,8 @@ export default function GameRecapDialog({
             ) : null}
 
             <div className="space-y-2 border-t border-gray-200 pt-5">
-              <Button fullWidth size="md" loading={exporting} onClick={handleShare} leftIcon={<Share2 aria-hidden size={16} />}>Share image</Button>
-              <Button fullWidth variant="secondary" size="md" disabled={exporting} onClick={handleDownload} leftIcon={<Download aria-hidden size={16} />}>Download image</Button>
+              <Button fullWidth size="lg" loading={exporting} onClick={handleShare} leftIcon={<Share2 aria-hidden size={17} />}>Share your story</Button>
+              <Button fullWidth variant="secondary" size="md" disabled={exporting} onClick={handleDownload} leftIcon={<Download aria-hidden size={16} />}>Save image</Button>
               <Button fullWidth variant="ghost" size="md" disabled={exporting} onClick={handleCopyLink} leftIcon={<Copy aria-hidden size={16} />}>Copy Mainpot link</Button>
             </div>
           </div>

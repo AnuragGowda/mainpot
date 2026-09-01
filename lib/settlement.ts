@@ -14,6 +14,14 @@ export interface PlayerNet {
   net: number;
 }
 
+export type DiscrepancyAllocationMethod = "proportional" | "selected";
+
+export interface DiscrepancyAllocation {
+  method: DiscrepancyAllocationMethod;
+  /** Player ids sharing the adjustment. Empty means every eligible player. */
+  playerIds: string[];
+}
+
 /**
  * Applies who-paid-for-whom adjustments without changing chip accounting.
  * The beneficiary still owns the buy-in and its chips; only the final debt is
@@ -37,6 +45,47 @@ export function applyFundingAdjustments(
       (adjustments.get(lenderId) ?? 0) + buyIn.amount
     );
   }
+
+  return players.map((player) => ({
+    ...player,
+    net: round2(player.net + (adjustments.get(player.playerId) ?? 0)),
+  }));
+}
+
+/**
+ * Brings an otherwise unbalanced set of nets back to zero after the table has
+ * explicitly agreed how to treat a cash discrepancy. A positive discrepancy
+ * (less cash out than bought in) reduces losses; a negative discrepancy
+ * reduces winnings. This keeps the adjustment on the side that otherwise
+ * over-claims the available cash.
+ */
+export function applyDiscrepancyAllocation(
+  players: PlayerNet[],
+  discrepancy: number,
+  allocation: DiscrepancyAllocation
+): PlayerNet[] {
+  const amount = round2(Math.abs(discrepancy));
+  if (amount < EPSILON) return players;
+
+  const eligible = players.filter((player) =>
+    discrepancy > 0 ? player.net < -EPSILON : player.net > EPSILON
+  );
+  const selected = allocation.method === "selected"
+    ? eligible.filter((player) => allocation.playerIds.includes(player.playerId))
+    : eligible;
+  const capacity = selected.reduce((sum, player) => sum + Math.abs(player.net), 0);
+
+  if (selected.length === 0 || capacity + EPSILON < amount) return players;
+
+  const adjustments = new Map<string, number>();
+  let remaining = amount;
+  selected.forEach((player, index) => {
+    const share = index === selected.length - 1
+      ? remaining
+      : round2(amount * Math.abs(player.net) / capacity);
+    adjustments.set(player.playerId, discrepancy > 0 ? share : -share);
+    remaining = round2(remaining - share);
+  });
 
   return players.map((player) => ({
     ...player,

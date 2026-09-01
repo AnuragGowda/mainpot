@@ -1,5 +1,5 @@
 import { formatCurrency, formatSignedNet } from "./format";
-import type { PlayerNet, Transfer } from "./settlement";
+import type { DiscrepancyAllocation, PlayerNet, Transfer } from "./settlement";
 import type { Game } from "./types";
 
 export interface SummaryInput {
@@ -9,6 +9,8 @@ export interface SummaryInput {
   mode: "min" | "bank";
   bankName?: string;
   totalBoughtIn: number;
+  discrepancyAllocation?: DiscrepancyAllocation | null;
+  discrepancyAmount?: number;
 }
 
 /**
@@ -22,6 +24,8 @@ export function buildSummaryText({
   mode,
   bankName,
   totalBoughtIn,
+  discrepancyAllocation,
+  discrepancyAmount = 0,
 }: SummaryInput): string {
   const lines: string[] = [
     `Mainpot — ${game.name}`,
@@ -45,6 +49,11 @@ export function buildSummaryText({
   }
 
   lines.push("");
+  if (discrepancyAllocation && discrepancyAmount > 0.004) {
+    lines.push(`Discrepancy: ${formatCurrency(discrepancyAmount)}`);
+    lines.push(`Allocation: ${discrepancyAllocation.method === "proportional" ? "split proportionally" : "assigned to selected players"}`);
+    lines.push("");
+  }
   lines.push("Net:");
   for (const net of nets) {
     lines.push(`${net.name}: ${formatSignedNet(net.net)}`);
