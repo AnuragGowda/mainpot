@@ -49,9 +49,9 @@ test("syncs two guests' independent ledger entries and host approval", async ({ 
     const pending = host.getByRole("region", { name: "Needs approval" });
     await expect(pending.getByRole("listitem")).toHaveCount(2);
 
-    await pending.getByRole("button", { name: "Approve" }).first().click();
+    await pending.getByRole("button", { name: "Approve", exact: true }).first().click();
     await expect(pending.getByRole("listitem")).toHaveCount(1);
-    await pending.getByRole("button", { name: "Approve" }).click();
+    await pending.getByRole("button", { name: "Approve", exact: true }).click();
     await expect(host.getByRole("region", { name: "Needs approval" })).toHaveCount(0);
     await expect(playerCard(host, "Jordan").getByText("1 entry", { exact: true })).toBeVisible();
     await expect(playerCard(host, "Taylor").getByText("1 entry", { exact: true })).toBeVisible();
@@ -76,7 +76,7 @@ test("records only one ledger entry after a rapid duplicate buy-in", async ({ br
     const pending = host.getByRole("region", { name: "Needs approval" });
     await expect(pending.getByRole("listitem")).toHaveCount(1);
 
-    await pending.getByRole("button", { name: "Approve" }).click();
+    await pending.getByRole("button", { name: "Approve", exact: true }).click();
     await expect(host.getByRole("region", { name: "Needs approval" })).toHaveCount(0);
     await expect(playerCard(host, "Jordan").getByText("1 entry", { exact: true })).toBeVisible();
   } finally {
@@ -96,14 +96,17 @@ test("transfers host authority and updates controls for both users", async ({ br
     await joinGame(jordan, host.url(), "Jordan");
 
     await expect(host.getByRole("button", { name: "End game" })).toBeVisible();
+    await host.getByText("Host controls", { exact: true }).click();
     await expect(host.getByLabel("Pass host controls")).toBeVisible();
 
     await host.locator("#next-host").selectOption({ label: "Jordan" });
     await host.getByRole("button", { name: "Make host" }).click();
+    await host.getByRole("button", { name: "Transfer host?" }).click();
 
     await expect(host.getByRole("button", { name: "End game" })).toHaveCount(0);
     await expect(host.getByLabel("Pass host controls")).toHaveCount(0);
     await expect(jordan.getByRole("button", { name: "End game" })).toBeVisible();
+    await jordan.getByText("Host controls", { exact: true }).click();
     await expect(jordan.getByLabel("Pass host controls")).toBeVisible();
     await expect(playerCard(jordan, "Jordan").getByText("Host", { exact: true })).toBeVisible();
     await expect(playerCard(jordan, "Casey").getByText("Host", { exact: true })).toHaveCount(0);
@@ -125,7 +128,7 @@ test("recovers a disconnected guest after the host starts settlement", async ({ 
 
     await jordanContext.setOffline(true);
     await host.getByRole("button", { name: "End game" }).click();
-    await host.getByRole("button", { name: "Confirm?" }).click();
+    await host.getByRole("button", { name: "End game and start cash-outs?", exact: true }).click();
     await expect(host.getByRole("heading", { name: "Cash-outs" })).toBeVisible();
 
     await jordanContext.setOffline(false);
@@ -161,7 +164,7 @@ test("keeps host correction and approval decisions auditable", async ({ browser 
 
     await jordanPending.getByRole("button", { name: "Save" }).click();
     await expect(host.getByText("Buy-in updated", { exact: true })).toBeVisible();
-    await taylorPending.getByRole("button", { name: "Approve" }).click();
+    await taylorPending.getByRole("button", { name: "Approve", exact: true }).click();
 
     await expect(pending.getByRole("listitem")).toHaveCount(1);
     await expect(pending.getByRole("listitem").filter({ hasText: "Jordan" })).toContainText("$25.00");
@@ -185,11 +188,11 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
     await createGame(host, "Realtime test game");
     await joinGame(guest, host.url(), "Jordan");
     await guest.getByRole("button", { name: "Buy in · $20.00" }).click();
-    await expect(host.getByRole("button", { name: "Approve" })).toBeVisible();
-    await host.getByRole("button", { name: "Approve" }).click();
+    await expect(host.getByRole("button", { name: "Approve", exact: true })).toBeVisible();
+    await host.getByRole("button", { name: "Approve", exact: true }).click();
 
     await host.getByRole("button", { name: "End game" }).click();
-    await host.getByRole("button", { name: "Confirm?" }).click();
+    await host.getByRole("button", { name: "End game and start cash-outs?", exact: true }).click();
     await expect(guest.getByRole("heading", { name: "Cash-outs" })).toBeVisible();
 
     await host.getByRole("spinbutton", { name: "Cash-out amount for Casey" }).fill("20");
