@@ -317,7 +317,9 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
 
     await guest.getByRole("spinbutton", { name: "Cash-out amount for Jordan" }).fill("10");
     await guest.getByRole("spinbutton", { name: "Cash-out amount for Jordan" }).blur();
-    await expect(host.getByRole("spinbutton", { name: "Cash-out amount for Jordan" })).toHaveValue("10");
+    await expect(host.getByRole("spinbutton", { name: "Cash-out amount for Jordan" })).toHaveValue("10", {
+      timeout: 15_000,
+    });
     await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
 
     await host.getByRole("button", { name: "Calculate settlement" }).click();

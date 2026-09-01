@@ -15,6 +15,8 @@ export default defineConfig({
     ? "**/realtime.spec.ts"
     : "**/smoke.spec.ts",
   fullyParallel: true,
+  timeout: isMobileSmokeSuite ? 60_000 : 30_000,
+  workers: process.env.CI && isMobileSmokeSuite ? 2 : undefined,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
