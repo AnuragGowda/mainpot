@@ -20,7 +20,7 @@ export default function ProductOpsAcquisition() {
   useEffect(() => {
     if (!productOpsEnabled() || window.localStorage.getItem(key)) return;
     window.localStorage.setItem(key, "1");
-    trackProductOpsEvent("acquisition.attributed", { source: source() });
+    trackProductOpsEvent("acquisition.referrer_attributed", { source: source() });
   }, []);
   return null;
 }
