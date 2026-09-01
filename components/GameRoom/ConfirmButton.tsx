@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import Button from "@/components/ui/Button";
 import type { ButtonSize, ButtonVariant } from "@/components/ui/Button";
-
-const CONFIRM_TIMEOUT_MS = 3000;
 
 export interface ConfirmButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick"> {
@@ -22,9 +20,9 @@ export interface ConfirmButtonProps
 }
 
 /**
- * Two-step inline confirmation for destructive actions: the first click
- * switches the button into a "Confirm?" + "Cancel" pair for ~3s. Clicking
- * "Confirm?" fires `onConfirm`; clicking "Cancel" (or waiting) resets it.
+ * Two-step inline confirmation for destructive actions. The confirmation stays
+ * visible until the user explicitly confirms or cancels, which keeps the
+ * consequence readable on touch devices and for assistive-technology users.
  */
 export default function ConfirmButton({
   onConfirm,
@@ -34,35 +32,16 @@ export default function ConfirmButton({
   size = "md",
   loading = false,
   children,
+  className,
   ...rest
 }: ConfirmButtonProps) {
   const [confirming, setConfirming] = useState(false);
-  const timerRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current !== null) {
-        window.clearTimeout(timerRef.current);
-      }
-    };
-  }, []);
 
   function startConfirm() {
     setConfirming(true);
-    if (timerRef.current !== null) {
-      window.clearTimeout(timerRef.current);
-    }
-    timerRef.current = window.setTimeout(() => {
-      setConfirming(false);
-      timerRef.current = null;
-    }, CONFIRM_TIMEOUT_MS);
   }
 
   function cancel() {
-    if (timerRef.current !== null) {
-      window.clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
     setConfirming(false);
   }
 
@@ -73,11 +52,17 @@ export default function ConfirmButton({
 
   if (confirming) {
     return (
-      <span className="inline-flex items-center gap-1.5">
-        <Button variant={variant} size={size} onClick={handleConfirm} {...rest}>
+      <span className="flex w-full items-center gap-1.5 sm:inline-flex sm:w-auto">
+        <Button
+          variant={variant}
+          size={size}
+          className={["flex-1 sm:flex-none", className ?? ""].join(" ")}
+          onClick={handleConfirm}
+          {...rest}
+        >
           {confirmLabel}
         </Button>
-        <Button variant="ghost" size={size} onClick={cancel}>
+        <Button variant="ghost" size={size} className="flex-1 sm:flex-none" onClick={cancel}>
           {cancelLabel}
         </Button>
       </span>
@@ -90,6 +75,7 @@ export default function ConfirmButton({
       size={size}
       loading={loading}
       onClick={startConfirm}
+      className={className}
       {...rest}
     >
       {children}

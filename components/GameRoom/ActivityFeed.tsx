@@ -11,8 +11,6 @@ import ConfirmButton from "./ConfirmButton";
 export interface ActivityFeedProps {
   snapshot: GameSnapshot;
   isHost: boolean;
-  currentPlayerId: string | null;
-  onVerify: (buyInId: string) => void;
   onEdit: (buyInId: string, amount: number) => void;
   onRemoveBuyIn: (buyInId: string) => void;
   onRemovePlayer: (playerId: string) => void;
@@ -117,8 +115,6 @@ function EventMark({ type }: { type: GameEvent["event_type"] }) {
 export default function ActivityFeed({
   snapshot,
   isHost,
-  currentPlayerId,
-  onVerify,
   onEdit,
   onRemoveBuyIn,
   onRemovePlayer,
@@ -177,7 +173,7 @@ export default function ActivityFeed({
             const buyInId = event.metadata.buy_in_id;
             const buyIn = buyInId ? snapshot.buyIns.find((item) => item.id === buyInId) : null;
             const canManageBuyIn = Boolean(
-              isHost && buyIn && buyInId && latestByBuyIn.get(buyInId) === event.id
+              isHost && buyIn?.verified && buyInId && latestByBuyIn.get(buyInId) === event.id
             );
             const canRemovePlayer = Boolean(
               isHost &&
@@ -203,7 +199,7 @@ export default function ActivityFeed({
                   {showMenu ? (
                     <button
                       type="button"
-                      aria-label="Activity actions"
+                      aria-label={`Actions for ${eventText(event, actor?.name ?? null)}`}
                       aria-expanded={openEventId === event.id}
                       onClick={() => setOpenEventId((current) => current === event.id ? null : event.id)}
                       className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-lg leading-none text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"
@@ -217,7 +213,7 @@ export default function ActivityFeed({
                   <div className="ml-11 mt-3 rounded-lg bg-gray-50 p-3">
                     {editing && buyIn ? (
                       <div className="flex items-end gap-2">
-                        <Input aria-label="Edit buy-in amount" type="number" min={0.01} step={0.01} inputMode="decimal" prefix="$" value={editValue} onChange={(event) => setEditValue(event.target.value)} />
+                        <Input aria-label={`Edit ${buyIn.type === "rebuy" ? "rebuy" : "buy-in"} amount for ${subject?.name ?? "player"}`} type="number" min={0.01} step={0.01} inputMode="decimal" prefix="$" value={editValue} onChange={(event) => setEditValue(event.target.value)} />
                         <Button size="sm" onClick={() => saveEdit(buyIn.id)}>Save</Button>
                         <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
                       </div>
@@ -225,9 +221,8 @@ export default function ActivityFeed({
                       <div className="flex flex-wrap gap-1">
                         {canManageBuyIn && buyIn ? (
                           <>
-                            {!buyIn.verified ? <Button size="sm" variant="ghost" onClick={() => onVerify(buyIn.id)}>Verify</Button> : null}
-                            <Button size="sm" variant="ghost" onClick={() => startEdit(event.id, buyIn.amount)}>Edit</Button>
-                            <ConfirmButton size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" onConfirm={() => onRemoveBuyIn(buyIn.id)}>Remove buy-in</ConfirmButton>
+                            <Button size="sm" variant="ghost" onClick={() => startEdit(event.id, buyIn.amount)}>Edit {buyIn.type === "rebuy" ? "rebuy" : "buy-in"}</Button>
+                            <ConfirmButton size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" confirmLabel="Remove entry?" onConfirm={() => onRemoveBuyIn(buyIn.id)}>Remove {buyIn.type === "rebuy" ? "rebuy" : "buy-in"}</ConfirmButton>
                           </>
                         ) : null}
                         {canRemovePlayer && subject ? (

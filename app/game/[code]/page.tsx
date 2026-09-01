@@ -12,6 +12,7 @@ import BuyInActions from "@/components/GameRoom/BuyInActions";
 import JoinPrompt from "@/components/GameRoom/JoinPrompt";
 import HostControls from "@/components/GameRoom/HostControls";
 import PendingApprovals from "@/components/GameRoom/PendingApprovals";
+import AcquisitionPrompt from "@/components/GameRoom/AcquisitionPrompt";
 import SettlementScreen from "@/components/Settlement/SettlementScreen";
 import {
   addBuyIn,
@@ -27,7 +28,7 @@ import {
   usingLocalStorage,
   verifyBuyIn,
 } from "@/lib/data";
-import { totalPot } from "@/lib/game";
+import { pendingPot, verifiedPot } from "@/lib/game";
 import { getSessionId, setActiveGame } from "@/lib/session";
 import type { GameSnapshot } from "@/lib/types";
 
@@ -242,9 +243,34 @@ export default function GameRoomPage() {
     }
   }
 
+  async function handleVerifyAll(buyInIds: string[]) {
+    try {
+      for (const buyInId of buyInIds) {
+        await verifyBuyIn(buyInId);
+      }
+      toast(`${buyInIds.length} entries verified`, "success");
+    } catch (err) {
+      toast(
+        err instanceof Error ? err.message : "Failed to verify every entry.",
+        "error"
+      );
+    }
+  }
+
   async function handleEdit(buyInId: string, amount: number) {
     try {
       await updateBuyIn(buyInId, amount);
+      // Keep the initiating host responsive while the room-wide subscription
+      // reconciles the authoritative snapshot and audit entry.
+      setSnapshot((current) => current
+        ? {
+            ...current,
+            buyIns: current.buyIns.map((buyIn) =>
+              buyIn.id === buyInId ? { ...buyIn, amount } : buyIn
+            ),
+          }
+        : current
+      );
       toast("Buy-in updated", "success");
     } catch (err) {
       toast(
@@ -332,7 +358,8 @@ export default function GameRoomPage() {
     <main className="mx-auto w-full max-w-3xl px-4 pb-32 md:pb-16">
       <GameHeader
         game={snapshot.game}
-        totalPot={totalPot(snapshot)}
+        verifiedPot={verifiedPot(snapshot)}
+        pendingPot={pendingPot(snapshot)}
         playerCount={snapshot.players.length}
         isLocalMode={usingLocalStorage()}
         isHost={isHost}
@@ -340,11 +367,14 @@ export default function GameRoomPage() {
         ending={ending}
       />
 
+      {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
+
       <div className="mt-7 space-y-8">
         <PendingApprovals
           snapshot={snapshot}
           isHost={isHost}
           onVerify={handleVerify}
+          onVerifyAll={handleVerifyAll}
           onEdit={handleEdit}
           onRemove={handleRemoveBuyIn}
         />
@@ -353,18 +383,16 @@ export default function GameRoomPage() {
           snapshot={snapshot}
           currentPlayerId={currentPlayer?.id ?? null}
         />
-        {isHost && currentPlayer ? (
-          <HostControls players={snapshot.players} currentPlayerId={currentPlayer.id} onTransfer={handleTransferHost} />
-        ) : null}
         <ActivityFeed
           snapshot={snapshot}
           isHost={isHost}
-          currentPlayerId={currentPlayer?.id ?? null}
-          onVerify={handleVerify}
           onEdit={handleEdit}
           onRemoveBuyIn={handleRemoveBuyIn}
           onRemovePlayer={handleRemovePlayer}
         />
+        {isHost && currentPlayer ? (
+          <HostControls players={snapshot.players} currentPlayerId={currentPlayer.id} onTransfer={handleTransferHost} />
+        ) : null}
       </div>
 
       {currentPlayer && !leftGame ? (
@@ -374,6 +402,7 @@ export default function GameRoomPage() {
               game={snapshot.game}
               players={snapshot.players}
               currentPlayerId={currentPlayer.id}
+              hasBuyIn={snapshot.buyIns.some((buyIn) => buyIn.player_id === currentPlayer.id)}
               onBuyIn={handleBuyIn}
               onRebuy={handleRebuy}
               ledgerAction={ledgerAction}

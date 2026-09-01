@@ -12,6 +12,7 @@ export interface BuyInActionsProps {
   game: Game;
   players: Player[];
   currentPlayerId: string;
+  hasBuyIn: boolean;
   onBuyIn: (operationKey: string) => Promise<boolean>;
   onRebuy: (amount: number, frontedByPlayerId: string | null, operationKey: string) => Promise<boolean>;
   ledgerAction: "buy-in" | "rebuy" | null;
@@ -24,6 +25,7 @@ export default function BuyInActions({
   game,
   players,
   currentPlayerId,
+  hasBuyIn,
   onBuyIn,
   onRebuy,
   ledgerAction,
@@ -128,18 +130,20 @@ export default function BuyInActions({
       ) : null}
 
       <div className="flex gap-2">
-        <Button className="flex-1" onClick={() => void submitBuyIn()} loading={ledgerAction === "buy-in"} disabled={submitting}>
-          {ledgerAction === "buy-in" ? "Adding buy-in…" : `Buy in · ${formatCurrency(game.buy_in_amount)}`}
-        </Button>
-        <Button
-          variant="secondary"
-          className="flex-1"
-          onClick={() => (rebuyOpen ? closeRebuy() : openRebuy())}
-          aria-expanded={rebuyOpen}
-          disabled={submitting}
-        >
-          Rebuy
-        </Button>
+        {hasBuyIn ? (
+          <Button
+            className="flex-1"
+            onClick={() => (rebuyOpen ? closeRebuy() : openRebuy())}
+            aria-expanded={rebuyOpen}
+            disabled={submitting}
+          >
+            {rebuyOpen ? "Close rebuy" : "Add a rebuy"}
+          </Button>
+        ) : (
+          <Button className="flex-1" onClick={() => void submitBuyIn()} loading={ledgerAction === "buy-in"} disabled={submitting}>
+            {ledgerAction === "buy-in" ? "Adding buy-in…" : `Buy in · ${formatCurrency(game.buy_in_amount)}`}
+          </Button>
+        )}
         <ConfirmButton
           variant="ghost"
           className="hidden flex-none text-red-600 hover:bg-red-50 sm:inline-flex"

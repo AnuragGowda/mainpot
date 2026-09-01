@@ -16,9 +16,43 @@ export function playerInvested(snapshot: GameSnapshot, playerId: string): number
   );
 }
 
+/** Verified money for a player. Pending entries remain visible separately. */
+export function playerVerifiedInvested(
+  snapshot: GameSnapshot,
+  playerId: string
+): number {
+  return getPlayerBuyIns(snapshot, playerId)
+    .filter((buyIn) => buyIn.verified)
+    .reduce((sum, buyIn) => sum + buyIn.amount, 0);
+}
+
+/** Amount awaiting host approval for a player. */
+export function playerPendingAmount(
+  snapshot: GameSnapshot,
+  playerId: string
+): number {
+  return getPlayerBuyIns(snapshot, playerId)
+    .filter((buyIn) => !buyIn.verified)
+    .reduce((sum, buyIn) => sum + buyIn.amount, 0);
+}
+
 /** Sum of ALL buy-ins in the game — the total pot. */
 export function totalPot(snapshot: GameSnapshot): number {
   return snapshot.buyIns.reduce((sum, buyIn) => sum + buyIn.amount, 0);
+}
+
+/** Money the host has approved as part of the final ledger. */
+export function verifiedPot(snapshot: GameSnapshot): number {
+  return snapshot.buyIns
+    .filter((buyIn) => buyIn.verified)
+    .reduce((sum, buyIn) => sum + buyIn.amount, 0);
+}
+
+/** Money recorded by players but not yet approved by the host. */
+export function pendingPot(snapshot: GameSnapshot): number {
+  return snapshot.buyIns
+    .filter((buyIn) => !buyIn.verified)
+    .reduce((sum, buyIn) => sum + buyIn.amount, 0);
 }
 
 /** The player's cash-out record, if any (one per player). */

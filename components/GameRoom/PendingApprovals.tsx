@@ -7,18 +7,21 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import { formatCurrency } from "@/lib/format";
 import type { GameSnapshot } from "@/lib/types";
+import ConfirmButton from "./ConfirmButton";
 
 interface PendingApprovalsProps {
   snapshot: GameSnapshot;
   isHost: boolean;
-  onVerify: (buyInId: string) => void;
+  onVerify: (buyInId: string) => Promise<void>;
+  onVerifyAll: (buyInIds: string[]) => Promise<void>;
   onEdit: (buyInId: string, amount: number) => void;
   onRemove: (buyInId: string) => void;
 }
 
-export default function PendingApprovals({ snapshot, isHost, onVerify, onEdit, onRemove }: PendingApprovalsProps) {
+export default function PendingApprovals({ snapshot, isHost, onVerify, onVerifyAll, onEdit, onRemove }: PendingApprovalsProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
+  const [approvingAll, setApprovingAll] = useState(false);
   if (!isHost) return null;
 
   const pending = snapshot.buyIns.filter((buyIn) => !buyIn.verified);
@@ -26,12 +29,30 @@ export default function PendingApprovals({ snapshot, isHost, onVerify, onEdit, o
 
   return (
     <section aria-labelledby="approvals-heading">
-      <div className="mb-3 flex items-end justify-between">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 id="approvals-heading" className="text-base font-semibold text-gray-950">Needs approval</h2>
           <p className="text-sm text-gray-500">Confirm new money before it becomes final.</p>
         </div>
-        <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">{pending.length} pending</span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">{pending.length} pending</span>
+          {pending.length > 1 ? (
+            <Button
+              size="sm"
+              loading={approvingAll}
+              onClick={async () => {
+                setApprovingAll(true);
+                try {
+                  await onVerifyAll(pending.map((buyIn) => buyIn.id));
+                } finally {
+                  setApprovingAll(false);
+                }
+              }}
+            >
+              Approve all
+            </Button>
+          ) : null}
+        </div>
       </div>
       <Card padding="none" className="overflow-hidden border-amber-200 shadow-none">
         <ul className="divide-y divide-amber-100">
@@ -45,11 +66,11 @@ export default function PendingApprovals({ snapshot, isHost, onVerify, onEdit, o
                     <p className="text-sm font-medium text-gray-950">{player?.name ?? "Player"}</p>
                     <p className="mt-0.5 text-xs text-gray-500">{buyIn.type === "rebuy" ? "Rebuy" : "Buy-in"} · {formatCurrency(buyIn.amount)}</p>
                   </div>
-                  <Button size="sm" onClick={() => onVerify(buyIn.id)} leftIcon={<CircleCheck size={16} />}>Approve</Button>
+                  <Button size="sm" onClick={() => void onVerify(buyIn.id)} leftIcon={<CircleCheck size={16} />}>Approve</Button>
                   <Button
                     size="sm"
                     variant="secondary"
-                    aria-label={`Edit ${player?.name ?? "player"} buy-in`}
+                    aria-label={`Edit ${player?.name ?? "player"} ${buyIn.type === "rebuy" ? "rebuy" : "buy-in"} of ${formatCurrency(buyIn.amount)}`}
                     onClick={() => {
                       setEditingId(editing ? null : buyIn.id);
                       setAmount(String(buyIn.amount));
@@ -58,12 +79,18 @@ export default function PendingApprovals({ snapshot, isHost, onVerify, onEdit, o
                   >
                     Edit
                   </Button>
-                  <Button size="sm" variant="ghost" aria-label={`Remove ${player?.name ?? "player"} buy-in`} onClick={() => onRemove(buyIn.id)}>
+                  <ConfirmButton
+                    size="sm"
+                    variant="ghost"
+                    confirmLabel="Remove entry?"
+                    aria-label={`Remove ${player?.name ?? "player"} ${buyIn.type === "rebuy" ? "rebuy" : "buy-in"} of ${formatCurrency(buyIn.amount)}`}
+                    onConfirm={() => onRemove(buyIn.id)}
+                  >
                     <Trash2 aria-hidden size={15} />
-                  </Button>
+                  </ConfirmButton>
                 </div>
                 {editing ? (
-                  <div className="mt-3 flex items-end gap-2">
+                  <div className="mt-3 flex flex-wrap items-end gap-2">
                     <Input label="Correct amount" type="number" min={0.01} step={0.01} prefix="$" value={amount} onChange={(event) => setAmount(event.target.value)} />
                     <Button
                       className="mb-px"
@@ -75,6 +102,15 @@ export default function PendingApprovals({ snapshot, isHost, onVerify, onEdit, o
                       }}
                     >
                       Save
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setEditingId(null);
+                        setAmount("");
+                      }}
+                    >
+                      Cancel
                     </Button>
                   </div>
                 ) : null}

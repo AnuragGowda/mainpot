@@ -9,7 +9,6 @@ import GameSetupShell from "@/components/GameSetupShell";
 import { useToast } from "@/components/ui/Toast";
 import { createGame, getGame, recordGameEvent } from "@/lib/data";
 import { getGameTemplates, saveGameTemplate, type GameTemplate } from "@/lib/account-data";
-import type { AcquisitionSource } from "@/lib/types";
 import { getCurrentUser, getCurrentUserId } from "@/lib/auth-client";
 import { getPlayerName, getSessionId, setActiveGame, setPlayerName } from "@/lib/session";
 
@@ -26,7 +25,6 @@ export default function CreateGamePage() {
   const [name, setName] = useState("");
   const [gameName, setGameName] = useState("");
   const [buyIn, setBuyIn] = useState("");
-  const [acquisitionSource, setAcquisitionSource] = useState<AcquisitionSource | "">("");
   const [templates, setTemplates] = useState<GameTemplate[]>([]);
   const [canSaveTemplate, setCanSaveTemplate] = useState(false);
   const [saveTemplate, setSaveTemplate] = useState(false);
@@ -94,8 +92,7 @@ export default function CreateGamePage() {
         trimmedGameName,
         trimmedName,
         parsedBuyIn,
-        userId,
-        acquisitionSource || null
+        userId
       );
       if (saveTemplate && canSaveTemplate && userId) {
         try {
@@ -111,6 +108,7 @@ export default function CreateGamePage() {
         }
       }
       setActiveGame(code);
+      window.sessionStorage.setItem("ante_post_create_source_game", code);
       toast("Game created!", "success");
       router.push(`/game/${code}`);
     } catch (err) {
@@ -188,17 +186,9 @@ export default function CreateGamePage() {
               placeholder="20"
               error={errors.buyIn}
             />
-            <label htmlFor="create-source" className="block text-sm font-medium text-gray-700">
-              How did you hear about Mainpot? <span className="font-normal text-gray-400">(optional)</span>
-              <select id="create-source" value={acquisitionSource} onChange={(event) => setAcquisitionSource(event.target.value as AcquisitionSource | "")}
-                className="mt-2 h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10">
-                <option value="">Choose one</option>
-                <option value="personal_invite">Personal invite</option>
-                <option value="poker_group">Poker group</option>
-                <option value="search">Search</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
+            <p className="rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3 text-sm leading-6 text-emerald-900">
+              Creating the table automatically records your opening buy-in{buyIn && Number(buyIn) > 0 ? ` of $${Number(buyIn).toFixed(2)}` : ""}. You can add rebuys after the game starts.
+            </p>
             {canSaveTemplate ? <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-800">
                 <input type="checkbox" checked={saveTemplate} onChange={(event) => setSaveTemplate(event.target.checked)} className="h-4 w-4 rounded border-gray-300" />

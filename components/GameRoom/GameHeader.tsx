@@ -14,7 +14,8 @@ import FriendInviteList from "./FriendInviteList";
 
 export interface GameHeaderProps {
   game: Game;
-  totalPot: number;
+  verifiedPot: number;
+  pendingPot: number;
   playerCount: number;
   isLocalMode: boolean;
   isHost: boolean;
@@ -30,7 +31,8 @@ const statusMeta: Record<GameStatus, { label: string; variant: "green" | "amber"
 
 export default function GameHeader({
   game,
-  totalPot,
+  verifiedPot,
+  pendingPot,
   playerCount,
   isLocalMode,
   isHost,
@@ -119,10 +121,20 @@ export default function GameHeader({
           <p className="mt-1 text-sm text-gray-500">Hosted by {game.host_name}</p>
         </div>
         {isHost ? (
-          <div className="shrink-0">
-            <ConfirmButton variant="secondary" size="sm" onConfirm={onEndGame} loading={ending}>
+          <div className="shrink-0 text-right">
+            <ConfirmButton
+              variant="secondary"
+              size="sm"
+              confirmLabel="End game and start cash-outs?"
+              onConfirm={onEndGame}
+              loading={ending}
+              disabled={pendingPot > 0}
+            >
               End game
             </ConfirmButton>
+            {pendingPot > 0 ? (
+              <p className="mt-1 max-w-40 text-xs leading-4 text-amber-700">Resolve pending entries first</p>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -176,11 +188,16 @@ export default function GameHeader({
         </div>
         <div className="px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
-            Total pot
+            Verified pot
           </p>
           <p className="mt-1 text-lg font-semibold text-gray-950">
-            {formatCurrency(totalPot)}
+            {formatCurrency(verifiedPot)}
           </p>
+          {pendingPot > 0 ? (
+            <p className="mt-0.5 text-xs font-medium text-amber-700">
+              +{formatCurrency(pendingPot)} pending
+            </p>
+          ) : null}
         </div>
         <div className="px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
