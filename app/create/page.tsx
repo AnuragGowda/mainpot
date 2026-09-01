@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/Toast";
 import { createGame, getGame, recordGameEvent } from "@/lib/data";
 import { getGameTemplates, saveGameTemplate, type GameTemplate } from "@/lib/account-data";
 import { getCurrentUser, getCurrentUserId } from "@/lib/auth-client";
+import { trackProductOpsEvent } from "@/lib/product-ops";
 import { getPlayerName, getSessionId, setActiveGame, setPlayerName } from "@/lib/session";
 
 interface FormErrors {
@@ -44,7 +45,10 @@ export default function CreateGamePage() {
         const isHost = game.host_user_id
           ? game.host_user_id === userId
           : game.host_session_id === getSessionId();
-        if (isHost) await recordGameEvent(game.id, "host_returned_to_create");
+        if (isHost) {
+          await recordGameEvent(game.id, "host_returned_to_create");
+          trackProductOpsEvent("host.returned_to_create", {}, game.id);
+        }
       }).catch(() => undefined);
     }
     const params = new URLSearchParams(window.location.search);

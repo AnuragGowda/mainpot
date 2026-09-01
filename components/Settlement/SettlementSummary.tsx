@@ -256,7 +256,7 @@ export default function SettlementSummary({
 
       <Link
         href={`/create?name=${encodeURIComponent(game.name)}&buyin=${game.buy_in_amount}`}
-        onClick={() => { if (isHost) trackProductOpsEvent("host.returned_to_create"); clearActiveGame(); }}
+        onClick={() => { if (isHost) trackProductOpsEvent("host.returned_to_create", {}, game.id); clearActiveGame(); }}
         className="mt-2 block"
       >
         <Button variant="ghost" size="md" fullWidth>

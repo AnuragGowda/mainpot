@@ -1457,7 +1457,7 @@ export async function createGame(
   const result = await (localStorageMode
     ? createGameLocal(name, hostName, buyInAmount, userId, acquisitionSource)
     : createGameSupabase(name, hostName, buyInAmount, userId, acquisitionSource));
-  trackProductOpsEvent("game.created", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
+  trackProductOpsEvent("game.created", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, result.gameId);
   return result;
 }
 
@@ -1465,9 +1465,11 @@ export async function setGameAcquisitionSource(
   gameId: string,
   source: AcquisitionSource
 ): Promise<void> {
-  return usingLocalStorage()
+  const localStorageMode = usingLocalStorage();
+  await (localStorageMode
     ? setGameAcquisitionSourceLocal(gameId, source)
-    : setGameAcquisitionSourceSupabase(gameId, source);
+    : setGameAcquisitionSourceSupabase(gameId, source));
+  trackProductOpsEvent("acquisition.self_reported", { source }, gameId);
 }
 
 export async function recordGameEvent(
@@ -1503,14 +1505,14 @@ export async function submitGameFeedback(
       score, confusing: confusing.trim() || null, created_at: new Date().toISOString(),
     });
     persistStore(store);
-    trackProductOpsEvent("feedback.submitted", { score, feedback_present: Boolean(confusing.trim()) });
+    trackProductOpsEvent("feedback.submitted", { score, feedback_present: Boolean(confusing.trim()) }, gameId);
     return;
   }
   const { error } = await assertSupabase().from("game_feedback").insert({
     game_id: gameId, player_id: playerId, score, confusing: confusing.trim() || null,
   });
   if (error) throw error;
-  trackProductOpsEvent("feedback.submitted", { score, feedback_present: Boolean(confusing.trim()) });
+  trackProductOpsEvent("feedback.submitted", { score, feedback_present: Boolean(confusing.trim()) }, gameId);
 }
 
 export async function joinGame(
@@ -1524,7 +1526,7 @@ export async function joinGame(
     : joinGameSupabase(code, playerName, userId));
   if (productOpsEnabled()) {
     void getGameSnapshot(result.gameId).then((snapshot) => {
-      if (snapshot.players.length === 2) trackProductOpsEvent("game.second_player_joined", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
+      if (snapshot.players.length === 2) trackProductOpsEvent("game.second_player_joined", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, result.gameId);
     }).catch(() => {});
   }
   return result;
@@ -1614,13 +1616,13 @@ export async function updateCashOut(
 export async function endGame(gameId: string): Promise<void> {
   const localStorageMode = usingLocalStorage();
   await (localStorageMode ? endGameLocal(gameId) : endGameSupabase(gameId));
-  trackProductOpsEvent("game.entered_settling", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
+  trackProductOpsEvent("game.entered_settling", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, gameId);
 }
 
 export async function markEnded(gameId: string): Promise<void> {
   const localStorageMode = usingLocalStorage();
   await (localStorageMode ? markEndedLocal(gameId) : markEndedSupabase(gameId));
-  trackProductOpsEvent("game.finalized", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
+  trackProductOpsEvent("game.finalized", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, gameId);
 }
 
 export async function saveDiscrepancyAllocation(
