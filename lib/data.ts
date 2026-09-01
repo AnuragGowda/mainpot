@@ -21,6 +21,7 @@ import { getSessionId, randomUUID } from "./session";
 import { round2 } from "./format";
 import { productOpsEnabled, trackProductOpsEvent } from "./product-ops";
 import { dispatchGamePush } from "./push-client";
+import { validateGameName, validatePlayerName } from "./name-validation";
 
 export { isSupabaseConfigured };
 
@@ -453,6 +454,10 @@ async function addBuyInLocal(
   if (existing) {
     return existing;
   }
+  const actorPlayerId = currentLocalPlayerId(store, gameId);
+  const actorIsHost = store.players.some(
+    (player) => player.id === actorPlayerId && player.is_host
+  );
   const buyIn: BuyIn = {
     id: randomUUID(),
     game_id: gameId,
@@ -460,7 +465,7 @@ async function addBuyInLocal(
     amount: round2(amount),
     type,
     fronted_by_player_id: frontedByPlayerId ?? null,
-    verified: false,
+    verified: actorIsHost,
     created_at: new Date().toISOString(),
     operation_key: operationKey,
   };
@@ -472,7 +477,7 @@ async function addBuyInLocal(
   addLocalEvent(store, {
     gameId,
     eventType: "buy_in_added",
-    actorPlayerId: currentLocalPlayerId(store, gameId),
+    actorPlayerId,
     subjectPlayerId: playerId,
     amount: buyIn.amount,
     metadata: {
@@ -1104,6 +1109,13 @@ async function addBuyInSupabase(
     // Older self-hosted databases predate the idempotent RPC. Keep the ledger
     // usable while the operator applies the current migration; the normal path
     // above retains retry protection once that migration is present.
+    const { data: actorIsHost, error: hostLookupError } = await client.rpc(
+      "is_game_host",
+      { target_game_id: gameId }
+    );
+    if (hostLookupError) {
+      throw hostLookupError;
+    }
     const { data: inserted, error: insertError } = await client
       .from("buy_ins")
       .insert({
@@ -1112,7 +1124,7 @@ async function addBuyInSupabase(
         amount,
         type,
         fronted_by_player_id: frontedByPlayerId,
-        verified: false,
+        verified: actorIsHost === true,
       })
       .select()
       .single();
@@ -1456,8 +1468,19 @@ async function saveDiscrepancyAllocationSupabase(
     .eq("status", "settling")
     .select("id")
     .maybeSingle();
-  if (error) throw error;
-  if (!data) throw new Error("Finalized games are read-only.");
+  if (error) {
+    if (
+      error.code === "42703"
+      || error.code === "PGRST204"
+      || error.message.includes("discrepancy_allocation")
+    ) {
+      throw new Error("This game database needs the latest discrepancy-allocation migration before it can save this decision.");
+    }
+    throw error;
+  }
+  if (!data) {
+    throw new Error("Only the host can save a discrepancy decision, and finalized games are read-only.");
+  }
   await addSupabaseEvent(client, {
     gameId,
     eventType: "discrepancy_allocated",
@@ -1533,10 +1556,17 @@ export async function createGame(
   userId?: string | null,
   acquisitionSource?: AcquisitionSource | null
 ): Promise<{ code: string; gameId: string }> {
+  const gameNameError = validateGameName(name);
+  if (gameNameError) throw new Error(gameNameError);
+  const hostNameError = validatePlayerName(hostName);
+  if (hostNameError) throw new Error(hostNameError);
+
+  const normalizedGameName = name.trim();
+  const normalizedHostName = hostName.trim();
   const localStorageMode = usingLocalStorage();
   const result = await (localStorageMode
-    ? createGameLocal(name, hostName, buyInAmount, userId, acquisitionSource)
-    : createGameSupabase(name, hostName, buyInAmount, userId, acquisitionSource));
+    ? createGameLocal(normalizedGameName, normalizedHostName, buyInAmount, userId, acquisitionSource)
+    : createGameSupabase(normalizedGameName, normalizedHostName, buyInAmount, userId, acquisitionSource));
   trackProductOpsEvent("game.created", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, result.gameId);
   return result;
 }
@@ -1600,10 +1630,14 @@ export async function joinGame(
   playerName: string,
   userId?: string | null
 ): Promise<{ gameId: string; playerId: string }> {
+  const playerNameError = validatePlayerName(playerName);
+  if (playerNameError) throw new Error(playerNameError);
+
+  const normalizedPlayerName = playerName.trim();
   const localStorageMode = usingLocalStorage();
   const result = await (localStorageMode
-    ? joinGameLocal(code, playerName, userId)
-    : joinGameSupabase(code, playerName, userId));
+    ? joinGameLocal(code, normalizedPlayerName, userId)
+    : joinGameSupabase(code, normalizedPlayerName, userId));
   if (productOpsEnabled()) {
     void getGameSnapshot(result.gameId).then((snapshot) => {
       if (snapshot.players.length === 2) trackProductOpsEvent("game.second_player_joined", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, result.gameId);

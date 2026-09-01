@@ -12,6 +12,7 @@ import { getPlayerName, setPlayerName } from "@/lib/session";
 import { markPostGameEntry } from "@/lib/push-client";
 import { formatCurrency } from "@/lib/format";
 import type { Game } from "@/lib/types";
+import { PLAYER_NAME_MAX_LENGTH, validatePlayerName } from "@/lib/name-validation";
 
 export interface JoinPromptProps {
   game: Pick<Game, "code" | "name" | "host_name" | "buy_in_amount">;
@@ -81,8 +82,9 @@ export default function JoinPrompt({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedName = name.trim();
-    if (!trimmedName) {
-      setError("Enter your name to join.");
+    const nameError = validatePlayerName(trimmedName, "Enter your name to join.");
+    if (nameError) {
+      setError(nameError);
       return;
     }
 
@@ -164,6 +166,7 @@ export default function JoinPrompt({
               onChange={(event) => setName(event.target.value)}
               placeholder="Mike"
               autoComplete="name"
+              maxLength={PLAYER_NAME_MAX_LENGTH}
               error={error ?? undefined}
             />
             <Button type="submit" fullWidth loading={loading}>

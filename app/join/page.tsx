@@ -12,6 +12,7 @@ import { getCurrentUserId } from "@/lib/auth-client";
 import { normalizeRoomCode } from "@/lib/roomcode";
 import { getPlayerName, setActiveGame, setPlayerName } from "@/lib/session";
 import { markPostGameEntry } from "@/lib/push-client";
+import { PLAYER_NAME_MAX_LENGTH, validatePlayerName } from "@/lib/name-validation";
 
 interface FormErrors {
   name?: string;
@@ -52,9 +53,7 @@ export default function JoinGamePage() {
     const normalizedCode = normalizeRoomCode(code);
 
     const nextErrors: FormErrors = {};
-    if (!trimmedName) {
-      nextErrors.name = "Enter your name.";
-    }
+    nextErrors.name = validatePlayerName(trimmedName) ?? undefined;
     if (!normalizedCode) {
       nextErrors.code = "Enter the 6-character room code.";
     }
@@ -108,6 +107,7 @@ export default function JoinGamePage() {
               onChange={(event) => setName(event.target.value)}
               placeholder="Mike"
               autoComplete="name"
+              maxLength={PLAYER_NAME_MAX_LENGTH}
               error={errors.name}
             />
             <Input

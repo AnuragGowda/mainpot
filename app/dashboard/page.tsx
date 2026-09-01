@@ -20,6 +20,12 @@ import { getProfileById, isUsernameTaken, updateProfile } from "@/lib/friends";
 import { getFriendsStats, getUserGames, getUserStats } from "@/lib/stats";
 import { friendLabel, getIncomingGameInvites, respondToGameInvite } from "@/lib/invites";
 import type { FriendStats, GameHistory, IncomingGameInvite, Profile, UserStats } from "@/lib/types";
+import {
+  PLAYER_NAME_MAX_LENGTH,
+  USERNAME_MAX_LENGTH,
+  validateDisplayName,
+  validateUsername,
+} from "@/lib/name-validation";
 
 const emptyStats: UserStats = {
   gamesPlayed: 0,
@@ -114,8 +120,14 @@ export default function DashboardPage() {
     event.preventDefault();
     if (!user) return;
     const username = form.username.trim().replace(/^@/, "").toLowerCase();
-    if (username && !/^[a-z0-9_]{3,24}$/.test(username)) {
-      toast("Username must be 3–24 letters, numbers, or underscores.", "error");
+    const displayNameError = validateDisplayName(form.display_name);
+    if (displayNameError) {
+      toast(displayNameError, "error");
+      return;
+    }
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      toast(usernameError, "error");
       return;
     }
     setSaving(true);
@@ -126,7 +138,7 @@ export default function DashboardPage() {
       }
       const nextProfile = await updateProfile(user.id, {
         display_name: form.display_name.trim(),
-        username,
+        username: username || null,
         venmo_handle: form.venmo_handle.trim(),
         zelle_handle: form.zelle_handle.trim(),
         bio: form.bio.trim(),
@@ -221,8 +233,8 @@ export default function DashboardPage() {
         {editing ? (
           <Card className="mt-7">
             <form onSubmit={saveProfile} className="grid gap-5 sm:grid-cols-2">
-              <Input label="Display name" value={form.display_name} onChange={(event) => setForm({ ...form, display_name: event.target.value })} />
-              <Input label="Username" prefix="@" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value.replace(/^@/, "") })} placeholder="pocketaces" />
+              <Input label="Display name" value={form.display_name} onChange={(event) => setForm({ ...form, display_name: event.target.value })} maxLength={PLAYER_NAME_MAX_LENGTH} />
+              <Input label="Username" prefix="@" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value.replace(/^@/, "") })} placeholder="pocketaces" maxLength={USERNAME_MAX_LENGTH} autoCapitalize="none" spellCheck={false} />
               <Input label="Venmo" prefix="@" value={form.venmo_handle} onChange={(event) => setForm({ ...form, venmo_handle: event.target.value.replace(/^@/, "") })} placeholder="your-handle" />
               <Input label="Zelle email or phone" value={form.zelle_handle} onChange={(event) => setForm({ ...form, zelle_handle: event.target.value })} />
               <p className="-mt-2 text-xs leading-5 text-gray-500 sm:col-span-2">

@@ -298,7 +298,7 @@ export async function getProfileById(userId: string): Promise<Profile | null> {
 export async function updateProfile(
   userId: string,
   patch: {
-    username?: string;
+    username?: string | null;
     display_name?: string;
     bio?: string;
     venmo_handle?: string;
@@ -311,14 +311,15 @@ export async function updateProfile(
     return null;
   }
 
-  const updates: Record<string, string> = {};
+  const updates: Record<string, string | null> = {};
   for (const key of Object.keys(patch) as Array<keyof typeof patch>) {
     const value = patch[key];
     if (value === undefined) {
       continue;
     }
-    updates[key] =
-      key === "venmo_handle" ? value.trim().replace(/^@/, "") : value;
+    updates[key] = value === null
+      ? null
+      : key === "venmo_handle" ? value.trim().replace(/^@/, "") : value;
   }
   if (Object.keys(updates).length === 0) {
     return getProfileById(userId);

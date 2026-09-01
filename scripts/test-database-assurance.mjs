@@ -76,11 +76,51 @@ async function run() {
   const otherHost = await guest("Other game host");
   const outsider = await guest("Game A outsider");
 
+  await expectError(
+    () => host.rpc("create_game_guarded", {
+      input_code: "NAME42",
+      input_game_name: "G".repeat(41),
+      input_host_name: "Casey",
+      input_buy_in: 20,
+      input_session_id: randomUUID(),
+    }),
+    "41-character game name",
+  );
+  await expectError(
+    () => host.rpc("create_game_guarded", {
+      input_code: "HAST42",
+      input_game_name: "Compact game",
+      input_host_name: "P".repeat(33),
+      input_buy_in: 20,
+      input_session_id: randomUUID(),
+    }),
+    "33-character host name",
+  );
+  console.log("✓ compact game and host name limits are enforced");
+
   const gameA = await createGame(host, "Assurance game A");
   const gameB = await createGame(otherHost, "Assurance game B");
   const playerA = await join(guestA, gameA.code, "Guest A");
   const playerB = await join(guestB, gameA.code, "Guest B");
   const otherPlayer = await join(guestB, gameB.code, "Other player");
+
+  await expectError(
+    () => outsider.rpc("join_game_guarded", {
+      input_code: gameA.code,
+      input_player_name: "P".repeat(33),
+      input_session_id: randomUUID(),
+    }),
+    "33-character player name",
+  );
+  await expectError(
+    () => outsider.rpc("join_game_guarded", {
+      input_code: gameA.code,
+      input_player_name: "Line\nbreak",
+      input_session_id: randomUUID(),
+    }),
+    "player name containing a line break",
+  );
+  console.log("✓ player names reject excess length and control characters");
 
   const otherGameBuyIn = await otherHost.rpc("create_buy_in_idempotent", {
     input_game_id: gameB.game_id,
@@ -136,6 +176,23 @@ async function run() {
   assert(mismatch.error, "operation key reused with different inputs is rejected");
   console.log("✓ idempotent buy-in create/retry/mismatch");
   const guestBuyIn = first.data[0];
+  assert(guestBuyIn.verified === false, "player-created buy-in waits for host approval");
+
+  const hostRebuy = await host.rpc("create_buy_in_idempotent", {
+    input_game_id: gameA.game_id,
+    input_player_id: gameA.player_id,
+    input_amount: 20,
+    input_type: "rebuy",
+    input_fronted_by_player_id: null,
+    input_operation_key: randomUUID(),
+  });
+  assert(
+    !hostRebuy.error
+      && hostRebuy.data?.length === 1
+      && hostRebuy.data[0].verified === true,
+    "host-created rebuy is automatically approved",
+  );
+  console.log("✓ host entries auto-approve while player entries stay pending");
 
   const rebuyOperationKey = randomUUID();
   const rebuy = await guestA.rpc("create_buy_in_idempotent", {
@@ -262,9 +319,78 @@ async function run() {
     () => guestB.from("buy_ins").delete().eq("id", guestBuyIn.id).select("id"),
     "non-host removal of another player's buy-in",
   );
+  await expectError(
+    () => guestA.from("buy_ins").insert({
+      game_id: gameA.game_id,
+      player_id: playerA.player_id,
+      amount: 99,
+      type: "buy_in",
+      verified: true,
+    }).select("id"),
+    "player-created pre-approved buy-in",
+  );
+  await expectError(
+    () => guestA.from("buy_ins").update({ verified: true }).eq("id", guestBuyIn.id).select("id"),
+    "player verification of their own buy-in",
+  );
+  await expectError(
+    () => guestA.from("buy_ins").update({ amount: 99 }).eq("id", guestBuyIn.id).select("id"),
+    "player edit of their own buy-in",
+  );
+  await expectError(
+    () => guestA.from("buy_ins").delete().eq("id", guestBuyIn.id).select("id"),
+    "player removal of their own buy-in",
+  );
+
+  const { data: unchangedGuestBuyIn, error: unchangedGuestBuyInError } = await admin
+    .from("buy_ins")
+    .select("amount, verified")
+    .eq("id", guestBuyIn.id)
+    .single();
+  assert(
+    !unchangedGuestBuyInError
+      && Number(unchangedGuestBuyIn.amount) === 15
+      && unchangedGuestBuyIn.verified === false,
+    "rejected player mutations leave the buy-in unchanged",
+  );
+
+  const hostCorrection = await host
+    .from("buy_ins")
+    .update({ amount: 17, verified: true })
+    .eq("id", guestBuyIn.id)
+    .select("id, amount, verified");
+  assert(
+    !hostCorrection.error
+      && hostCorrection.data?.[0]?.id === guestBuyIn.id
+      && Number(hostCorrection.data[0].amount) === 17
+      && hostCorrection.data[0].verified === true,
+    "host can edit and approve a player buy-in",
+  );
+
+  const removableBuyIn = await guestB.rpc("create_buy_in_idempotent", {
+    input_game_id: gameA.game_id,
+    input_player_id: playerB.player_id,
+    input_amount: 10,
+    input_type: "rebuy",
+    input_fronted_by_player_id: null,
+    input_operation_key: randomUUID(),
+  });
+  assert(
+    !removableBuyIn.error && removableBuyIn.data?.[0]?.verified === false,
+    "player-created removable fixture stays pending",
+  );
+  const hostRemoval = await host
+    .from("buy_ins")
+    .delete()
+    .eq("id", removableBuyIn.data[0].id)
+    .select("id");
+  assert(
+    !hostRemoval.error && hostRemoval.data?.[0]?.id === removableBuyIn.data[0].id,
+    "host can remove a player buy-in",
+  );
   const transfer = await guestB.rpc("transfer_game_host", { target_game_id: gameA.game_id, target_player_id: playerB.player_id });
   assert(transfer.error, "non-host host transfer");
-  console.log("✓ non-host approval/edit/remove/transfer protections");
+  console.log("✓ only the host can approve, edit, or remove buy-ins");
 
   // Verify the canonical row with a separate service-role read. An RLS actor
   // can receive zero returned rows even when a mutation was applied.
@@ -281,6 +407,40 @@ async function run() {
     throw new Error("Cross-game buy-in UPDATE mutation is permitted");
   }
   console.log("✓ cross-game row-rewrite probe is denied");
+
+  const gameASettling = await host
+    .from("games")
+    .update({ status: "settling", ended_at: new Date().toISOString() })
+    .eq("id", gameA.game_id)
+    .select("id");
+  assert(!gameASettling.error && gameASettling.data?.[0]?.id, "host can enter settlement");
+
+  const allocation = {
+    method: "proportional",
+    player_ids: [playerA.player_id, playerB.player_id],
+    amount: 5,
+  };
+  const hostAllocation = await host
+    .from("games")
+    .update({ discrepancy_allocation: allocation })
+    .eq("id", gameA.game_id)
+    .eq("status", "settling")
+    .select("id, discrepancy_allocation");
+  assert(
+    !hostAllocation.error
+      && hostAllocation.data?.[0]?.id
+      && hostAllocation.data[0].discrepancy_allocation?.amount === allocation.amount,
+    "host can save a discrepancy allocation during settlement",
+  );
+  await expectError(
+    () => guestA
+      .from("games")
+      .update({ discrepancy_allocation: { ...allocation, amount: 6 } })
+      .eq("id", gameA.game_id)
+      .select("id"),
+    "non-host discrepancy allocation update",
+  );
+  console.log("✓ discrepancy allocations persist for the host and reject non-host writes");
 }
 
 try {

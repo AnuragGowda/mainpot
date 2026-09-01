@@ -14,6 +14,12 @@ import { getCurrentUser, getCurrentUserId } from "@/lib/auth-client";
 import { trackProductOpsEvent } from "@/lib/product-ops";
 import { getPlayerName, getSessionId, setActiveGame, setPlayerName } from "@/lib/session";
 import { markPostGameEntry } from "@/lib/push-client";
+import {
+  GAME_NAME_MAX_LENGTH,
+  PLAYER_NAME_MAX_LENGTH,
+  validateGameName,
+  validatePlayerName,
+} from "@/lib/name-validation";
 
 interface FormErrors {
   name?: string;
@@ -61,7 +67,7 @@ export default function CreateGamePage() {
       }).catch(() => undefined);
     }
     const params = new URLSearchParams(window.location.search);
-    const suggestedName = params.get("name")?.trim().slice(0, 80);
+    const suggestedName = params.get("name")?.trim().slice(0, GAME_NAME_MAX_LENGTH);
     const suggestedBuyIn = Number(params.get("buyin"));
     if (suggestedName) setGameName(suggestedName);
     if (Number.isFinite(suggestedBuyIn) && suggestedBuyIn > 0) {
@@ -83,12 +89,8 @@ export default function CreateGamePage() {
     const parsedBuyIn = Number(buyIn);
 
     const nextErrors: FormErrors = {};
-    if (!trimmedName) {
-      nextErrors.name = "Enter your name.";
-    }
-    if (!trimmedGameName) {
-      nextErrors.gameName = "Enter a game name.";
-    }
+    nextErrors.name = validatePlayerName(trimmedName) ?? undefined;
+    nextErrors.gameName = validateGameName(trimmedGameName) ?? undefined;
     if (!buyIn.trim() || !Number.isFinite(parsedBuyIn) || parsedBuyIn <= 0) {
       nextErrors.buyIn = "Enter an amount greater than 0.";
     }
@@ -178,6 +180,7 @@ export default function CreateGamePage() {
               onChange={(event) => setName(event.target.value)}
               placeholder="Mike"
               autoComplete="name"
+              maxLength={PLAYER_NAME_MAX_LENGTH}
               error={errors.name}
             />
             <Input
@@ -186,6 +189,7 @@ export default function CreateGamePage() {
               value={gameName}
               onChange={(event) => setGameName(event.target.value)}
               placeholder="Friday Night at Mike's"
+              maxLength={GAME_NAME_MAX_LENGTH}
               error={errors.gameName}
             />
             <Input
@@ -212,7 +216,7 @@ export default function CreateGamePage() {
               </label>
               {saveTemplate ? (
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <Input label="Template name" value={templateName} onChange={(event) => setTemplateName(event.target.value)} placeholder="Friday game" />
+                  <Input label="Template name" value={templateName} onChange={(event) => setTemplateName(event.target.value)} placeholder="Friday game" maxLength={GAME_NAME_MAX_LENGTH} />
                   <Input label="Preferred roster" value={preferredRoster} onChange={(event) => setPreferredRoster(event.target.value)} placeholder="Alex, Sam, Jordan" />
                 </div>
               ) : null}

@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/Toast";
 import { linkSessionToUser } from "@/lib/accounts";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
+import { PLAYER_NAME_MAX_LENGTH, validateDisplayName } from "@/lib/name-validation";
 
 type AuthMode = "signin" | "signup";
 
@@ -46,6 +47,14 @@ export default function SignInPage() {
     const supabase = getBrowserSupabase();
     if (!supabase) {
       return;
+    }
+
+    if (mode === "signup") {
+      const displayNameError = validateDisplayName(displayName);
+      if (displayNameError) {
+        toast(displayNameError, "error");
+        return;
+      }
     }
 
     setLoading(true);
@@ -194,7 +203,7 @@ export default function SignInPage() {
 
               <form onSubmit={handlePasswordAuth} className="space-y-4">
                 {mode === "signup" ? (
-                  <Input label="Display name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} autoComplete="name" placeholder="Alex" />
+                  <Input label="Display name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} autoComplete="name" placeholder="Alex" maxLength={PLAYER_NAME_MAX_LENGTH} />
                 ) : null}
                 <Input label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" />
                 <Input label="Password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} minLength={6} required placeholder="At least 6 characters" />
