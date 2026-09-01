@@ -272,14 +272,18 @@ disabled in development to avoid stale local bundles.
 
 ## 11. Agent-runner deployment
 
-The checked-in `deploy/ante.service` runs the production build on
-`127.0.0.1:3100` as a persistent user service. After a new build:
+The checked-in `deploy/mainpot.service` runs the production build on
+`127.0.0.1:3100` as a persistent user service. It expects the repository at
+`~/mainpot`; edit `WorkingDirectory` in the unit if you use another checkout
+path. Optional runtime variables can be placed in
+`~/.config/mainpot/mainpot.env` (the unit loads that file when it exists).
+After a new build:
 
 ```sh
 mkdir -p ~/.config/systemd/user
-cp deploy/ante.service ~/.config/systemd/user/ante.service
+cp deploy/mainpot.service ~/.config/systemd/user/mainpot.service
 systemctl --user daemon-reload
-systemctl --user enable --now ante.service
+systemctl --user enable --now mainpot.service
 ```
 
 The runner exposes this private service to the tailnet on HTTPS port `8443`:

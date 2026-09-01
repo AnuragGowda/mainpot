@@ -5,7 +5,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/agowda/ante
+WorkingDirectory=%h/mainpot
+EnvironmentFile=-%h/.config/mainpot/mainpot.env
 Environment=NODE_ENV=production
 ExecStart=/usr/local/bin/mise exec node@22 -- npm run start -- --hostname 127.0.0.1 --port 3100
 Restart=on-failure

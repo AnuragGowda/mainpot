@@ -10,9 +10,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Local container runtime
 
-- On this Mac, use OrbStack as the container runtime. Never launch or use
-  Docker Desktop.
-- Docker-compatible CLI commands are acceptable only when the active Docker
-  context points to OrbStack. Verify the context before starting containers.
-- If OrbStack is unavailable or its context is not configured, stop and ask the
-  user instead of falling back to Docker Desktop.
+- Use a Docker-compatible runtime for the local Supabase stack. OrbStack is
+  supported on macOS; contributors on other platforms may use an equivalent
+  Docker-compatible runtime.
+- Verify that the Docker-compatible CLI is connected to the intended runtime
+  before starting containers.
