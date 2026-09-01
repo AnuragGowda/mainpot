@@ -131,23 +131,37 @@ export default function GameHeader({
         <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
           Room code
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-2 sm:gap-3">
+        <div className="mt-2 flex items-center gap-1.5 sm:gap-2">
+          <span className="font-mono text-3xl font-bold tracking-[0.2em] text-gray-900 sm:text-4xl">
+            {game.code}
+          </span>
           <button
             type="button"
             onClick={handleCopy}
             aria-label={`Copy room code ${game.code}`}
-            className="-mx-2 inline-flex min-h-[44px] items-center rounded-lg px-2 transition-colors duration-150 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
+            title="Copy room code"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-600 transition-colors duration-150 hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:h-9 sm:w-9"
           >
-            <span className="font-mono text-3xl font-bold tracking-[0.2em] text-gray-900 sm:text-4xl">
-              {game.code}
-            </span>
+            <Copy aria-hidden size={18} />
           </button>
-          <Button variant="secondary" size="sm" onClick={handleCopy} leftIcon={<Copy size={15} />}>
-            Copy code
-          </Button>
-          <Button variant="secondary" size="sm" onClick={() => setInviteOpen(true)} leftIcon={<QrCode size={15} />}>
-            Invite
-          </Button>
+          <button
+            type="button"
+            onClick={() => setInviteOpen(true)}
+            aria-label="Show invite QR code"
+            title="Show QR code"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-colors duration-150 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:h-9 sm:w-9"
+          >
+            <QrCode aria-hidden size={18} />
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            aria-label={`Share invite for ${game.name}`}
+            title="Share invite"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-colors duration-150 hover:border-gray-400 hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:h-9 sm:w-9"
+          >
+            <Share2 aria-hidden size={18} />
+          </button>
         </div>
       </div>
 
