@@ -1,11 +1,12 @@
 "use client";
 
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode, Ref } from "react";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "dangerOutline";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  ref?: Ref<HTMLButtonElement>;
   variant?: ButtonVariant;
   size?: ButtonSize;
   fullWidth?: boolean;
@@ -18,6 +19,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   secondary: "border border-gray-300 bg-white text-gray-900 shadow-sm hover:border-gray-400 hover:bg-gray-50",
   ghost: "bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-950",
   danger: "bg-red-600 text-white shadow-sm hover:bg-red-500",
+  dangerOutline: "border border-red-200 bg-white text-red-700 shadow-sm hover:border-red-300 hover:bg-red-50",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -52,6 +54,7 @@ function Spinner() {
 }
 
 export default function Button({
+  ref,
   variant = "primary",
   size = "md",
   fullWidth = false,
@@ -65,6 +68,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
+      ref={ref}
       type={type}
       disabled={disabled || loading}
       className={[

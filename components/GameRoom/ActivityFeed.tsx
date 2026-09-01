@@ -223,11 +223,31 @@ export default function ActivityFeed({
                         {canManageBuyIn && buyIn ? (
                           <>
                             <Button size="sm" variant="ghost" onClick={() => startEdit(event.id, buyIn.amount)}>Edit {buyIn.type === "rebuy" ? "rebuy" : "buy-in"}</Button>
-                            <ConfirmButton size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" confirmLabel="Remove entry?" onConfirm={() => onRemoveBuyIn(buyIn.id)}>Remove {buyIn.type === "rebuy" ? "rebuy" : "buy-in"}</ConfirmButton>
+                            <ConfirmButton
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-600 hover:bg-red-50"
+                              confirmationTitle={`Remove this ${buyIn.type === "rebuy" ? "rebuy" : "buy-in"}?`}
+                              confirmationDescription={<>This removes {formatCurrency(buyIn.amount)} from {subject?.name ?? "this player"}&apos;s ledger.</>}
+                              confirmLabel="Remove entry"
+                              onConfirm={() => onRemoveBuyIn(buyIn.id)}
+                            >
+                              Remove {buyIn.type === "rebuy" ? "rebuy" : "buy-in"}
+                            </ConfirmButton>
                           </>
                         ) : null}
                         {canRemovePlayer && subject ? (
-                          <ConfirmButton size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" onConfirm={() => onRemovePlayer(subject.id)}>Remove player</ConfirmButton>
+                          <ConfirmButton
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-600 hover:bg-red-50"
+                            confirmationTitle={`Remove ${subject.name}?`}
+                            confirmationDescription="Their buy-ins and cash-out will be removed from this game."
+                            confirmLabel="Remove player"
+                            onConfirm={() => onRemovePlayer(subject.id)}
+                          >
+                            Remove player
+                          </ConfirmButton>
                         ) : null}
                       </div>
                     )}

@@ -215,6 +215,9 @@ export default function PlayerCard({
                                 size="sm"
                                 variant="ghost"
                                 className="text-red-600 hover:bg-red-50"
+                                confirmationTitle="Remove this buy-in?"
+                                confirmationDescription={<>This removes {formatCurrency(buyIn.amount)} from {player.name}&apos;s ledger.</>}
+                                confirmLabel="Remove buy-in"
                                 onConfirm={() => onRemoveBuyIn(buyIn.id)}
                                 aria-label={`Remove ${player.name}'s buy-in of ${formatCurrency(buyIn.amount)}`}
                               >
@@ -239,6 +242,9 @@ export default function PlayerCard({
             size="sm"
             variant="ghost"
             className="text-red-600 hover:bg-red-50"
+            confirmationTitle={`Remove ${player.name}?`}
+            confirmationDescription="Their buy-ins and cash-out will be removed from this game."
+            confirmLabel="Remove player"
             onConfirm={() => onRemovePlayer(player.id)}
             aria-label={`Remove ${player.name} from the game`}
           >

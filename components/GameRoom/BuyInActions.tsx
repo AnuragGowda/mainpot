@@ -179,7 +179,10 @@ export default function BuyInActions({
         )}
         <ConfirmButton
           variant="ghost"
-          className="hidden flex-none text-red-600 hover:bg-red-50 sm:inline-flex"
+          className="flex-none text-red-600 hover:bg-red-50"
+          confirmationTitle="Leave the table?"
+          confirmationDescription="Your buy-ins stay in the ledger. You won’t be able to add more, and the host can enter your final cash-out when the game ends."
+          confirmLabel="Leave table"
           onConfirm={onLeave}
           loading={leaving}
           aria-label="Leave the game"

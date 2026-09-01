@@ -24,6 +24,7 @@ export default function HostControls({ players, currentPlayerId, onTransfer }: H
   const validPlayerId = candidates.some((player) => player.id === playerId)
     ? playerId
     : candidates[0].id;
+  const selectedPlayer = candidates.find((player) => player.id === validPlayerId);
 
   return (
     <details className="group rounded-xl border border-gray-200 bg-white shadow-none">
@@ -49,8 +50,11 @@ export default function HostControls({ players, currentPlayerId, onTransfer }: H
           </div>
           <ConfirmButton
             variant="secondary"
+            confirmVariant="secondary"
             loading={loading}
-            confirmLabel="Transfer host?"
+            confirmationTitle={`Make ${selectedPlayer?.name ?? "this player"} the host?`}
+            confirmationDescription="You will immediately lose host-only controls. The new host can manage the ledger and end the game."
+            confirmLabel="Transfer host"
             onConfirm={async () => {
               setLoading(true);
               try { await onTransfer(validPlayerId); } finally { setLoading(false); }

@@ -1,0 +1,40 @@
+.overlay {
+  animation: confirm-overlay-in 160ms ease-out;
+}
+
+.panel {
+  animation: confirm-sheet-in 190ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes confirm-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes confirm-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+}
+
+@media (min-width: 640px) {
+  .panel {
+    animation-name: confirm-dialog-in;
+  }
+
+  @keyframes confirm-dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem) scale(0.98);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .panel {
+    animation: none;
+  }
+}
