@@ -81,3 +81,41 @@ self.addEventListener("message", (event) => {
     void self.skipWaiting();
   }
 });
+
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    return;
+  }
+
+  const title = typeof payload.title === "string" ? payload.title : "Mainpot";
+  const options = {
+    body: typeof payload.body === "string" ? payload.body : "Your game has an update.",
+    icon: typeof payload.icon === "string" ? payload.icon : "/icon-192x192.png",
+    badge: typeof payload.badge === "string" ? payload.badge : "/icon-192x192.png",
+    tag: typeof payload.tag === "string" ? payload.tag : "mainpot-game-update",
+    data: {
+      url: typeof payload.url === "string" && payload.url.startsWith("/")
+        ? payload.url
+        : "/",
+    },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = new URL(event.notification.data?.url || "/", self.location.origin).href;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      const existing = clients.find((client) => client.url === targetUrl);
+      if (existing) return existing.focus();
+      return self.clients.openWindow(targetUrl);
+    })
+  );
+});

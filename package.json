@@ -20,19 +20,23 @@
     "test:e2e:mobile": "PLAYWRIGHT_MOBILE=1 playwright test tests/e2e/smoke.spec.ts",
     "test:e2e:realtime": "node scripts/test-realtime.mjs",
     "test:db:assurance": "node scripts/test-database-assurance.mjs",
-    "test:db:soak": "node scripts/test-database-soak.mjs"
+    "test:product-ops:canary": "node scripts/test-product-ops-canary.mjs",
+    "test:db:soak": "node scripts/test-database-soak.mjs",
+    "push:generate-keys": "web-push generate-vapid-keys"
   },
   "engines": {
     "node": ">=22.0.0"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.3.7",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.45.0",
     "lucide-react": "^1.37.0",
     "next": "^16.3.3",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
@@ -40,6 +44,7 @@
     "@types/node": "^26.4.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.3",
     "postcss": "^8.5.26",

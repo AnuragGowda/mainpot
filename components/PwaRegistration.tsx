@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
+import type { BeforeInstallPromptEvent } from "@/lib/push-client";
 
 const UPDATE_INTERVAL_MS = 60 * 60 * 1000;
 
 export default function PwaRegistration() {
   useEffect(() => {
-    if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) {
+    if (!("serviceWorker" in navigator)) {
       return;
     }
 
@@ -18,6 +19,20 @@ export default function PwaRegistration() {
         void registration?.update();
       }
     };
+
+    const rememberInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      window.__mainpotInstallPrompt = event as BeforeInstallPromptEvent;
+      window.dispatchEvent(new Event("mainpot:install-available"));
+    };
+
+    const clearInstallPrompt = () => {
+      delete window.__mainpotInstallPrompt;
+      window.dispatchEvent(new Event("mainpot:installed"));
+    };
+
+    window.addEventListener("beforeinstallprompt", rememberInstallPrompt);
+    window.addEventListener("appinstalled", clearInstallPrompt);
 
     void navigator.serviceWorker
       .register("/sw.js", { scope: "/", updateViaCache: "none" })
@@ -36,6 +51,8 @@ export default function PwaRegistration() {
       disposed = true;
       window.clearInterval(interval);
       window.removeEventListener("online", checkForUpdate);
+      window.removeEventListener("beforeinstallprompt", rememberInstallPrompt);
+      window.removeEventListener("appinstalled", clearInstallPrompt);
     };
   }, []);
 
