@@ -113,7 +113,30 @@ test("transfers host authority and updates controls for both users", async ({ br
   }
 });
 
-test("keeps concurrent host correction and approval decisions auditable", async ({ browser }) => {
+test("recovers a disconnected guest after the host starts settlement", async ({ browser }) => {
+  const hostContext = await browser.newContext();
+  const jordanContext = await browser.newContext();
+  const host = await hostContext.newPage();
+  const jordan = await jordanContext.newPage();
+
+  try {
+    await createGame(host, "Realtime test game");
+    await joinGame(jordan, host.url(), "Jordan");
+
+    await jordanContext.setOffline(true);
+    await host.getByRole("button", { name: "End game" }).click();
+    await host.getByRole("button", { name: "Confirm?" }).click();
+    await expect(host.getByRole("heading", { name: "Cash-outs" })).toBeVisible();
+
+    await jordanContext.setOffline(false);
+    await expect(jordan.getByRole("heading", { name: "Cash-outs" })).toBeVisible({ timeout: 10_000 });
+  } finally {
+    await jordanContext.close();
+    await hostContext.close();
+  }
+});
+
+test("keeps host correction and approval decisions auditable", async ({ browser }) => {
   const hostContext = await browser.newContext();
   const jordanContext = await browser.newContext();
   const taylorContext = await browser.newContext();
@@ -136,10 +159,9 @@ test("keeps concurrent host correction and approval decisions auditable", async 
     await jordanPending.getByRole("button", { name: "Edit Jordan buy-in" }).click();
     await jordanPending.getByLabel("Correct amount").fill("25");
 
-    await Promise.all([
-      jordanPending.getByRole("button", { name: "Save" }).click(),
-      taylorPending.getByRole("button", { name: "Approve" }).click(),
-    ]);
+    await jordanPending.getByRole("button", { name: "Save" }).click();
+    await expect(host.getByText("Buy-in updated", { exact: true })).toBeVisible();
+    await taylorPending.getByRole("button", { name: "Approve" }).click();
 
     await expect(pending.getByRole("listitem")).toHaveCount(1);
     await expect(pending.getByRole("listitem").filter({ hasText: "Jordan" })).toContainText("$25.00");

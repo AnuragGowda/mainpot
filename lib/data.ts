@@ -10,6 +10,7 @@ import type {
   GameEvent,
   GameEventMetadata,
   GameEventType,
+  DiscrepancyAllocationRecord,
   GameFeedback,
   AcquisitionSource,
   GameSnapshot,
@@ -54,7 +55,11 @@ async function ensureSupabaseReady(): Promise<{
 // Supabase `numeric` columns sometimes come back as strings — coerce every
 // amount to a number at the data layer so the rest of the app sees numbers.
 function toGame(row: Game): Game {
-  return { ...row, buy_in_amount: Number(row.buy_in_amount) };
+  return {
+    ...row,
+    buy_in_amount: Number(row.buy_in_amount),
+    discrepancy_allocation: row.discrepancy_allocation ?? null,
+  };
 }
 
 function toPlayer(row: Player): Player {
@@ -192,6 +197,21 @@ function currentLocalPlayerId(store: LocalStore, gameId: string): string | null 
   );
 }
 
+function requireLocalGameStatus(
+  store: LocalStore,
+  gameId: string,
+  status: Game["status"]
+): Game {
+  const game = store.games.find((item) => item.id === gameId);
+  if (!game) throw new Error("Game not found.");
+  if (game.status !== status) {
+    throw new Error(status === "active"
+      ? "The active ledger is already closed."
+      : "Finalized games are read-only.");
+  }
+  return game;
+}
+
 function emitSnapshot(gameId: string, store: LocalStore): void {
   const snapshot = buildSnapshot(store, gameId);
   if (!snapshot) {
@@ -310,6 +330,25 @@ async function createGameLocal(
   return { code, gameId };
 }
 
+async function setGameAcquisitionSourceLocal(
+  gameId: string,
+  source: AcquisitionSource
+): Promise<void> {
+  const store = loadStore();
+  const game = store.games.find((item) => item.id === gameId);
+  if (!game) throw new Error("Game not found.");
+  if (game.status !== "active") {
+    throw new Error("Acquisition details can only be added to an active game.");
+  }
+  const currentHost = store.players.find(
+    (player) => player.game_id === gameId && player.is_host && player.session_id === getSessionId()
+  );
+  if (!currentHost) throw new Error("Only the host can update this game.");
+  game.acquisition_source = source;
+  persistStore(store);
+  emitSnapshot(gameId, store);
+}
+
 async function joinGameLocal(
   code: string,
   playerName: string,
@@ -393,6 +432,7 @@ async function addBuyInLocal(
   operationKey: string
 ): Promise<BuyIn> {
   const store = loadStore();
+  requireLocalGameStatus(store, gameId, "active");
   const existing = store.buyIns.find(
     (buyIn) => buyIn.operation_key === operationKey
   );
@@ -437,6 +477,7 @@ async function addBuyInLocal(
 async function removeBuyInLocal(buyInId: string): Promise<void> {
   const store = loadStore();
   const buyIn = store.buyIns.find((b) => b.id === buyInId);
+  if (buyIn) requireLocalGameStatus(store, buyIn.game_id, "active");
   if (buyIn) {
     const player = store.players.find((item) => item.id === buyIn.player_id);
     addLocalEvent(store, {
@@ -462,6 +503,7 @@ async function removeBuyInLocal(buyInId: string): Promise<void> {
 async function verifyBuyInLocal(buyInId: string): Promise<void> {
   const store = loadStore();
   const buyIn = store.buyIns.find((b) => b.id === buyInId);
+  if (buyIn) requireLocalGameStatus(store, buyIn.game_id, "active");
   if (buyIn) {
     buyIn.verified = true;
     const player = store.players.find((item) => item.id === buyIn.player_id);
@@ -487,6 +529,7 @@ async function verifyBuyInLocal(buyInId: string): Promise<void> {
 async function updateBuyInLocal(buyInId: string, amount: number): Promise<void> {
   const store = loadStore();
   const buyIn = store.buyIns.find((b) => b.id === buyInId);
+  if (buyIn) requireLocalGameStatus(store, buyIn.game_id, "active");
   if (buyIn) {
     const previousAmount = buyIn.amount;
     buyIn.amount = round2(amount);
@@ -591,6 +634,7 @@ async function addCashOutLocal(
   amount: number
 ): Promise<CashOut> {
   const store = loadStore();
+  requireLocalGameStatus(store, gameId, "settling");
   const existing = store.cashOuts.find(
     (c) => c.game_id === gameId && c.player_id === playerId
   );
@@ -639,6 +683,7 @@ async function updateCashOutLocal(
 ): Promise<void> {
   const store = loadStore();
   const cashOut = store.cashOuts.find((c) => c.id === cashOutId);
+  if (cashOut) requireLocalGameStatus(store, cashOut.game_id, "settling");
   if (cashOut) {
     cashOut.amount = round2(amount);
     const player = store.players.find((item) => item.id === cashOut.player_id);
@@ -659,38 +704,48 @@ async function updateCashOutLocal(
 
 async function endGameLocal(gameId: string): Promise<void> {
   const store = loadStore();
-  const game = store.games.find((g) => g.id === gameId);
-  if (game) {
-    game.status = "settling";
-    game.ended_at = new Date().toISOString();
-    addLocalEvent(store, {
-      gameId,
-      eventType: "game_settling",
-      actorPlayerId: currentLocalPlayerId(store, gameId),
-      createdAt: game.ended_at,
-    });
-  }
+  const game = requireLocalGameStatus(store, gameId, "active");
+  game.status = "settling";
+  game.ended_at = new Date().toISOString();
+  addLocalEvent(store, {
+    gameId,
+    eventType: "game_settling",
+    actorPlayerId: currentLocalPlayerId(store, gameId),
+    createdAt: game.ended_at,
+  });
   persistStore(store);
-  if (game) {
-    emitSnapshot(gameId, store);
-  }
+  emitSnapshot(gameId, store);
 }
 
 async function markEndedLocal(gameId: string): Promise<void> {
   const store = loadStore();
-  const game = store.games.find((g) => g.id === gameId);
-  if (game) {
-    game.status = "ended";
-    addLocalEvent(store, {
-      gameId,
-      eventType: "game_finalized",
-      actorPlayerId: currentLocalPlayerId(store, gameId),
-    });
-  }
+  const game = requireLocalGameStatus(store, gameId, "settling");
+  game.status = "ended";
+  addLocalEvent(store, {
+    gameId,
+    eventType: "game_finalized",
+    actorPlayerId: currentLocalPlayerId(store, gameId),
+  });
   persistStore(store);
-  if (game) {
-    emitSnapshot(gameId, store);
-  }
+  emitSnapshot(gameId, store);
+}
+
+async function saveDiscrepancyAllocationLocal(
+  gameId: string,
+  allocation: DiscrepancyAllocationRecord
+): Promise<void> {
+  const store = loadStore();
+  const game = requireLocalGameStatus(store, gameId, "settling");
+  game.discrepancy_allocation = allocation;
+  addLocalEvent(store, {
+    gameId,
+    eventType: "discrepancy_allocated",
+    actorPlayerId: currentLocalPlayerId(store, gameId),
+    amount: allocation.amount,
+    metadata: { method: allocation.method, player_count: allocation.player_ids.length },
+  });
+  persistStore(store);
+  emitSnapshot(gameId, store);
 }
 
 async function getGameSnapshotLocal(gameId: string): Promise<GameSnapshot> {
@@ -717,6 +772,25 @@ async function currentSupabasePlayerId(
     .eq("session_id", getSessionId())
     .maybeSingle();
   return (data as { id?: string } | null)?.id ?? null;
+}
+
+async function requireSupabaseGameStatus(
+  client: SupabaseClient,
+  gameId: string,
+  status: Game["status"]
+): Promise<void> {
+  const { data, error } = await client
+    .from("games")
+    .select("status")
+    .eq("id", gameId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("Game not found.");
+  if ((data as { status: Game["status"] }).status !== status) {
+    throw new Error(status === "active"
+      ? "The active ledger is already closed."
+      : "Finalized games are read-only.");
+  }
 }
 
 async function addSupabaseEvent(
@@ -788,6 +862,22 @@ async function createGameSupabase(
   throw new Error("Could not generate a unique room code. Please try again.");
 }
 
+async function setGameAcquisitionSourceSupabase(
+  gameId: string,
+  source: AcquisitionSource
+): Promise<void> {
+  const { client } = await ensureSupabaseReady();
+  const { data, error } = await client
+    .from("games")
+    .update({ acquisition_source: source })
+    .eq("id", gameId)
+    .eq("status", "active")
+    .select("id")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("Only the host can update an active game.");
+}
+
 async function joinGameSupabase(
   code: string,
   playerName: string,
@@ -826,23 +916,45 @@ async function getGameSupabase(code: string): Promise<Game | null> {
   return toGame(data as Game);
 }
 
-async function refreshSnapshot(
-  gameId: string,
-  callback: (snapshot: GameSnapshot) => void
-): Promise<void> {
-  try {
-    const snapshot = await getGameSnapshot(gameId);
-    callback(snapshot);
-  } catch (err) {
-    console.error("Failed to refresh game snapshot:", err);
-  }
-}
-
 function subscribeToGameSupabase(
   gameId: string,
   callback: (snapshot: GameSnapshot) => void
 ): () => void {
   const client = assertSupabase();
+  let disposed = false;
+  let refreshInFlight = false;
+  let refreshQueued = false;
+
+  // Several table changes can arrive at once. Serialize refreshes so an older
+  // request can never finish last and overwrite a newer room snapshot.
+  async function requestRefresh(): Promise<void> {
+    if (refreshInFlight) {
+      refreshQueued = true;
+      return;
+    }
+
+    refreshInFlight = true;
+    try {
+      do {
+        refreshQueued = false;
+        try {
+          const snapshot = await getGameSnapshot(gameId);
+          if (!disposed) callback(snapshot);
+        } catch (err) {
+          console.error("Failed to refresh game snapshot:", err);
+        }
+      } while (refreshQueued && !disposed);
+    } finally {
+      refreshInFlight = false;
+    }
+  }
+
+  // Postgres Changes is the fast path. Keep a small reconciliation loop as a
+  // safety net for a change committed while a browser channel is reconnecting
+  // or subscribing, so a room cannot remain stale indefinitely.
+  const reconciliation = window.setInterval(() => {
+    void requestRefresh();
+  }, 2_000);
 
   const channel = client
     .channel(`game-${gameId}-${randomUUID()}`)
@@ -850,7 +962,7 @@ function subscribeToGameSupabase(
       "postgres_changes",
       { event: "*", schema: "public", table: "games", filter: `id=eq.${gameId}` },
       () => {
-        void refreshSnapshot(gameId, callback);
+        void requestRefresh();
       }
     )
     .on(
@@ -862,7 +974,7 @@ function subscribeToGameSupabase(
         filter: `game_id=eq.${gameId}`,
       },
       () => {
-        void refreshSnapshot(gameId, callback);
+        void requestRefresh();
       }
     )
     .on(
@@ -874,7 +986,7 @@ function subscribeToGameSupabase(
         filter: `game_id=eq.${gameId}`,
       },
       () => {
-        void refreshSnapshot(gameId, callback);
+        void requestRefresh();
       }
     )
     .on(
@@ -886,7 +998,7 @@ function subscribeToGameSupabase(
         filter: `game_id=eq.${gameId}`,
       },
       () => {
-        void refreshSnapshot(gameId, callback);
+        void requestRefresh();
       }
     )
     .on(
@@ -898,7 +1010,7 @@ function subscribeToGameSupabase(
         filter: `game_id=eq.${gameId}`,
       },
       () => {
-        void refreshSnapshot(gameId, callback);
+        void requestRefresh();
       }
     )
     .subscribe((status) => {
@@ -906,11 +1018,13 @@ function subscribeToGameSupabase(
       // channel is fully subscribed. Refreshing at that boundary closes the
       // gap so hosts do not remain on a stale roster until the next event.
       if (status === "SUBSCRIBED") {
-        void refreshSnapshot(gameId, callback);
+        void requestRefresh();
       }
     });
 
   return () => {
+    disposed = true;
+    window.clearInterval(reconciliation);
     void client.removeChannel(channel);
   };
 }
@@ -979,6 +1093,7 @@ async function removeBuyInSupabase(buyInId: string): Promise<void> {
     .eq("id", buyInId)
     .maybeSingle();
   if (lookupError) throw lookupError;
+  if (buyIn) await requireSupabaseGameStatus(client, (buyIn as BuyIn).game_id, "active");
   const { error } = await client.from("buy_ins").delete().eq("id", buyInId);
   if (error) {
     throw error;
@@ -1001,6 +1116,13 @@ async function removeBuyInSupabase(buyInId: string): Promise<void> {
 
 async function verifyBuyInSupabase(buyInId: string): Promise<void> {
   const { client } = await ensureSupabaseReady();
+  const { data: existing, error: lookupError } = await client
+    .from("buy_ins")
+    .select("game_id")
+    .eq("id", buyInId)
+    .single();
+  if (lookupError) throw lookupError;
+  await requireSupabaseGameStatus(client, (existing as { game_id: string }).game_id, "active");
   const { data, error } = await client
     .from("buy_ins")
     .update({ verified: true })
@@ -1032,6 +1154,7 @@ async function updateBuyInSupabase(buyInId: string, amount: number): Promise<voi
     .eq("id", buyInId)
     .single();
   if (lookupError) throw lookupError;
+  await requireSupabaseGameStatus(client, (existing as BuyIn).game_id, "active");
   const { data, error } = await client
     .from("buy_ins")
     .update({ amount })
@@ -1116,6 +1239,7 @@ async function addCashOutSupabase(
   amount: number
 ): Promise<CashOut> {
   const { client } = await ensureSupabaseReady();
+  await requireSupabaseGameStatus(client, gameId, "settling");
 
   const { data: existing, error: lookupError } = await client
     .from("cash_outs")
@@ -1182,6 +1306,13 @@ async function updateCashOutSupabase(
   amount: number
 ): Promise<void> {
   const { client } = await ensureSupabaseReady();
+  const { data: existing, error: lookupError } = await client
+    .from("cash_outs")
+    .select("game_id")
+    .eq("id", cashOutId)
+    .single();
+  if (lookupError) throw lookupError;
+  await requireSupabaseGameStatus(client, (existing as { game_id: string }).game_id, "settling");
   const { data, error } = await client
     .from("cash_outs")
     .update({ amount })
@@ -1203,26 +1334,56 @@ async function updateCashOutSupabase(
 
 async function endGameSupabase(gameId: string): Promise<void> {
   const { client } = await ensureSupabaseReady();
-  const { error } = await client
+  const { data, error } = await client
     .from("games")
     .update({ status: "settling", ended_at: new Date().toISOString() })
-    .eq("id", gameId);
+    .eq("id", gameId)
+    .eq("status", "active")
+    .select("id")
+    .maybeSingle();
   if (error) {
     throw error;
   }
+  if (!data) throw new Error("The active ledger is already closed.");
   await addSupabaseEvent(client, { gameId, eventType: "game_settling" });
 }
 
 async function markEndedSupabase(gameId: string): Promise<void> {
   const { client } = await ensureSupabaseReady();
-  const { error } = await client
+  const { data, error } = await client
     .from("games")
     .update({ status: "ended" })
-    .eq("id", gameId);
+    .eq("id", gameId)
+    .eq("status", "settling")
+    .select("id")
+    .maybeSingle();
   if (error) {
     throw error;
   }
+  if (!data) throw new Error("Finalized games are read-only.");
   await addSupabaseEvent(client, { gameId, eventType: "game_finalized" });
+}
+
+async function saveDiscrepancyAllocationSupabase(
+  gameId: string,
+  allocation: DiscrepancyAllocationRecord
+): Promise<void> {
+  const { client } = await ensureSupabaseReady();
+  const { data, error } = await client
+    .from("games")
+    .update({ discrepancy_allocation: allocation })
+    .eq("id", gameId)
+    .eq("status", "settling")
+    .select("id")
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("Finalized games are read-only.");
+  await addSupabaseEvent(client, {
+    gameId,
+    eventType: "discrepancy_allocated",
+    amount: allocation.amount,
+    metadata: { method: allocation.method, player_count: allocation.player_ids.length },
+  });
 }
 
 async function getGameSnapshotSupabase(gameId: string): Promise<GameSnapshot> {
@@ -1298,6 +1459,15 @@ export async function createGame(
     : createGameSupabase(name, hostName, buyInAmount, userId, acquisitionSource));
   trackProductOpsEvent("game.created", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
   return result;
+}
+
+export async function setGameAcquisitionSource(
+  gameId: string,
+  source: AcquisitionSource
+): Promise<void> {
+  return usingLocalStorage()
+    ? setGameAcquisitionSourceLocal(gameId, source)
+    : setGameAcquisitionSourceSupabase(gameId, source);
 }
 
 export async function recordGameEvent(
@@ -1451,6 +1621,15 @@ export async function markEnded(gameId: string): Promise<void> {
   const localStorageMode = usingLocalStorage();
   await (localStorageMode ? markEndedLocal(gameId) : markEndedSupabase(gameId));
   trackProductOpsEvent("game.finalized", { storage_mode: localStorageMode ? "local_storage" : "supabase" });
+}
+
+export async function saveDiscrepancyAllocation(
+  gameId: string,
+  allocation: DiscrepancyAllocationRecord
+): Promise<void> {
+  return usingLocalStorage()
+    ? saveDiscrepancyAllocationLocal(gameId, allocation)
+    : saveDiscrepancyAllocationSupabase(gameId, allocation);
 }
 
 export async function getGameSnapshot(gameId: string): Promise<GameSnapshot> {

@@ -162,6 +162,25 @@ separate production Supabase project. Do not reuse local or staging keys.
    result survives a page refresh and appears in account history.
 5. Use the support link and check that it opens the configured private inbox.
 
+### Beta release evidence
+
+For each beta deployment, record the production URL, deploy SHA, migration
+version, timestamp, tester devices/browsers, and result in the release notes.
+Before expanding the cohort, attach evidence for each of these checks:
+
+1. Trigger and acknowledge one real uptime alert and one host error-tracking
+   alert; confirm both reach the launch owner.
+2. Restore a production backup into a non-production project. Record the
+   restoration owner, recovery point objective, and recovery time.
+3. On the production domain, test a fresh password sign-up, password login,
+   magic-link callback, logout, and the configured auth redirect URLs.
+4. Complete the production smoke test above on desktop Chrome, mobile Safari,
+   and Android Chrome. Include one brief offline/reconnect check during an
+   active game.
+
+`/api/health` confirms that the application is reachable; database and
+realtime health still require the user-flow checks above.
+
 ### Account-data requests
 
 Permanent-account holders can download a JSON export and submit an in-product

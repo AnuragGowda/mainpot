@@ -74,6 +74,7 @@ async function run() {
   const guestA = await guest("Assurance guest A");
   const guestB = await guest("Assurance guest B");
   const otherHost = await guest("Other game host");
+  const outsider = await guest("Game A outsider");
 
   const gameA = await createGame(host, "Assurance game A");
   const gameB = await createGame(otherHost, "Assurance game B");
@@ -128,6 +129,7 @@ async function run() {
   });
   assert(mismatch.error, "operation key reused with different inputs is rejected");
   console.log("✓ idempotent buy-in create/retry/mismatch");
+  const guestBuyIn = first.data[0];
 
   await expectError(
     () => guestA.from("buy_ins").insert({ game_id: gameB.game_id, player_id: otherPlayer.player_id, amount: 12, type: "buy_in" }),
@@ -149,7 +151,31 @@ async function run() {
   assert(!hidden.error && hidden.data?.length === 0, "cross-game buy-ins are not readable");
   console.log("✓ cross-game reads and writes are denied");
 
-  const guestBuyIn = first.data[0];
+  const protectedTables = ["players", "buy_ins", "cash_outs", "game_events", "settlement_payments"];
+  for (const table of protectedTables) {
+    const { data, error } = await outsider.from(table).select("id").eq("game_id", gameA.game_id);
+    assert(!error && data?.length === 0, `outsider cannot read Game A ${table}`);
+  }
+  const hiddenGame = await outsider.from("games").select("id").eq("id", gameA.game_id);
+  assert(!hiddenGame.error && hiddenGame.data?.length === 0, "outsider cannot read Game A");
+  await expectError(
+    () => outsider.from("players").update({ name: "Intruder" }).eq("id", playerA.player_id).select("id"),
+    "outsider player update",
+  );
+  await expectError(
+    () => outsider.from("buy_ins").update({ amount: 99 }).eq("id", guestBuyIn.id).select("id"),
+    "outsider buy-in update",
+  );
+  await expectError(
+    () => outsider.from("cash_outs").update({ amount: 99 }).eq("id", otherGameCashOut.data[0].id).select("id"),
+    "outsider cash-out update",
+  );
+  await expectError(
+    () => outsider.rpc("transfer_game_host", { target_game_id: gameA.game_id, target_player_id: playerA.player_id }),
+    "outsider host transfer",
+  );
+  console.log("✓ non-member room reads and mutations are denied");
+
   await expectError(
     () => guestB.from("buy_ins").update({ verified: true }).eq("id", guestBuyIn.id).select("id"),
     "non-host verification of another player's buy-in",

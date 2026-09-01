@@ -5,7 +5,7 @@ test.describe("public local-mode experience", () => {
     await page.goto("/");
 
     await expect(page.getByRole("heading", { name: "Keep the game friendly. Keep the money exact." })).toBeVisible();
-    await page.getByRole("link", { name: "Start a game" }).first().click();
+    await page.getByRole("link", { name: /Start( a)? game/i }).first().click();
 
     await page.getByRole("button", { name: "Create game" }).click();
     await expect(page.getByText("Enter your name.")).toBeVisible();

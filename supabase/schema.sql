@@ -12,6 +12,7 @@ create table games (
 );
 alter table games add column if not exists acquisition_source text
   check (acquisition_source is null or acquisition_source in ('personal_invite', 'poker_group', 'search', 'other'));
+alter table games add column if not exists discrepancy_allocation jsonb;
 -- Players table
 create table players (
   id uuid default gen_random_uuid() primary key,
@@ -114,7 +115,8 @@ create table if not exists game_events (
   event_type text not null check (event_type in (
     'game_created', 'player_joined', 'buy_in_added', 'buy_in_updated',
     'buy_in_removed', 'buy_in_verified', 'player_left', 'player_removed',
-    'cash_out_updated', 'game_settling', 'game_finalized', 'host_returned_to_create'
+    'cash_out_updated', 'game_settling', 'game_finalized', 'host_returned_to_create',
+    'discrepancy_allocated'
   )),
   actor_player_id uuid references players on delete set null,
   subject_player_id uuid references players on delete set null,

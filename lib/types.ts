@@ -14,6 +14,13 @@ export interface Game {
   created_at: string;
   ended_at: string | null;
   acquisition_source?: AcquisitionSource | null;
+  discrepancy_allocation?: DiscrepancyAllocationRecord | null;
+}
+
+export interface DiscrepancyAllocationRecord {
+  method: "proportional" | "selected";
+  player_ids: string[];
+  amount: number;
 }
 
 export type AcquisitionSource = "personal_invite" | "poker_group" | "search" | "other";
@@ -75,6 +82,7 @@ export type GameEventType =
   | "cash_out_updated"
   | "game_settling"
   | "game_finalized"
+  | "discrepancy_allocated"
   | "host_returned_to_create";
 
 export interface GameEventMetadata {
