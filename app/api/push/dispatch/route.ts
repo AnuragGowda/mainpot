@@ -1,6 +1,7 @@
 import { createServerSupabase } from "@/lib/supabase-server";
 import { getPushAdminClient, pushIsConfigured, sendWebPush } from "@/lib/push-server";
 import type { GamePushEvent } from "@/lib/push-client";
+import { getPushRecipientIds } from "@/lib/push-recipients";
 
 const allowedEvents = new Set<GamePushEvent>([
   "player_joined",
@@ -87,14 +88,9 @@ export async function POST(request: Request) {
 
   const { data: playerRows } = await admin
     .from("players")
-    .select("user_id")
-    .eq("game_id", body.gameId)
-    .is("left_at", null);
-  const recipientIds = [...new Set(
-    (playerRows ?? [])
-      .map((player) => player.user_id as string | null)
-      .filter((id): id is string => Boolean(id) && id !== user.id)
-  )];
+    .select("user_id,left_at")
+    .eq("game_id", body.gameId);
+  const recipientIds = getPushRecipientIds(playerRows ?? [], event, user.id);
   if (recipientIds.length === 0) return new Response(null, { status: 204 });
 
   const { data: rows, error: subscriptionsError } = await admin
@@ -103,7 +99,7 @@ export async function POST(request: Request) {
     .in("user_id", recipientIds);
   if (subscriptionsError || !rows?.length) return new Response(null, { status: 204 });
 
-  const playerCount = (playerRows ?? []).length;
+  const playerCount = (playerRows ?? []).filter((player) => player.left_at === null).length;
   const content = event === "player_joined"
     ? {
         title: `${subjectName ?? "A player"} joined ${game.name}`,
