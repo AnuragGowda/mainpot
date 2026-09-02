@@ -95,6 +95,8 @@ async function run() {
   const guestB = await guest("Assurance guest B");
   const otherHost = await guest("Other game host");
   const outsider = await guest("Game A outsider");
+  const handoffHost = await guest("Handoff host");
+  const handoffGuest = await guest("Handoff guest");
 
   await expectError(
     () => host.rpc("create_game_guarded", {
@@ -123,6 +125,30 @@ async function run() {
   const playerA = await join(guestA, gameA.code, "Guest A");
   const playerB = await join(guestB, gameA.code, "Guest B");
   const otherPlayer = await join(guestB, gameB.code, "Other player");
+
+  await expectError(
+    () => host.from("players").update({ left_at: new Date().toISOString() }).eq("id", gameA.player_id).select("id"),
+    "host leaving without a replacement",
+  );
+
+  const handoffGame = await createGame(handoffHost, "Host handoff assurance");
+  const handoffPlayer = await join(handoffGuest, handoffGame.code, "Handoff guest");
+  const handoff = await handoffHost.rpc("transfer_host_and_leave_game", {
+    target_game_id: handoffGame.game_id,
+    target_player_id: handoffPlayer.player_id,
+  });
+  assert(!handoff.error, "host can transfer and leave together");
+  const { data: handoffState, error: handoffStateError } = await admin
+    .from("players")
+    .select("id, is_host, left_at")
+    .eq("game_id", handoffGame.game_id);
+  assert(
+    !handoffStateError
+      && handoffState?.some((player) => player.id === handoffGame.player_id && !player.is_host && player.left_at)
+      && handoffState?.some((player) => player.id === handoffPlayer.player_id && player.is_host && !player.left_at),
+    "host transfer and departure leave exactly the selected player active as host",
+  );
+  console.log("✓ hosts must choose an active successor before leaving");
 
   await expectError(
     () => outsider.rpc("join_game_guarded", {

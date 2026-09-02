@@ -617,6 +617,15 @@ async function leaveGameLocal(playerId: string): Promise<void> {
   }
 }
 
+async function transferHostAndLeaveLocal(
+  gameId: string,
+  playerId: string,
+  targetPlayerId: string,
+): Promise<void> {
+  await transferHostLocal(gameId, targetPlayerId);
+  await leaveGameLocal(playerId);
+}
+
 async function transferHostLocal(gameId: string, targetPlayerId: string): Promise<void> {
   const store = loadStore();
   const game = requireLocalGameStatus(store, gameId, "active");
@@ -1315,6 +1324,18 @@ async function leaveGameSupabase(playerId: string): Promise<void> {
   });
 }
 
+async function transferHostAndLeaveSupabase(
+  gameId: string,
+  targetPlayerId: string,
+): Promise<void> {
+  const { client } = await ensureSupabaseReady();
+  const { error } = await client.rpc("transfer_host_and_leave_game", {
+    target_game_id: gameId,
+    target_player_id: targetPlayerId,
+  });
+  if (error) throw error;
+}
+
 async function transferHostSupabase(gameId: string, targetPlayerId: string): Promise<void> {
   const { client } = await ensureSupabaseReady();
   await requireSupabaseGameStatus(client, gameId, "active");
@@ -1710,6 +1731,17 @@ export async function transferHost(gameId: string, targetPlayerId: string): Prom
   return usingLocalStorage()
     ? transferHostLocal(gameId, targetPlayerId)
     : transferHostSupabase(gameId, targetPlayerId);
+}
+
+/** Transfers the active host role, then records the departing host's exit. */
+export async function transferHostAndLeave(
+  gameId: string,
+  playerId: string,
+  targetPlayerId: string,
+): Promise<void> {
+  return usingLocalStorage()
+    ? transferHostAndLeaveLocal(gameId, playerId, targetPlayerId)
+    : transferHostAndLeaveSupabase(gameId, targetPlayerId);
 }
 
 export async function addCashOut(

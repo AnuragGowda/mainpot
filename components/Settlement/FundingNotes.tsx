@@ -13,7 +13,23 @@ export default function FundingNotes({ snapshot }: { snapshot: GameSnapshot }) {
     );
     if (!borrower || !lender) return [];
     return [{ buyIn, borrower, lender }];
-  });
+  }).reduce<{
+    borrower: GameSnapshot["players"][number];
+    lender: GameSnapshot["players"][number];
+    amount: number;
+    entryCount: number;
+  }[]>((current, { buyIn, borrower, lender }) => {
+    const existing = current.find(
+      (entry) => entry.borrower.id === borrower.id && entry.lender.id === lender.id,
+    );
+    if (existing) {
+      existing.amount += buyIn.amount;
+      existing.entryCount += 1;
+    } else {
+      current.push({ borrower, lender, amount: buyIn.amount, entryCount: 1 });
+    }
+    return current;
+  }, []);
 
   if (!entries.length) return null;
 
@@ -21,24 +37,29 @@ export default function FundingNotes({ snapshot }: { snapshot: GameSnapshot }) {
     <section aria-labelledby="funding-notes-heading">
       <div className="mb-2 flex items-end justify-between gap-4">
         <h2 id="funding-notes-heading" className="text-sm font-medium uppercase tracking-widest text-gray-500">
-          Fronted buy-ins
+          Cash advances to settle
         </h2>
-        <span className="text-xs text-gray-400">Settlement only</span>
+        <span className="text-xs text-gray-400">Doesn&apos;t change the pot</span>
       </div>
       <Card padding="none" className="divide-y divide-gray-100 overflow-hidden">
-        {entries.map(({ buyIn, borrower, lender }) => (
-          <div key={buyIn.id} className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-5">
-            <p className="text-sm text-gray-700">
-              <span className="font-medium text-gray-950">{borrower.name}</span> owes {lender.name}
-            </p>
+        {entries.map(({ borrower, lender, amount, entryCount }) => (
+          <div key={`${borrower.id}-${lender.id}`} className="flex items-center justify-between gap-4 px-4 py-3.5 sm:px-5">
+            <div className="min-w-0">
+              <p className="text-sm text-gray-700">
+                <span className="font-medium text-gray-950">{lender.name}</span> covered cash for <span className="font-medium text-gray-950">{borrower.name}</span>
+              </p>
+              <p className="mt-0.5 text-xs text-gray-500">
+                {borrower.name} repays {lender.name} in the final settlement{entryCount > 1 ? ` · ${entryCount} entries combined` : ""}
+              </p>
+            </div>
             <p className="shrink-0 text-sm font-semibold tabular-nums text-gray-950">
-              {formatCurrency(buyIn.amount)}
+              {formatCurrency(amount)}
             </p>
           </div>
         ))}
       </Card>
       <p className="mt-2 text-xs leading-5 text-gray-400">
-        Included in final payments without changing the pot or chip ledger.
+        These repayments are added to the final payment plan; buy-ins, chips, and the pot are unchanged.
       </p>
     </section>
   );

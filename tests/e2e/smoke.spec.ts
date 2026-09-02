@@ -213,7 +213,7 @@ test.describe("public local-mode experience", () => {
 
     const invite = page.getByRole("button", { name: "Invite players" });
     await expect(invite).toBeInViewport();
-    await expect(page.getByText("How did you hear about Mainpot?")).not.toBeInViewport();
+    await expect(page.getByText("How did you hear about Mainpot?")).toBeInViewport();
     await expect(page.getByRole("button", { name: "Personal invite" })).toHaveCount(0);
 
     await invite.click();

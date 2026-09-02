@@ -33,6 +33,18 @@ export default function PlayerList({ players, snapshot, currentPlayerId }: Playe
             const buyIns = getPlayerBuyIns(snapshot, player.id);
             const verified = playerVerifiedInvested(snapshot, player.id);
             const pending = playerPendingAmount(snapshot, player.id);
+            const advances = buyIns.reduce<{ name: string; amount: number }[]>((current, buyIn) => {
+              if (!buyIn.fronted_by_player_id || buyIn.fronted_by_player_id === player.id) return current;
+              const lender = players.find((item) => item.id === buyIn.fronted_by_player_id);
+              if (!lender) return current;
+              const existing = current.find((advance) => advance.name === lender.name);
+              if (existing) {
+                existing.amount += buyIn.amount;
+              } else {
+                current.push({ name: lender.name, amount: buyIn.amount });
+              }
+              return current;
+            }, []);
             return (
               <li key={player.id} className="flex items-center gap-3 px-4 py-3 sm:px-5">
                 <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">
@@ -49,6 +61,11 @@ export default function PlayerList({ players, snapshot, currentPlayerId }: Playe
                     {buyIns.length} {buyIns.length === 1 ? "entry" : "entries"}
                     {pending > 0 ? ` · ${formatCurrency(pending)} pending` : ""}
                   </p>
+                  {advances.map((advance) => (
+                    <p key={advance.name} className="mt-1 text-xs font-medium text-amber-700">
+                      {advance.name} covered {formatCurrency(advance.amount)} · settled separately
+                    </p>
+                  ))}
                 </div>
                 <p className="shrink-0 font-semibold tabular-nums text-gray-950">{formatCurrency(verified)}</p>
               </li>

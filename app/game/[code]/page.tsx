@@ -11,6 +11,7 @@ import ActivityFeed from "@/components/GameRoom/ActivityFeed";
 import BuyInActions from "@/components/GameRoom/BuyInActions";
 import JoinPrompt from "@/components/GameRoom/JoinPrompt";
 import HostControls from "@/components/GameRoom/HostControls";
+import HostLeaveButton from "@/components/GameRoom/HostLeaveButton";
 import PendingApprovals from "@/components/GameRoom/PendingApprovals";
 import AcquisitionPrompt from "@/components/GameRoom/AcquisitionPrompt";
 import GameNotifications from "@/components/GameRoom/GameNotifications";
@@ -26,6 +27,7 @@ import {
   subscribeToGame,
   updateBuyIn,
   transferHost,
+  transferHostAndLeave,
   type GameSyncStatus,
   usingLocalStorage,
   verifyBuyIn,
@@ -306,14 +308,19 @@ export default function GameRoomPage() {
     }
   }
 
-  async function handleLeave() {
+  async function handleLeave(nextHostId?: string) {
     if (!currentPlayer) {
       return;
     }
     setLeaving(true);
     try {
-      await leaveGame(currentPlayer.id);
-      toast("You left the game");
+      if (nextHostId && snapshot) {
+        await transferHostAndLeave(snapshot.game.id, currentPlayer.id, nextHostId);
+        toast("Host transferred — you left the game", "success");
+      } else {
+        await leaveGame(currentPlayer.id);
+        toast("You left the game");
+      }
     } catch (err) {
       toast(
         err instanceof Error ? err.message : "Failed to leave the game.",
@@ -471,6 +478,7 @@ export default function GameRoomPage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pb-32 md:pb-16">
       <SyncStatusNotice status={syncStatus} onRetry={handleRetrySync} />
+      {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
       <GameHeader
         game={snapshot.game}
         verifiedPot={verifiedPot(snapshot)}
@@ -519,8 +527,6 @@ export default function GameRoomPage() {
         ) : null}
       </div>
 
-      {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
-
       {currentPlayer && !leftGame ? (
         <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
           <div className="mx-auto flex w-full max-w-3xl gap-2">
@@ -537,6 +543,14 @@ export default function GameRoomPage() {
               onLeave={handleLeave}
               leaving={leaving}
               left={false}
+              leaveAction={isHost ? (
+                <HostLeaveButton
+                  players={snapshot.players}
+                  currentPlayerId={currentPlayer.id}
+                  leaving={leaving}
+                  onConfirm={handleLeave}
+                />
+              ) : undefined}
             />
           </div>
         </div>

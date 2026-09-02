@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Game, Player } from "@/lib/types";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -20,6 +20,7 @@ export interface BuyInActionsProps {
   onLeave: () => void;
   leaving: boolean;
   left: boolean;
+  leaveAction?: ReactNode;
 }
 
 const SELF_FUNDED_VALUE = "self-funded";
@@ -35,6 +36,7 @@ export default function BuyInActions({
   onLeave,
   leaving,
   left,
+  leaveAction,
 }: BuyInActionsProps) {
   const [rebuyOpen, setRebuyOpen] = useState(false);
   const [rebuyAmount, setRebuyAmount] = useState(String(game.buy_in_amount));
@@ -111,7 +113,14 @@ export default function BuyInActions({
           aria-label="Add a rebuy"
           className="fixed inset-x-0 bottom-0 z-40 grid max-h-[min(80dvh,32rem)] gap-2 overflow-y-auto rounded-t-2xl border border-gray-200 bg-white p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-2xl shadow-gray-950/20 sm:static sm:mb-3 sm:max-h-none sm:overflow-visible sm:rounded-xl sm:p-3 sm:shadow-lg sm:shadow-gray-950/5 sm:[grid-template-columns:1fr_1.15fr_auto_auto] sm:items-end"
         >
-          <div className="min-w-0 flex-1">
+          <div className="sm:col-span-4">
+            <p className="text-base font-semibold text-gray-950">Add a rebuy</p>
+            <p className="mt-1 text-sm leading-5 text-gray-500">
+              Record the chips you received. If someone covered the cash, we&apos;ll include that repayment when the game settles.
+            </p>
+          </div>
+          <label className="min-w-0 flex-1">
+            <span className="mb-1.5 block text-sm font-medium text-gray-700">Rebuy amount</span>
             <Input
               type="number"
               min={0.01}
@@ -124,26 +133,26 @@ export default function BuyInActions({
               autoFocus
               disabled={submitting}
             />
-          </div>
+          </label>
           <label className="min-w-0">
-            <span className="mb-1.5 block text-sm font-medium text-gray-700">Paid by</span>
+            <span className="mb-1.5 block text-sm font-medium text-gray-700">Who covered the cash?</span>
             <span className="mb-2 block text-xs leading-5 text-gray-500">
-              Who handed over the cash? This affects settlement only; the chips stay with you.
+              This only adds a repayment note for settlement. Your chips and the pot stay the same.
             </span>
             <Select
               value={frontedByPlayerId || SELF_FUNDED_VALUE}
               onValueChange={(value) => setFrontedByPlayerId(value === SELF_FUNDED_VALUE ? "" : value)}
               disabled={submitting}
             >
-              <SelectTrigger aria-label="Paid by">
-                <SelectValue placeholder="Me" />
+              <SelectTrigger aria-label="Who covered the cash?">
+                <SelectValue placeholder="I paid" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={SELF_FUNDED_VALUE}>Me (self-funded)</SelectItem>
+                <SelectItem value={SELF_FUNDED_VALUE}>I paid my own cash</SelectItem>
               {players
                 .filter((player) => player.id !== currentPlayerId && !player.left_at)
                 .map((player) => (
-                  <SelectItem key={player.id} value={player.id}>{player.name} paid/fronted it</SelectItem>
+                  <SelectItem key={player.id} value={player.id}>{player.name} covered the cash</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -190,7 +199,7 @@ export default function BuyInActions({
             {ledgerAction === "buy-in" ? "Adding buy-in…" : `Buy in · ${formatCurrency(game.buy_in_amount)}`}
           </ConfirmButton>
         )}
-        <ConfirmButton
+        {leaveAction ?? <ConfirmButton
           variant="ghost"
           className="flex-none text-red-600 hover:bg-red-50"
           confirmationTitle="Leave the table?"
@@ -201,7 +210,7 @@ export default function BuyInActions({
           aria-label="Leave the game"
         >
           Leave
-        </ConfirmButton>
+        </ConfirmButton>}
       </div>
     </div>
   );

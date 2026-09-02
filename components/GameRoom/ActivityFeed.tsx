@@ -67,7 +67,7 @@ function eventText(event: GameEvent, actorName: string | null): string {
     case "player_joined":
       return `${playerName} joined`;
     case "buy_in_added":
-      return `${playerName} ${event.metadata.buy_in_type === "rebuy" ? "rebought" : "bought in"} for ${amount}${event.metadata.fronted_by_name ? `, fronted by ${event.metadata.fronted_by_name}` : ""}`;
+      return `${playerName} ${event.metadata.buy_in_type === "rebuy" ? "rebought" : "bought in"} for ${amount}${event.metadata.fronted_by_name ? ` — ${event.metadata.fronted_by_name} covered the cash` : ""}`;
     case "buy_in_updated":
       return `${actor} edited ${possession} ${entryType} from ${formatCurrency(Number(event.metadata.previous_amount ?? 0))} to ${amount}`;
     case "buy_in_removed":
