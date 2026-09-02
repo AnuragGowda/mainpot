@@ -53,7 +53,7 @@ export interface BuyIn {
   player_id: string;
   amount: number;
   type: BuyInType;
-  /** Another player who covered this buy-in; affects settlement, not the pot. */
+  /** Another player who advanced this buy-in and is still owed; affects settlement, not the pot. */
   fronted_by_player_id: string | null;
   verified: boolean;
   created_at: string;
@@ -74,6 +74,7 @@ export type GameEventType =
   | "player_joined"
   | "buy_in_added"
   | "buy_in_updated"
+  | "buy_in_advance_repaid"
   | "buy_in_removed"
   | "buy_in_verified"
   | "player_left"

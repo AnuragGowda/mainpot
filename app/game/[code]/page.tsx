@@ -10,9 +10,9 @@ import PlayerList from "@/components/GameRoom/PlayerList";
 import ActivityFeed from "@/components/GameRoom/ActivityFeed";
 import BuyInActions from "@/components/GameRoom/BuyInActions";
 import JoinPrompt from "@/components/GameRoom/JoinPrompt";
-import HostControls from "@/components/GameRoom/HostControls";
 import HostLeaveButton from "@/components/GameRoom/HostLeaveButton";
 import PendingApprovals from "@/components/GameRoom/PendingApprovals";
+import OutstandingAdvances from "@/components/GameRoom/OutstandingAdvances";
 import AcquisitionPrompt from "@/components/GameRoom/AcquisitionPrompt";
 import GameNotifications from "@/components/GameRoom/GameNotifications";
 import SettlementScreen from "@/components/Settlement/SettlementScreen";
@@ -24,9 +24,9 @@ import {
   leaveGame,
   removeBuyIn,
   removePlayer,
+  markBuyInAdvanceRepaid,
   subscribeToGame,
   updateBuyIn,
-  transferHost,
   transferHostAndLeave,
   type GameSyncStatus,
   usingLocalStorage,
@@ -34,7 +34,7 @@ import {
 } from "@/lib/data";
 import { pendingPot, verifiedPot } from "@/lib/game";
 import { getSessionId, setActiveGame } from "@/lib/session";
-import type { GameSnapshot } from "@/lib/types";
+import type { GameSnapshot, GameStatus } from "@/lib/types";
 
 function LoadingScreen() {
   return (
@@ -131,6 +131,17 @@ export default function GameRoomPage() {
   );
   const ledgerActionInFlight = useRef(false);
   const joinTableActionRef = useRef<HTMLButtonElement>(null);
+  const previousHostStateRef = useRef<{
+    gameId: string;
+    playerId: string;
+    isHost: boolean;
+  } | null>(null);
+  const previousGameStatusRef = useRef<{
+    gameId: string;
+    status: GameStatus;
+  } | null>(null);
+  const currentPlayerRef = useRef(false);
+  const isHostRef = useRef(false);
 
   useEffect(() => {
     setSessionId(getSessionId());
@@ -174,11 +185,34 @@ export default function GameRoomPage() {
           return;
         }
         setSnapshot(gameSnapshot);
+        previousGameStatusRef.current = {
+          gameId: gameSnapshot.game.id,
+          status: gameSnapshot.game.status,
+        };
         setLoading(false);
 
         unsubscribe = subscribeToGame(
           game.id,
-          (next) => setSnapshot(next),
+          (next) => {
+            const previous = previousGameStatusRef.current;
+            previousGameStatusRef.current = {
+              gameId: next.game.id,
+              status: next.game.status,
+            };
+            if (
+              previous?.gameId === next.game.id
+              && previous.status !== next.game.status
+              && currentPlayerRef.current
+              && !isHostRef.current
+            ) {
+              if (next.game.status === "settling") {
+                toast("Game ended — starting settlement.");
+              } else if (next.game.status === "ended") {
+                toast("Final settlement is ready to review.", "success");
+              }
+            }
+            setSnapshot(next);
+          },
           {
             onStatusChange: (status) => {
               if (!cancelled) setSyncStatus(status);
@@ -204,6 +238,7 @@ export default function GameRoomPage() {
     setLoading(true);
     setNotFound(false);
     setSnapshot(null);
+    previousGameStatusRef.current = null;
     setSyncStatus("connecting");
     setJoinDismissed(false);
     void load();
@@ -221,6 +256,38 @@ export default function GameRoomPage() {
       : null;
   const isHost = currentPlayer?.is_host === true;
   const leftGame = currentPlayer?.left_at != null;
+
+  useEffect(() => {
+    currentPlayerRef.current = Boolean(currentPlayer);
+    isHostRef.current = isHost;
+  }, [currentPlayer, isHost]);
+
+  useEffect(() => {
+    if (!snapshot || !currentPlayer) {
+      previousHostStateRef.current = null;
+      return;
+    }
+
+    const previous = previousHostStateRef.current;
+    if (
+      previous?.gameId === snapshot.game.id
+      && previous.playerId === currentPlayer.id
+      && !previous.isHost
+      && isHost
+    ) {
+      toast(
+        "You're the host now — you can manage the ledger and end the game.",
+        "success",
+      );
+    }
+
+    previousHostStateRef.current = {
+      gameId: snapshot.game.id,
+      playerId: currentPlayer.id,
+      isHost,
+    };
+  }, [currentPlayer, isHost, snapshot, toast]);
+
   const handleSpectate = useCallback(() => {
     setJoinDismissed(true);
     window.requestAnimationFrame(() => joinTableActionRef.current?.focus());
@@ -241,7 +308,10 @@ export default function GameRoomPage() {
     }
   }, [snapshot, toast]);
 
-  async function handleBuyIn(operationKey: string): Promise<boolean> {
+  async function handleBuyIn(
+    frontedByPlayerId: string | null,
+    operationKey: string,
+  ): Promise<boolean> {
     if (ledgerActionInFlight.current || !snapshot || !currentPlayer) {
       return false;
     }
@@ -254,10 +324,13 @@ export default function GameRoomPage() {
         currentPlayer.id,
         snapshot.game.buy_in_amount,
         "buy_in",
-        null,
+        frontedByPlayerId,
         operationKey,
       );
-      toast("Buy-in added", "success");
+      toast(
+        frontedByPlayerId ? "Buy-in and outstanding advance added" : "Buy-in added",
+        "success",
+      );
       return true;
     } catch (err) {
       toast(
@@ -292,7 +365,7 @@ export default function GameRoomPage() {
         operationKey,
       );
       toast(
-        frontedByPlayerId ? "Fronted rebuy added" : "Rebuy added",
+        frontedByPlayerId ? "Rebuy and outstanding advance added" : "Rebuy added",
         "success",
       );
       return true;
@@ -393,6 +466,30 @@ export default function GameRoomPage() {
     }
   }
 
+  async function handleMarkAdvanceRepaid(buyInId: string) {
+    try {
+      await markBuyInAdvanceRepaid(buyInId);
+      setSnapshot((current) =>
+        current
+          ? {
+              ...current,
+              buyIns: current.buyIns.map((buyIn) =>
+                buyIn.id === buyInId
+                  ? { ...buyIn, fronted_by_player_id: null }
+                  : buyIn,
+              ),
+            }
+          : current,
+      );
+      toast("Advance marked repaid", "success");
+    } catch (err) {
+      toast(
+        err instanceof Error ? err.message : "Failed to mark the advance repaid.",
+        "error",
+      );
+    }
+  }
+
   async function handleRemovePlayer(playerId: string) {
     try {
       await removePlayer(playerId);
@@ -420,27 +517,6 @@ export default function GameRoomPage() {
       );
     } finally {
       setEnding(false);
-    }
-  }
-
-  async function handleTransferHost(playerId: string) {
-    if (!snapshot) return;
-    try {
-      await transferHost(snapshot.game.id, playerId);
-      try {
-        setSnapshot(await getGameSnapshot(snapshot.game.id));
-        setSyncStatus("connected");
-      } catch {
-        setSyncStatus(navigator.onLine ? "stale" : "offline");
-      }
-      toast("Host controls transferred", "success");
-    } catch (err) {
-      toast(
-        err instanceof Error
-          ? err.message
-          : "Failed to transfer host controls.",
-        "error",
-      );
     }
   }
 
@@ -506,6 +582,11 @@ export default function GameRoomPage() {
           onEdit={handleEdit}
           onRemove={handleRemoveBuyIn}
         />
+        <OutstandingAdvances
+          snapshot={snapshot}
+          isHost={isHost}
+          onMarkRepaid={handleMarkAdvanceRepaid}
+        />
         <PlayerList
           players={snapshot.players}
           snapshot={snapshot}
@@ -518,13 +599,6 @@ export default function GameRoomPage() {
           onRemoveBuyIn={handleRemoveBuyIn}
           onRemovePlayer={handleRemovePlayer}
         />
-        {isHost && currentPlayer ? (
-          <HostControls
-            players={snapshot.players}
-            currentPlayerId={currentPlayer.id}
-            onTransfer={handleTransferHost}
-          />
-        ) : null}
       </div>
 
       {currentPlayer && !leftGame ? (

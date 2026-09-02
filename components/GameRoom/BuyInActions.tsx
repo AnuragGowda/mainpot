@@ -14,7 +14,7 @@ export interface BuyInActionsProps {
   players: Player[];
   currentPlayerId: string;
   hasBuyIn: boolean;
-  onBuyIn: (operationKey: string) => Promise<boolean>;
+  onBuyIn: (frontedByPlayerId: string | null, operationKey: string) => Promise<boolean>;
   onRebuy: (amount: number, frontedByPlayerId: string | null, operationKey: string) => Promise<boolean>;
   ledgerAction: "buy-in" | "rebuy" | null;
   onLeave: () => void;
@@ -23,7 +23,82 @@ export interface BuyInActionsProps {
   leaveAction?: ReactNode;
 }
 
-const SELF_FUNDED_VALUE = "self-funded";
+interface AdvanceFieldsProps {
+  players: Player[];
+  currentPlayerId: string;
+  entryLabel: string;
+  enabled: boolean;
+  frontedByPlayerId: string;
+  onEnabledChange: (enabled: boolean) => void;
+  onFrontedByPlayerIdChange: (playerId: string) => void;
+  disabled: boolean;
+}
+
+function AdvanceFields({
+  players,
+  currentPlayerId,
+  entryLabel,
+  enabled,
+  frontedByPlayerId,
+  onEnabledChange,
+  onFrontedByPlayerIdChange,
+  disabled,
+}: AdvanceFieldsProps) {
+  const eligiblePlayers = players.filter(
+    (player) => player.id !== currentPlayerId && !player.left_at,
+  );
+
+  if (!eligiblePlayers.length) return null;
+
+  return (
+    <details className="rounded-lg border border-gray-200 bg-gray-50/70 px-3 py-2.5">
+      <summary className="cursor-pointer list-none text-sm font-medium text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
+        Payment details <span className="font-normal text-gray-400">(optional)</span>
+      </summary>
+      <div className="mt-3 space-y-3 border-t border-gray-200 pt-3">
+        <label className="flex items-start gap-2.5 text-sm leading-5 text-gray-700">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(event) => {
+              onEnabledChange(event.target.checked);
+              if (!event.target.checked) onFrontedByPlayerIdChange("");
+            }}
+            disabled={disabled}
+            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950"
+          />
+          <span>Someone else paid and I still owe them</span>
+        </label>
+        {enabled ? (
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Paid by
+              <Select
+                value={frontedByPlayerId || undefined}
+                onValueChange={onFrontedByPlayerIdChange}
+                disabled={disabled}
+              >
+                <SelectTrigger className="mt-1.5" aria-label={`Who advanced your ${entryLabel}?`}>
+                  <SelectValue placeholder="Choose a player" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eligiblePlayers.map((player) => (
+                    <SelectItem key={player.id} value={player.id}>
+                      {player.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </label>
+            <p className="text-xs leading-5 text-gray-500">
+              Use this only when that player is still owed. If you already paid them—or bought chips from their personal stack—leave this off.
+            </p>
+          </div>
+        ) : null}
+      </div>
+    </details>
+  );
+}
 
 export default function BuyInActions({
   game,
@@ -40,7 +115,10 @@ export default function BuyInActions({
 }: BuyInActionsProps) {
   const [rebuyOpen, setRebuyOpen] = useState(false);
   const [rebuyAmount, setRebuyAmount] = useState(String(game.buy_in_amount));
-  const [frontedByPlayerId, setFrontedByPlayerId] = useState("");
+  const [buyInAdvance, setBuyInAdvance] = useState(false);
+  const [buyInFrontedByPlayerId, setBuyInFrontedByPlayerId] = useState("");
+  const [rebuyAdvance, setRebuyAdvance] = useState(false);
+  const [rebuyFrontedByPlayerId, setRebuyFrontedByPlayerId] = useState("");
   const buyInOperationKey = useRef<string | null>(null);
   const rebuyOperationKey = useRef<string | null>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -68,7 +146,8 @@ export default function BuyInActions({
 
   function openRebuy() {
     setRebuyAmount(String(game.buy_in_amount));
-    setFrontedByPlayerId("");
+    setRebuyAdvance(false);
+    setRebuyFrontedByPlayerId("");
     rebuyOperationKey.current = null;
     setRebuyOpen(true);
   }
@@ -85,18 +164,29 @@ export default function BuyInActions({
     }
     const operationKey = rebuyOperationKey.current ?? randomUUID();
     rebuyOperationKey.current = operationKey;
-    const added = await onRebuy(parsed, frontedByPlayerId || null, operationKey);
+    if (rebuyAdvance && !rebuyFrontedByPlayerId) return;
+    const added = await onRebuy(
+      parsed,
+      rebuyAdvance ? rebuyFrontedByPlayerId : null,
+      operationKey,
+    );
     if (added) {
       closeRebuy();
     }
   }
 
   async function submitBuyIn() {
+    if (buyInAdvance && !buyInFrontedByPlayerId) return;
     const operationKey = buyInOperationKey.current ?? randomUUID();
     buyInOperationKey.current = operationKey;
-    const added = await onBuyIn(operationKey);
+    const added = await onBuyIn(
+      buyInAdvance ? buyInFrontedByPlayerId : null,
+      operationKey,
+    );
     if (added) {
       buyInOperationKey.current = null;
+      setBuyInAdvance(false);
+      setBuyInFrontedByPlayerId("");
     }
   }
 
@@ -116,7 +206,7 @@ export default function BuyInActions({
           <div className="sm:col-span-4">
             <p className="text-base font-semibold text-gray-950">Add a rebuy</p>
             <p className="mt-1 text-sm leading-5 text-gray-500">
-              Record the chips you received. If someone covered the cash, we&apos;ll include that repayment when the game settles.
+              Record new chips received from the table&apos;s bank.
             </p>
           </div>
           <label className="min-w-0 flex-1">
@@ -134,30 +224,19 @@ export default function BuyInActions({
               disabled={submitting}
             />
           </label>
-          <label className="min-w-0">
-            <span className="mb-1.5 block text-sm font-medium text-gray-700">Who covered the cash?</span>
-            <span className="mb-2 block text-xs leading-5 text-gray-500">
-              This only adds a repayment note for settlement. Your chips and the pot stay the same.
-            </span>
-            <Select
-              value={frontedByPlayerId || SELF_FUNDED_VALUE}
-              onValueChange={(value) => setFrontedByPlayerId(value === SELF_FUNDED_VALUE ? "" : value)}
+          <div className="min-w-0">
+            <AdvanceFields
+              players={players}
+              currentPlayerId={currentPlayerId}
+              entryLabel="rebuy"
+              enabled={rebuyAdvance}
+              frontedByPlayerId={rebuyFrontedByPlayerId}
+              onEnabledChange={setRebuyAdvance}
+              onFrontedByPlayerIdChange={setRebuyFrontedByPlayerId}
               disabled={submitting}
-            >
-              <SelectTrigger aria-label="Who covered the cash?">
-                <SelectValue placeholder="I paid" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={SELF_FUNDED_VALUE}>I paid my own cash</SelectItem>
-              {players
-                .filter((player) => player.id !== currentPlayerId && !player.left_at)
-                .map((player) => (
-                  <SelectItem key={player.id} value={player.id}>{player.name} covered the cash</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </label>
-          <Button size="md" onClick={submitRebuy} aria-label="Add rebuy" loading={ledgerAction === "rebuy"} disabled={submitting}>
+            />
+          </div>
+          <Button size="md" onClick={submitRebuy} aria-label="Add rebuy" loading={ledgerAction === "rebuy"} disabled={submitting || (rebuyAdvance && !rebuyFrontedByPlayerId)}>
             {ledgerAction === "rebuy" ? "Adding…" : "Add rebuy"}
           </Button>
           <Button
@@ -190,8 +269,23 @@ export default function BuyInActions({
             confirmVariant="primary"
             className="flex-1"
             confirmationTitle={`Add your ${formatCurrency(game.buy_in_amount)} buy-in?`}
-            confirmationDescription="This adds the opening buy-in to the shared ledger for the host to review."
+            confirmationDescription={(
+              <div className="space-y-3">
+                <p>This adds the opening buy-in to the shared ledger for the host to review.</p>
+                <AdvanceFields
+                  players={players}
+                  currentPlayerId={currentPlayerId}
+                  entryLabel="opening buy-in"
+                  enabled={buyInAdvance}
+                  frontedByPlayerId={buyInFrontedByPlayerId}
+                  onEnabledChange={setBuyInAdvance}
+                  onFrontedByPlayerIdChange={setBuyInFrontedByPlayerId}
+                  disabled={submitting}
+                />
+              </div>
+            )}
             confirmLabel="Add buy-in"
+            confirmDisabled={buyInAdvance && !buyInFrontedByPlayerId}
             onConfirm={submitBuyIn}
             loading={ledgerAction === "buy-in"}
             disabled={submitting}

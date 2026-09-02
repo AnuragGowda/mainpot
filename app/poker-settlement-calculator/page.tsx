@@ -86,7 +86,7 @@ const faqs = [
   {
     question: "What if one player fronts a rebuy for someone else?",
     answer:
-      "The chips still belong to the player receiving them, but the funding note matters at settlement. Mainpot can preserve who supplied the money so the final payment plan does not make the person who fronted the rebuy pay twice.",
+      "Record an advance only when the player who paid is still owed. If they were already repaid, record a normal rebuy. Buying chips from another player’s personal stack is not a rebuy because it does not add money or chips to the bank.",
   },
   {
     question: "Does Mainpot hold or send the money?",
@@ -417,7 +417,7 @@ export default function PokerSettlementCalculatorPage() {
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 {[
-                  { title: "A rebuy was fronted", body: "Record both the player receiving the chips and the player who supplied the cash. Chip ownership and funding are different facts, and settlement needs both.", icon: ReceiptText },
+                  { title: "A buy-in was advanced", body: "Record the player receiving the bank chips and, only while repayment is outstanding, the player who advanced the cash. Mark it repaid if they settle during the game.", icon: ReceiptText },
                   { title: "One cash-out is missing", body: "Do not treat a blank as zero unless the player actually busted. A missing final stack keeps the table from proving that the bank balances.", icon: AlertTriangle },
                   { title: "The host acts as the bank", body: "A bank-style settlement can route every payment through one person. It is easier to coordinate, but may create more transfers than direct netting.", icon: Scale },
                   { title: "The totals differ by cents", body: "Use the same currency precision for purchases, cash-outs, and payments. Fix the source entry instead of hiding a rounding difference in the final list.", icon: Calculator },

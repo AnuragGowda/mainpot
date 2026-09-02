@@ -17,6 +17,8 @@ export interface ConfirmButtonProps
   confirmationDescription: ReactNode;
   /** Final action label in the dialog. */
   confirmLabel?: string;
+  /** Prevent confirmation while required choices inside the dialog are incomplete. */
+  confirmDisabled?: boolean;
   /** Text for the dismissive action. */
   cancelLabel?: string;
   variant?: ButtonVariant;
@@ -36,6 +38,7 @@ export default function ConfirmButton({
   confirmationTitle,
   confirmationDescription,
   confirmLabel = "Confirm",
+  confirmDisabled = false,
   cancelLabel = "Cancel",
   variant = "danger",
   confirmVariant = "danger",
@@ -115,6 +118,7 @@ export default function ConfirmButton({
   }
 
   function handleConfirm() {
+    if (loading || confirmDisabled) return;
     setConfirming(false);
     onConfirm();
   }
@@ -157,7 +161,7 @@ export default function ConfirmButton({
                 fullWidth
                 variant={confirmVariant}
                 size="md"
-                disabled={loading}
+                disabled={loading || confirmDisabled}
                 onClick={handleConfirm}
                 className="sm:order-2"
               >

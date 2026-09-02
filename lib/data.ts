@@ -454,6 +454,21 @@ async function addBuyInLocal(
   if (existing) {
     return existing;
   }
+  const player = store.players.find(
+    (item) => item.id === playerId && item.game_id === gameId,
+  );
+  if (!player) throw new Error("The buy-in player is not in this game.");
+  const frontedBy = frontedByPlayerId
+    ? store.players.find(
+        (item) => item.id === frontedByPlayerId && item.game_id === gameId,
+      )
+    : null;
+  if (frontedByPlayerId && !frontedBy) {
+    throw new Error("The player advancing this buy-in is not in this game.");
+  }
+  if (frontedByPlayerId === playerId) {
+    throw new Error("A player cannot advance their own buy-in.");
+  }
   const actorPlayerId = currentLocalPlayerId(store, gameId);
   const actorIsHost = store.players.some(
     (player) => player.id === actorPlayerId && player.is_host
@@ -470,10 +485,6 @@ async function addBuyInLocal(
     operation_key: operationKey,
   };
   store.buyIns.push(buyIn);
-  const player = store.players.find((item) => item.id === playerId);
-  const frontedBy = frontedByPlayerId
-    ? store.players.find((item) => item.id === frontedByPlayerId)
-    : null;
   addLocalEvent(store, {
     gameId,
     eventType: "buy_in_added",
@@ -571,6 +582,37 @@ async function updateBuyInLocal(buyInId: string, amount: number): Promise<void> 
   if (buyIn) {
     emitSnapshot(buyIn.game_id, store);
   }
+}
+
+async function markBuyInAdvanceRepaidLocal(buyInId: string): Promise<void> {
+  const store = loadStore();
+  const buyIn = store.buyIns.find((item) => item.id === buyInId);
+  if (!buyIn?.fronted_by_player_id) return;
+  requireLocalGameStatus(store, buyIn.game_id, "active");
+  const actorPlayerId = currentLocalPlayerId(store, buyIn.game_id);
+  const actor = store.players.find((player) => player.id === actorPlayerId);
+  if (!actor?.is_host) throw new Error("Only the host can mark an advance repaid.");
+
+  const borrower = store.players.find((player) => player.id === buyIn.player_id);
+  const lender = store.players.find(
+    (player) => player.id === buyIn.fronted_by_player_id,
+  );
+  buyIn.fronted_by_player_id = null;
+  addLocalEvent(store, {
+    gameId: buyIn.game_id,
+    eventType: "buy_in_advance_repaid",
+    actorPlayerId,
+    subjectPlayerId: buyIn.player_id,
+    amount: buyIn.amount,
+    metadata: {
+      player_name: borrower?.name,
+      buy_in_id: buyIn.id,
+      buy_in_type: buyIn.type,
+      fronted_by_name: lender?.name,
+    },
+  });
+  persistStore(store);
+  emitSnapshot(buyIn.game_id, store);
 }
 
 async function removePlayerLocal(playerId: string): Promise<void> {
@@ -1150,18 +1192,20 @@ async function addBuyInSupabase(
   if (!created) {
     return buyIn;
   }
-  const { data: player } = await client
-    .from("players")
-    .select("name")
-    .eq("id", playerId)
-    .maybeSingle();
-  const { data: frontedBy } = frontedByPlayerId
-    ? await client
-        .from("players")
-        .select("name")
-        .eq("id", frontedByPlayerId)
-        .maybeSingle()
-    : { data: null };
+  const [{ data: player }, { data: frontedBy }] = await Promise.all([
+    client
+      .from("players")
+      .select("name")
+      .eq("id", playerId)
+      .maybeSingle(),
+    frontedByPlayerId
+      ? client
+          .from("players")
+          .select("name")
+          .eq("id", frontedByPlayerId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
   await addSupabaseEvent(client, {
     gameId,
     eventType: "buy_in_added",
@@ -1268,6 +1312,45 @@ async function updateBuyInSupabase(buyInId: string, amount: number): Promise<voi
       buy_in_id: row.id,
       buy_in_type: row.type,
       previous_amount: Number(previous.amount),
+    },
+  });
+}
+
+async function markBuyInAdvanceRepaidSupabase(buyInId: string): Promise<void> {
+  const { client } = await ensureSupabaseReady();
+  const { data: existing, error: lookupError } = await client
+    .from("buy_ins")
+    .select("*, player:players!buy_ins_player_id_fkey(name), lender:players!buy_ins_fronted_by_player_id_fkey(name)")
+    .eq("id", buyInId)
+    .single();
+  if (lookupError) throw lookupError;
+  const row = existing as unknown as BuyIn & {
+    player?: { name?: string };
+    lender?: { name?: string };
+  };
+  if (!row.fronted_by_player_id) return;
+  await requireSupabaseGameStatus(client, row.game_id, "active");
+
+  const { data: updated, error } = await client
+    .from("buy_ins")
+    .update({ fronted_by_player_id: null })
+    .eq("id", buyInId)
+    .eq("fronted_by_player_id", row.fronted_by_player_id)
+    .select("id")
+    .maybeSingle();
+  if (error) throw error;
+  if (!updated) return;
+
+  await addSupabaseEvent(client, {
+    gameId: row.game_id,
+    eventType: "buy_in_advance_repaid",
+    subjectPlayerId: row.player_id,
+    amount: Number(row.amount),
+    metadata: {
+      player_name: row.player?.name,
+      buy_in_id: row.id,
+      buy_in_type: row.type,
+      fronted_by_name: row.lender?.name,
     },
   });
 }
@@ -1713,6 +1796,12 @@ export async function updateBuyIn(buyInId: string, amount: number): Promise<void
   return usingLocalStorage()
     ? updateBuyInLocal(buyInId, amount)
     : updateBuyInSupabase(buyInId, amount);
+}
+
+export async function markBuyInAdvanceRepaid(buyInId: string): Promise<void> {
+  return usingLocalStorage()
+    ? markBuyInAdvanceRepaidLocal(buyInId)
+    : markBuyInAdvanceRepaidSupabase(buyInId);
 }
 
 export async function removePlayer(playerId: string): Promise<void> {

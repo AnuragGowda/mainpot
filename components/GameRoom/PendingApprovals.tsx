@@ -77,6 +77,9 @@ export default function PendingApprovals({
         <ul className="divide-y divide-amber-100">
           {pending.map((buyIn) => {
             const player = snapshot.players.find((item) => item.id === buyIn.player_id);
+            const lender = snapshot.players.find(
+              (item) => item.id === buyIn.fronted_by_player_id,
+            );
             const editing = editingId === buyIn.id;
             const editFormId = `pending-edit-${buyIn.id}`;
             return (
@@ -90,6 +93,11 @@ export default function PendingApprovals({
                       <p className="mt-0.5 text-xs text-gray-500">
                         {buyIn.type === "rebuy" ? "Rebuy" : "Buy-in"}
                       </p>
+                      {lender ? (
+                        <p className="mt-1 text-xs font-medium text-amber-700">
+                          Outstanding advance owed to {lender.name}
+                        </p>
+                      ) : null}
                     </div>
                     <p className="shrink-0 font-semibold tabular-nums text-gray-950">
                       {formatCurrency(buyIn.amount)}

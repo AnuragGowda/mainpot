@@ -63,7 +63,7 @@ export default function PlayerList({ players, snapshot, currentPlayerId }: Playe
                   </p>
                   {advances.map((advance) => (
                     <p key={advance.name} className="mt-1 text-xs font-medium text-amber-700">
-                      {advance.name} covered {formatCurrency(advance.amount)} · settled separately
+                      Still owes {advance.name} {formatCurrency(advance.amount)} · included at settlement
                     </p>
                   ))}
                 </div>
