@@ -1,11 +1,11 @@
 const faqs = [
   {
-    question: "Who can change the ledger?",
-    answer: "Players add their own buy-ins and rebuys, then enter their own final stacks. The host can verify buy-ins, correct ledger entries, and edit any final stack.",
+    question: "Do I need to create an account?",
+    answer: "No. Start or join a game as a guest—just share the room link, QR code, or six-character room code. Create an account when you want to keep settled games, find regular players, and track your record over time.",
   },
   {
-    question: "Can the host fix a mistake?",
-    answer: "Yes. The host can edit or remove an incorrect buy-in, and the activity history keeps the change visible.",
+    question: "Who can change the ledger?",
+    answer: "Players add their own buy-ins and rebuys, then enter their own final stacks. The host can verify buy-ins, correct ledger entries, and edit any final stack.",
   },
   {
     question: "What if the bank does not balance?",
