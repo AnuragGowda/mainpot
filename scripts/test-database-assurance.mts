@@ -461,6 +461,57 @@ async function run() {
     "non-host discrepancy allocation update",
   );
   console.log("✓ discrepancy allocations persist for the host and reject non-host writes");
+
+  const draftPayment = {
+    game_id: gameA.game_id,
+    from_player_id: playerA.player_id,
+    to_player_id: playerB.player_id,
+    amount: 2.34,
+    mode: "min",
+  };
+  await expectError(
+    () => guestA.from("settlement_payments").insert(draftPayment).select("id"),
+    "settlement payment insert before game lock",
+  );
+
+  const adminDraft = await admin
+    .from("settlement_payments")
+    .insert({ ...draftPayment, amount: 1.23 })
+    .select("id")
+    .single();
+  assert(!adminDraft.error && adminDraft.data?.id, "service role can create a payment-state fixture");
+  await expectError(
+    () => guestA
+      .from("settlement_payments")
+      .update({ settled: true, settled_at: new Date().toISOString() })
+      .eq("id", adminDraft.data.id)
+      .select("id"),
+    "settlement payment update before game lock",
+  );
+  console.log("✓ settlement payment writes reject draft settlement state");
+
+  const gameAEnded = await host
+    .from("games")
+    .update({ status: "ended" })
+    .eq("id", gameA.game_id)
+    .eq("status", "settling")
+    .select("id");
+  assert(!gameAEnded.error && gameAEnded.data?.[0]?.id, "host can lock settlement");
+
+  const finalizedInsert = await guestA
+    .from("settlement_payments")
+    .insert(draftPayment)
+    .select("id")
+    .single();
+  assert(!finalizedInsert.error && finalizedInsert.data?.id, "payment party can create payment state after game lock");
+  const finalizedUpdate = await guestB
+    .from("settlement_payments")
+    .update({ settled: true, settled_at: new Date().toISOString() })
+    .eq("id", adminDraft.data.id)
+    .select("id, settled")
+    .single();
+  assert(!finalizedUpdate.error && finalizedUpdate.data?.settled === true, "payment party can update payment state after game lock");
+  console.log("✓ settlement payment writes become available after game lock");
 }
 
 try {

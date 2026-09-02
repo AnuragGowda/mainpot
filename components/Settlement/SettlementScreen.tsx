@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { X } from "lucide-react";
 import Badge from "@/components/ui/Badge";
@@ -14,8 +14,6 @@ import { addCashOut, markEnded, saveDiscrepancyAllocation, submitGameFeedback } 
 import { formatCurrency, round2 } from "@/lib/format";
 import { getPlayerCashOut, playerInvested, totalPot } from "@/lib/game";
 import { getSessionId } from "@/lib/session";
-import { settlementPaymentKey } from "@/lib/payments";
-import type { SettlementMode as PaymentMode } from "@/lib/payments";
 import {
   applyFundingAdjustments,
   applyDiscrepancyAllocation,
@@ -82,10 +80,6 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   );
   const [finalizing, setFinalizing] = useState(false);
   const [fullPlanOpen, setFullPlanOpen] = useState(false);
-  const [settledPaymentKeys, setSettledPaymentKeys] = useState<Record<ResultsTab, Set<string>>>(() => ({
-    min: new Set(),
-    bank: new Set(),
-  }));
   const [allocationMethod, setAllocationMethod] = useState<"proportional" | "selected">(
     snapshot.game.discrepancy_allocation?.method ?? "proportional"
   );
@@ -175,8 +169,9 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     if (previousPlanContextRef.current === context) return;
     previousPlanContextRef.current = context;
     if (mode !== "results") return;
-    if (fullPlanRef.current) fullPlanRef.current.open = isHost;
-    setFullPlanOpen(isHost);
+    const shouldOpen = snapshot.game.status === "ended" && isHost;
+    if (fullPlanRef.current) fullPlanRef.current.open = shouldOpen;
+    setFullPlanOpen(shouldOpen);
   }, [isHost, mode, sessionId, snapshot.game.status]);
 
   const nets = applyFundingAdjustments(
@@ -212,17 +207,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   // A finalized game has one stable, canonical plan rather than a view choice.
   const displayedTab: ResultsTab = snapshot.game.status === "ended" ? "min" : tab;
   const activeTabTransfers = displayedTab === "min" ? minTransfers : bankTransfers;
-  const activeTransferKeys = activeTabTransfers.map((transfer) => settlementPaymentKey(displayedTab, transfer));
-  const unpaidCount = activeTransferKeys.filter((key) => !settledPaymentKeys[displayedTab].has(key)).length;
-
   const status = statusMeta[snapshot.game.status];
-
-  const handlePaymentStatusChange = useCallback((paymentMode: PaymentMode, settledKeys: Set<string>) => {
-    setSettledPaymentKeys((current) => ({
-      ...current,
-      [paymentMode]: new Set(settledKeys),
-    }));
-  }, []);
 
   async function handleSaveCashOut(playerId: string, amount: number): Promise<boolean> {
     try {
@@ -354,7 +339,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               disabled={!allCashOutsEntered || !balanced}
               onClick={() => setMode("results")}
             >
-              Calculate settlement
+              {isHost ? "Calculate settlement" : "Preview settlement"}
             </Button>
 
             {allCashOutsEntered && !balanced && isHost ? (
@@ -362,17 +347,13 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 <p className="text-sm text-gray-500">
                   The table is off by {formatCurrency(Math.abs(difference))}.
                 </p>
-                <ConfirmButton
+                <Button
                   variant="ghost"
                   size="sm"
-                  confirmVariant="primary"
-                  confirmationTitle="Resolve this discrepancy?"
-                  confirmationDescription={<>You’ll choose how to allocate {formatCurrency(Math.abs(difference))} before settlement can be calculated.</>}
-                  confirmLabel="Choose allocation"
-                  onConfirm={() => setMode("allocation")}
+                  onClick={() => setMode("allocation")}
                 >
                   Resolve discrepancy
-                </ConfirmButton>
+                </Button>
               </div>
             ) : null}
             {allCashOutsEntered && !balanced && !isHost ? (
@@ -433,59 +414,77 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               gameId={snapshot.game.id}
               mode="min"
               currentPlayerId={currentPlayerId}
+              finalized={snapshot.game.status === "ended"}
             />
           ) : null}
-          {snapshot.game.status === "ended" ? (
-            <>
-              {!feedbackSent && !feedbackDismissed ? (
-                <section aria-labelledby="feedback-heading" className="rounded-xl border border-dashed border-gray-300 bg-gray-50/60 p-1">
-                  <div className="flex items-start gap-2">
-                    <details className="min-w-0 flex-1">
-                      <summary className="cursor-pointer list-none px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
-                        <span id="feedback-heading" className="block text-sm font-semibold text-gray-950">How did game night go?</span>
-                        <span className="mt-0.5 block text-xs text-gray-500">Optional · about 30 seconds</span>
-                      </summary>
-                      <form onSubmit={handleFeedbackSubmit} className="space-y-4 border-t border-dashed border-gray-300 px-4 pb-4 pt-3">
-                        <fieldset>
-                          <legend className="text-sm font-medium text-gray-700">How easy was Mainpot to use?</legend>
-                          <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Ease of use score">
-                            {[1, 2, 3, 4, 5].map((score) => (
-                              <button key={score} type="button" role="radio" aria-checked={feedbackScore === score}
-                                onClick={() => setFeedbackScore(score)}
-                                className={`grid h-10 w-10 place-items-center rounded-lg border text-sm font-semibold ${feedbackScore === score ? "border-gray-950 bg-gray-950 text-white" : "border-gray-300 bg-white text-gray-700"}`}>
-                                {score}
-                              </button>
-                            ))}
-                          </div>
-                        </fieldset>
-                        <label className="block text-sm font-medium text-gray-700" htmlFor="feedback-confusing">
-                          What was confusing? <span className="font-normal text-gray-400">(optional)</span>
-                          <textarea id="feedback-confusing" value={confusing} onChange={(event) => setConfusing(event.target.value)} maxLength={1000} rows={3}
-                            className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" />
-                        </label>
-                        <Button type="submit" size="md" disabled={feedbackScore == null} loading={feedbackSaving}>Send feedback</Button>
-                      </form>
-                    </details>
-                    <button type="button" onClick={dismissFeedback} aria-label="Dismiss feedback prompt" className="mr-1 mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
-                      <X aria-hidden size={18} />
-                    </button>
-                  </div>
-                </section>
-              ) : null}
-              <SettlementSummary
-                snapshot={snapshot}
-                game={snapshot.game}
-                transfers={activeTabTransfers}
-                nets={allocatedNets}
-                mode={tab}
-                bankName={bankPlayer?.name}
-                totalBoughtIn={totalBoughtIn}
-                isHost={isHost}
-                finalized
-                discrepancyAllocation={allocation}
-                discrepancyAmount={balanced ? 0 : Math.abs(difference)}
-              />
-            </>
+
+          {isHost && snapshot.game.status === "settling" ? (
+            <section aria-labelledby="finalization-heading" className="rounded-xl border border-gray-300 bg-gray-50 p-4 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Final step</p>
+                <h2 id="finalization-heading" className="mt-1 text-base font-semibold text-gray-950">Lock this settlement</h2>
+                <p role="status" className="mt-1 text-sm leading-6 text-amber-800">
+                  Review the totals, then lock them before anyone pays. Payment tracking starts after the lock.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-gray-600">
+                  Locking shares each player&apos;s final payment instructions and prevents further cash-out edits.
+                </p>
+              </div>
+              <div className="mt-4 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-auto sm:min-w-52">
+                <ConfirmButton
+                  variant="primary"
+                  confirmVariant="primary"
+                  size="md"
+                  className="w-full"
+                  loading={finalizing}
+                  confirmationTitle="Lock the final settlement?"
+                  confirmationDescription="Cash-outs and totals can no longer be edited. Each player will see their final payment instructions, and payment tracking will become available."
+                  confirmLabel="Lock settlement"
+                  onConfirm={handleFinalize}
+                >
+                  Finalize game
+                </ConfirmButton>
+                <Button fullWidth variant="secondary" size="md" onClick={() => setMode("entry")}>
+                  Edit cash-outs
+                </Button>
+              </div>
+            </section>
+          ) : null}
+
+          {snapshot.game.status === "ended" && !feedbackSent && !feedbackDismissed ? (
+            <section aria-labelledby="feedback-heading" className="rounded-xl border border-dashed border-gray-300 bg-gray-50/60 p-1">
+              <div className="flex items-start gap-2">
+                <details className="min-w-0 flex-1">
+                  <summary className="cursor-pointer list-none px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
+                    <span id="feedback-heading" className="block text-sm font-semibold text-gray-950">How did game night go?</span>
+                    <span className="mt-0.5 block text-xs text-gray-500">Optional · about 30 seconds</span>
+                  </summary>
+                  <form onSubmit={handleFeedbackSubmit} className="space-y-4 border-t border-dashed border-gray-300 px-4 pb-4 pt-3">
+                    <fieldset>
+                      <legend className="text-sm font-medium text-gray-700">How easy was Mainpot to use?</legend>
+                      <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Ease of use score">
+                        {[1, 2, 3, 4, 5].map((score) => (
+                          <button key={score} type="button" role="radio" aria-checked={feedbackScore === score}
+                            onClick={() => setFeedbackScore(score)}
+                            className={`grid h-10 w-10 place-items-center rounded-lg border text-sm font-semibold ${feedbackScore === score ? "border-gray-950 bg-gray-950 text-white" : "border-gray-300 bg-white text-gray-700"}`}>
+                            {score}
+                          </button>
+                        ))}
+                      </div>
+                    </fieldset>
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="feedback-confusing">
+                      What was confusing? <span className="font-normal text-gray-400">(optional)</span>
+                      <textarea id="feedback-confusing" value={confusing} onChange={(event) => setConfusing(event.target.value)} maxLength={1000} rows={3}
+                        className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" />
+                    </label>
+                    <Button type="submit" size="md" disabled={feedbackScore == null} loading={feedbackSaving}>Send feedback</Button>
+                  </form>
+                </details>
+                <button type="button" onClick={dismissFeedback} aria-label="Dismiss feedback prompt" className="mr-1 mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
+                  <X aria-hidden size={18} />
+                </button>
+              </div>
+            </section>
           ) : null}
 
           <details
@@ -565,7 +564,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   mode="min"
                   currentPlayerId={currentPlayerId}
                   isHost={isHost}
-                  onStatusChange={handlePaymentStatusChange}
+                  actionsEnabled={snapshot.game.status === "ended"}
                 />
               </section>
 
@@ -621,7 +620,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   mode="bank"
                   currentPlayerId={currentPlayerId}
                   isHost={isHost}
-                  onStatusChange={handlePaymentStatusChange}
+                  actionsEnabled={snapshot.game.status === "ended"}
                 />
               </section>
 
@@ -673,39 +672,22 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             </div>
           </details>
 
-          {isHost && snapshot.game.status === "settling" ? (
-            <section aria-labelledby="finalization-heading" className="rounded-xl border border-gray-200 bg-gray-50 p-4 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Final step</p>
-                <h2 id="finalization-heading" className="mt-1 text-base font-semibold text-gray-950">Lock this settlement</h2>
-                <p role="status" className={`mt-1 text-sm leading-6 ${unpaidCount > 0 ? "text-amber-800" : "text-gray-600"}`}>
-                  {unpaidCount > 0
-                    ? `${unpaidCount} ${unpaidCount === 1 ? "payment is" : "payments are"} still open. You can lock the totals now and keep tracking payments.`
-                    : "All payments are recorded. Finalizing locks cash-outs and totals."}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-gray-600">
-                  Finalizing shares each player&apos;s payment instructions in the app—who to pay, who is paying them, or that they&apos;re square.
-                </p>
-              </div>
-              <div className="mt-4 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-auto sm:min-w-52">
-                <ConfirmButton
-                  variant="primary"
-                  confirmVariant="primary"
-                  size="md"
-                  className="w-full"
-                  loading={finalizing}
-                  confirmationTitle="Lock the final settlement?"
-                  confirmationDescription="Cash-outs and totals can no longer be edited. Each player will see their payment instructions in the app, and payment tracking will remain available."
-                  confirmLabel="Lock settlement"
-                  onConfirm={handleFinalize}
-                >
-                  Finalize game
-                </ConfirmButton>
-                <Button fullWidth variant="secondary" size="md" onClick={() => setMode("entry")}>
-                  Edit cash-outs
-                </Button>
-              </div>
-            </section>
+          {snapshot.game.status === "ended" ? (
+            <>
+              <SettlementSummary
+                snapshot={snapshot}
+                game={snapshot.game}
+                transfers={activeTabTransfers}
+                nets={allocatedNets}
+                mode={displayedTab}
+                bankName={bankPlayer?.name}
+                totalBoughtIn={totalBoughtIn}
+                isHost={isHost}
+                finalized
+                discrepancyAllocation={allocation}
+                discrepancyAmount={balanced ? 0 : Math.abs(difference)}
+              />
+            </>
           ) : null}
 
         </div>

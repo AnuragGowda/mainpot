@@ -25,6 +25,7 @@ export interface TransferListProps {
   mode: SettlementMode;
   currentPlayerId?: string | null;
   isHost?: boolean;
+  actionsEnabled?: boolean;
   onStatusChange?: (mode: SettlementMode, settledKeys: Set<string>) => void;
 }
 
@@ -39,6 +40,7 @@ export default function TransferList({
   mode,
   currentPlayerId = null,
   isHost = false,
+  actionsEnabled = true,
   onStatusChange,
 }: TransferListProps) {
   const { toast } = useToast();
@@ -48,6 +50,11 @@ export default function TransferList({
   const [paymentHandles, setPaymentHandles] = useState<Map<string, PlayerPaymentHandles>>(new Map());
 
   useEffect(() => {
+    if (!actionsEnabled) {
+      setSettledKeys(new Set());
+      onStatusChange?.(mode, new Set());
+      return;
+    }
     let cancelled = false;
     const refresh = () => {
       void getSettlementPaymentStatuses(gameId)
@@ -70,9 +77,13 @@ export default function TransferList({
       cancelled = true;
       if (channel && supabase) void supabase.removeChannel(channel);
     };
-  }, [channelId, gameId, mode, onStatusChange]);
+  }, [actionsEnabled, channelId, gameId, mode, onStatusChange]);
 
   useEffect(() => {
+    if (!actionsEnabled) {
+      setPaymentHandles(new Map());
+      return;
+    }
     let cancelled = false;
     const recipientIds = transfers
       .filter((transfer) => isHost || transfer.fromPlayerId === currentPlayerId)
@@ -86,7 +97,7 @@ export default function TransferList({
     return () => {
       cancelled = true;
     };
-  }, [currentPlayerId, isHost, transfers]);
+  }, [actionsEnabled, currentPlayerId, isHost, transfers]);
 
   if (!transfers.length) return <p className="text-sm text-gray-500">No transfers needed — everyone is square.</p>;
 
@@ -96,8 +107,8 @@ export default function TransferList({
         {transfers.map((transfer) => {
           const key = settlementPaymentKey(mode, transfer);
           const settled = settledKeys.has(key);
-          const canManage = isHost || isPlayerInTransfer(transfer, currentPlayerId);
-          const canUsePaymentShortcut = isHost || transfer.fromPlayerId === currentPlayerId;
+          const canManage = actionsEnabled && (isHost || isPlayerInTransfer(transfer, currentPlayerId));
+          const canUsePaymentShortcut = actionsEnabled && (isHost || transfer.fromPlayerId === currentPlayerId);
           const handles = transfer.toPlayerId ? paymentHandles.get(transfer.toPlayerId) : undefined;
           const venmoUrl = canUsePaymentShortcut && handles?.venmo
             ? buildVenmoPaymentUrl(handles.venmo, transfer.amount)
@@ -168,7 +179,7 @@ export default function TransferList({
                 ) : (
                   <span className={`inline-flex h-9 items-center gap-1.5 px-2.5 text-xs font-semibold ${settled ? "text-emerald-800" : "text-gray-400"}`}>
                     {settled ? <CircleCheck aria-hidden size={17} /> : <Circle aria-hidden size={17} />}
-                    {settled ? "Paid" : "Open"}
+                    {settled ? "Paid" : actionsEnabled ? "Open" : "Available after lock"}
                   </span>
                 )}
               </div>

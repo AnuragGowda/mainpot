@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   CheckCircle2,
+  ChevronRight,
   Copy,
   RefreshCw,
   Share2,
@@ -67,7 +68,6 @@ export default function SettlementSummary({
   });
   const recapData = deriveRecapData(snapshot, nets, transfers);
   const topFinisher = recapData.players[0] ?? null;
-
   async function copyFallback() {
     try {
       await copyText(summaryText);
@@ -120,20 +120,28 @@ export default function SettlementSummary({
   if (finalized && presentation === "card") {
     return (
       <>
-        <button
-          type="button"
-          onClick={() => setShowGameRecap(true)}
-          aria-label="Open shareable game card"
-          className="mx-auto block w-full max-w-[320px] rounded-[18px] text-left transition duration-200 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
-        >
-          <RecapStoryCard
-            data={recapData}
-            privacy={defaultRecapPrivacy}
-            mode="summary"
-            featuredPlayerId={topFinisher?.id}
-            decorative
-          />
-        </button>
+        <div className="mx-auto w-full max-w-[360px]">
+          <div className="mx-auto w-full max-w-[320px]">
+            <RecapStoryCard
+              data={recapData}
+              privacy={defaultRecapPrivacy}
+              mode="summary"
+              featuredPlayerId={topFinisher?.id}
+              decorative
+            />
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={() => setShowGameRecap(true)}
+            aria-label="Open shareable game card"
+            fullWidth
+            className="mt-3"
+          >
+            <Share2 aria-hidden size={16} /> Customize &amp; share
+          </Button>
+        </div>
         {showGameRecap ? <GameRecapDialog snapshot={snapshot} nets={nets} transfers={transfers} onClose={() => setShowGameRecap(false)} /> : null}
       </>
     );
@@ -147,13 +155,45 @@ export default function SettlementSummary({
               <CheckCircle2 aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
               <div>
                 <p className="text-sm font-semibold text-gray-950">Settlement locked</p>
-                <p className="mt-1 text-sm leading-6 text-gray-500">The payment record remains available below for everyone at the table.</p>
               </div>
             </div>
 
-            <details className="mt-5 rounded-lg border border-gray-200 bg-gray-50/70 px-4 py-3">
-              <summary className="cursor-pointer text-sm font-semibold text-gray-900">Plain-text settlement record</summary>
-              <pre className="mt-3 whitespace-pre-wrap border-t border-gray-200 pt-3 font-mono text-xs leading-6 text-gray-700">{summaryText}</pre>
+            <details className="group mt-5 rounded-lg border border-gray-200 bg-gray-50/70">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 py-px pl-3 pr-px text-sm font-semibold text-gray-900">
+                <ChevronRight aria-hidden className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90" />
+                <span className="min-w-0 flex-1">Payment record</span>
+                <span className="flex shrink-0">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void handleCopy();
+                  }}
+                  aria-label="Copy payment record"
+                  title="Copy payment record"
+                  className="w-11 px-0 shadow-none"
+                >
+                  <Copy aria-hidden size={18} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void handleShare();
+                  }}
+                  aria-label="Share payment record"
+                  title="Share payment record"
+                  className="w-11 px-0 shadow-none"
+                >
+                  <Share2 aria-hidden size={18} />
+                </Button>
+                </span>
+              </summary>
+              <pre className="mx-4 mb-3 whitespace-pre-wrap border-t border-gray-200 pt-3 font-mono text-xs leading-6 text-gray-700">{summaryText}</pre>
             </details>
 
             {discrepancyAllocation && discrepancyAmount ? (
@@ -162,15 +202,6 @@ export default function SettlementSummary({
                 <p className="mt-1">{formatCurrency(discrepancyAmount)} {discrepancyAllocation.method === "proportional" ? "split proportionally across eligible results." : "assigned to the selected eligible players."}</p>
               </div>
             ) : null}
-
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <Button variant="secondary" size="md" onClick={handleCopy}>
-                <Copy aria-hidden size={16} /> Copy results
-              </Button>
-              <Button variant="secondary" size="md" onClick={handleShare}>
-                <Share2 aria-hidden size={16} /> Share record
-              </Button>
-            </div>
 
             <Link
               href={`/create?name=${encodeURIComponent(game.name)}&buyin=${game.buy_in_amount}`}

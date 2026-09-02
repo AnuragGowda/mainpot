@@ -13,6 +13,7 @@ export interface PlayerSettlementSummaryProps {
   gameId: string;
   mode: SettlementMode;
   currentPlayerId: string;
+  finalized: boolean;
 }
 
 function totalAmount(transfers: Transfer[]): number {
@@ -25,6 +26,7 @@ export default function PlayerSettlementSummary({
   gameId,
   mode,
   currentPlayerId,
+  finalized,
 }: PlayerSettlementSummaryProps) {
   const { outgoing, incoming } = getPlayerTransfers(transfers, currentPlayerId);
   const outgoingTotal = totalAmount(outgoing);
@@ -38,7 +40,7 @@ export default function PlayerSettlementSummary({
         className={square ? "border-emerald-200 bg-emerald-50/50" : "border-gray-300"}
       >
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-          Your settlement
+          {finalized ? "Your settlement" : "Settlement preview"}
         </p>
         <div className="mt-3 flex items-start gap-3">
           {outgoing.length > 0 ? (
@@ -51,13 +53,15 @@ export default function PlayerSettlementSummary({
           <div>
             <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
               {outgoing.length > 0
-                ? `You need to send ${formatCurrency(outgoingTotal)}.`
+                ? `${finalized ? "You need to send" : "Preview: you would send"} ${formatCurrency(outgoingTotal)}.`
                 : incoming.length > 0
-                  ? `You’re receiving ${formatCurrency(incomingTotal)}.`
-                  : "You’re all square."}
+                  ? `${finalized ? "You’re receiving" : "Preview: you would receive"} ${formatCurrency(incomingTotal)}.`
+                  : finalized ? "You’re all square." : "Preview: you would be square."}
             </h2>
             <p className="mt-1 text-sm leading-6 text-gray-600">
-              {outgoing.length > 0
+              {!finalized
+                ? "Waiting for the host to lock the final totals. Do not pay yet."
+                : outgoing.length > 0
                 ? "Your payment details are first. The complete table plan is available below."
                 : incoming.length > 0
                   ? "You can track incoming payments here. The complete table plan is available below."
@@ -77,6 +81,7 @@ export default function PlayerSettlementSummary({
             gameId={gameId}
             mode={mode}
             currentPlayerId={currentPlayerId}
+            actionsEnabled={finalized}
           />
         </section>
       ) : null}
@@ -91,6 +96,7 @@ export default function PlayerSettlementSummary({
             gameId={gameId}
             mode={mode}
             currentPlayerId={currentPlayerId}
+            actionsEnabled={finalized}
           />
         </section>
       ) : null}
