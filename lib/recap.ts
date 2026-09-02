@@ -39,9 +39,9 @@ export interface RecapDisplayPlayer extends RecapPlayer {
 }
 
 export const defaultRecapPrivacy: RecapPrivacy = {
-  showDollarAmounts: false,
+  showDollarAmounts: true,
   showPlayerNames: false,
-  showLosses: false,
+  showLosses: true,
   hiddenPlayerIds: [],
 };
 

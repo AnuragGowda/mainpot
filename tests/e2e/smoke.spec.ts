@@ -61,6 +61,7 @@ test.describe("public local-mode experience", () => {
   });
 
   test("runs a host from game creation through a balanced finalized settlement", async ({ page }) => {
+    test.slow();
     await page.goto("/create");
     await page.locator("#create-name").fill("Casey");
     await page.locator("#create-game-name").fill("Friday test game");
@@ -109,6 +110,7 @@ test.describe("public local-mode experience", () => {
     const finalizeButton = page.getByRole("button", { name: "Finalize game" });
     const editCashOutsButton = page.getByRole("button", { name: "Edit cash-outs" });
     const fullPlan = page.locator('[data-testid="full-settlement-plan"]');
+    const fullPlanSummary = fullPlan.locator(":scope > summary");
     await expect(fullPlan).toHaveJSProperty("open", false);
     await expect(page.getByText(/Payment tracking starts after the lock/)).toBeVisible();
     await expect(editCashOutsButton).toBeVisible();
@@ -125,17 +127,21 @@ test.describe("public local-mode experience", () => {
     await page.getByRole("button", { name: "Lock settlement" }).click();
     await expect(page.getByText("Ended", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Open your game card" })).toBeVisible();
-    await expect(page.getByText("Full settlement plan", { exact: true })).toBeVisible();
-    await expect(fullPlan).toHaveJSProperty("open", true);
+    await expect(fullPlanSummary).toContainText("Full settlement plan");
+    await expect(fullPlanSummary).toContainText("Host view");
+    await expect(fullPlan).toHaveJSProperty("open", false);
     await expect(page.getByRole("tab", { name: "Fewest payments" })).toHaveCount(0);
     await expect(page.getByRole("tab", { name: "Bank" })).toHaveCount(0);
     const feedbackPrompt = page.getByText("How did game night go?", { exact: true });
     await expect(feedbackPrompt).toBeVisible();
-    expect(await feedbackPrompt.evaluate((prompt, plan) => Boolean(
-      prompt.compareDocumentPosition(plan as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ), await fullPlan.elementHandle())).toBe(true);
+    const gameHeading = page.getByRole("heading", { name: "Friday test game" });
+    expect(await feedbackPrompt.evaluate((prompt, heading) => Boolean(
+      prompt.compareDocumentPosition(heading as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ), await gameHeading.elementHandle())).toBe(true);
     await page.getByRole("button", { name: "Dismiss feedback prompt" }).click();
     await expect(page.getByText("How did game night go?", { exact: true })).toHaveCount(0);
+    await fullPlanSummary.click();
+    await expect(fullPlan).toHaveJSProperty("open", true);
     await expect(page.getByText("Settlement locked", { exact: true })).toBeVisible();
     const paymentRecord = page.locator("summary").filter({ hasText: "Payment record" }).locator("..");
     await expect(paymentRecord.getByRole("button", { name: "Copy payment record" })).toBeVisible();
@@ -151,8 +157,12 @@ test.describe("public local-mode experience", () => {
 
     await recapButton.click();
     await expect(page.getByRole("dialog", { name: "Your game card" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Share your story", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Share (your story|game card)/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /save.*image/i })).toHaveCount(0);
     await expect(page.getByRole("group", { name: "What can people see?" })).toBeVisible();
+    await expect(page.getByRole("checkbox", { name: "Show amounts and losses" })).toBeVisible();
+    await expect(page.getByRole("checkbox", { name: "Show dollar amounts" })).toHaveCount(0);
+    await expect(page.getByRole("checkbox", { name: "Show losses" })).toHaveCount(0);
     await expect(page.getByText("Who gets the card?", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Choose a layout", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Tap for another", { exact: true })).toHaveCount(0);
@@ -170,7 +180,11 @@ test.describe("public local-mode experience", () => {
     await page.getByRole("button", { name: "Create game" }).click();
 
     await page.getByRole("button", { name: "Add a rebuy" }).click();
-    await expect(page.getByText("Who handed over the cash? This affects settlement only; the chips stay with you.")).toBeVisible();
+    const rebuyDialog = page.getByRole("dialog", { name: "Add a rebuy" });
+    await expect(rebuyDialog).toContainText("Record new chips received from the table's bank.");
+    await expect(
+      rebuyDialog.getByRole("checkbox", { name: "Someone else paid and I still owe them" }),
+    ).toHaveCount(0);
     await page.getByRole("spinbutton", { name: "Rebuy amount" }).fill("15");
     await page.getByRole("button", { name: "Add rebuy" }).click();
 

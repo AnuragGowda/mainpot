@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, Share2, X } from "lucide-react";
+import { Share2, X } from "lucide-react";
 import SuitIcon from "@/components/SuitIcon";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
@@ -128,18 +128,6 @@ export default function GameRecapDialog({
     return renderPng(svgRef.current);
   }
 
-  async function handleDownload() {
-    setExporting(true);
-    try {
-      downloadBlob(await createPng(), "mainpot-game-recap.png");
-      toast("Story image downloaded", "success");
-    } catch (error) {
-      toast(error instanceof Error ? error.message : "Couldn't export the recap.", "error");
-    } finally {
-      setExporting(false);
-    }
-  }
-
   async function handleShare() {
     setExporting(true);
     try {
@@ -166,13 +154,20 @@ export default function GameRecapDialog({
     }
   }
 
-  const setBoolean = (key: "showDollarAmounts" | "showPlayerNames" | "showLosses", value: boolean) => {
+  const setBoolean = (key: "showPlayerNames", value: boolean) => {
     setPrivacy((current) => ({
       ...current,
       [key]: value,
-      ...(key === "showDollarAmounts" && !value ? { showLosses: false } : {}),
     }));
   };
+
+  function setAmountsAndLosses(value: boolean) {
+    setPrivacy((current) => ({
+      ...current,
+      showDollarAmounts: value,
+      showLosses: value,
+    }));
+  }
 
   return (
     <div
@@ -199,7 +194,7 @@ export default function GameRecapDialog({
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#6674c6] sm:text-xs">Table receipt · Mainpot.app</p>
               <h2 id="game-recap-title" className="mt-0.5 text-xl font-semibold tracking-[-0.03em] text-gray-950 sm:text-2xl">Your game card</h2>
-              <p id="game-recap-description" className="mt-1 hidden max-w-2xl text-sm leading-6 text-gray-600 sm:block">Adjust only what is visible, then save or share your card.</p>
+              <p id="game-recap-description" className="mt-1 hidden max-w-2xl text-sm leading-6 text-gray-600 sm:block">Adjust what is visible, then share your card.</p>
             </div>
           </div>
           <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="Close game recap" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
@@ -211,8 +206,8 @@ export default function GameRecapDialog({
           <div className="relative min-h-0 min-w-0 overflow-hidden px-4 py-4 sm:px-6 sm:py-5 lg:overflow-y-auto lg:p-7">
             <div aria-hidden className="absolute -left-24 top-10 h-64 w-64 rounded-full bg-[#dfe3fb]/80 blur-3xl" />
             <div aria-hidden className="absolute -right-24 bottom-20 h-72 w-72 rounded-full bg-[#b8ddcd]/65 blur-3xl" />
-            <div className="mx-auto w-full max-w-[520px]">
-              <div className="relative mx-auto w-[min(58vw,232px)] rounded-[24px] border border-[#cfd3e6] bg-[#e5e7f6] p-2.5 shadow-sm sm:w-[280px] sm:p-3">
+            <div className="mx-auto w-full max-w-[560px]">
+              <div className="relative mx-auto w-[min(76vw,300px)] rounded-[24px] border border-[#cfd3e6] bg-[#e5e7f6] p-2.5 shadow-sm sm:w-[340px] sm:p-3 lg:w-[min(34vw,400px)]">
               <RecapStoryCard
                 ref={svgRef}
                 data={data}
@@ -229,44 +224,30 @@ export default function GameRecapDialog({
           <aside className="min-w-0 space-y-6 border-t border-[#d9dcd5] bg-[#fffdf7] p-5 lg:overflow-y-auto lg:border-l lg:border-t-0 lg:p-6">
             <fieldset>
               <legend className="text-sm font-semibold text-gray-900">What can people see?</legend>
-              <p className="mt-1 text-sm leading-5 text-gray-500">Private by default. These choices only affect the image.</p>
+              <p className="mt-1 text-sm leading-5 text-gray-500">Amounts are visible by default. Choices only affect the image.</p>
               <div className="mt-3 space-y-3">
                 <label className="flex cursor-pointer items-center justify-between gap-4 text-sm text-gray-700">
                   Show player names
                   <input aria-label="Show player names" type="checkbox" checked={privacy.showPlayerNames} onChange={(event) => setBoolean("showPlayerNames", event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
                 </label>
                 <label className="flex cursor-pointer items-center justify-between gap-4 text-sm text-gray-700">
-                  Show dollar amounts
-                  <input aria-label="Show dollar amounts" type="checkbox" checked={privacy.showDollarAmounts} onChange={(event) => setBoolean("showDollarAmounts", event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
-                </label>
-                <label className={`flex items-center justify-between gap-4 text-sm ${privacy.showDollarAmounts ? "cursor-pointer text-gray-700" : "cursor-not-allowed text-gray-400"}`}>
-                  Show losses
-                  <input aria-label="Show losses" type="checkbox" disabled={!privacy.showDollarAmounts} checked={privacy.showLosses} onChange={(event) => setBoolean("showLosses", event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
+                  Show amounts &amp; losses
+                  <input aria-label="Show amounts and losses" type="checkbox" checked={privacy.showDollarAmounts && privacy.showLosses} onChange={(event) => setAmountsAndLosses(event.target.checked)} className="h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950" />
                 </label>
               </div>
             </fieldset>
 
-            <div className="space-y-2 border-t border-gray-200 pt-5">
+            <div className="hidden border-t border-gray-200 pt-5 lg:block">
               <Button fullWidth size="lg" loading={exporting} onClick={handleShare} leftIcon={<Share2 aria-hidden size={17} />}>Share your story</Button>
-              <Button fullWidth variant="secondary" size="md" disabled={exporting} onClick={handleDownload} leftIcon={<Download aria-hidden size={16} />}>Save image</Button>
             </div>
           </aside>
         </div>
 
         <div className="shrink-0 border-t border-gray-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
-          <div className="mx-auto grid max-w-lg grid-cols-[minmax(0,1fr)_52px] gap-2">
+          <div className="mx-auto max-w-lg">
             <Button fullWidth size="lg" loading={exporting} onClick={handleShare} leftIcon={<Share2 aria-hidden size={17} />}>
               Share game card
             </Button>
-            <button
-              type="button"
-              disabled={exporting}
-              onClick={handleDownload}
-              aria-label="Save game card image"
-              className="grid h-12 w-[52px] place-items-center rounded-lg border border-gray-300 bg-white text-gray-800 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Download aria-hidden size={18} />
-            </button>
           </div>
         </div>
       </div>

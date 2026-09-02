@@ -51,9 +51,11 @@ describe("getRecapDisplayPlayers", () => {
     { playerId: "c", name: "Cam", net: -30 },
   ], []);
 
-  it("uses safe anonymous defaults and excludes losses", () => {
+  it("shows anonymous player results and amounts by default", () => {
     expect(getRecapDisplayPlayers(recap, defaultRecapPrivacy)).toEqual([
-      expect.objectContaining({ id: "a", displayLabel: "Player 1", showNet: false }),
+      expect.objectContaining({ id: "a", displayLabel: "Player 1", showNet: true }),
+      expect.objectContaining({ id: "b", displayLabel: "Player 2", showNet: true }),
+      expect.objectContaining({ id: "c", displayLabel: "Player 3", showNet: true }),
     ]);
   });
 
