@@ -124,7 +124,7 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByRole("alertdialog", { name: "Lock the final settlement?" })).toBeVisible();
     await page.getByRole("button", { name: "Lock settlement" }).click();
     await expect(page.getByText("Ended", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Open shareable game card" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open your game card" })).toBeVisible();
     await expect(page.getByText("Full settlement plan", { exact: true })).toBeVisible();
     await expect(fullPlan).toHaveJSProperty("open", true);
     await expect(page.getByRole("tab", { name: "Fewest payments" })).toHaveCount(0);
@@ -144,15 +144,18 @@ test.describe("public local-mode experience", () => {
     await expect(paymentRecord).not.toHaveAttribute("open", "");
     await paymentRecord.getByText("Payment record", { exact: true }).click();
     await expect(paymentRecord).toHaveAttribute("open", "");
-    const recapButton = page.getByRole("button", { name: "Open shareable game card" });
-    expect(await paymentRecord.evaluate((record, recap) => Boolean(
-      record.compareDocumentPosition(recap as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ), await recapButton.elementHandle())).toBe(true);
+    const recapButton = page.getByRole("button", { name: "Open your game card" });
+    expect(await recapButton.evaluate((card, plan) => Boolean(
+      card.compareDocumentPosition(plan as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ), await fullPlan.elementHandle())).toBe(true);
 
     await recapButton.click();
-    await expect(page.getByRole("dialog", { name: "Make the night yours" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Your game card" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Share your story", exact: true })).toBeVisible();
-    await expect(page.getByRole("group", { name: "Who gets the card?" })).toBeVisible();
+    await expect(page.getByRole("group", { name: "What can people see?" })).toBeVisible();
+    await expect(page.getByText("Who gets the card?", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Choose a layout", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Tap for another", { exact: true })).toHaveCount(0);
     await page.getByRole("button", { name: "Close game recap" }).click();
 
     await expect(page.getByRole("button", { name: "Edit cash-outs" })).toHaveCount(0);

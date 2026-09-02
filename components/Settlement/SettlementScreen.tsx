@@ -408,16 +408,6 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
           <h2 ref={stageHeadingRef} tabIndex={-1} className="scroll-mt-6 sr-only">
             Settlement results and payment plan
           </h2>
-          {!isHost && currentPlayerId ? (
-            <PlayerSettlementSummary
-              transfers={minTransfers}
-              gameId={snapshot.game.id}
-              mode="min"
-              currentPlayerId={currentPlayerId}
-              finalized={snapshot.game.status === "ended"}
-            />
-          ) : null}
-
           {isHost && snapshot.game.status === "settling" ? (
             <section aria-labelledby="finalization-heading" className="rounded-xl border border-gray-300 bg-gray-50 p-4 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5">
               <div>
@@ -485,6 +475,33 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 </button>
               </div>
             </section>
+          ) : null}
+
+          {!isHost && currentPlayerId ? (
+            <PlayerSettlementSummary
+              transfers={minTransfers}
+              gameId={snapshot.game.id}
+              mode="min"
+              currentPlayerId={currentPlayerId}
+              finalized={snapshot.game.status === "ended"}
+            />
+          ) : null}
+
+          {snapshot.game.status === "ended" ? (
+            <SettlementSummary
+              snapshot={snapshot}
+              game={snapshot.game}
+              transfers={activeTabTransfers}
+              nets={allocatedNets}
+              mode={displayedTab}
+              bankName={bankPlayer?.name}
+              totalBoughtIn={totalBoughtIn}
+              isHost={isHost}
+              finalized
+              featuredPlayerId={currentPlayerId ?? undefined}
+              discrepancyAllocation={allocation}
+              discrepancyAmount={balanced ? 0 : Math.abs(difference)}
+            />
           ) : null}
 
           <details
@@ -671,24 +688,6 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               )}
             </div>
           </details>
-
-          {snapshot.game.status === "ended" ? (
-            <>
-              <SettlementSummary
-                snapshot={snapshot}
-                game={snapshot.game}
-                transfers={activeTabTransfers}
-                nets={allocatedNets}
-                mode={displayedTab}
-                bankName={bankPlayer?.name}
-                totalBoughtIn={totalBoughtIn}
-                isHost={isHost}
-                finalized
-                discrepancyAllocation={allocation}
-                discrepancyAmount={balanced ? 0 : Math.abs(difference)}
-              />
-            </>
-          ) : null}
 
         </div>
       )}

@@ -36,6 +36,8 @@ export interface SettlementSummaryProps {
   presentation?: "card" | "record";
   discrepancyAllocation?: DiscrepancyAllocation | null;
   discrepancyAmount?: number;
+  /** The signed-in player's personal recap. Hosts fall back to the top result. */
+  featuredPlayerId?: string;
 }
 
 /** Finished-game recap card and the quieter, auditable settlement record. */
@@ -52,6 +54,7 @@ export default function SettlementSummary({
   presentation = "card",
   discrepancyAllocation,
   discrepancyAmount,
+  featuredPlayerId,
 }: SettlementSummaryProps) {
   const { toast } = useToast();
   const [showGameRecap, setShowGameRecap] = useState(false);
@@ -67,7 +70,9 @@ export default function SettlementSummary({
     discrepancyAmount,
   });
   const recapData = deriveRecapData(snapshot, nets, transfers);
-  const topFinisher = recapData.players[0] ?? null;
+  const featuredPlayer = recapData.players.find((player) => player.id === featuredPlayerId)
+    ?? recapData.players[0]
+    ?? null;
   async function copyFallback() {
     try {
       await copyText(summaryText);
@@ -121,28 +126,22 @@ export default function SettlementSummary({
     return (
       <>
         <div className="mx-auto w-full max-w-[360px]">
-          <div className="mx-auto w-full max-w-[320px]">
+          <button
+            type="button"
+            onClick={() => setShowGameRecap(true)}
+            aria-label="Open your game card"
+            className="mx-auto block w-full max-w-[320px] rounded-[22px] text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
+          >
             <RecapStoryCard
               data={recapData}
               privacy={defaultRecapPrivacy}
               mode="summary"
-              featuredPlayerId={topFinisher?.id}
+              featuredPlayerId={featuredPlayer?.id}
               decorative
             />
-          </div>
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            onClick={() => setShowGameRecap(true)}
-            aria-label="Open shareable game card"
-            fullWidth
-            className="mt-3"
-          >
-            <Share2 aria-hidden size={16} /> Customize &amp; share
-          </Button>
+          </button>
         </div>
-        {showGameRecap ? <GameRecapDialog snapshot={snapshot} nets={nets} transfers={transfers} onClose={() => setShowGameRecap(false)} /> : null}
+        {showGameRecap ? <GameRecapDialog snapshot={snapshot} nets={nets} transfers={transfers} featuredPlayerId={featuredPlayer?.id} onClose={() => setShowGameRecap(false)} /> : null}
       </>
     );
   }
@@ -231,6 +230,7 @@ export default function SettlementSummary({
           snapshot={snapshot}
           nets={nets}
           transfers={transfers}
+          featuredPlayerId={featuredPlayer?.id}
           onClose={() => setShowGameRecap(false)}
         />
       ) : null}
