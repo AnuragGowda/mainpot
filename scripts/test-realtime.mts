@@ -136,19 +136,23 @@ try {
     });
   } else {
     console.log("Running realtime browser tests…");
-    const result = spawnSync("npx", ["playwright", "test", "tests/e2e/realtime.spec.ts"], {
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        NEXT_PUBLIC_SUPABASE_URL: apiUrl,
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey,
-        NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${testAppPort}`,
-        NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: "false",
-        NEXT_E2E_DIST_DIR: testDistDirectory,
-        PLAYWRIGHT_PORT: testAppPort,
-        PLAYWRIGHT_REALTIME: "1",
+    const result = spawnSync(
+      "npx",
+      ["playwright", "test", "tests/e2e/realtime.spec.ts", ...process.argv.slice(2)],
+      {
+        stdio: "inherit",
+        env: {
+          ...process.env,
+          NEXT_PUBLIC_SUPABASE_URL: apiUrl,
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey,
+          NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${testAppPort}`,
+          NEXT_PUBLIC_GOOGLE_AUTH_ENABLED: "false",
+          NEXT_E2E_DIST_DIR: testDistDirectory,
+          PLAYWRIGHT_PORT: testAppPort,
+          PLAYWRIGHT_REALTIME: "1",
+        },
       },
-    });
+    );
 
     if (result.error) throw result.error;
     if (result.status !== 0) process.exitCode = result.status ?? 1;

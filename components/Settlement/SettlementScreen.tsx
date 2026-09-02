@@ -14,6 +14,8 @@ import { addCashOut, markEnded, saveDiscrepancyAllocation, submitGameFeedback } 
 import { formatCurrency, round2 } from "@/lib/format";
 import { getPlayerCashOut, playerInvested, totalPot } from "@/lib/game";
 import { getSessionId } from "@/lib/session";
+import { getSettlementPaymentStatuses, settlementPaymentKey } from "@/lib/payments";
+import { getBrowserSupabase } from "@/lib/supabase-browser";
 import {
   applyFundingAdjustments,
   applyDiscrepancyAllocation,
@@ -80,6 +82,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   );
   const [finalizing, setFinalizing] = useState(false);
   const [fullPlanOpen, setFullPlanOpen] = useState(false);
+  const [settledMinPaymentKeys, setSettledMinPaymentKeys] = useState<Set<string>>(new Set());
   const [allocationMethod, setAllocationMethod] = useState<"proportional" | "selected">(
     snapshot.game.discrepancy_allocation?.method ?? "proportional"
   );
@@ -169,7 +172,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     if (previousPlanContextRef.current === context) return;
     previousPlanContextRef.current = context;
     if (mode !== "results") return;
-    const shouldOpen = snapshot.game.status === "ended" && isHost;
+    const shouldOpen = false;
     if (fullPlanRef.current) fullPlanRef.current.open = shouldOpen;
     setFullPlanOpen(shouldOpen);
   }, [isHost, mode, sessionId, snapshot.game.status]);
@@ -207,7 +210,39 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   // A finalized game has one stable, canonical plan rather than a view choice.
   const displayedTab: ResultsTab = snapshot.game.status === "ended" ? "min" : tab;
   const activeTabTransfers = displayedTab === "min" ? minTransfers : bankTransfers;
+  const settledMinPaymentCount = minTransfers.filter((transfer) =>
+    settledMinPaymentKeys.has(settlementPaymentKey("min", transfer))
+  ).length;
   const status = statusMeta[snapshot.game.status];
+
+  useEffect(() => {
+    if (!isHost || snapshot.game.status !== "ended") {
+      setSettledMinPaymentKeys(new Set());
+      return;
+    }
+    let cancelled = false;
+    const refreshSettlementProgress = () => void getSettlementPaymentStatuses(snapshot.game.id)
+      .then((statuses) => {
+        if (!cancelled) {
+          setSettledMinPaymentKeys(new Set(statuses.filter((item) => item.settled).map((item) => item.key)));
+        }
+      })
+      .catch(() => undefined);
+    refreshSettlementProgress();
+    const supabase = getBrowserSupabase();
+    const channel = supabase
+      ?.channel(`settlement-plan-progress-${snapshot.game.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "settlement_payments", filter: `game_id=eq.${snapshot.game.id}` }, refreshSettlementProgress)
+      .subscribe((channelStatus) => {
+        // Close the read/subscribe race: if a player records a payment while
+        // this channel is joining, the post-subscribe read still sees it.
+        if (channelStatus === "SUBSCRIBED") refreshSettlementProgress();
+      });
+    return () => {
+      cancelled = true;
+      if (channel && supabase) void supabase.removeChannel(channel);
+    };
+  }, [isHost, snapshot.game.id, snapshot.game.status]);
 
   async function handleSaveCashOut(playerId: string, amount: number): Promise<boolean> {
     try {
@@ -288,6 +323,41 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6 md:pt-10">
+      {snapshot.game.status === "ended" && !feedbackSent && !feedbackDismissed ? (
+        <section aria-labelledby="feedback-heading" className="mb-6 rounded-xl border border-dashed border-gray-300 bg-gray-50/60 p-1">
+          <div className="flex items-start gap-2">
+            <details className="min-w-0 flex-1">
+              <summary className="cursor-pointer list-none px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
+                <span id="feedback-heading" className="block text-sm font-semibold text-gray-950">How did game night go?</span>
+                <span className="mt-0.5 block text-xs text-gray-500">Optional · about 30 seconds</span>
+              </summary>
+              <form onSubmit={handleFeedbackSubmit} className="space-y-4 border-t border-dashed border-gray-300 px-4 pb-4 pt-3">
+                <fieldset>
+                  <legend className="text-sm font-medium text-gray-700">How easy was Mainpot to use?</legend>
+                  <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Ease of use score">
+                    {[1, 2, 3, 4, 5].map((score) => (
+                      <button key={score} type="button" role="radio" aria-checked={feedbackScore === score}
+                        onClick={() => setFeedbackScore(score)}
+                        className={`grid h-10 w-10 place-items-center rounded-lg border text-sm font-semibold ${feedbackScore === score ? "border-gray-950 bg-gray-950 text-white" : "border-gray-300 bg-white text-gray-700"}`}>
+                        {score}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="feedback-confusing">
+                  What was confusing? <span className="font-normal text-gray-400">(optional)</span>
+                  <textarea id="feedback-confusing" value={confusing} onChange={(event) => setConfusing(event.target.value)} maxLength={1000} rows={3}
+                    className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" />
+                </label>
+                <Button type="submit" size="md" disabled={feedbackScore == null} loading={feedbackSaving}>Send feedback</Button>
+              </form>
+            </details>
+            <button type="button" onClick={dismissFeedback} aria-label="Dismiss feedback prompt" className="mr-1 mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
+              <X aria-hidden size={18} />
+            </button>
+          </div>
+        </section>
+      ) : null}
       <header>
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -333,14 +403,23 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
           />
 
           <div className="space-y-3">
-            <Button
-              fullWidth
-              size="lg"
-              disabled={!allCashOutsEntered || !balanced}
-              onClick={() => setMode("results")}
-            >
-              {isHost ? "Calculate settlement" : "Preview settlement"}
-            </Button>
+            {isHost ? (
+              <Button
+                fullWidth
+                size="lg"
+                disabled={!allCashOutsEntered || !balanced}
+                onClick={() => setMode("results")}
+              >
+                Calculate settlement
+              </Button>
+            ) : allCashOutsEntered && balanced ? (
+              <Card padding="md" className="border-amber-200 bg-amber-50/60 text-center">
+                <p className="text-sm font-semibold text-gray-950">Cash-outs are in.</p>
+                <p role="status" className="mt-1 text-sm leading-6 text-gray-600">
+                  Waiting for {snapshot.game.host_name} to finalize the settlement. Payment instructions will appear once it&apos;s locked.
+                </p>
+              </Card>
+            ) : null}
 
             {allCashOutsEntered && !balanced && isHost ? (
               <div className="flex flex-col items-center gap-2 pt-1 text-center sm:flex-row sm:justify-center">
@@ -441,49 +520,12 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             </section>
           ) : null}
 
-          {snapshot.game.status === "ended" && !feedbackSent && !feedbackDismissed ? (
-            <section aria-labelledby="feedback-heading" className="rounded-xl border border-dashed border-gray-300 bg-gray-50/60 p-1">
-              <div className="flex items-start gap-2">
-                <details className="min-w-0 flex-1">
-                  <summary className="cursor-pointer list-none px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
-                    <span id="feedback-heading" className="block text-sm font-semibold text-gray-950">How did game night go?</span>
-                    <span className="mt-0.5 block text-xs text-gray-500">Optional · about 30 seconds</span>
-                  </summary>
-                  <form onSubmit={handleFeedbackSubmit} className="space-y-4 border-t border-dashed border-gray-300 px-4 pb-4 pt-3">
-                    <fieldset>
-                      <legend className="text-sm font-medium text-gray-700">How easy was Mainpot to use?</legend>
-                      <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Ease of use score">
-                        {[1, 2, 3, 4, 5].map((score) => (
-                          <button key={score} type="button" role="radio" aria-checked={feedbackScore === score}
-                            onClick={() => setFeedbackScore(score)}
-                            className={`grid h-10 w-10 place-items-center rounded-lg border text-sm font-semibold ${feedbackScore === score ? "border-gray-950 bg-gray-950 text-white" : "border-gray-300 bg-white text-gray-700"}`}>
-                            {score}
-                          </button>
-                        ))}
-                      </div>
-                    </fieldset>
-                    <label className="block text-sm font-medium text-gray-700" htmlFor="feedback-confusing">
-                      What was confusing? <span className="font-normal text-gray-400">(optional)</span>
-                      <textarea id="feedback-confusing" value={confusing} onChange={(event) => setConfusing(event.target.value)} maxLength={1000} rows={3}
-                        className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" />
-                    </label>
-                    <Button type="submit" size="md" disabled={feedbackScore == null} loading={feedbackSaving}>Send feedback</Button>
-                  </form>
-                </details>
-                <button type="button" onClick={dismissFeedback} aria-label="Dismiss feedback prompt" className="mr-1 mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
-                  <X aria-hidden size={18} />
-                </button>
-              </div>
-            </section>
-          ) : null}
-
-          {!isHost && currentPlayerId ? (
+          {currentPlayerId ? (
             <PlayerSettlementSummary
               transfers={minTransfers}
               gameId={snapshot.game.id}
               mode="min"
               currentPlayerId={currentPlayerId}
-              finalized={snapshot.game.status === "ended"}
             />
           ) : null}
 
@@ -504,7 +546,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             />
           ) : null}
 
-          <details
+          {isHost ? <details
             ref={fullPlanRef}
             data-testid="full-settlement-plan"
             onToggle={(event) => setFullPlanOpen(event.currentTarget.open)}
@@ -513,9 +555,14 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             <summary className="cursor-pointer list-none px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
               <span className="flex items-center justify-between gap-4">
                 <span>
-                  <span className="block text-sm font-semibold text-gray-950">Full settlement plan</span>
+                  <span className="flex items-center gap-2 text-sm font-semibold text-gray-950">
+                    Full settlement plan
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-600">Host view</span>
+                  </span>
                   <span className="mt-0.5 block text-xs text-gray-500">
-                    {isHost ? "Host overview · payments, player results, and bank view" : "Optional · all payments, player results, and bank view"}
+                    {snapshot.game.status === "ended"
+                      ? `Host-only payment tracking · ${settledMinPaymentCount}/${minTransfers.length} marked sent`
+                      : "Host-only: payments, player results, and bank view"}
                   </span>
                 </span>
                 <span aria-hidden className="text-lg text-gray-400">{fullPlanOpen ? "−" : "＋"}</span>
@@ -687,7 +734,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 />
               )}
             </div>
-          </details>
+          </details> : null}
 
         </div>
       )}

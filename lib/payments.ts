@@ -1,4 +1,5 @@
 import { getBrowserSupabase } from "./supabase-browser";
+import { getSessionId } from "./session";
 import type { Transfer } from "./settlement";
 
 export type SettlementMode = "min" | "bank";
@@ -54,20 +55,18 @@ export async function setSettlementPaymentStatus(
   if (!transfer.fromPlayerId || !transfer.toPlayerId) {
     throw new Error("This payment cannot be identified.");
   }
-  const { error } = await supabase.from("settlement_payments").upsert({
-    game_id: gameId,
-    from_player_id: transfer.fromPlayerId,
-    to_player_id: transfer.toPlayerId,
-    amount: transfer.amount,
-    mode,
-    settled,
-    settled_at: settled ? new Date().toISOString() : null,
-    updated_at: new Date().toISOString(),
-  }, { onConflict: "game_id,from_player_id,to_player_id,amount,mode" });
+  const { error } = await supabase.rpc("set_settlement_payment_status_guarded", {
+    input_game_id: gameId,
+    input_from_player_id: transfer.fromPlayerId,
+    input_to_player_id: transfer.toPlayerId,
+    input_amount: transfer.amount,
+    input_mode: mode,
+    input_settled: settled,
+    input_session_id: getSessionId(),
+  });
   if (error) throw new Error(`Could not update payment status: ${error.message}`);
 }
 
 export function settlementPaymentKey(mode: SettlementMode, transfer: Transfer): string {
   return paymentKey(mode, transfer);
 }
-

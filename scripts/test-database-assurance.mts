@@ -68,11 +68,11 @@ async function createGame(client: SupabaseClient, name: string) {
   return row;
 }
 
-async function join(client: SupabaseClient, code: string, name: string) {
+async function join(client: SupabaseClient, code: string, name: string, sessionId = randomUUID()) {
   const { data, error } = await client.rpc("join_game_guarded", {
     input_code: code,
     input_player_name: name,
-    input_session_id: randomUUID(),
+    input_session_id: sessionId,
   });
   if (error) throw error;
   return Array.isArray(data) ? data[0] : data;
@@ -92,6 +92,7 @@ async function run() {
   console.log("Running local database assurance checks…");
   const host = await guest("Assurance host");
   const guestA = await guest("Assurance guest A");
+  const rotatedGuestA = await guest("Assurance guest A rotated auth");
   const guestB = await guest("Assurance guest B");
   const otherHost = await guest("Other game host");
   const outsider = await guest("Game A outsider");
@@ -122,7 +123,18 @@ async function run() {
 
   const gameA = await createGame(host, "Assurance game A");
   const gameB = await createGame(otherHost, "Assurance game B");
-  const playerA = await join(guestA, gameA.code, "Guest A");
+  const playerASessionId = randomUUID();
+  const playerA = await join(guestA, gameA.code, "Guest A", playerASessionId);
+  const resumedPlayerA = await join(
+    rotatedGuestA,
+    gameA.code,
+    "Guest A",
+    playerASessionId,
+  );
+  assert(
+    resumedPlayerA.player_id === playerA.player_id,
+    "a stable browser session resumes the same player after auth rotation",
+  );
   const playerB = await join(guestB, gameA.code, "Guest B");
   const otherPlayer = await join(guestB, gameB.code, "Other player");
 
@@ -249,7 +261,7 @@ async function run() {
     input_fronted_by_player_id: playerB.player_id,
     input_operation_key: rebuyOperationKey,
   });
-  assert(!rebuy.error && rebuy.data?.length === 1 && rebuy.data[0].created === true, "fronted rebuy is created");
+  assert(!rebuy.error && rebuy.data?.length === 1 && rebuy.data[0].created === true, "outstanding rebuy advance is created");
   assert(rebuy.data[0].type === "rebuy", "rebuy keeps its ledger type");
   assert(rebuy.data[0].fronted_by_player_id === playerB.player_id, "rebuy keeps its funding player");
   const retriedRebuy = await guestA.rpc("create_buy_in_idempotent", {
@@ -262,7 +274,31 @@ async function run() {
   });
   assert(!retriedRebuy.error && retriedRebuy.data?.[0]?.created === false, "rebuy retry returns its original ledger entry");
   assert(retriedRebuy.data[0].id === rebuy.data[0].id, "rebuy retry does not duplicate the ledger entry");
-  console.log("✓ idempotent fronted rebuy create/retry");
+  console.log("✓ idempotent outstanding rebuy advance create/retry");
+
+  await expectError(
+    () => guestA.rpc("create_buy_in_idempotent", {
+      input_game_id: gameA.game_id,
+      input_player_id: playerA.player_id,
+      input_amount: 5,
+      input_type: "rebuy",
+      input_fronted_by_player_id: playerA.player_id,
+      input_operation_key: randomUUID(),
+    }),
+    "self-funded entry recorded as an advance",
+  );
+  await expectError(
+    () => guestA.rpc("create_buy_in_idempotent", {
+      input_game_id: gameA.game_id,
+      input_player_id: playerA.player_id,
+      input_amount: 5,
+      input_type: "buy_in",
+      input_fronted_by_player_id: otherPlayer.player_id,
+      input_operation_key: randomUUID(),
+    }),
+    "advance payer from another game",
+  );
+  console.log("✓ advances reject self-funding and cross-game payers");
 
   await expectError(
     () => guestA.from("buy_ins").insert({ game_id: gameB.game_id, player_id: otherPlayer.player_id, amount: 12, type: "buy_in" }),
@@ -387,6 +423,14 @@ async function run() {
     () => guestA.from("buy_ins").delete().eq("id", guestBuyIn.id).select("id"),
     "player removal of their own buy-in",
   );
+  await expectError(
+    () => guestA
+      .from("buy_ins")
+      .update({ fronted_by_player_id: null })
+      .eq("id", rebuy.data[0].id)
+      .select("id"),
+    "player marking their own advance repaid",
+  );
 
   const { data: unchangedGuestBuyIn, error: unchangedGuestBuyInError } = await admin
     .from("buy_ins")
@@ -411,6 +455,18 @@ async function run() {
       && Number(hostCorrection.data[0].amount) === 17
       && hostCorrection.data[0].verified === true,
     "host can edit and approve a player buy-in",
+  );
+
+  const hostRepaidAdvance = await host
+    .from("buy_ins")
+    .update({ fronted_by_player_id: null })
+    .eq("id", rebuy.data[0].id)
+    .select("id, fronted_by_player_id");
+  assert(
+    !hostRepaidAdvance.error
+      && hostRepaidAdvance.data?.[0]?.id === rebuy.data[0].id
+      && hostRepaidAdvance.data[0].fronted_by_player_id === null,
+    "host can mark an outstanding advance repaid",
   );
 
   const removableBuyIn = await guestB.rpc("create_buy_in_idempotent", {
@@ -537,7 +593,47 @@ async function run() {
     .select("id, settled")
     .single();
   assert(!finalizedUpdate.error && finalizedUpdate.data?.settled === true, "payment party can update payment state after game lock");
+
+  const resumedPayment = { ...draftPayment, amount: 3.45, settled: true };
+  await expectError(
+    () => rotatedGuestA
+      .from("settlement_payments")
+      .upsert(resumedPayment, {
+        onConflict: "game_id,from_player_id,to_player_id,amount,mode",
+      })
+      .select("id"),
+    "direct payment upsert after anonymous auth rotation",
+  );
+  const guardedResumedPayment = await rotatedGuestA.rpc(
+    "set_settlement_payment_status_guarded",
+    {
+      input_game_id: gameA.game_id,
+      input_from_player_id: playerA.player_id,
+      input_to_player_id: playerB.player_id,
+      input_amount: resumedPayment.amount,
+      input_mode: resumedPayment.mode,
+      input_settled: resumedPayment.settled,
+      input_session_id: playerASessionId,
+    },
+  );
+  assert(
+    !guardedResumedPayment.error,
+    "the guarded payment update accepts the resumed browser session",
+  );
+  await expectError(
+    () => outsider.rpc("set_settlement_payment_status_guarded", {
+      input_game_id: gameA.game_id,
+      input_from_player_id: playerA.player_id,
+      input_to_player_id: playerB.player_id,
+      input_amount: resumedPayment.amount,
+      input_mode: resumedPayment.mode,
+      input_settled: false,
+      input_session_id: playerASessionId,
+    }),
+    "outsider guarded payment update with another browser session",
+  );
   console.log("✓ settlement payment writes become available after game lock");
+  console.log("✓ resumed browser sessions can update their payments after auth rotation");
 }
 
 try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownLeft, ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Trophy } from "lucide-react";
 import Card from "@/components/ui/Card";
 import { formatCurrency } from "@/lib/format";
 import { getPlayerTransfers } from "@/lib/settlement";
@@ -13,7 +13,6 @@ export interface PlayerSettlementSummaryProps {
   gameId: string;
   mode: SettlementMode;
   currentPlayerId: string;
-  finalized: boolean;
 }
 
 function totalAmount(transfers: Transfer[]): number {
@@ -26,80 +25,57 @@ export default function PlayerSettlementSummary({
   gameId,
   mode,
   currentPlayerId,
-  finalized,
 }: PlayerSettlementSummaryProps) {
   const { outgoing, incoming } = getPlayerTransfers(transfers, currentPlayerId);
   const outgoingTotal = totalAmount(outgoing);
   const incomingTotal = totalAmount(incoming);
-  const square = outgoing.length === 0 && incoming.length === 0;
+
+  const owesPayment = outgoing.length > 0;
+  const isUp = !owesPayment && incomingTotal > 0;
 
   return (
     <section aria-labelledby="your-settlement-heading" className="space-y-4">
       <Card
-        padding="md"
-        className={square ? "border-emerald-200 bg-emerald-50/50" : "border-gray-300"}
+        padding="sm"
+        className={owesPayment ? "border-amber-200 bg-amber-50/40" : isUp ? "border-emerald-200 bg-emerald-50/50" : "border-gray-300"}
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-          {finalized ? "Your settlement" : "Settlement preview"}
-        </p>
-        <div className="mt-3 flex items-start gap-3">
-          {outgoing.length > 0 ? (
-            <ArrowUpRight aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
-          ) : incoming.length > 0 ? (
-            <ArrowDownLeft aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
-          ) : (
-            <CheckCircle2 aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
-          )}
-          <div>
+        {owesPayment ? (
+          <>
             <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
-              {outgoing.length > 0
-                ? `${finalized ? "You need to send" : "Preview: you would send"} ${formatCurrency(outgoingTotal)}.`
-                : incoming.length > 0
-                  ? `${finalized ? "You’re receiving" : "Preview: you would receive"} ${formatCurrency(incomingTotal)}.`
-                  : finalized ? "You’re all square." : "Preview: you would be square."}
+              You owe {formatCurrency(outgoingTotal)}.
             </h2>
-            <p className="mt-1 text-sm leading-6 text-gray-600">
-              {!finalized
-                ? "Waiting for the host to lock the final totals. Do not pay yet."
-                : outgoing.length > 0
-                ? "Your payment details are first. The complete table plan is available below."
-                : incoming.length > 0
-                  ? "You can track incoming payments here. The complete table plan is available below."
-                  : "You don’t need to send or receive a payment for this settlement."}
+            <p className="mt-0.5 text-sm leading-5 text-gray-600">
+              Send each payment below, then mark it sent so the table can keep track.
             </p>
+          </>
+        ) : isUp ? (
+          <div className="flex items-center gap-2.5 whitespace-nowrap">
+            <Trophy aria-hidden className="h-5 w-5 shrink-0 text-gray-950" />
+            <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
+              You&apos;re up {formatCurrency(incomingTotal)}.
+            </h2>
+            <p className="text-sm leading-5 text-gray-600">No payment needed.</p>
           </div>
-        </div>
-      </Card>
-
-      {outgoing.length > 0 ? (
-        <section aria-labelledby="payments-to-send-heading">
-          <h3 id="payments-to-send-heading" className="mb-2 text-sm font-medium uppercase tracking-widest text-gray-500">
-            Payments to send
-          </h3>
+        ) : (
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 aria-hidden className="h-5 w-5 shrink-0 text-emerald-700" />
+            <div>
+              <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">You&apos;re even.</h2>
+              <p className="mt-0.5 text-sm leading-5 text-gray-600">No payment needed.</p>
+            </div>
+          </div>
+        )}
+        {owesPayment ? <div className="mt-4">
           <TransferList
             transfers={outgoing}
             gameId={gameId}
             mode={mode}
             currentPlayerId={currentPlayerId}
-            actionsEnabled={finalized}
+            actionsEnabled
+            personalOutgoing
           />
-        </section>
-      ) : null}
-
-      {incoming.length > 0 ? (
-        <section aria-labelledby="payments-to-receive-heading">
-          <h3 id="payments-to-receive-heading" className="mb-2 text-sm font-medium uppercase tracking-widest text-gray-500">
-            Payments to receive
-          </h3>
-          <TransferList
-            transfers={incoming}
-            gameId={gameId}
-            mode={mode}
-            currentPlayerId={currentPlayerId}
-            actionsEnabled={finalized}
-          />
-        </section>
-      ) : null}
+        </div> : null}
+      </Card>
     </section>
   );
 }
