@@ -292,8 +292,9 @@ export async function getProfileById(userId: string): Promise<Profile | null> {
 
 /**
  * Updates the user's own profile with the given patch (leading `@` is
- * stripped from venmo_handle before storing) and returns the updated row,
- * or null when the profile does not exist / Supabase is unconfigured.
+ * stripped from venmo_handle; blank payment contacts become null) and returns
+ * the updated row, or null when the profile does not exist / Supabase is
+ * unconfigured.
  */
 export async function updateProfile(
   userId: string,
@@ -319,7 +320,9 @@ export async function updateProfile(
     }
     updates[key] = value === null
       ? null
-      : key === "venmo_handle" ? value.trim().replace(/^@/, "") : value;
+      : key === "venmo_handle" ? value.trim().replace(/^@/, "")
+      : key === "zelle_handle" ? value.trim() || null
+      : value;
   }
   if (Object.keys(updates).length === 0) {
     return getProfileById(userId);

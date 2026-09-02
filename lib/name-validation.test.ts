@@ -6,6 +6,8 @@ import {
   validateGameName,
   validatePlayerName,
   validateUsername,
+  normalizeZelleContact,
+  validateZelleContact,
 } from "./name-validation";
 
 describe("human-facing name validation", () => {
@@ -54,5 +56,21 @@ describe("username validation", () => {
     expect(validateUsername("a".repeat(25))).not.toBeNull();
     expect(validateUsername("élodie")).not.toBeNull();
     expect(validateUsername("pocket-aces")).not.toBeNull();
+  });
+});
+
+describe("Zelle contact validation", () => {
+  it("accepts an email address or U.S. mobile number", () => {
+    expect(validateZelleContact("")).toBeNull();
+    expect(validateZelleContact("alex@example.com")).toBeNull();
+    expect(validateZelleContact("(312) 555-1234")).toBeNull();
+    expect(normalizeZelleContact("(312) 555-1234")).toBe("+13125551234");
+    expect(normalizeZelleContact("+1 312 555 1234")).toBe("+13125551234");
+  });
+
+  it("rejects non-contact text and non-U.S. phone numbers", () => {
+    expect(validateZelleContact("alex at example dot com")).not.toBeNull();
+    expect(validateZelleContact("555-1234")).not.toBeNull();
+    expect(validateZelleContact("+44 20 7946 0958")).not.toBeNull();
   });
 });

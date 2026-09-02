@@ -5,6 +5,8 @@ export const USERNAME_MAX_LENGTH = 24;
 
 const DISALLOWED_NAME_CHARACTERS = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/u;
 const USERNAME_PATTERN = /^[a-z0-9_]{3,24}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const US_PHONE_CHARACTERS_PATTERN = /^[0-9+().\-\s]+$/;
 
 interface HumanNameOptions {
   label: "Game name" | "Player name" | "Display name";
@@ -67,4 +69,35 @@ export function validateUsername(value: string): string | null {
   return USERNAME_PATTERN.test(normalized)
     ? null
     : `Username must be ${USERNAME_MIN_LENGTH}–${USERNAME_MAX_LENGTH} lowercase letters, numbers, or underscores.`;
+}
+
+/**
+ * Zelle recipients can be identified by an enrolled email address or a U.S.
+ * mobile number. Store phone numbers consistently so payment instructions are
+ * unambiguous, while leaving email addresses intact.
+ */
+export function normalizeZelleContact(value: string): string {
+  const trimmed = value.trim();
+  if (EMAIL_PATTERN.test(trimmed)) return trimmed;
+
+  if (!US_PHONE_CHARACTERS_PATTERN.test(trimmed)) return trimmed;
+  const digits = trimmed.replace(/\D/g, "");
+  const nationalNumber = digits.length === 11 && digits.startsWith("1")
+    ? digits.slice(1)
+    : digits;
+
+  return /^[2-9]\d{2}[2-9]\d{6}$/.test(nationalNumber)
+    ? `+1${nationalNumber}`
+    : trimmed;
+}
+
+export function validateZelleContact(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (EMAIL_PATTERN.test(trimmed)) return null;
+
+  const normalized = normalizeZelleContact(trimmed);
+  return /^\+1[2-9]\d{2}[2-9]\d{6}$/.test(normalized)
+    ? null
+    : "Enter an email address or a valid U.S. mobile number.";
 }

@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/Toast";
 import { createGame, getGame, recordGameEvent } from "@/lib/data";
 import { getGameTemplates, saveGameTemplate, type GameTemplate } from "@/lib/account-data";
 import { getCurrentUser, getCurrentUserId } from "@/lib/auth-client";
+import { getProfileById } from "@/lib/friends";
 import { trackProductOpsEvent } from "@/lib/product-ops";
 import { getPlayerName, getSessionId, setActiveGame, setPlayerName } from "@/lib/session";
 import { markPostGameEntry } from "@/lib/push-client";
@@ -76,6 +77,11 @@ export default function CreateGamePage() {
     void getCurrentUser().then((currentUser) => {
       if (currentUser && !currentUser.is_anonymous) {
         setCanSaveTemplate(true);
+        void getProfileById(currentUser.id).then((profile) => {
+          if (profile?.display_name?.trim()) {
+            setName(profile.display_name.trim());
+          }
+        }).catch(() => undefined);
         return getGameTemplates(currentUser.id).then(setTemplates);
       }
     }).catch(() => undefined);

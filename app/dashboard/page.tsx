@@ -25,6 +25,8 @@ import {
   USERNAME_MAX_LENGTH,
   validateDisplayName,
   validateUsername,
+  normalizeZelleContact,
+  validateZelleContact,
 } from "@/lib/name-validation";
 
 const emptyStats: UserStats = {
@@ -130,6 +132,11 @@ export default function DashboardPage() {
       toast(usernameError, "error");
       return;
     }
+    const zelleError = validateZelleContact(form.zelle_handle);
+    if (zelleError) {
+      toast(zelleError, "error");
+      return;
+    }
     setSaving(true);
     try {
       if (username && (await isUsernameTaken(username, user.id))) {
@@ -140,7 +147,7 @@ export default function DashboardPage() {
         display_name: form.display_name.trim(),
         username: username || null,
         venmo_handle: form.venmo_handle.trim(),
-        zelle_handle: form.zelle_handle.trim(),
+        zelle_handle: normalizeZelleContact(form.zelle_handle),
         bio: form.bio.trim(),
       });
       setProfile(nextProfile);
@@ -236,13 +243,14 @@ export default function DashboardPage() {
               <Input label="Display name" value={form.display_name} onChange={(event) => setForm({ ...form, display_name: event.target.value })} maxLength={PLAYER_NAME_MAX_LENGTH} />
               <Input label="Username" prefix="@" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value.replace(/^@/, "") })} placeholder="pocketaces" maxLength={USERNAME_MAX_LENGTH} autoCapitalize="none" spellCheck={false} />
               <Input label="Venmo" prefix="@" value={form.venmo_handle} onChange={(event) => setForm({ ...form, venmo_handle: event.target.value.replace(/^@/, "") })} placeholder="your-handle" />
-              <Input label="Zelle email or phone" value={form.zelle_handle} onChange={(event) => setForm({ ...form, zelle_handle: event.target.value })} />
+              <Input label="Zelle email or U.S. mobile number" value={form.zelle_handle} onChange={(event) => setForm({ ...form, zelle_handle: event.target.value })} placeholder="you@example.com or (312) 555-1234" />
               <p className="-mt-2 text-xs leading-5 text-gray-500 sm:col-span-2">
                 Optional. Mainpot uses these to create settlement shortcuts; you always review and send the payment yourself.
               </p>
               <label className="sm:col-span-2">
                 <span className="mb-1 block text-sm font-medium text-gray-700">Bio</span>
                 <textarea value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} maxLength={160} rows={3} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" placeholder="Tuesday $20 home game" />
+                <span className="mt-1 block text-xs leading-5 text-gray-500">Public to Mainpot members who find you, and to your friends. Never shown in a game room or payment instructions.</span>
               </label>
               <div className="sm:col-span-2">
                 <Button type="submit" loading={saving}>Save profile</Button>

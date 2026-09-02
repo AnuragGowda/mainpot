@@ -21,10 +21,10 @@ export function buildVenmoPaymentUrl(
   return `https://venmo.com/${encodeURIComponent(normalizedHandle)}?${params.toString()}`;
 }
 
-export function buildZellePaymentText(handle: string, amount: number): string | null {
-  const normalizedHandle = handle.trim();
-  if (!normalizedHandle || !Number.isFinite(amount) || amount <= 0) return null;
-  return `Send $${amount.toFixed(2)} with Zelle to ${normalizedHandle} — Mainpot settlement`;
+export function buildZellePaymentText(contact: string, amount: number): string | null {
+  const normalizedContact = contact.trim();
+  if (!normalizedContact || !Number.isFinite(amount) || amount <= 0) return null;
+  return `Send $${amount.toFixed(2)} with Zelle to ${normalizedContact} — Mainpot settlement`;
 }
 
 export async function getPlayerPaymentHandles(

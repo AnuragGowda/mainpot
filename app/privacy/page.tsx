@@ -33,6 +33,7 @@ export default function PrivacyPage() {
       <LegalSection title="Service providers and sharing">
         <p>Mainpot uses Supabase for database, synchronization, and authentication services. Your browser or operating system&apos;s push service delivers optional game alerts. Google processes information when you choose Google sign-in. GitHub processes information you submit through public feedback or issue forms.</p>
         <p>Game information is shared with people who have access to that game. We do not sell personal information or use game data for targeted advertising.</p>
+        <p>Your optional bio is visible to Mainpot members who find you and to your friends. It is not shown in game rooms or included in payment instructions.</p>
       </LegalSection>
 
       <LegalSection title="Retention, choices, and deletion">
