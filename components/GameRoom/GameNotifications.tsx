@@ -42,13 +42,11 @@ function snoozeNudge(): void {
 export interface GameNotificationsProps {
   game: Pick<Game, "id" | "code" | "name">;
   isHost: boolean;
-  deferNudge?: boolean;
 }
 
 export default function GameNotifications({
   game,
   isHost,
-  deferNudge = false,
 }: GameNotificationsProps) {
   const { toast } = useToast();
   const cardRef = useRef<HTMLElement>(null);
@@ -116,12 +114,12 @@ export default function GameNotifications({
   const installed = standalone || installAccepted;
 
   useEffect(() => {
-    if (!available || deferNudge || subscription || nudgeIsSnoozed()) return;
+    if (!available || subscription || nudgeIsSnoozed()) return;
     const timeout = window.setTimeout(() => {
       if (consumePostGameEntry(game.code)) setExpanded(true);
     }, 500);
     return () => window.clearTimeout(timeout);
-  }, [available, deferNudge, game.code, subscription]);
+  }, [available, game.code, subscription]);
 
   useEffect(() => {
     if (!expanded) return;
@@ -140,7 +138,7 @@ export default function GameNotifications({
     return { label: "Turn on game alerts", icon: <Bell aria-hidden size={16} /> };
   }, [installed, installPrompt, ios]);
 
-  if (!available || (deferNudge && !subscription)) return null;
+  if (!available) return null;
 
   async function handlePrimaryAction() {
     setError(null);

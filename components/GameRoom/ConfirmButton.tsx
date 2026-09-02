@@ -154,23 +154,25 @@ export default function ConfirmButton({
             </div>
             <div className="mt-6 grid gap-2 sm:grid-cols-2">
               <Button
+                fullWidth
+                variant={confirmVariant}
+                size="md"
+                disabled={loading}
+                onClick={handleConfirm}
+                className="sm:order-2"
+              >
+                {confirmLabel}
+              </Button>
+              <Button
                 ref={cancelButtonRef}
                 fullWidth
                 variant="secondary"
                 size="md"
                 disabled={loading}
                 onClick={cancel}
+                className="sm:order-1"
               >
                 {cancelLabel}
-              </Button>
-              <Button
-                fullWidth
-                variant={confirmVariant}
-                size="md"
-                disabled={loading}
-                onClick={handleConfirm}
-              >
-                {confirmLabel}
               </Button>
             </div>
           </div>

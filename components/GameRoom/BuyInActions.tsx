@@ -127,6 +127,9 @@ export default function BuyInActions({
           </div>
           <label className="min-w-0">
             <span className="mb-1.5 block text-sm font-medium text-gray-700">Paid by</span>
+            <span className="mb-2 block text-xs leading-5 text-gray-500">
+              Who handed over the cash? This affects settlement only; the chips stay with you.
+            </span>
             <Select
               value={frontedByPlayerId || SELF_FUNDED_VALUE}
               onValueChange={(value) => setFrontedByPlayerId(value === SELF_FUNDED_VALUE ? "" : value)}
@@ -136,11 +139,11 @@ export default function BuyInActions({
                 <SelectValue placeholder="Me" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={SELF_FUNDED_VALUE}>Me</SelectItem>
+                <SelectItem value={SELF_FUNDED_VALUE}>Me (self-funded)</SelectItem>
               {players
                 .filter((player) => player.id !== currentPlayerId && !player.left_at)
                 .map((player) => (
-                  <SelectItem key={player.id} value={player.id}>{player.name} (fronted)</SelectItem>
+                  <SelectItem key={player.id} value={player.id}>{player.name} paid/fronted it</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -173,9 +176,19 @@ export default function BuyInActions({
             {rebuyOpen ? "Close rebuy" : "Add a rebuy"}
           </Button>
         ) : (
-          <Button className="flex-1" onClick={() => void submitBuyIn()} loading={ledgerAction === "buy-in"} disabled={submitting}>
+          <ConfirmButton
+            variant="primary"
+            confirmVariant="primary"
+            className="flex-1"
+            confirmationTitle={`Add your ${formatCurrency(game.buy_in_amount)} buy-in?`}
+            confirmationDescription="This adds the opening buy-in to the shared ledger for the host to review."
+            confirmLabel="Add buy-in"
+            onConfirm={submitBuyIn}
+            loading={ledgerAction === "buy-in"}
+            disabled={submitting}
+          >
             {ledgerAction === "buy-in" ? "Adding buy-in…" : `Buy in · ${formatCurrency(game.buy_in_amount)}`}
-          </Button>
+          </ConfirmButton>
         )}
         <ConfirmButton
           variant="ghost"

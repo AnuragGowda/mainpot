@@ -122,8 +122,6 @@ export default function GameRoomPage() {
     useState<GameSyncStatus>("connecting");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [joinDismissed, setJoinDismissed] = useState(false);
-  const [acquisitionPromptVisible, setAcquisitionPromptVisible] =
-    useState(true);
   const [ending, setEnding] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [ledgerAction, setLedgerAction] = useState<"buy-in" | "rebuy" | null>(
@@ -206,7 +204,6 @@ export default function GameRoomPage() {
     setSnapshot(null);
     setSyncStatus("connecting");
     setJoinDismissed(false);
-    setAcquisitionPromptVisible(true);
     void load();
 
     return () => {
@@ -222,9 +219,6 @@ export default function GameRoomPage() {
       : null;
   const isHost = currentPlayer?.is_host === true;
   const leftGame = currentPlayer?.left_at != null;
-  const handleAcquisitionVisibility = useCallback((visible: boolean) => {
-    setAcquisitionPromptVisible(visible);
-  }, []);
   const handleSpectate = useCallback(() => {
     setJoinDismissed(true);
     window.requestAnimationFrame(() => joinTableActionRef.current?.focus());
@@ -492,14 +486,6 @@ export default function GameRoomPage() {
         <GameNotifications
           game={snapshot.game}
           isHost={isHost}
-          deferNudge={isHost && acquisitionPromptVisible}
-        />
-      ) : null}
-
-      {isHost ? (
-        <AcquisitionPrompt
-          game={snapshot.game}
-          onVisibilityChange={handleAcquisitionVisibility}
         />
       ) : null}
 
@@ -532,6 +518,8 @@ export default function GameRoomPage() {
           />
         ) : null}
       </div>
+
+      {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
 
       {currentPlayer && !leftGame ? (
         <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">

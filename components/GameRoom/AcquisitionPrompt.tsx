@@ -16,13 +16,7 @@ const options: Array<{ label: string; value: AcquisitionSource }> = [
   { label: "Other", value: "other" },
 ];
 
-export default function AcquisitionPrompt({
-  game,
-  onVisibilityChange,
-}: {
-  game: Game;
-  onVisibilityChange?: (visible: boolean) => void;
-}) {
+export default function AcquisitionPrompt({ game }: { game: Game }) {
   const { toast } = useToast();
   const [visible, setVisible] = useState(false);
   const [saving, setSaving] = useState<AcquisitionSource | null>(null);
@@ -32,13 +26,11 @@ export default function AcquisitionPrompt({
       game.acquisition_source == null &&
       window.sessionStorage.getItem(POST_CREATE_SOURCE_KEY) === game.code;
     setVisible(nextVisible);
-    onVisibilityChange?.(nextVisible);
-  }, [game.acquisition_source, game.code, onVisibilityChange]);
+  }, [game.acquisition_source, game.code]);
 
   function dismiss() {
     window.sessionStorage.removeItem(POST_CREATE_SOURCE_KEY);
     setVisible(false);
-    onVisibilityChange?.(false);
   }
 
   if (!visible) return null;
