@@ -13,7 +13,6 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
-import { formatCurrency } from "@/lib/format";
 import { defaultRecapPrivacy, deriveRecapData } from "@/lib/recap";
 import { clearActiveGame } from "@/lib/session";
 import { trackProductOpsEvent } from "@/lib/product-ops";
@@ -36,6 +35,7 @@ export interface SettlementSummaryProps {
   presentation?: "card" | "record";
   discrepancyAllocation?: DiscrepancyAllocation | null;
   discrepancyAmount?: number;
+  beforeDiscrepancyNets?: PlayerNet[];
   /** The signed-in player's personal recap. Hosts fall back to the top result. */
   featuredPlayerId?: string;
 }
@@ -54,6 +54,7 @@ export default function SettlementSummary({
   presentation = "card",
   discrepancyAllocation,
   discrepancyAmount,
+  beforeDiscrepancyNets,
   featuredPlayerId,
 }: SettlementSummaryProps) {
   const { toast } = useToast();
@@ -68,6 +69,7 @@ export default function SettlementSummary({
     totalBoughtIn,
     discrepancyAllocation,
     discrepancyAmount,
+    beforeDiscrepancyNets,
   });
   const recapData = deriveRecapData(snapshot, nets, transfers);
   const featuredPlayer = recapData.players.find((player) => player.id === featuredPlayerId)
@@ -129,8 +131,8 @@ export default function SettlementSummary({
           <button
             type="button"
             onClick={() => setShowGameRecap(true)}
-            aria-label="Open your game card"
-            className="mx-auto block w-full max-w-[320px] rounded-[22px] text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
+            aria-label="Customize and share your game card"
+            className="group relative mx-auto block w-full max-w-[320px] rounded-[22px] text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
           >
             <RecapStoryCard
               data={recapData}
@@ -139,6 +141,9 @@ export default function SettlementSummary({
               featuredPlayerId={featuredPlayer?.id}
               decorative
             />
+            <span className="pointer-events-none absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full bg-gray-950/90 px-3 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur-sm transition group-hover:bg-gray-950">
+              <Share2 aria-hidden size={14} /> Customize &amp; share
+            </span>
           </button>
         </div>
         {showGameRecap ? <GameRecapDialog snapshot={snapshot} nets={nets} transfers={transfers} featuredPlayerId={featuredPlayer?.id} onClose={() => setShowGameRecap(false)} /> : null}
@@ -194,13 +199,6 @@ export default function SettlementSummary({
               </summary>
               <pre className="mx-4 mb-3 whitespace-pre-wrap border-t border-gray-200 pt-3 font-mono text-xs leading-6 text-gray-700">{summaryText}</pre>
             </details>
-
-            {discrepancyAllocation && discrepancyAmount ? (
-              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-                <p className="font-semibold">Discrepancy decision</p>
-                <p className="mt-1">{formatCurrency(discrepancyAmount)} {discrepancyAllocation.method === "proportional" ? "split proportionally across eligible results." : "assigned to the selected eligible players."}</p>
-              </div>
-            ) : null}
 
             <Link
               href={`/create?name=${encodeURIComponent(game.name)}&buyin=${game.buy_in_amount}`}

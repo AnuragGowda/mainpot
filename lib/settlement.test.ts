@@ -4,6 +4,7 @@ import {
   applyDiscrepancyAllocation,
   calculateBankSettlement,
   calculateMinTransfers,
+  getPlayerNetChanges,
   getPlayerTransfers,
   isPlayerInTransfer,
 } from "./settlement";
@@ -127,20 +128,65 @@ describe("applyFundingAdjustments", () => {
   });
 });
 
+describe("getPlayerNetChanges", () => {
+  it("describes each player's before, adjustment, and final result", () => {
+    expect(getPlayerNetChanges(
+      [player("A", 40), player("B", -30)],
+      [player("A", 30), player("B", -30)]
+    )).toEqual([
+      { playerId: "A", name: "A", before: 40, adjustment: -10, final: 30 },
+      { playerId: "B", name: "B", before: -30, adjustment: 0, final: -30 },
+    ]);
+  });
+});
+
 describe("applyDiscrepancyAllocation", () => {
   it("reduces winnings proportionally when cash-outs exceed buy-ins", () => {
     expect(applyDiscrepancyAllocation(
-      [player("A", 60), player("B", 40), player("C", -120)],
+      [player("A", 60), player("B", 40), player("C", -80)],
       -20,
       { method: "proportional", playerIds: [] }
-    )).toEqual([player("A", 48), player("B", 32), player("C", -120)]);
+    )).toEqual([player("A", 48), player("B", 32), player("C", -80)]);
   });
 
   it("uses only selected eligible players when they can cover the discrepancy", () => {
     expect(applyDiscrepancyAllocation(
-      [player("A", 60), player("B", 40), player("C", -120)],
+      [player("A", 60), player("B", 40), player("C", -80)],
       -20,
       { method: "selected", playerIds: ["B"] }
-    )).toEqual([player("A", 60), player("B", 20), player("C", -120)]);
+    )).toEqual([player("A", 60), player("B", 20), player("C", -80)]);
+  });
+
+  it("uses exact custom amounts without changing the opposite side", () => {
+    expect(applyDiscrepancyAllocation(
+      [player("A", 60), player("B", 40), player("C", -80)],
+      -20,
+      {
+        method: "custom",
+        playerIds: ["A", "B"],
+        playerAllocations: [
+          { playerId: "A", amount: 15 },
+          { playerId: "B", amount: 5 },
+        ],
+      }
+    )).toEqual([player("A", 45), player("B", 35), player("C", -80)]);
+  });
+
+  it("rejects a custom allocation that does not total the discrepancy", () => {
+    const players = [player("A", 60), player("B", 40), player("C", -80)];
+    expect(applyDiscrepancyAllocation(players, -20, {
+      method: "custom",
+      playerIds: ["A"],
+      playerAllocations: [{ playerId: "A", amount: 19 }],
+    })).toBe(players);
+  });
+
+  it("rejects a custom amount that would push a result through zero", () => {
+    const players = [player("A", 10), player("B", -30)];
+    expect(applyDiscrepancyAllocation(players, -20, {
+      method: "custom",
+      playerIds: ["A"],
+      playerAllocations: [{ playerId: "A", amount: 20 }],
+    })).toBe(players);
   });
 });

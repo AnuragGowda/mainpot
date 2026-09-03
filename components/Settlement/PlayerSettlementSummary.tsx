@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Trophy } from "lucide-react";
 import Card from "@/components/ui/Card";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatSignedNet, round2 } from "@/lib/format";
 import { getPlayerTransfers } from "@/lib/settlement";
 import type { Transfer } from "@/lib/settlement";
 import type { SettlementMode } from "@/lib/payments";
@@ -13,6 +13,8 @@ export interface PlayerSettlementSummaryProps {
   gameId: string;
   mode: SettlementMode;
   currentPlayerId: string;
+  beforeDiscrepancyNet?: number;
+  finalNet?: number;
 }
 
 function totalAmount(transfers: Transfer[]): number {
@@ -25,6 +27,8 @@ export default function PlayerSettlementSummary({
   gameId,
   mode,
   currentPlayerId,
+  beforeDiscrepancyNet,
+  finalNet,
 }: PlayerSettlementSummaryProps) {
   const { outgoing, incoming } = getPlayerTransfers(transfers, currentPlayerId);
   const outgoingTotal = totalAmount(outgoing);
@@ -32,12 +36,16 @@ export default function PlayerSettlementSummary({
 
   const owesPayment = outgoing.length > 0;
   const isUp = !owesPayment && incomingTotal > 0;
+  const resultBeforeDiscrepancy = beforeDiscrepancyNet ?? finalNet ?? 0;
+  const finalResult = finalNet ?? resultBeforeDiscrepancy;
+  const discrepancyAdjustment = round2(finalResult - resultBeforeDiscrepancy);
+  const showDiscrepancyAdjustment = Math.abs(discrepancyAdjustment) >= 0.005;
 
   return (
     <section aria-labelledby="your-settlement-heading" className="space-y-4">
       <Card
         padding="sm"
-        className={owesPayment ? "border-amber-200 bg-amber-50/40" : isUp ? "border-emerald-200 bg-emerald-50/50" : "border-gray-300"}
+        className={owesPayment ? "border-gray-300 bg-gray-50/60" : isUp ? "border-emerald-200 bg-emerald-50/50" : "border-gray-300"}
       >
         {owesPayment ? (
           <>
@@ -65,6 +73,13 @@ export default function PlayerSettlementSummary({
             </div>
           </div>
         )}
+        {showDiscrepancyAdjustment ? (
+          <p className="mt-2 border-t border-gray-200 pt-2 text-sm text-gray-500">
+            <span className="font-semibold tabular-nums text-gray-950">{formatSignedNet(discrepancyAdjustment)}</span>
+            {" discrepancy adjustment · was "}
+            <span className="tabular-nums text-gray-700">{formatSignedNet(resultBeforeDiscrepancy)}</span>
+          </p>
+        ) : null}
         {owesPayment ? <div className="mt-4">
           <TransferList
             transfers={outgoing}

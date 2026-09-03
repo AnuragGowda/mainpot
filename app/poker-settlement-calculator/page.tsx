@@ -96,7 +96,7 @@ const faqs = [
   {
     question: "Can a game be settled when the bank is still off?",
     answer:
-      "Mainpot first asks the table to find the discrepancy. If it is intentional, the host can record an explicit allocation: split it proportionally across the affected winners or losers, or assign it to selected players. The adjusted result and the decision appear in the settlement record.",
+      "Mainpot first asks the table to find the discrepancy. If it is intentional, the host can adjust all affected results proportionally, choose specific players, or record exact agreed amounts. The adjusted result and the decision appear in the settlement record.",
   },
 ];
 

@@ -19,12 +19,40 @@ export interface PlayerNet {
   net: number;
 }
 
-export type DiscrepancyAllocationMethod = "proportional" | "selected";
+export interface PlayerNetChange {
+  playerId: string;
+  name: string;
+  before: number;
+  adjustment: number;
+  final: number;
+}
+
+export type DiscrepancyAllocationMethod = "proportional" | "selected" | "custom";
+
+export interface PlayerDiscrepancyAllocation {
+  playerId: string;
+  amount: number;
+}
 
 export interface DiscrepancyAllocation {
   method: DiscrepancyAllocationMethod;
   /** Player ids sharing the adjustment. Empty means every eligible player. */
   playerIds: string[];
+  /** Exact positive amounts used by the advanced custom method. */
+  playerAllocations?: PlayerDiscrepancyAllocation[];
+}
+
+export function discrepancyAllocationLabel(
+  method: DiscrepancyAllocationMethod
+): string {
+  switch (method) {
+    case "proportional":
+      return "all affected players, proportional";
+    case "selected":
+      return "chosen players, proportional";
+    case "custom":
+      return "exact amounts";
+  }
 }
 
 /** Returns only the payments that involve one player, with actions first. */
@@ -96,6 +124,46 @@ export function applyDiscrepancyAllocation(
   const eligible = players.filter((player) =>
     discrepancy > 0 ? player.net < -EPSILON : player.net > EPSILON
   );
+
+  if (allocation.method === "custom") {
+    const eligibleById = new Map(
+      eligible.map((player) => [player.playerId, player])
+    );
+    const customAdjustments = new Map<string, number>();
+    let allocatedTotal = 0;
+
+    for (const item of allocation.playerAllocations ?? []) {
+      const player = eligibleById.get(item.playerId);
+      const itemAmount = round2(item.amount);
+      if (
+        !player
+        || customAdjustments.has(item.playerId)
+        || !Number.isFinite(itemAmount)
+        || itemAmount < EPSILON
+        || itemAmount > Math.abs(player.net) + EPSILON
+      ) {
+        return players;
+      }
+      customAdjustments.set(
+        item.playerId,
+        discrepancy > 0 ? itemAmount : -itemAmount
+      );
+      allocatedTotal = round2(allocatedTotal + itemAmount);
+    }
+
+    if (
+      customAdjustments.size === 0
+      || Math.abs(allocatedTotal - amount) >= EPSILON
+    ) {
+      return players;
+    }
+
+    return players.map((player) => ({
+      ...player,
+      net: round2(player.net + (customAdjustments.get(player.playerId) ?? 0)),
+    }));
+  }
+
   const selected = allocation.method === "selected"
     ? eligible.filter((player) => allocation.playerIds.includes(player.playerId))
     : eligible;
@@ -117,6 +185,27 @@ export function applyDiscrepancyAllocation(
     ...player,
     net: round2(player.net + (adjustments.get(player.playerId) ?? 0)),
   }));
+}
+
+/** Compares the recorded result with the final result after a discrepancy decision. */
+export function getPlayerNetChanges(
+  beforeNets: PlayerNet[],
+  finalNets: PlayerNet[]
+): PlayerNetChange[] {
+  const beforeByPlayerId = new Map(
+    beforeNets.map((player) => [player.playerId, player])
+  );
+
+  return finalNets.map((player) => {
+    const before = beforeByPlayerId.get(player.playerId)?.net ?? player.net;
+    return {
+      playerId: player.playerId,
+      name: player.name,
+      before,
+      adjustment: round2(player.net - before),
+      final: player.net,
+    };
+  });
 }
 
 const EPSILON = 0.005;

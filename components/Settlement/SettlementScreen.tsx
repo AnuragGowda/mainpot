@@ -7,6 +7,7 @@ import Badge from "@/components/ui/Badge";
 import type { BadgeVariant } from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import Input from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toast";
 import ConfirmButton from "@/components/GameRoom/ConfirmButton";
@@ -22,8 +23,10 @@ import {
   calculateBankSettlement,
   calculateMinTransfers,
 } from "@/lib/settlement";
+import type { DiscrepancyAllocationMethod } from "@/lib/settlement";
 import type { GameSnapshot, GameStatus } from "@/lib/types";
 import CashOutEntry from "./CashOutEntry";
+import DiscrepancyImpact from "./DiscrepancyImpact";
 import FundingNotes from "./FundingNotes";
 import NetList from "./NetList";
 import PlayerSettlementSummary from "./PlayerSettlementSummary";
@@ -47,7 +50,7 @@ const statusMeta: Record<
   { label: string; variant: BadgeVariant }
 > = {
   active: { label: "Active", variant: "green" },
-  settling: { label: "Settling", variant: "amber" },
+  settling: { label: "Settling", variant: "gray" },
   ended: { label: "Ended", variant: "gray" },
 };
 
@@ -83,11 +86,18 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const [finalizing, setFinalizing] = useState(false);
   const [fullPlanOpen, setFullPlanOpen] = useState(false);
   const [settledMinPaymentKeys, setSettledMinPaymentKeys] = useState<Set<string>>(new Set());
-  const [allocationMethod, setAllocationMethod] = useState<"proportional" | "selected">(
+  const [allocationMethod, setAllocationMethod] = useState<DiscrepancyAllocationMethod>(
     snapshot.game.discrepancy_allocation?.method ?? "proportional"
   );
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>(
     snapshot.game.discrepancy_allocation?.player_ids ?? []
+  );
+  const [customAmounts, setCustomAmounts] = useState<Record<string, string>>(
+    () => Object.fromEntries(
+      (snapshot.game.discrepancy_allocation?.player_allocations ?? []).map(
+        (item) => [item.player_id, String(item.amount)]
+      )
+    )
   );
   const [allocationSaving, setAllocationSaving] = useState(false);
   const [feedbackScore, setFeedbackScore] = useState<number | null>(null);
@@ -137,6 +147,9 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     if (!saved) return;
     setAllocationMethod(saved.method);
     setSelectedPlayerIds(saved.player_ids);
+    setCustomAmounts(Object.fromEntries(
+      (saved.player_allocations ?? []).map((item) => [item.player_id, String(item.amount)])
+    ));
   }, [snapshot.game.discrepancy_allocation]);
 
   // Keep the selected bank valid when the player list changes.
@@ -192,17 +205,55 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const allocationEligible = nets.filter((player) =>
     difference > 0 ? player.net < -0.005 : player.net > 0.005
   );
+  const customPlayerAllocations = allocationEligible
+    .map((player) => ({
+      playerId: player.playerId,
+      amount: round2(Number(customAmounts[player.playerId] ?? 0)),
+    }))
+    .filter((item) => Number.isFinite(item.amount) && item.amount >= 0.005);
+  const customAllocatedTotal = round2(
+    customPlayerAllocations.reduce((sum, item) => sum + item.amount, 0)
+  );
+  const customHasInvalidAmount = allocationEligible.some((player) => {
+    const raw = customAmounts[player.playerId] ?? "";
+    if (raw.trim() === "") return false;
+    const parsed = round2(Number(raw));
+    return !Number.isFinite(parsed)
+      || parsed < 0
+      || parsed > Math.abs(player.net) + 0.005;
+  });
+  const customAllocationValid = customPlayerAllocations.length > 0
+    && !customHasInvalidAmount
+    && Math.abs(customAllocatedTotal - Math.abs(difference)) < 0.005;
   const allocation = !balanced
-    ? { method: allocationMethod, playerIds: selectedPlayerIds }
+    ? {
+        method: allocationMethod,
+        playerIds: allocationMethod === "proportional"
+          ? allocationEligible.map((player) => player.playerId)
+          : allocationMethod === "custom"
+            ? customPlayerAllocations.map((item) => item.playerId)
+            : selectedPlayerIds,
+        playerAllocations: allocationMethod === "custom"
+          ? customPlayerAllocations
+          : undefined,
+      }
     : null;
   const allocatedNets = allocation
     ? applyDiscrepancyAllocation(nets, difference, allocation)
     : nets;
+  const currentPlayerNetBeforeDiscrepancy = nets.find(
+    (player) => player.playerId === currentPlayerId
+  )?.net;
+  const currentPlayerFinalNet = allocatedNets.find(
+    (player) => player.playerId === currentPlayerId
+  )?.net;
   const selectedCapacity = allocationEligible
     .filter((player) => selectedPlayerIds.includes(player.playerId))
     .reduce((sum, player) => sum + Math.abs(player.net), 0);
-  const selectedAllocationValid = allocationMethod === "proportional"
-    || (selectedPlayerIds.length > 0 && selectedCapacity + 0.005 >= Math.abs(difference));
+  const allocationValid = allocationMethod === "proportional"
+    || (allocationMethod === "selected"
+      ? selectedPlayerIds.length > 0 && selectedCapacity + 0.005 >= Math.abs(difference)
+      : customAllocationValid);
   const minTransfers = calculateMinTransfers(allocatedNets);
   const bankPlayer =
     players.find((player) => player.id === bankPlayerId) ?? null;
@@ -213,6 +264,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const settledMinPaymentCount = minTransfers.filter((transfer) =>
     settledMinPaymentKeys.has(settlementPaymentKey("min", transfer))
   ).length;
+  const settlementPlanReadOnly = snapshot.game.status !== "ended";
   const status = statusMeta[snapshot.game.status];
 
   useEffect(() => {
@@ -273,13 +325,19 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   }
 
   async function handleAllocationContinue() {
-    if (!selectedAllocationValid) return;
+    if (!allocationValid) return;
     setAllocationSaving(true);
     try {
       await saveDiscrepancyAllocation(snapshot.game.id, {
         method: allocationMethod,
-        player_ids: allocationMethod === "selected" ? selectedPlayerIds : allocationEligible.map((player) => player.playerId),
+        player_ids: allocation?.playerIds ?? [],
         amount: Math.abs(difference),
+        player_allocations: allocationMethod === "custom"
+          ? customPlayerAllocations.map((item) => ({
+              player_id: item.playerId,
+              amount: item.amount,
+            }))
+          : undefined,
       });
       setMode("results");
     } catch (err) {
@@ -413,7 +471,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 Calculate settlement
               </Button>
             ) : allCashOutsEntered && balanced ? (
-              <Card padding="md" className="border-amber-200 bg-amber-50/60 text-center">
+              <Card padding="md" className="border-gray-300 bg-gray-50/60 text-center">
                 <p className="text-sm font-semibold text-gray-950">Cash-outs are in.</p>
                 <p role="status" className="mt-1 text-sm leading-6 text-gray-600">
                   Waiting for {snapshot.game.host_name} to finalize the settlement. Payment instructions will appear once it&apos;s locked.
@@ -444,8 +502,8 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
         </div>
       ) : mode === "allocation" ? (
         <div className="mt-6 space-y-6">
-          <Card padding="md" className="border-amber-200 bg-amber-50/60">
-            <p className="text-xs font-semibold uppercase tracking-widest text-amber-800">Discrepancy decision</p>
+          <Card padding="md" className="border-gray-300 bg-white">
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Discrepancy decision</p>
             <h2 ref={stageHeadingRef} tabIndex={-1} className="mt-2 scroll-mt-6 text-xl font-semibold tracking-tight text-gray-950 focus:outline-none">Agree how to handle {formatCurrency(Math.abs(difference))} before payments.</h2>
             <p className="mt-2 text-sm leading-6 text-gray-700">
               {difference < 0
@@ -456,12 +514,16 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             <fieldset className="mt-5 space-y-3">
               <legend className="text-sm font-semibold text-gray-900">Allocate the adjustment</legend>
               <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 bg-white p-4">
-                <input type="radio" name="allocation-method" checked={allocationMethod === "proportional"} onChange={() => setAllocationMethod("proportional")} className="mt-0.5 h-4 w-4" />
-                <span><span className="block text-sm font-semibold text-gray-900">Split proportionally</span><span className="mt-1 block text-sm text-gray-600">Share it across every {difference < 0 ? "winner" : "losing player"} in proportion to their result.</span></span>
+                <input type="radio" name="allocation-method" checked={allocationMethod === "proportional"} onChange={() => setAllocationMethod("proportional")} className="mt-0.5 h-4 w-4 accent-gray-950" />
+                <span><span className="block text-sm font-semibold text-gray-900">Adjust all {difference < 0 ? "winners" : "losing players"} proportionally</span><span className="mt-1 block text-sm text-gray-600">{difference < 0 ? "Larger wins are reduced more. Losing results stay unchanged." : "Larger losses receive more of the adjustment. Winning results stay unchanged."}</span></span>
               </label>
               <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 bg-white p-4">
-                <input type="radio" name="allocation-method" checked={allocationMethod === "selected"} onChange={() => setAllocationMethod("selected")} className="mt-0.5 h-4 w-4" />
-                <span><span className="block text-sm font-semibold text-gray-900">Choose players</span><span className="mt-1 block text-sm text-gray-600">Use this when the table knows which results the discrepancy belongs to.</span></span>
+                <input type="radio" name="allocation-method" checked={allocationMethod === "selected"} onChange={() => setAllocationMethod("selected")} className="mt-0.5 h-4 w-4 accent-gray-950" />
+                <span><span className="block text-sm font-semibold text-gray-900">Choose affected players</span><span className="mt-1 block text-sm text-gray-600">Only selected players are adjusted. Multiple selections are still weighted by their results.</span></span>
+              </label>
+              <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 bg-white p-4">
+                <input type="radio" name="allocation-method" checked={allocationMethod === "custom"} onChange={() => setAllocationMethod("custom")} className="mt-0.5 h-4 w-4 accent-gray-950" />
+                <span><span className="block text-sm font-semibold text-gray-900">Enter exact amounts</span><span className="mt-1 block text-sm text-gray-600">Advanced: record each eligible player&apos;s exact adjustment.</span></span>
               </label>
             </fieldset>
 
@@ -470,15 +532,65 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 <legend className="text-sm font-semibold text-gray-900">Players sharing the adjustment</legend>
                 {allocationEligible.map((player) => {
                   const checked = selectedPlayerIds.includes(player.playerId);
-                  return <label key={player.playerId} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800"><span>{player.name} <span className="text-gray-500">({formatCurrency(Math.abs(player.net))})</span></span><input type="checkbox" checked={checked} onChange={() => setSelectedPlayerIds((current) => checked ? current.filter((id) => id !== player.playerId) : [...current, player.playerId])} className="h-4 w-4" /></label>;
+                  return <label key={player.playerId} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800"><span>{player.name} <span className="text-gray-500">({formatCurrency(Math.abs(player.net))})</span></span><input type="checkbox" checked={checked} onChange={() => setSelectedPlayerIds((current) => checked ? current.filter((id) => id !== player.playerId) : [...current, player.playerId])} className="h-4 w-4 accent-gray-950" /></label>;
                 })}
-                {!selectedAllocationValid ? <p className="text-sm text-red-700">Select players with at least {formatCurrency(Math.abs(difference))} in eligible results.</p> : null}
+                {!allocationValid ? <p className="text-sm text-red-700">Select players with at least {formatCurrency(Math.abs(difference))} in eligible results.</p> : null}
               </fieldset>
+            ) : null}
+
+            {allocationMethod === "custom" ? (
+              <fieldset className="mt-4 space-y-3">
+                <legend className="text-sm font-semibold text-gray-900">Exact adjustment by player</legend>
+                <p className="text-sm leading-6 text-gray-600">
+                  Amounts must add up to {formatCurrency(Math.abs(difference))}. No player can be adjusted past even.
+                </p>
+                <div className="space-y-3">
+                  {allocationEligible.map((player) => (
+                    <div key={player.playerId} className="grid gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-center">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{player.name}</p>
+                        <p className="mt-0.5 text-xs text-gray-500">Up to {formatCurrency(Math.abs(player.net))}</p>
+                      </div>
+                      <Input
+                        aria-label={`Exact discrepancy adjustment for ${player.name}`}
+                        prefix="$"
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        max={Math.abs(player.net)}
+                        step="0.01"
+                        placeholder="0.00"
+                        value={customAmounts[player.playerId] ?? ""}
+                        onChange={(event) => setCustomAmounts((current) => ({
+                          ...current,
+                          [player.playerId]: event.target.value,
+                        }))}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className={allocationValid ? "text-sm text-emerald-700" : "text-sm text-red-700"}>
+                  Assigned {formatCurrency(customAllocatedTotal)} of {formatCurrency(Math.abs(difference))}
+                  {customHasInvalidAmount ? ". Each amount must stay within that player’s result." : "."}
+                </p>
+              </fieldset>
+            ) : null}
+
+            {allocation && allocationValid ? (
+              <div className="mt-5 rounded-lg border border-gray-200 bg-gray-50 px-4 pb-3">
+                <p className="pt-3 text-xs font-semibold uppercase tracking-widest text-gray-500">Result preview</p>
+                <DiscrepancyImpact
+                  amount={Math.abs(difference)}
+                  allocation={allocation}
+                  beforeNets={nets}
+                  finalNets={allocatedNets}
+                />
+              </div>
             ) : null}
 
             <div className="mt-6 flex flex-col gap-2 sm:flex-row">
               <Button variant="secondary" size="md" onClick={() => setMode("entry")}>Back to cash-outs</Button>
-              <Button size="md" onClick={handleAllocationContinue} disabled={!selectedAllocationValid} loading={allocationSaving}>Review adjusted settlement</Button>
+              <Button size="md" onClick={handleAllocationContinue} disabled={!allocationValid} loading={allocationSaving}>Review adjusted settlement</Button>
             </div>
           </Card>
         </div>
@@ -492,12 +604,20 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">Final step</p>
                 <h2 id="finalization-heading" className="mt-1 text-base font-semibold text-gray-950">Lock this settlement</h2>
-                <p role="status" className="mt-1 text-sm leading-6 text-amber-800">
+                <p role="status" className="mt-1 text-sm leading-6 text-gray-700">
                   Review the totals, then lock them before anyone pays. Payment tracking starts after the lock.
                 </p>
                 <p className="mt-2 text-sm leading-6 text-gray-600">
                   Locking shares each player&apos;s final payment instructions and prevents further cash-out edits.
                 </p>
+                {allocation ? (
+                  <DiscrepancyImpact
+                    amount={Math.abs(difference)}
+                    allocation={allocation}
+                    beforeNets={nets}
+                    finalNets={allocatedNets}
+                  />
+                ) : null}
               </div>
               <div className="mt-4 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-auto sm:min-w-52">
                 <ConfirmButton
@@ -520,12 +640,14 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             </section>
           ) : null}
 
-          {currentPlayerId ? (
+          {currentPlayerId && (!isHost || snapshot.game.status === "ended") ? (
             <PlayerSettlementSummary
               transfers={minTransfers}
               gameId={snapshot.game.id}
               mode="min"
               currentPlayerId={currentPlayerId}
+              beforeDiscrepancyNet={currentPlayerNetBeforeDiscrepancy}
+              finalNet={currentPlayerFinalNet}
             />
           ) : null}
 
@@ -543,6 +665,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               featuredPlayerId={currentPlayerId ?? undefined}
               discrepancyAllocation={allocation}
               discrepancyAmount={balanced ? 0 : Math.abs(difference)}
+              beforeDiscrepancyNets={nets}
             />
           ) : null}
 
@@ -562,14 +685,22 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   <span className="mt-0.5 block text-xs text-gray-500">
                     {snapshot.game.status === "ended"
                       ? `Host-only payment tracking · ${settledMinPaymentCount}/${minTransfers.length} marked sent`
-                      : "Host-only: payments, player results, and bank view"}
+                      : "Review-only until finalized · payments, player results, and bank view"}
                   </span>
                 </span>
                 <span aria-hidden className="text-lg text-gray-400">{fullPlanOpen ? "−" : "＋"}</span>
               </span>
             </summary>
 
-            <div className="space-y-6 border-t border-gray-200 p-5">
+            <div aria-readonly={settlementPlanReadOnly} className="space-y-6 border-t border-gray-200 p-5">
+              {snapshot.game.status === "ended" && allocation ? (
+                <DiscrepancyImpact
+                  amount={Math.abs(difference)}
+                  allocation={allocation}
+                  beforeNets={nets}
+                  finalNets={allocatedNets}
+                />
+              ) : null}
               {snapshot.game.status === "settling" ? (
               <div>
             <div
@@ -585,6 +716,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 aria-selected={tab === "min"}
                 aria-controls="panel-min"
                 tabIndex={tab === "min" ? 0 : -1}
+                disabled={settlementPlanReadOnly}
                 onClick={() => setTab("min")}
                 className={tabClass(tab === "min")}
               >
@@ -597,6 +729,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 aria-selected={tab === "bank"}
                 aria-controls="panel-bank"
                 tabIndex={tab === "bank" ? 0 : -1}
+                disabled={settlementPlanReadOnly}
                 onClick={() => setTab("bank")}
                 className={tabClass(tab === "bank")}
               >
@@ -659,6 +792,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 <Select
                   value={bankPlayerId}
                   onValueChange={setBankPlayerId}
+                  disabled={settlementPlanReadOnly}
                 >
                   <SelectTrigger id="bank-player-select"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -718,6 +852,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   presentation="record"
                   discrepancyAllocation={allocation}
                   discrepancyAmount={balanced ? 0 : Math.abs(difference)}
+                  beforeDiscrepancyNets={nets}
                 />
               ) : (
                 <SettlementSummary
@@ -731,6 +866,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   isHost={isHost}
                   discrepancyAllocation={allocation}
                   discrepancyAmount={balanced ? 0 : Math.abs(difference)}
+                  beforeDiscrepancyNets={nets}
                 />
               )}
             </div>

@@ -18,9 +18,13 @@ export interface Game {
 }
 
 export interface DiscrepancyAllocationRecord {
-  method: "proportional" | "selected";
+  method: "proportional" | "selected" | "custom";
   player_ids: string[];
   amount: number;
+  player_allocations?: Array<{
+    player_id: string;
+    amount: number;
+  }>;
 }
 
 export type AcquisitionSource = "personal_invite" | "poker_group" | "search" | "other";

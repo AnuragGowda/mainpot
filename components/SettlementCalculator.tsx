@@ -13,6 +13,7 @@ import { formatCurrency, formatSignedNet, round2 } from "@/lib/format";
 import {
   applyDiscrepancyAllocation,
   calculateMinTransfers,
+  getPlayerNetChanges,
   type DiscrepancyAllocationMethod,
 } from "@/lib/settlement";
 
@@ -44,6 +45,7 @@ export default function SettlementCalculator() {
   const [allocationMethod, setAllocationMethod] =
     useState<DiscrepancyAllocationMethod>("proportional");
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
+  const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
 
   const result = useMemo(() => {
     const rows = players.map((player, index) => ({
@@ -77,16 +79,43 @@ export default function SettlementCalculator() {
         0
       )
     );
+    const customPlayerAllocations = eligiblePlayers
+      .map((player) => ({
+        playerId: player.playerId,
+        amount: round2(Number(customAmounts[player.playerId] ?? 0)),
+      }))
+      .filter((item) => Number.isFinite(item.amount) && item.amount >= 0.005);
+    const customAllocatedTotal = round2(
+      customPlayerAllocations.reduce((total, item) => total + item.amount, 0)
+    );
+    const customHasInvalidAmount = eligiblePlayers.some((player) => {
+      const raw = customAmounts[player.playerId] ?? "";
+      if (raw.trim() === "") return false;
+      const parsed = round2(Number(raw));
+      return !Number.isFinite(parsed)
+        || parsed < 0
+        || parsed > Math.abs(player.net) + 0.005;
+    });
+    const customAllocationValid = customPlayerAllocations.length > 0
+      && !customHasInvalidAmount
+      && Math.abs(customAllocatedTotal - Math.abs(difference)) < 0.005;
     const allocationValid =
       balanced ||
       allocationMethod === "proportional" ||
-      selectedCapacity + 0.005 >= Math.abs(difference);
+      (allocationMethod === "selected"
+        ? selectedCapacity + 0.005 >= Math.abs(difference)
+        : customAllocationValid);
     const adjustedNets = balanced
       ? baseNets
       : allocationValid
         ? applyDiscrepancyAllocation(baseNets, difference, {
             method: allocationMethod,
-            playerIds: selectedPlayerIds,
+            playerIds: allocationMethod === "custom"
+              ? customPlayerAllocations.map((item) => item.playerId)
+              : selectedPlayerIds,
+            playerAllocations: allocationMethod === "custom"
+              ? customPlayerAllocations
+              : undefined,
           })
         : baseNets;
     const transfers = allocationValid
@@ -100,21 +129,25 @@ export default function SettlementCalculator() {
       balanced,
       eligiblePlayers,
       selectedCapacity,
+      customAllocatedTotal,
+      customHasInvalidAmount,
       allocationValid,
+      baseNets,
+      adjustedNets,
       transfers,
     };
-  }, [allocationMethod, players, selectedPlayerIds]);
+  }, [allocationMethod, customAmounts, players, selectedPlayerIds]);
 
   const discrepancyAmount = Math.abs(result.difference);
   const affectedSide = result.difference < 0 ? "winners" : "losing players";
   const presetTitle =
     result.difference < 0
-      ? "Winners cover the overage"
-      : "Share it across losing players";
+      ? "Adjust all winners proportionally"
+      : "Adjust all losing players proportionally";
   const presetDescription =
     result.difference < 0
-      ? "Reduce each winner’s result in proportion to their winnings."
-      : "Reduce each losing player’s recorded loss in proportion to their loss.";
+      ? "Larger wins absorb more of the difference. Losing results stay unchanged."
+      : "Larger losses receive more of the adjustment. Winning results stay unchanged.";
 
   function updatePlayer(
     id: number,
@@ -149,6 +182,11 @@ export default function SettlementCalculator() {
     setSelectedPlayerIds((current) =>
       current.filter((playerId) => playerId !== String(id))
     );
+    setCustomAmounts((current) => {
+      const next = { ...current };
+      delete next[String(id)];
+      return next;
+    });
   }
 
   function toggleSelectedPlayer(playerId: string) {
@@ -180,7 +218,7 @@ export default function SettlementCalculator() {
           </div>
           <p className="text-sm leading-7 text-gray-600">
             No account needed. If the totals do not match, correct the entry or
-            record exactly who agreed to cover the difference.
+            record exactly how the table agreed to allocate the difference.
           </p>
         </div>
 
@@ -341,7 +379,7 @@ export default function SettlementCalculator() {
                       <p className="mt-1 text-sm leading-6 text-gray-600">
                         The ledger is {formatSignedNet(result.difference)} out.
                         Correct a mistake above, or record how the table wants to
-                        absorb it.
+                        allocate it.
                       </p>
                     </div>
                   </div>
@@ -393,7 +431,32 @@ export default function SettlementCalculator() {
                             Choose specific players
                           </span>
                           <span className="mt-1 block text-xs leading-5 text-gray-600">
-                            Assign the difference only to selected eligible {affectedSide}.
+                            Adjust only the selected {affectedSide}. Multiple selections are weighted by result.
+                          </span>
+                        </span>
+                      </span>
+                    </label>
+                    <label
+                      className={`block cursor-pointer rounded-xl border p-4 transition ${
+                        allocationMethod === "custom"
+                          ? "border-gray-950 bg-white"
+                          : "border-gray-300 bg-transparent hover:bg-white/70"
+                      }`}
+                    >
+                      <span className="flex gap-3">
+                        <input
+                          type="radio"
+                          name="calculator-allocation"
+                          checked={allocationMethod === "custom"}
+                          onChange={() => setAllocationMethod("custom")}
+                          className="mt-1 h-4 w-4"
+                        />
+                        <span>
+                          <span className="block text-sm font-semibold text-gray-950">
+                            Enter exact amounts
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-gray-600">
+                            Advanced: specify each eligible player&apos;s exact adjustment.
                           </span>
                         </span>
                       </span>
@@ -440,6 +503,75 @@ export default function SettlementCalculator() {
                         </p>
                       ) : null}
                     </fieldset>
+                  ) : null}
+
+                  {allocationMethod === "custom" ? (
+                    <fieldset className="mt-4">
+                      <legend className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-gray-600">
+                        <Users aria-hidden className="h-3.5 w-3.5" />
+                        Exact adjustments
+                      </legend>
+                      <p className="mt-2 text-xs leading-5 text-gray-600">
+                        Assign {formatCurrency(discrepancyAmount)} without moving anyone past even.
+                      </p>
+                      <div className="mt-2 divide-y divide-gray-200 rounded-xl border border-gray-300 bg-white px-3">
+                        {result.eligiblePlayers.map((player) => (
+                          <label
+                            key={player.playerId}
+                            className="flex min-h-14 items-center justify-between gap-3 py-2 text-sm"
+                          >
+                            <span>
+                              <span className="block font-medium text-gray-800">{player.name}</span>
+                              <span className="block text-xs tabular-nums text-gray-500">
+                                Up to {formatCurrency(Math.abs(player.net))}
+                              </span>
+                            </span>
+                            <span className="relative w-28">
+                              <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                              <input
+                                aria-label={`Exact discrepancy adjustment for ${player.name}`}
+                                type="number"
+                                inputMode="decimal"
+                                min="0"
+                                max={Math.abs(player.net)}
+                                step="0.01"
+                                placeholder="0.00"
+                                value={customAmounts[player.playerId] ?? ""}
+                                onChange={(event) => setCustomAmounts((current) => ({
+                                  ...current,
+                                  [player.playerId]: event.target.value,
+                                }))}
+                                className={`${inputClass} pl-7 text-right tabular-nums`}
+                              />
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                      <p className={`mt-2 text-xs leading-5 ${result.allocationValid ? "text-emerald-700" : "text-red-700"}`}>
+                        Assigned {formatCurrency(result.customAllocatedTotal)} of {formatCurrency(discrepancyAmount)}
+                        {result.customHasInvalidAmount ? ". Each amount must stay within that player’s result." : "."}
+                      </p>
+                    </fieldset>
+                  ) : null}
+
+                  {result.allocationValid ? (
+                    <div className="mt-4 rounded-xl border border-gray-300 bg-white p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+                        Result preview
+                      </p>
+                      <ul className="mt-2 space-y-1.5 text-xs">
+                        {getPlayerNetChanges(result.baseNets, result.adjustedNets)
+                          .filter((player) => Math.abs(player.adjustment) >= 0.005)
+                          .map((player) => (
+                            <li key={player.playerId} className="flex items-baseline justify-between gap-3">
+                              <span className="font-medium text-gray-800">{player.name}</span>
+                              <span className="whitespace-nowrap tabular-nums text-gray-600">
+                                {formatSignedNet(player.before)} <strong className="text-gray-950">{formatSignedNet(player.adjustment)}</strong> → {formatSignedNet(player.final)}
+                              </span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
                   ) : null}
                 </div>
               )}
@@ -496,8 +628,8 @@ export default function SettlementCalculator() {
                   )
                 ) : (
                   <p className="mt-3 text-sm leading-6 text-gray-600">
-                    Choose players who can cover the full difference to reveal
-                    the payments.
+                    Complete the selected allocation so it covers the full
+                    difference to reveal the payments.
                   </p>
                 )}
 

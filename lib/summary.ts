@@ -1,4 +1,5 @@
 import { formatCurrency, formatSignedNet } from "./format";
+import { discrepancyAllocationLabel, getPlayerNetChanges } from "./settlement";
 import type { DiscrepancyAllocation, PlayerNet, Transfer } from "./settlement";
 import type { Game } from "./types";
 
@@ -11,6 +12,7 @@ export interface SummaryInput {
   totalBoughtIn: number;
   discrepancyAllocation?: DiscrepancyAllocation | null;
   discrepancyAmount?: number;
+  beforeDiscrepancyNets?: PlayerNet[];
 }
 
 /**
@@ -26,6 +28,7 @@ export function buildSummaryText({
   totalBoughtIn,
   discrepancyAllocation,
   discrepancyAmount = 0,
+  beforeDiscrepancyNets,
 }: SummaryInput): string {
   const lines: string[] = [
     `Mainpot — ${game.name}`,
@@ -51,10 +54,22 @@ export function buildSummaryText({
   lines.push("");
   if (discrepancyAllocation && discrepancyAmount > 0.004) {
     lines.push(`Discrepancy: ${formatCurrency(discrepancyAmount)}`);
-    lines.push(`Allocation: ${discrepancyAllocation.method === "proportional" ? "split proportionally" : "assigned to selected players"}`);
+    lines.push(`Allocation: ${discrepancyAllocationLabel(discrepancyAllocation.method)}`);
+    if (beforeDiscrepancyNets) {
+      const affectedPlayers = getPlayerNetChanges(beforeDiscrepancyNets, nets)
+        .filter((player) => Math.abs(player.adjustment) >= 0.005);
+      if (affectedPlayers.length > 0) {
+        lines.push("Result changes:");
+        for (const player of affectedPlayers) {
+          lines.push(
+            `${player.name}: ${formatSignedNet(player.before)} ${formatSignedNet(player.adjustment)} discrepancy → ${formatSignedNet(player.final)}`
+          );
+        }
+      }
+    }
     lines.push("");
   }
-  lines.push("Net:");
+  lines.push("Final net:");
   for (const net of nets) {
     lines.push(`${net.name}: ${formatSignedNet(net.net)}`);
   }

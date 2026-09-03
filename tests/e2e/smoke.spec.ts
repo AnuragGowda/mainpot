@@ -114,6 +114,11 @@ test.describe("public local-mode experience", () => {
     await expect(fullPlan).toHaveJSProperty("open", false);
     await expect(page.getByText(/Payment tracking starts after the lock/)).toBeVisible();
     await expect(editCashOutsButton).toBeVisible();
+    await expect(page.getByRole("region", { name: "You're even." })).toHaveCount(0);
+    await fullPlanSummary.click();
+    await expect(fullPlan.getByRole("tab", { name: "Fewest payments" })).toBeDisabled();
+    await expect(fullPlan.getByRole("tab", { name: "Bank" })).toBeDisabled();
+    await fullPlanSummary.click();
     expect(await finalizeButton.evaluate((button, plan) => Boolean(
       button.compareDocumentPosition(plan as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
     ), await fullPlan.elementHandle())).toBe(true);
@@ -126,7 +131,10 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByRole("alertdialog", { name: "Lock the final settlement?" })).toBeVisible();
     await page.getByRole("button", { name: "Lock settlement" }).click();
     await expect(page.getByText("Ended", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Open your game card" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "You're even." })).toBeVisible();
+    const gameCardButton = page.getByRole("button", { name: "Customize and share your game card" });
+    await expect(gameCardButton).toBeVisible();
+    await expect(gameCardButton.getByText("Customize & share", { exact: true })).toBeVisible();
     await expect(fullPlanSummary).toContainText("Full settlement plan");
     await expect(fullPlanSummary).toContainText("Host view");
     await expect(fullPlan).toHaveJSProperty("open", false);
@@ -150,7 +158,7 @@ test.describe("public local-mode experience", () => {
     await expect(paymentRecord).not.toHaveAttribute("open", "");
     await paymentRecord.getByText("Payment record", { exact: true }).click();
     await expect(paymentRecord).toHaveAttribute("open", "");
-    const recapButton = page.getByRole("button", { name: "Open your game card" });
+    const recapButton = page.getByRole("button", { name: "Customize and share your game card" });
     expect(await recapButton.evaluate((card, plan) => Boolean(
       card.compareDocumentPosition(plan as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
     ), await fullPlan.elementHandle())).toBe(true);
@@ -215,9 +223,38 @@ test.describe("public local-mode experience", () => {
 
     await expect(page.getByText("Discrepancy decision", { exact: true })).toBeVisible();
     await expect(page.getByRole("alertdialog")).toHaveCount(0);
-    await page.getByRole("button", { name: "Review adjusted settlement" }).click();
+    const reviewButton = page.getByRole("button", { name: "Review adjusted settlement" });
+    const allocationPreview = page.getByRole("group", { name: "Discrepancy impact" });
+    await expect(allocationPreview).toContainText("all affected players, proportional");
+
+    await page.getByRole("radio", { name: /Enter exact amounts/ }).check();
+    await expect(reviewButton).toBeDisabled();
+    await page.getByRole("spinbutton", { name: "Exact discrepancy adjustment for Casey" }).fill("1");
+    await expect(allocationPreview).toContainText("Discrepancy: $1.00 · exact amounts");
+    await expect(reviewButton).toBeEnabled();
+    await reviewButton.click();
     await expect(page.getByRole("region", { name: "Lock this settlement" })).toBeVisible();
-    await expect(page.locator('[data-testid="full-settlement-plan"]')).toHaveJSProperty("open", false);
+    const discrepancyImpact = page.getByRole("group", { name: "Discrepancy impact" });
+    await expect(discrepancyImpact).toBeVisible();
+    await expect(discrepancyImpact).toContainText("Discrepancy: $1.00 · exact amounts");
+    await expect(discrepancyImpact.getByRole("listitem", {
+      name: "Casey: -$1.00 before, +$1.00 adjustment, $0.00 final",
+    })).toBeVisible();
+
+    const fullPlan = page.locator('[data-testid="full-settlement-plan"]');
+    await expect(fullPlan).toHaveJSProperty("open", false);
+    await page.getByRole("button", { name: "Finalize game" }).click();
+    await page.getByRole("button", { name: "Lock settlement" }).click();
+    await expect(page.getByRole("heading", { name: "You're even." })).toBeVisible();
+    await expect(page.getByText("+$1.00 discrepancy adjustment · was -$1.00", { exact: true })).toBeVisible();
+
+    await fullPlan.locator(":scope > summary").click();
+    const paymentRecord = fullPlan.locator("summary").filter({ hasText: "Payment record" }).locator("..");
+    await paymentRecord.getByText("Payment record", { exact: true }).click();
+    await expect(paymentRecord.locator("pre")).toContainText(
+      "Casey: -$1.00 +$1.00 discrepancy → $0.00",
+    );
+    await expect(paymentRecord.locator("pre")).toContainText("Final net:");
   });
 
   test("keeps the complete game flow usable on a 320px-wide screen", async ({ page }) => {

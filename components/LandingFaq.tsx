@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "What if the bank does not balance?",
-    answer: "Mainpot shows the exact difference between money in and final stacks before settlement. The host can correct the ledger, or explicitly allocate an intentional discrepancy—proportionally across eligible results or to players the table selects. The decision appears in the settlement record.",
+    answer: "Mainpot shows the exact difference between money in and final stacks before settlement. The host can correct the ledger, adjust all affected results proportionally, choose specific players, or record exact agreed amounts. Every adjustment appears in the settlement record.",
   },
 ];
 
