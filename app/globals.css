@@ -105,6 +105,13 @@ body {
   opacity: 0.96;
 }
 
+.ante-open-source-dots {
+  background-image: radial-gradient(rgba(17, 24, 39, 0.22) 0.9px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse 76% 118% at 50% 50%, transparent 10%, rgba(0, 0, 0, 0.9) 62%, transparent 100%);
+  pointer-events: none;
+}
+
 .ante-hero {
   isolation: isolate;
 }

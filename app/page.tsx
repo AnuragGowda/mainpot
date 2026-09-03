@@ -149,6 +149,7 @@ export default function HomePage() {
         </div>
 
         <section className="relative px-4 pb-16 sm:px-6 md:pb-24">
+          <div aria-hidden="true" className="ante-open-source-dots absolute inset-x-4 inset-y-0 z-20 rounded-2xl sm:inset-x-6" />
           <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-5 rounded-2xl border border-gray-200 bg-white/80 px-6 py-6 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-8">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Open source</p>
