@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type { CharacterDirection, CharacterKind } from '@/lib/recap-characters';
 
 const ink = '#202421';
@@ -14,24 +15,42 @@ export function LittleChip({ x, y, angle = 0, dark = false, scale = 1 }: {x:numb
   </g>;
 }
 
+/** Hands are drawn around a shared wrist so poses and props stay connected. */
+function Glove({ x, y, grip = false, angle = 0 }: { x: number; y: number; grip?: boolean; angle?: number }) {
+  return <g transform={`translate(${x} ${y}) rotate(${angle})`} fill="white" stroke={ink} strokeWidth="4">
+    {grip ? <>
+      <path d="M-10 3C-20-4-20-20-11-25H8C20-25 22-12 15-3L9 3Z"/>
+      <path d="M-10-15H4C12-15 12-5 5-4H-2" fill="none"/>
+    </> : <>
+      <path d="M-11 2C-25-7-34-21-28-27C-23-32-17-26-12-20L-17-41C-19-51-7-54-4-43L1-25L5-45C7-54 19-51 17-41L13-21C20-31 29-28 27-20C24-9 17-2 10 2Z"/>
+      <path d="M-7-13Q1-18 8-12" fill="none" strokeWidth="3"/>
+    </>}
+    <rect x="-12" y="0" width="24" height="10" rx="4"/>
+  </g>;
+}
+
 /** Original vector family, drawn in a shared 800 x 620 illustration space. */
 export default function RecapCharacterArt({kind, direction}: {kind:CharacterKind; direction:CharacterDirection}) {
   const pocket = direction === 'pocket';
+  const bodyClip = `recap-body-${useId().replace(/:/g, '')}`;
+  const holding = kind === 'encore' || kind === 'marathoner' || kind === 'correspondent';
   return <g strokeLinecap="round" strokeLinejoin="round">
     <ellipse cx="400" cy="568" rx="219" ry="23" fill={ink} opacity=".06"/>
     <circle cx="400" cy="300" r="255" fill={lilac} opacity={pocket ? '.38' : '.5'}/>
     <circle cx="400" cy="300" r="283" fill="none" stroke={ink} strokeOpacity=".07" strokeDasharray={pocket ? '3 16' : undefined}/>
     <g transform={`translate(400 308) rotate(${kind === 'sponsor' ? 7 : -7})`}>
-      {/* Shoes and elastic limbs give the entire family the same silhouette. */}
+      <defs><clipPath id={bodyClip}>
+        {pocket ? <circle r="171"/> : <rect x="-143" y="-181" width="286" height="370" rx="35"/>}
+      </clipPath></defs>
+      {/* Arms end at the wrist; feet and props share the same attachment points. */}
       <g fill="none" stroke={ink} strokeWidth="13">
         <path d="M-68 157q-18 45-9 81M64 157q13 45 3 81"/>
-        <path d={kind === 'sponsor' ? 'M-133 0q-87 30-88-27M133 0q78 28 98-32' : 'M-133 0q-93 18-90-72M133 0q73 52 86 4'}/>
+        <path d={kind === 'sponsor' ? 'M-133 0Q-212 32-222-32' : 'M-133 0Q-218 28-222-62'}/>
+        <path d="M133 0Q202 51 224 8"/>
       </g>
       <path d="M-81 222q-42 2-48 25q24 15 68 0l-1-25M64 222q44 0 51 24q-24 16-68 0l-1-24" fill={ink}/>
-      <g fill="white" stroke={ink} strokeWidth="5">
-        <path d="M-226-61q-21-4-26-22q-3-17 9-20q10-2 16 16q-9-29 5-32q14 0 17 29q1-19 13-16q19 8-8 40Z"/>
-        <path d="M216 5q13 20 30 4q17-19 7-26q-9-5-21 8q14-27 1-32q-13-1-19 26q-5-13-15-6q-11 14 17 26Z"/>
-      </g>
+      {kind !== 'sponsor' && <Glove x={-222} y={-62} angle={-12}/>}
+      {!holding && <Glove x={224} y={8} angle={18}/>}
       {pocket ? <>
         <circle cy="8" r="174" fill={ink}/><circle r="174" fill={lilac} stroke={ink} strokeWidth="5"/>
         <circle r="151" fill="none" stroke="white" strokeWidth="19" strokeDasharray="31 28"/>
@@ -40,42 +59,58 @@ export default function RecapCharacterArt({kind, direction}: {kind:CharacterKind
         <rect x="-140" y="-174" width="292" height="376" rx="38" fill={ink} opacity=".12"/>
         <rect x="-146" y="-184" width="292" height="376" rx="38" fill="white" stroke={ink} strokeWidth="5"/>
         <text x="-116" y="-130" fontSize="40" fontWeight="600" fill={ink}>A</text>
-        <text x="106" y="156" fontSize="40" fontWeight="600" fill={ink} transform="rotate(180 106 142)">A</text>
+        <g transform="rotate(180)"><text x="-116" y="-130" fontSize="40" fontWeight="600" fill={ink}>A</text></g>
       </>}
       {/* One suit per playing card; the face sits above, never replaces the suit. */}
       <path d={kind === 'sponsor' ? heart : CHARACTER_SPADE} fill={kind === 'sponsor' ? '#ad6170' : ink} transform="translate(-40 18) scale(3.35)"/>
-      <g fill={ink}>
+      <g fill={ink} visibility={kind === 'social' ? 'hidden' : undefined}>
         {kind === 'encore' ? <path d="M-54-57q16-19 32 0" fill="none" stroke={ink} strokeWidth="6"/> : <ellipse cx="-38" cy="-60" rx="10" ry="21"/>}<ellipse cx="38" cy="-60" rx="10" ry="21"/>
       </g>
       <path d={kind === 'baron' ? 'M-20-22h40' : 'M-24-30q24 25 48 0'} fill="none" stroke={ink} strokeWidth="5"/>
       {kind === 'mayor' && <>
         <path d="M-114-173l14-90h180l21 90Z" fill={ink}/><path d="M-142-172q135-28 262 0" stroke={ink} strokeWidth="19"/>
         <path d="M-104-204h193" stroke={lilac} strokeWidth="21"/>
-        <path d="M-141 88l183 101h82l-265-151Z" fill={lilac}/>
-        <circle cx="-94" cy="105" r="18" fill={ink}/><path d="m-101 105 5 5 9-11" fill="none" stroke="white" strokeWidth="3"/>
+        <g clipPath={`url(#${bodyClip})`}>
+          <path d="M-174 44 154 171 135 205-190 79Z" fill={lilac}/>
+          <circle cx="-94" cy="94" r="18" fill={ink}/><path d="m-101 94 5 5 9-11" fill="none" stroke="white" strokeWidth="3"/>
+        </g>
       </>}
       {kind === 'sponsor' && <>
         <path d="M-38-122v-38l38 19 38-19v38l-38-18Z" fill={ink}/><circle cy="-141" r="10" fill={lilac}/>
-        <path d="M-265-36h109" stroke={ink} strokeWidth="7"/><LittleChip x={-210} y={-77} scale={.7} angle={27}/>
+        <g transform="translate(-222 -32)">
+          <path d="M-11 6Q-18-10-7-17L21-24Q30-23 25-15L8-6H-5" fill="white" stroke={ink} strokeWidth="4"/>
+          <rect x="-13" y="2" width="24" height="10" rx="4" fill="white" stroke={ink} strokeWidth="4"/>
+          <path d="M-48-29H58" stroke={ink} strokeWidth="7"/>
+          {[0, 1, 2].map(i => <rect key={i} x="-21" y={-43-i*12} width="51" height="12" rx="5" fill={i === 1 ? 'white' : lilac} stroke={ink} strokeWidth="3"/>)}
+        </g>
       </>}
       {kind === 'baron' && <>
         <circle cx="38" cy="-60" r="31" fill="none" stroke={ink} strokeWidth="4"/>
         <path d="M68-52q55 102 28 163" fill="none" stroke={ink} strokeWidth="3"/>
-        <path d="M-105-181v-42l43 16 42-37 42 37 43-16v42Z" fill={lilac} stroke={ink} strokeWidth="5"/>
+        <path d="M-85-169-99-220-51-201 0-241 51-201 99-220 85-169Z" fill={lilac} stroke={ink} strokeWidth="5"/>
       </>}
       {kind === 'encore' && <>
-        <path d="M-127-175q125-31 252 0l-12 35q-117-28-226 0Z" fill={lilac} stroke={ink} strokeWidth="4"/>
-        <path d="m-111-153-54 28 9-43 40-10" fill={lilac} stroke={ink} strokeWidth="4"/>
-        <path d="M-137 112q134 51 273 0v45q-135 62-273 0Z" fill={ink}/>
-        <path d="m-31 145-20-19v38l20-19 19 19v-38Z" fill={lilac}/>
-        <g transform="translate(217 35) rotate(-15)"><rect x="-6" width="12" height="104" rx="6" fill={ink}/><rect x="-6" width="12" height="25" rx="3" fill={lilac}/></g>
+        <g clipPath={`url(#${bodyClip})`}>
+          <path d={pocket ? 'M-150-113Q0-205 150-113L150-142Q0-226-150-142Z' : 'M-146-148Q0-180 146-148V-179Q0-211-146-179Z'} fill={lilac} stroke={ink} strokeWidth="4"/>
+          <path d="M-174 110Q0 183 174 110V172Q0 224-174 172Z" fill={ink}/>
+          <path d="M-5 148-31 131V165L-5 152M5 148 31 131V165L5 152" fill={lilac}/><circle cy="150" r="7" fill={lilac}/>
+        </g>
+        <g transform="translate(224 8) rotate(18)">
+          <rect x="-6" y="-78" width="12" height="132" rx="4" fill={ink}/><rect x="-6" y="-78" width="12" height="24" rx="3" fill={lilac} stroke={ink} strokeWidth="2"/>
+        </g>
       </>}
       {kind === 'marathoner' && <>
-        <path d="M-144-173q145-37 289 0v26q-145-36-289 0Z" fill={lilac}/>
-        <path d="M-142-163q145-36 285 0" fill="none" stroke="white" strokeWidth="5"/>
-        <path d="m133-167 55-14-11 34-37-9 41 38-25 16-28-51" fill={lilac} stroke={ink} strokeWidth="3"/>
-        <path d="M-57-178q8-27 29-21m19 14q14-33 33-26m2 33q22-23 39-10" stroke={ink} strokeWidth="6" fill="none"/>
-        <g transform="translate(196 23)"><circle r="29" fill="white" stroke={ink} strokeWidth="5"/><path d="M0-16v17l13 7M-7-37H7" stroke={ink} strokeWidth="4" fill="none"/></g>
+        <g clipPath={`url(#${bodyClip})`}>
+          <path d={pocket ? 'M-150-120Q0-210 150-120L150-148Q0-231-150-148Z' : 'M-146-145Q0-180 146-145V-173Q0-208-146-173Z'} fill={lilac} stroke={ink} strokeWidth="3"/>
+          <path d={pocket ? 'M-150-136Q0-222 150-136' : 'M-146-159Q0-194 146-159'} fill="none" stroke="white" strokeWidth="5"/>
+        </g>
+        <g transform={pocket ? 'translate(113 -119)' : 'translate(140 -159)'} fill={lilac} stroke={ink} strokeWidth="3">
+          <path d="M0 0 42-12 31 12Z"/><path d="M0 0 30 36 10 40Z"/>
+        </g>
+        <g transform="translate(224 57)">
+          <path d="M-8-38V-48H8V-38M-8-49H8" stroke={ink} strokeWidth="5" fill="none"/>
+          <circle r="29" fill="white" stroke={ink} strokeWidth="5"/><path d="M0-16v17l13 7" stroke={ink} strokeWidth="4" fill="none"/>
+        </g>
         <path d="m-110 238 26-4m144 3 24 3" stroke={lilac} strokeWidth="7"/>
       </>}
       {kind === 'correspondent' && <>
@@ -84,13 +119,15 @@ export default function RecapCharacterArt({kind, direction}: {kind:CharacterKind
         <rect x="-39" y="-221" width="74" height="40" rx="5" fill="white" stroke={ink} strokeWidth="3"/>
         <path d="M-21-206H17m-38 12H6" stroke={ink} strokeWidth="4"/>
         <g fill="none" stroke={ink} strokeWidth="4"><circle cx="-38" cy="-60" r="28"/><circle cx="38" cy="-60" r="28"/><path d="M-10-62h20"/></g>
-        <g transform="translate(211 37) rotate(12)"><rect x="-30" y="-6" width="69" height="92" rx="8" fill={lilac} stroke={ink} strokeWidth="4"/><path d="M-16 17h39m-39 15h30m-30 15h36" stroke={ink} strokeWidth="3"/><path d="m26-17 7-7 8 7-21 35-9 4 1-10Z" fill="white" stroke={ink} strokeWidth="3"/></g>
+        <g transform="translate(224 8) rotate(8)"><rect x="-30" y="-28" width="69" height="108" rx="8" fill={lilac} stroke={ink} strokeWidth="4"/><path d="M-16 17h39m-39 15h30m-30 15h36" stroke={ink} strokeWidth="3"/><path d="m26-17 7-7 8 7-21 35-9 4 1-10Z" fill="white" stroke={ink} strokeWidth="3"/></g>
       </>}
       {kind === 'social' && <>
         <path d="M-72-78h56l-7 36h-40ZM16-78h56l-9 36H23Z" fill={ink}/><path d="M-16-67h32" stroke={ink} strokeWidth="5"/>
-        <path d="M-90-188q92-75 179 0" fill={lilac} stroke={ink} strokeWidth="5"/>
-        <path d="M16-193q71-16 115 5" stroke={ink} strokeWidth="9"/>
+        <path d="M-92-165Q-67-230 7-222Q64-217 88-166Z" fill={lilac} stroke={ink} strokeWidth="5"/>
+        <path d="M-2-168Q69-189 126-163Q70-149-2-168Z" fill={ink}/>
+        <path d="M7-221Q27-202 27-183" fill="none" stroke={ink} strokeWidth="3"/>
       </>}
+      {holding && <Glove x={224} y={8} grip angle={kind === 'encore' ? 18 : 0}/>}
     </g>
     <LittleChip x={134} y={470} angle={-29} dark scale={1.15}/>
     <LittleChip x={674} y={467} angle={24} scale={.88}/>

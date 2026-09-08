@@ -59,7 +59,7 @@ function durationInMinutes(snapshot: GameSnapshot): number | undefined {
     return undefined;
   }
 
-  return Math.round((endedAt - startedAt) / 60_000);
+  return Math.floor((endedAt - startedAt) / 60_000);
 }
 
 /**
@@ -79,7 +79,7 @@ export function deriveRecapData(
   }
 
   const sortedNets = [...nets].sort(
-    (left, right) => right.net - left.net || left.name.localeCompare(right.name)
+    (left, right) => right.net - left.net || (left.playerId < right.playerId ? -1 : left.playerId > right.playerId ? 1 : 0)
   );
   let previousNet: number | undefined;
   let previousRank = 0;

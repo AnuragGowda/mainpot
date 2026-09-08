@@ -69,3 +69,19 @@ describe("getRecapDisplayPlayers", () => {
     expect(recap.players).toHaveLength(3);
   });
 });
+
+
+describe("recap input stability", () => {
+  it("orders tied results by immutable player ID, independent of names and input ordering", () => {
+    const nets = [{ playerId: "b", name: "A", net: 0 }, { playerId: "a", name: "Z", net: 0 }];
+    const first = deriveRecapData(snapshot, nets, []);
+    const second = deriveRecapData(snapshot, [...nets].reverse(), []);
+    expect(first.players).toEqual(second.players);
+    expect(first.players.map(p => p.id)).toEqual(["a", "b"]);
+  });
+  it("does not round a game just under four hours into a marathon, or invent missing duration", () => {
+    const game = { ...snapshot.game, ended_at: "2026-08-20T21:59:50.000Z" };
+    expect(deriveRecapData({ ...snapshot, game }, [], []).durationMinutes).toBe(239);
+    expect(deriveRecapData({ ...snapshot, game: { ...game, ended_at: null } }, [], []).durationMinutes).toBeUndefined();
+  });
+});

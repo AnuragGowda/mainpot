@@ -1,20 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Maximize2, Minimize2, Shuffle, Share2, X } from "lucide-react";
+import { Maximize2, Minimize2, Share2, X } from "lucide-react";
 import { renderRecapPng } from "@/lib/recap-image";
-import { getShareableRecapCaption } from "@/lib/recap-personality";
+import { getRecapCharacter, getRecapSubject } from "@/lib/recap-characters";
 import SuitIcon from "@/components/SuitIcon";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import {
-  defaultRecapPrivacy,
   deriveRecapData,
   type RecapPrivacy,
 } from "@/lib/recap";
 import type { PlayerNet, Transfer } from "@/lib/settlement";
 import type { GameSnapshot } from "@/lib/types";
 import RecapStoryCard from "./RecapStoryCard";
+import RecapReveal, { type RecapRevealHandle } from "./RecapReveal";
+import { readRecapPrivacy, recapSessionKey, rememberRecapPrivacy } from "@/lib/recap-session";
 
 interface GameRecapDialogProps {
   snapshot: GameSnapshot;
@@ -30,14 +31,14 @@ function downloadBlob(blob: Blob, filename: string) {
   anchor.href = url;
   anchor.download = filename;
   anchor.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /**
  * Finished-game social recap. The link is a public landing-page URL only;
  * room codes and private ledger URLs never appear in this dialog.
  */
-export default function GameRecapDialog({
+function GameRecapEditor({
   snapshot,
   nets,
   transfers,
@@ -49,14 +50,15 @@ export default function GameRecapDialog({
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const data = deriveRecapData(snapshot, nets, transfers);
-  const [privacy, setPrivacy] = useState<RecapPrivacy>(defaultRecapPrivacy);
-  const [captionIndex, setCaptionIndex] = useState(0);
+  const subjectId = featuredPlayerId ?? getRecapSubject(data)?.id;
+  const sessionKey = recapSessionKey(data.gameId, subjectId);
+  const [privacy, setPrivacy] = useState<RecapPrivacy>(() => readRecapPrivacy(sessionKey));
+  const revealRef = useRef<RecapRevealHandle>(null);
+  const exportLock = useRef(false);
   const [exporting, setExporting] = useState(false);
   const [previewExpanded, setPreviewExpanded] = useState(false);
-  const featuredPlayer = data.players.find((player) => player.id === featuredPlayerId)
-    ?? data.players[0]
-    ?? null;
-  const caption = getShareableRecapCaption(data, featuredPlayer?.id, captionIndex, privacy);
+  const character = getRecapCharacter(data, privacy, subjectId);
+  const caption = { title: character.title.join(" "), line: character.line };
 
   useEffect(() => {
     const previouslyFocused = document.activeElement instanceof HTMLElement
@@ -72,31 +74,39 @@ export default function GameRecapDialog({
     };
   }, []);
 
-  function handleDialogKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      onClose();
-      return;
-    }
-    if (event.key !== "Tab") return;
+  useEffect(() => {
+    function handleDialogKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
 
-    const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    );
-    if (!focusable?.length) {
-      event.preventDefault();
-      return;
+      const focusable = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ) ?? []).filter(element => element.getClientRects().length > 0);
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!dialogRef.current?.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  }
+
+    document.addEventListener("keydown", handleDialogKeyDown);
+    return () => document.removeEventListener("keydown", handleDialogKeyDown);
+  }, [onClose]);
 
   async function createPng() {
     if (!svgRef.current) throw new Error("The recap preview is still loading.");
@@ -104,6 +114,9 @@ export default function GameRecapDialog({
   }
 
   async function handleShare() {
+    if (exportLock.current) return;
+    exportLock.current = true;
+    revealRef.current?.finish();
     setExporting(true);
     try {
       const image = await createPng();
@@ -125,23 +138,22 @@ export default function GameRecapDialog({
     } catch (error) {
       toast(error instanceof Error ? error.message : "Couldn't share the recap.", "error");
     } finally {
+      exportLock.current = false;
       setExporting(false);
     }
   }
 
+  function updatePrivacy(next: RecapPrivacy) {
+    rememberRecapPrivacy(sessionKey, next);
+    setPrivacy(next);
+  }
+
   const setBoolean = (key: "showResult" | "showPlayerCount" | "showDuration" | "showRebuys", value: boolean) => {
-    setPrivacy((current) => ({
-      ...current,
-      [key]: value,
-    }));
+    updatePrivacy({ ...privacy, [key]: value });
   };
 
   function setAmountsAndLosses(value: boolean) {
-    setPrivacy((current) => ({
-      ...current,
-      showDollarAmounts: value,
-      showLosses: value,
-    }));
+    updatePrivacy({ ...privacy, showDollarAmounts: value, showLosses: value });
   }
 
   return (
@@ -158,7 +170,6 @@ export default function GameRecapDialog({
         aria-modal="true"
         aria-labelledby="game-recap-title"
         aria-describedby="game-recap-description"
-        onKeyDown={handleDialogKeyDown}
         className="mx-auto flex h-[100dvh] w-full max-w-6xl flex-col overflow-hidden bg-[#f7f8f6] shadow-2xl focus:outline-none sm:h-[min(100dvh-2rem,820px)] sm:rounded-2xl"
       >
         <header className="flex shrink-0 items-start justify-between border-b border-[#e3e7e3] bg-white px-4 py-3.5 sm:px-7 sm:py-5">
@@ -168,7 +179,7 @@ export default function GameRecapDialog({
             </span>
             <div>
               <h2 id="game-recap-title" className="mt-0.5 text-xl font-semibold tracking-[-0.03em] text-gray-950 sm:text-2xl">Your game card</h2>
-              <p id="game-recap-description" className="mt-1 text-sm text-gray-500">Pick a title and the stats to share.</p>
+              <p id="game-recap-description" className="mt-1 text-sm text-gray-500">Meet your character. Choose the stats to share.</p>
             </div>
           </div>
           <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="Close game recap" className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
@@ -182,31 +193,28 @@ export default function GameRecapDialog({
             <div aria-hidden className="absolute -right-24 bottom-20 h-72 w-72 rounded-full bg-[#e4dfff]/65 blur-3xl" />
             <div className="mx-auto w-full max-w-[560px]">
               <div className={`relative mx-auto rounded-2xl border border-[#e3e7e3] bg-white/70 p-1.5 shadow-sm lg:w-[min(30vw,340px)] lg:rounded-[24px] lg:p-3 ${previewExpanded ? "w-[min(76vw,300px)]" : "w-[min(38vw,148px)]"}`}>
+              <RecapReveal ref={revealRef} sessionKey={sessionKey} description={`${caption.title}. ${caption.line}`}>
               <RecapStoryCard
                 ref={svgRef}
                 data={data}
                 privacy={privacy}
                 mode="summary"
-                featuredPlayerId={featuredPlayer?.id}
-                captionIndex={captionIndex}
+                featuredPlayerId={subjectId}
                 decorative
               />
+              </RecapReveal>
               </div>
               <div className="relative mx-auto mt-3 flex max-w-sm justify-center gap-2">
-                <button type="button" disabled={exporting} onClick={() => setCaptionIndex((index) => index + 1)} className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-800 transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 disabled:opacity-50">
-                  <Shuffle aria-hidden size={15} /> Try another title
-                </button>
                 <button type="button" onClick={() => setPreviewExpanded((value) => !value)} aria-expanded={previewExpanded} className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-800 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 lg:hidden">
                   {previewExpanded ? <Minimize2 aria-hidden size={15} /> : <Maximize2 aria-hidden size={15} />}
                   {previewExpanded ? "Shrink" : "Enlarge"} preview
                 </button>
               </div>
-              <span role="status" className="sr-only">{caption.title}. {caption.line}</span>
             </div>
           </div>
 
           <aside className="min-w-0 space-y-5 border-t border-[#e3e7e3] bg-white p-4 lg:overflow-y-auto lg:border-l lg:border-t-0 lg:p-6">
-            <fieldset>
+            <fieldset disabled={exporting}>
               <legend className="text-sm font-semibold text-gray-900">What can people see?</legend>
               <p className="mt-1 text-sm leading-5 text-gray-500">Table and player names always stay private.</p>
               <div className="mt-3 grid grid-cols-2 gap-x-4 lg:grid-cols-1">
@@ -244,4 +252,9 @@ export default function GameRecapDialog({
       </div>
     </div>
   );
+}
+
+/** Reset editor preferences when the game or requested player changes. */
+export default function GameRecapDialog(props: GameRecapDialogProps) {
+  return <GameRecapEditor key={recapSessionKey(props.snapshot.game.id, props.featuredPlayerId)} {...props} />;
 }

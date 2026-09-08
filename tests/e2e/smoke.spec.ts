@@ -187,19 +187,18 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByRole("checkbox", { name: "Show amounts and losses" })).toBeVisible();
     await expect(page.getByRole("checkbox", { name: "Show player names" })).toHaveCount(0);
     const recapGraphic = page.getByRole("dialog", { name: "Your game card" }).locator("svg[viewBox='0 0 1080 1920']");
-    await expect(recapGraphic).toContainText("The Break-Even Baron");
-    await page.getByRole("button", { name: "Try another title" }).click();
-    await expect(recapGraphic).toContainText("The Human Chop Pot");
-    await expect(recapGraphic).toContainText("Everybody wins. Especially nobody.");
-    await expect(recapGraphic).toContainText("What’s your poker alter ego?");
+    await expect(page.locator('[data-recap-reveal]')).toHaveAttribute('data-recap-reveal', 'complete');
+    await expect(recapGraphic).toContainText(/The Break-Even Baron|The Table Celebrity|The Group Chat Correspondent/);
+    await expect(page.getByRole("button", { name: "Try another title" })).toHaveCount(0);
+    await expect(recapGraphic).toContainText("Good nights make great characters.");
     await expect(recapGraphic).not.toContainText("Friday test game");
     await expect(recapGraphic).not.toContainText("Casey");
     await expect(recapGraphic).toContainText("$20");
     await page.getByRole("checkbox", { name: "Show amounts and losses" }).uncheck();
     await expect(recapGraphic).not.toContainText("$");
     await expect(recapGraphic).not.toContainText("NET RESULT");
-    await expect(recapGraphic).not.toContainText("The Human Chop Pot");
-    await expect(recapGraphic).toContainText("The Poker Face");
+    await expect(recapGraphic).not.toContainText("The Break-Even Baron");
+    await expect(recapGraphic).toContainText(/The Table Celebrity|The Group Chat Correspondent/);
     await page.getByRole("checkbox", { name: "Show player count" }).uncheck();
     await expect(recapGraphic).not.toContainText("PLAYERS");
     await page.getByRole("checkbox", { name: "Show game duration" }).uncheck();
@@ -222,7 +221,15 @@ test.describe("public local-mode experience", () => {
     expect(png.subarray(1, 4).toString()).toBe("PNG");
     expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([2160, 3840]);
 
+    const sharedCardText = await recapGraphic.textContent();
     await page.getByRole("button", { name: "Close game recap" }).click();
+    await recapButton.click();
+    await expect(page.locator('[data-recap-reveal]')).toHaveAttribute('data-recap-reveal', 'complete');
+    await expect(page.getByRole('button', { name: 'Skip reveal' })).toHaveCount(0);
+    await expect(recapGraphic).toHaveText(sharedCardText!);
+    await expect(page.getByRole('checkbox', { name: 'Show player count' })).not.toBeChecked();
+    await expect(page.getByRole('checkbox', { name: 'Show game duration' })).not.toBeChecked();
+    await page.getByRole('button', { name: 'Close game recap' }).click();
 
     await expect(page.getByRole("button", { name: "Edit cash-outs" })).toHaveCount(0);
     await expect(page.getByRole("spinbutton", { name: "Cash-out amount for Casey" })).toHaveCount(0);
