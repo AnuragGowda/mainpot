@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getRecapPersona, recapOutcomeForPlayer, recapPersonaCount } from "./recap-personality";
-import type { RecapData } from "./recap";
+import { getRecapPersona, getShareableRecapCaption, recapOutcomeForPlayer, recapPersonaCount } from "./recap-personality";
+import { defaultRecapPrivacy, type RecapData } from "./recap";
 
 const data: RecapData = {
   gameId: "game-1",
@@ -38,5 +38,31 @@ describe("getRecapPersona", () => {
     expect(recapPersonaCount(outcome)).toBeGreaterThanOrEqual(10);
     expect(getRecapPersona(data, "a", 10, false))
       .toEqual(getRecapPersona(data, "a", 0, false));
+  });
+});
+
+describe("getShareableRecapCaption", () => {
+  it("keeps real names off the social card even when legacy name display is enabled", () => {
+    const caption = getShareableRecapCaption(data, "a", 0, { ...defaultRecapPrivacy, showPlayerNames: true });
+    expect(caption.title).toBe("Mayor of Value Town");
+    expect(JSON.stringify(caption)).not.toContain("Alex");
+    expect(JSON.stringify(caption)).not.toContain(data.gameName);
+  });
+
+  it.each([
+    { showDollarAmounts: false },
+    { showResult: false },
+    { showLosses: false },
+    { hiddenPlayerIds: ["e"] },
+  ])("does not reveal a hidden loss through the joke: %j", (privacy) => {
+    const caption = getShareableRecapCaption(data, "e", 0, { ...defaultRecapPrivacy, ...privacy });
+    expect(caption.title).toBe("The Table Celebrity");
+  });
+
+  it("uses a neutral joke with no players and keeps the selected variant stable", () => {
+    expect(getShareableRecapCaption({ ...data, players: [] }, undefined, 1, defaultRecapPrivacy).title)
+      .toBe("The Poker Face");
+    expect(getShareableRecapCaption(data, "a", 1, defaultRecapPrivacy))
+      .toEqual(getShareableRecapCaption(data, "a", 11, defaultRecapPrivacy));
   });
 });

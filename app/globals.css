@@ -93,7 +93,8 @@ body {
 }
 
 .ante-section-atmosphere-cta {
-  height: calc(100% + 8rem);
+  top: -3rem;
+  height: calc(100% + 3rem);
   background:
     radial-gradient(ellipse 42% 76% at 8% 48%, rgba(216, 238, 255, 0.56), transparent 76%),
     radial-gradient(ellipse 40% 75% at 92% 50%, rgba(227, 216, 255, 0.48), transparent 78%);
@@ -102,15 +103,9 @@ body {
 .ante-section-atmosphere-cta::after {
   background-image: radial-gradient(rgba(65, 76, 96, 0.4) 1px, transparent 1.2px);
   mask-image: radial-gradient(ellipse 70% 94% at 50% 52%, transparent 12%, rgba(0, 0, 0, 0.92) 45%, transparent 90%);
-  opacity: 0.96;
+  opacity: 0.45;
 }
 
-.ante-open-source-dots {
-  background-image: radial-gradient(rgba(17, 24, 39, 0.22) 0.9px, transparent 1px);
-  background-size: 24px 24px;
-  mask-image: radial-gradient(ellipse 76% 118% at 50% 50%, transparent 10%, rgba(0, 0, 0, 0.9) 62%, transparent 100%);
-  pointer-events: none;
-}
 
 .ante-hero {
   isolation: isolate;
@@ -512,6 +507,10 @@ body {
 }
 
 
+.ante-faq[open] .ante-faq-toggle::after {
+  opacity: 0;
+}
+
 @keyframes ante-rise {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
@@ -625,6 +624,11 @@ body {
 
   .ante-cta-suit-card {
     display: none;
+  }
+
+  .ante-suit-card-one {
+    right: 2.55rem;
+    top: -1rem;
   }
 
 }

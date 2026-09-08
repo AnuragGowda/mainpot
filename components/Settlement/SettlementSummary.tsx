@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
+  ArrowUpRight,
   CheckCircle2,
   ChevronRight,
   Copy,
@@ -127,25 +128,33 @@ export default function SettlementSummary({
   if (finalized && presentation === "card") {
     return (
       <>
-        <div className="mx-auto w-full max-w-[360px]">
+        <section aria-label="Game recap" className="mx-auto w-full max-w-[300px] sm:max-w-[340px]">
+          <div className="mb-3 flex items-end justify-between gap-4 px-1">
+            <div>
+              <h2 className="mt-1 text-xl font-semibold tracking-[-0.035em] text-gray-950">Your game card.</h2>
+            </div>
+          </div>
           <button
             type="button"
             onClick={() => setShowGameRecap(true)}
             aria-label="Customize and share your game card"
-            className="group relative mx-auto block w-full max-w-[320px] rounded-[22px] text-left transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
+            className="group relative block w-full overflow-hidden rounded-[28px] border border-gray-950/10 bg-[#f7f6ef] p-2.5 text-left shadow-[0_18px_45px_rgba(17,21,18,0.14)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_24px_52px_rgba(17,21,18,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
           >
-            <RecapStoryCard
-              data={recapData}
-              privacy={defaultRecapPrivacy}
-              mode="summary"
-              featuredPlayerId={featuredPlayer?.id}
-              decorative
-            />
-            <span className="pointer-events-none absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full bg-gray-950/90 px-3 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur-sm transition group-hover:bg-gray-950">
-              <Share2 aria-hidden size={14} /> Customize &amp; share
+            <span className="block overflow-hidden rounded-[20px]">
+              <RecapStoryCard
+                data={recapData}
+                privacy={defaultRecapPrivacy}
+                mode="summary"
+                featuredPlayerId={featuredPlayer?.id}
+                decorative
+              />
+            </span>
+            <span className="mt-2.5 flex min-h-12 items-center justify-between rounded-[18px] bg-gray-950 px-4 text-sm font-semibold text-white transition group-hover:bg-emerald-950">
+              <span className="inline-flex items-center gap-2"><Share2 aria-hidden size={16} /> Customize &amp; share</span>
+              <ArrowUpRight aria-hidden size={18} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </span>
           </button>
-        </div>
+        </section>
         {showGameRecap ? <GameRecapDialog snapshot={snapshot} nets={nets} transfers={transfers} featuredPlayerId={featuredPlayer?.id} onClose={() => setShowGameRecap(false)} /> : null}
       </>
     );

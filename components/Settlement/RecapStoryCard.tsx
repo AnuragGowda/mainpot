@@ -1,11 +1,7 @@
-import { forwardRef } from "react";
-import { getRecapPersona, type RecapPersona } from "@/lib/recap-personality";
-import {
-  getRecapDisplayPlayers,
-  type RecapData,
-  type RecapMode,
-  type RecapPrivacy,
-} from "@/lib/recap";
+import { forwardRef, useId } from "react";
+import { recapFontFace, RECAP_FONT_FAMILY, RECAP_HEIGHT, RECAP_WIDTH } from "@/lib/recap-image";
+import { getShareableRecapCaption } from "@/lib/recap-personality";
+import { formatDuration, type RecapData, type RecapMode, type RecapPrivacy } from "@/lib/recap";
 
 interface RecapStoryCardProps {
   data: RecapData;
@@ -13,65 +9,19 @@ interface RecapStoryCardProps {
   mode: RecapMode;
   decorative?: boolean;
   featuredPlayerId?: string;
-  persona?: RecapPersona;
+  captionIndex?: number;
 }
-
-type Suit = "heart" | "spade";
-
-const SUIT_PATHS: Record<Suit, string> = {
-  heart: "M12 21.25 10.48 19.87C5.08 15 1.5 11.77 1.5 7.8A5.3 5.3 0 0 1 6.85 2.5 5.8 5.8 0 0 1 12 5.48 5.8 5.8 0 0 1 17.15 2.5 5.3 5.3 0 0 1 22.5 7.8c0 3.97-3.58 7.2-8.98 12.08L12 21.25Z",
-  spade: "M12 2C9.95 5.6 4 9.02 4 14.13A4.12 4.12 0 0 0 8.12 18.25c1.14 0 2.18-.47 2.94-1.23-.23 1.82-.97 3.23-2.31 4.98h6.5c-1.34-1.75-2.08-3.16-2.31-4.98a4.15 4.15 0 0 0 7.06-2.89C20 9.02 14.05 5.6 12 2Z",
-};
 
 const C = {
   ink: "#111512",
-  paper: "#f7f6ef",
-  white: "#fdfdf7",
+  paper: "#f7f8f6",
   muted: "#69716b",
-  line: "#d5d3c9",
-  coral: "#ef7965",
-  mint: "#b8ddcd",
-  lavender: "#aab5ff",
-  yellow: "#f4d889",
+  line: "#e3e7e3",
+  lilac: "#dce2ff",
 };
 
-function clip(value: string, maxLength: number): string {
-  return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
-}
-
-function wrapWords(value: string, maxLineLength: number, maxLines: number): string[] {
-  const words = value.trim().split(/\s+/).filter(Boolean);
-  const lines: string[] = [];
-
-  for (const word of words) {
-    const last = lines.length - 1;
-    if (last >= 0 && `${lines[last]} ${word}`.length <= maxLineLength) {
-      lines[last] = `${lines[last]} ${word}`;
-    } else if (lines.length < maxLines) {
-      lines.push(word);
-    } else {
-      lines[maxLines - 1] = clip(`${lines[maxLines - 1]} ${word}`, maxLineLength + 3);
-    }
-  }
-
-  return lines.length > 0 ? lines : ["POKER NIGHT"];
-}
-
-function headlineFontSize(lines: string[]): number {
-  const longest = Math.max(...lines.map((line) => line.length));
-  if (longest <= 8) return 150;
-  if (longest <= 10) return 136;
-  if (longest <= 12) return 120;
-  if (longest <= 15) return 104;
-  return 90;
-}
-
-function dateLabel(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "GAME COMPLETE";
-  const month = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date).toUpperCase();
-  return `${month} ${date.getDate()} · ${date.getFullYear()}`;
-}
+const SPADE = "M12 2C9.95 5.6 4 9.02 4 14.13A4.12 4.12 0 0 0 8.12 18.25c1.14 0 2.18-.47 2.94-1.23-.23 1.82-.97 3.23-2.31 4.98h6.5c-1.34-1.75-2.08-3.16-2.31-4.98a4.15 4.15 0 0 0 7.06-2.89C20 9.02 14.05 5.6 12 2Z";
+const HEART = "M12 21.25 10.48 19.87C5.08 15 1.5 11.77 1.5 7.8A5.3 5.3 0 0 1 6.85 2.5 5.8 5.8 0 0 1 12 5.48 5.8 5.8 0 0 1 17.15 2.5 5.3 5.3 0 0 1 22.5 7.8c0 3.97-3.58 7.2-8.98 12.08L12 21.25Z";
 
 function formatCardCurrency(value: number, signed = false): string {
   if (!Number.isFinite(value) || Math.abs(value) < 0.005) return "$0";
@@ -93,276 +43,159 @@ function formatCardCurrency(value: number, signed = false): string {
   }).format(absolute)}`;
 }
 
-function formatClockDuration(minutes: number | undefined): string {
-  if (!minutes || minutes < 1) return "—";
-  const hours = Math.floor(minutes / 60);
-  const remainder = minutes % 60;
-  return hours === 0 ? `${remainder}M` : `${hours}:${String(remainder).padStart(2, "0")}`;
+function PlayingCard({ x, y, angle, heart = false }: {
+  x: number; y: number; angle: number; heart?: boolean;
+}) {
+  const color = heart ? "#bd4255" : C.ink;
+  const suit = heart ? HEART : SPADE;
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${angle} 137 190)`}>
+      <rect x="5" y="14" width="274" height="380" rx="30" fill={C.ink} opacity="0.06" />
+      <rect width="274" height="380" rx="30" fill="white" stroke={C.line} strokeWidth="2" />
+      <text x="28" y="65" fill={color} fontSize="48" fontWeight="600">A</text>
+      <path d={suit} fill={color} transform="translate(65 118) scale(6)" />
+      <g transform="translate(274 380) rotate(180)">
+        <text x="28" y="65" fill={color} fontSize="48" fontWeight="600">A</text>
+      </g>
+    </g>
+  );
 }
 
-function SuitMark({ suit, x, y, size, color }: {
-  suit: Suit;
-  x: number;
-  y: number;
-  size: number;
-  color: string;
+function Chip({ x, y, angle, scale = 1, dark = false }: {
+  x: number; y: number; angle: number; scale?: number; dark?: boolean;
 }) {
   return (
-    <path
-      d={SUIT_PATHS[suit]}
-      fill={color}
-      transform={`translate(${x} ${y}) scale(${size / 24})`}
-    />
-  );
-}
-
-function LogoLockup() {
-  return (
-    <g transform="translate(64 58)">
-      <rect width="58" height="58" rx="17" fill={C.ink} />
-      <SuitMark suit="spade" x={13} y={13} size={32} color={C.white} />
-      <text x="78" y="41" fill={C.ink} fontSize="35" fontWeight="850" letterSpacing="3.5">MAINPOT</text>
+    <g transform={`translate(${x} ${y}) rotate(${angle}) scale(${scale})`}>
+      <circle cy="7" r="67" fill={C.ink} opacity="0.08" />
+      <circle r="67" fill={dark ? C.ink : C.lilac} />
+      <circle r="55" fill="none" stroke={dark ? "#f7f8f6" : "#ffffff"} strokeWidth="9" strokeDasharray="17 18" />
+      <circle r="41" fill="none" stroke={dark ? "#f7f8f6" : "#ffffff"} strokeWidth="2" opacity="0.65" />
+      <path d={SPADE} fill={dark ? "white" : C.ink} transform="translate(-20 -21) scale(1.7)" />
     </g>
   );
 }
 
-function PlayingCard({ rank, suit, x, y, rotate }: {
-  rank: "A" | "K";
-  suit: Suit;
-  x: number;
-  y: number;
-  rotate: number;
-}) {
-  const suitColor = suit === "heart" ? C.white : C.ink;
-  const cardColor = suit === "heart" ? C.coral : C.white;
-  return (
-    <g transform={`translate(${x} ${y}) rotate(${rotate} 111 163)`}>
-      <rect x="10" y="14" width="222" height="326" rx="26" fill="#000" opacity="0.2" />
-      <rect width="222" height="326" rx="26" fill={cardColor} stroke={C.white} strokeOpacity="0.18" strokeWidth="2" />
-      <text x="39" y="72" fill={suitColor} fontSize="54" fontWeight="800">{rank}</text>
-      <SuitMark suit={suit} x={66} y={122} size={104} color={suitColor} />
-    </g>
-  );
+/** Balance the curated titles across two lines without truncating the joke. */
+function titleLines(title: string): string[] {
+  const words = title.split(" ");
+  if (words.length < 2) return [title];
+  let split = 1;
+  for (let index = 2; index < words.length; index++) {
+    const width = Math.max(words.slice(0, index).join(" ").length, words.slice(index).join(" ").length);
+    const bestWidth = Math.max(words.slice(0, split).join(" ").length, words.slice(split).join(" ").length);
+    if (width < bestWidth) split = index;
+  }
+  return [words.slice(0, split).join(" "), words.slice(split).join(" ")];
 }
 
-function PokerChip({ x, y, color }: { x: number; y: number; color: string }) {
-  return (
-    <g transform={`translate(${x} ${y})`}>
-      <circle cx="39" cy="39" r="38" fill="#000" opacity="0.18" transform="translate(4 6)" />
-      <circle cx="39" cy="39" r="38" fill={color} stroke={C.white} strokeWidth="3" />
-      <circle cx="39" cy="39" r="30" fill="none" stroke={C.white} strokeWidth="5" strokeDasharray="12 10" />
-      <circle cx="39" cy="39" r="11" fill={C.white} opacity="0.9" />
-    </g>
-  );
-}
-
-function ChipStack() {
-  const chips = [
-    { x: 692, y: 476, color: C.lavender },
-    { x: 742, y: 500, color: C.mint },
-    { x: 792, y: 470, color: C.coral },
-    { x: 842, y: 498, color: C.yellow },
-  ];
-
-  return (
-    <g>
-      {chips.map((chip) => (
-        <PokerChip key={chip.x} {...chip} />
-      ))}
-    </g>
-  );
-}
-
-function PlayerPanel({ result, resultIsPrivate, eyebrow, persona }: {
-  result: string;
-  resultIsPrivate: boolean;
-  eyebrow: string;
-  persona: RecapPersona;
-}) {
-  const resultSize = resultIsPrivate ? 64 : result.length <= 6 ? 142 : result.length <= 8 ? 122 : 98;
-  const quoteLines = wrapWords(persona.line, 30, 2);
-
-  return (
-    <g transform="translate(64 860)">
-      <rect x="10" y="12" width="952" height="600" rx="40" fill="#000" opacity="0.18" />
-      <rect width="952" height="600" rx="40" fill={C.ink} />
-
-      <text x="40" y="62" fill={C.lavender} fontSize="20" fontWeight="850" letterSpacing="3.5">
-        {eyebrow}
-      </text>
-      <text x="40" y="200" fill={C.mint} fontSize={resultSize} fontWeight="900" letterSpacing="-6">
-        {result}
-      </text>
-      {quoteLines.map((line, index) => (
-        <text key={line} x="40" y={456 + index * 42} fill={C.white} fontSize="32" fontWeight="600">
-          {line}
-        </text>
-      ))}
-
-      <PlayingCard rank="K" suit="heart" x={712.07} y={35.83} rotate={11} />
-      <PlayingCard rank="A" suit="spade" x={600} y={120} rotate={-4} />
-      <ChipStack />
-    </g>
-  );
-}
-
-function TablePanel({ data, privacy, mode }: {
-  data: RecapData;
-  privacy: RecapPrivacy;
-  mode: Exclude<RecapMode, "summary">;
-}) {
-  const players = getRecapDisplayPlayers(data, privacy).slice(0, 5);
-  const heading = mode === "full" ? "GAME LEDGER" : "FINAL TABLE";
-
-  return (
-    <g transform="translate(64 860)">
-      <rect width="952" height="600" rx="38" fill={C.ink} />
-      <text x="52" y="76" fill={C.white} opacity="0.62" fontSize="20" fontWeight="850" letterSpacing="4">{heading}</text>
-      {mode === "full" && privacy.showDollarAmounts ? (
-        <text x="900" y="78" textAnchor="end" fill={C.mint} fontSize="30" fontWeight="850">
-          {formatCardCurrency(data.totalBuyIn)} IN PLAY
-        </text>
-      ) : null}
-      {players.length > 0 ? players.map((player, index) => {
-        const y = 148 + index * 82;
-        return (
-          <g key={player.id} transform={`translate(52 ${y})`}>
-            <text x="0" y="28" fill={index === 0 ? C.mint : C.white} fontSize="26" fontWeight="850">
-              {String(player.rank).padStart(2, "0")}
-            </text>
-            <text x="74" y="28" fill={C.white} fontSize="32" fontWeight="750">
-              {clip(player.displayLabel, 23)}
-            </text>
-            <text x="848" y="28" textAnchor="end" fill={player.showNet ? C.mint : C.white} opacity={player.showNet ? 1 : 0.42} fontSize="32" fontWeight="850">
-              {player.showNet ? formatCardCurrency(player.net, true) : "RESULT HIDDEN"}
-            </text>
-            {index < players.length - 1 ? <line x1="0" x2="848" y1="58" y2="58" stroke={C.white} strokeWidth="2" opacity="0.12" /> : null}
-          </g>
-        );
-      }) : (
-        <text x="476" y="322" textAnchor="middle" fill={C.white} opacity="0.6" fontSize="30" fontWeight="700">No public results selected</text>
-      )}
-    </g>
-  );
-}
-
-function StatsStrip({ data, privacy }: { data: RecapData; privacy: RecapPrivacy }) {
-  const stats = [
-    { label: "PLAYERS", value: String(data.playerCount), color: C.lavender },
-    { label: "TOTAL BUY-IN", value: privacy.showDollarAmounts ? formatCardCurrency(data.totalBuyIn) : "PRIVATE", color: C.coral },
-    { label: "SESSION", value: formatClockDuration(data.durationMinutes), color: C.ink },
-    { label: "PAYMENTS", value: String(data.settlementPaymentCount), color: C.coral },
-  ];
-
-  return (
-    <g transform="translate(64 1530)">
-      <rect width="952" height="160" rx="32" fill="#ffffff" stroke={C.ink} strokeWidth="2" />
-      {stats.map((stat, index) => {
-        const columnWidth = 238;
-        const center = index * columnWidth + columnWidth / 2;
-        const valueSize = stat.value.length > 7 ? 43 : stat.value.length > 5 ? 52 : 70;
-        return (
-          <g key={stat.label}>
-            <text x={center} y="85" textAnchor="middle" fill={stat.color} fontSize={valueSize} fontWeight="900" letterSpacing="-2">{stat.value}</text>
-            <text x={center} y="124" textAnchor="middle" fill={C.muted} fontSize="18" fontWeight="850" letterSpacing="2.2">{stat.label}</text>
-          </g>
-        );
-      })}
-    </g>
-  );
-}
-
-/** A self-contained SVG so the in-app preview and exported PNG match exactly. */
+/** One name-free design shared by the preview and standalone PNG. */
 const RecapStoryCard = forwardRef<SVGSVGElement, RecapStoryCardProps>(function RecapStoryCard(
-  { data, privacy, mode, decorative = false, featuredPlayerId, persona },
-  ref
+  { data, privacy, decorative = false, featuredPlayerId, captionIndex = 0 }, ref
 ) {
-  const featuredPlayer = data.players.find((player) => player.id === featuredPlayerId)
-    ?? data.players[0]
-    ?? null;
-  const cardPersona = persona ?? getRecapPersona(data, featuredPlayer?.id, 0, privacy.showPlayerNames);
-  const headline = mode === "summary"
-    ? cardPersona.title.toUpperCase()
-    : mode === "full"
-      ? "THE FULL STORY"
-      : "FINAL TABLE";
-  const headlineLines = wrapWords(headline, mode === "summary" ? 12 : 16, 3);
-  const headlineSize = headlineFontSize(headlineLines);
-  const lineHeight = headlineSize * 0.94;
-  const headlineHeight = headlineLines.length * lineHeight;
-  const firstBaseline = 350 + (430 - headlineHeight) / 2 + headlineSize * 0.82;
-  const resultIsPrivate = !featuredPlayer || !privacy.showDollarAmounts;
-  const result = featuredPlayer && privacy.showDollarAmounts
-    ? formatCardCurrency(featuredPlayer.net, true)
-    : featuredPlayer
-      ? `FINISHED #${featuredPlayer.rank}`
-      : "TABLE SETTLED";
-  const panelEyebrow = featuredPlayer?.rank === 1 ? "TOP STACK" : cardPersona.eyebrow;
-  const gameNameSize = data.gameName.length > 34 ? 23 : data.gameName.length > 25 ? 26 : 30;
+  // Unique paint servers keep the inline card and open editor independent.
+  const id = useId().replace(/:/g, "");
+  const featuredPlayer = data.players.find((player) => player.id === featuredPlayerId) ?? data.players[0];
+  const showResult = privacy.showResult !== false && privacy.showDollarAmounts && featuredPlayer
+    && !privacy.hiddenPlayerIds.includes(featuredPlayer.id)
+    && (privacy.showLosses || featuredPlayer.net >= -0.005);
+  const caption = getShareableRecapCaption(data, featuredPlayer?.id, captionIndex, privacy);
+  const headline = titleLines(caption.title);
+  const headlineSize = Math.min(100, 1500 / Math.max(...headline.map((line) => line.length)));
+  const result = showResult ? formatCardCurrency(featuredPlayer.net, true) : null;
+  const stats = [
+    { label: "PLAYERS", value: String(data.playerCount), visible: privacy.showPlayerCount !== false },
+    { label: "DURATION", value: data.durationMinutes ? formatDuration(data.durationMinutes) : "—", visible: privacy.showDuration !== false },
+    { label: "TOTAL BUY-IN", value: formatCardCurrency(data.totalBuyIn), visible: privacy.showDollarAmounts },
+    { label: "REBUYS", value: String(data.rebuyCount), visible: privacy.showRebuys !== false },
+  ].filter((stat) => stat.visible);
 
   return (
     <svg
       ref={ref}
       xmlns="http://www.w3.org/2000/svg"
+      width={RECAP_WIDTH}
+      height={RECAP_HEIGHT}
       viewBox="0 0 1080 1920"
       role={decorative ? undefined : "img"}
       aria-hidden={decorative || undefined}
-      aria-label={decorative ? undefined : `${data.gameName} game recap`}
+      aria-label={decorative ? undefined : "Mainpot poker night recap"}
       focusable="false"
-      fontFamily="Inter, Arial, sans-serif"
-      className="h-auto w-full overflow-hidden rounded-[22px] shadow-2xl"
+      fontFamily={`"${RECAP_FONT_FAMILY}", Arial, sans-serif`}
+      className="h-auto w-full overflow-hidden rounded-[22px]"
     >
+      <defs>
+        <style data-recap-font>{recapFontFace()}</style>
+        <radialGradient id={`${id}-glow`}>
+          <stop offset="0" stopColor="#d5ddff" stopOpacity="0.85" />
+          <stop offset="1" stopColor="#e8e6ff" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id={`${id}-panel`} x2="1" y2="1">
+          <stop stopColor="#242932" />
+          <stop offset="1" stopColor={C.ink} />
+        </linearGradient>
+        <pattern id={`${id}-dots`} width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.4" fill={C.ink} opacity="0.16" />
+        </pattern>
+      </defs>
       <rect width="1080" height="1920" fill={C.paper} />
-      <rect width="24" height="1920" fill={C.coral} />
-      <rect x="24" width="6" height="1920" fill={C.ink} opacity="0.06" />
-      <circle cx="1010" cy="94" r="220" fill={C.lavender} opacity="0.5" />
-      <circle cx="880" cy="52" r="142" fill={C.lavender} opacity="0.3" />
-      <g opacity="0.04">
-        <SuitMark suit="spade" x={840} y={118} size={250} color={C.ink} />
-      </g>
-      <circle cx="20" cy="1584" r="190" fill={C.mint} opacity="0.55" />
+      <ellipse cx="740" cy="640" rx="640" ry="690" fill={`url(#${id}-glow)`} />
+      <circle cx="540" cy="732" r="320" fill="none" stroke={C.ink} strokeOpacity="0.07" />
+      <circle cx="540" cy="732" r="370" fill="none" stroke={C.ink} strokeOpacity="0.05" />
+      <path d="M90 740 A450 450 0 0 1 990 740 L940 740 A400 400 0 0 0 140 740Z" fill={`url(#${id}-dots)`} />
 
-      <LogoLockup />
-      <g transform="translate(790 42)">
-        <rect width="230" height="68" rx="34" fill={C.ink} />
-        <text x="115" y="45" textAnchor="middle" fill={C.white} fontSize="27" fontWeight="800" letterSpacing="1.2">
-          {dateLabel(data.playedAt)}
-        </text>
+      <g transform="translate(80 76)">
+        <rect width="60" height="60" rx="17" fill={C.ink} />
+        <path d={SPADE} fill="white" transform="translate(14 13) scale(1.35)" />
+        <text x="78" y="43" fill={C.ink} fontSize="44" fontWeight="700" letterSpacing="-2">Mainpot</text>
       </g>
-
-      <text x="64" y="260" fill={C.muted} fontSize={gameNameSize} fontWeight="850" letterSpacing="3.4">
-        {clip(data.gameName.toUpperCase(), 42)}
+      <text x="1000" y="115" textAnchor="end" fill={C.muted} fontSize="21" letterSpacing="3">POKER NIGHT PERSONALITY</text>
+      <text x="540" y="216" textAnchor="middle" fill={C.muted} fontSize="23" letterSpacing="4">TONIGHT, I WAS</text>
+      <text textAnchor="middle" fill={C.ink} fontSize={headlineSize} fontWeight="700" letterSpacing="-4">
+        {headline.map((line, index) => <tspan key={index} x="540" y={318 + index * 98}>{line}{index === 0 ? " " : ""}</tspan>)}
       </text>
+      <text x="540" y="476" textAnchor="middle" fill={C.muted} fontSize="28">{caption.line}</text>
 
-      {headlineLines.map((line, index) => (
-        <text
-          key={`${line}-${index}`}
-          x="64"
-          y={firstBaseline + index * lineHeight}
-          fill={C.ink}
-          fontFamily="Arial Black, Inter, sans-serif"
-          fontSize={headlineSize}
-          fontWeight="900"
-          letterSpacing="-7"
-        >
-          {line}
-        </text>
-      ))}
-
-      {mode === "summary" ? (
-        <PlayerPanel result={result} resultIsPrivate={resultIsPrivate} eyebrow={panelEyebrow} persona={cardPersona} />
-      ) : (
-        <TablePanel data={data} privacy={privacy} mode={mode} />
-      )}
-
-      <StatsStrip data={data} privacy={privacy} />
-
-      <g transform="translate(64 1762)">
-        <text x="476" y="28" textAnchor="middle" fill={C.ink} fontSize="25" fontWeight="700" letterSpacing="0.2">
-          Track your home games and create memorable recaps
-        </text>
-        <text x="476" y="82" textAnchor="middle" fill={C.ink} fontSize="27" fontWeight="900" letterSpacing="1.4">mainpot.app</text>
+      <PlayingCard x={299} y={542} angle={-14} heart />
+      <PlayingCard x={490} y={559} angle={10} />
+      <Chip x={245} y={875} angle={-38} scale={0.78} dark />
+      <Chip x={296} y={934} angle={18} />
+      <Chip x={814} y={805} angle={28} scale={0.72} />
+      <Chip x={799} y={875} angle={-16} dark />
+      <Chip x={719} y={989} angle={58} scale={0.62} />
+      <g fill="none" stroke={C.ink} strokeWidth="3" strokeLinecap="round">
+        <path d="M231 560v28m-14-14h28M859 512v20m-10-10h20" />
+        <path d="m837 978 8-16 8 16-8 16Z" />
       </g>
+      <circle cx="202" cy="824" r="5" fill={C.ink} />
+      <circle cx="870" cy="651" r="5" fill={C.ink} />
+
+      <g transform="translate(80 1060)">
+        <rect width="920" height="264" rx="36" fill={`url(#${id}-panel)`} />
+        <text x="48" y="66" fill="#dce2ff" fontSize="22" letterSpacing="3">{result ? "NET RESULT" : "POKER NIGHT"}</text>
+        <text x="48" y="193" fill="white" fontSize={result ? (result.length > 8 ? 94 : 120) : 80} fontWeight="700" letterSpacing="-4">{result ?? "That's a wrap."}</text>
+        <g transform="translate(856 58)" fill="none" stroke="#dce2ff" strokeWidth="3">
+          <circle r="24" />
+          <path d="m-10 0 7 7 14-14" />
+        </g>
+      </g>
+
+      {stats.map((stat, index) => {
+        const lastFullWidth = index === stats.length - 1 && stats.length % 2 === 1;
+        const x = 80 + (index % 2) * 476;
+        const y = 1364 + Math.floor(index / 2) * 120;
+        return (
+          <g key={stat.label} transform={`translate(${x} ${y})`}>
+            <line x2={lastFullWidth ? 920 : 444} stroke={C.line} strokeWidth="2" />
+            <text y="36" fill={C.muted} fontSize="22" letterSpacing="2">{stat.label}</text>
+            <text y="93" fill={C.ink} fontSize={stat.value.length > 9 ? 42 : 52} fontWeight="600" letterSpacing="-1.5">{stat.value}</text>
+          </g>
+        );
+      })}
+      <line x1="80" x2="1000" y1="1772" y2="1772" stroke={C.line} strokeWidth="2" />
+      <text x="80" y="1824" fill={C.ink} fontSize="29" fontWeight="600">What’s your poker alter ego?</text>
+      <text x="80" y="1866" fill={C.muted} fontSize="23">Track your game. Settle up. Get your card.</text>
+      <text x="962" y="1847" textAnchor="end" fill={C.ink} fontSize="36" fontWeight="700" letterSpacing="-1">mainpot.app</text>
+      <path d="m978 1844 22-22m-18 0h18v18" fill="none" stroke={C.ink} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 });

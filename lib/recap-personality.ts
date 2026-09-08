@@ -1,4 +1,4 @@
-import type { RecapData, RecapPlayer } from "./recap";
+import type { RecapData, RecapPlayer, RecapPrivacy } from "./recap";
 
 export type RecapOutcome = "big_win" | "win" | "even" | "loss" | "big_loss";
 
@@ -45,7 +45,7 @@ const PERSONAS: Record<RecapOutcome, PersonaTemplate[]> = {
     { anonymousTitle: "The Human Chop Pot", namedTitle: "Chop-Pot {name}", line: "Everybody wins. Especially nobody." },
     { anonymousTitle: "The Variance Dodger", namedTitle: "Variance-Dodger {name}", line: "Variance called. Sent it to voicemail." },
     { anonymousTitle: "The Zero-EV Hero", namedTitle: "Zero-EV {name}", line: "Perfectly balanced, as the solver intended." },
-    { anonymousTitle: "The Rake-Free Grinder", namedTitle: "Rake-Free {name}", line: "Four hours. Zero financial plot." },
+    { anonymousTitle: "The Rake-Free Grinder", namedTitle: "Rake-Free {name}", line: "All night. Zero financial plot." },
     { anonymousTitle: "The Check-Check Champion", namedTitle: "Check-Check {name}", line: "Kept the pot and the pulse small." },
     { anonymousTitle: "The Side-Pot Accountant", namedTitle: "Side-Pot {name}", line: "Every chip returned to sender." },
     { anonymousTitle: "The Bankroll Time Traveler", namedTitle: "Time-Travel {name}", line: "Ended exactly where they started." },
@@ -126,4 +126,30 @@ export function getRecapPersona(
 
 export function recapPersonaCount(outcome: RecapOutcome): number {
   return PERSONAS[outcome].length;
+}
+
+const SOCIAL_CAPTIONS = [
+  { title: "The Table Celebrity", line: "Came for the cards. Stayed for the plot." },
+  { title: "The Poker Face", line: "Unreadable cards. Very readable snack order." },
+  { title: "The Group Chat Legend", line: "You really had to be there." },
+  { title: "The Snack Stack", line: "Always in position for the chips and dip." },
+  { title: "The Card Influencer", line: "Content was created. Hands were played." },
+];
+
+/** The social card never uses personal names or hints at a hidden result. */
+export function getShareableRecapCaption(
+  data: RecapData,
+  playerId: string | undefined,
+  variantIndex: number,
+  privacy: RecapPrivacy,
+): Pick<RecapPersona, "title" | "line"> {
+  const player = data.players.find((candidate) => candidate.id === playerId) ?? data.players[0];
+  if (!player || privacy.showResult === false || !privacy.showDollarAmounts
+    || privacy.hiddenPlayerIds.includes(player.id)
+    || (!privacy.showLosses && player.net < -0.005)) {
+    const index = ((variantIndex % SOCIAL_CAPTIONS.length) + SOCIAL_CAPTIONS.length) % SOCIAL_CAPTIONS.length;
+    return SOCIAL_CAPTIONS[index];
+  }
+  const { title, line } = getRecapPersona(data, player.id, variantIndex, false);
+  return { title, line };
 }

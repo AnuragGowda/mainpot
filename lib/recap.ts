@@ -31,6 +31,10 @@ export interface RecapPrivacy {
   showPlayerNames: boolean;
   showLosses: boolean;
   hiddenPlayerIds: string[];
+  showResult?: boolean;
+  showPlayerCount?: boolean;
+  showDuration?: boolean;
+  showRebuys?: boolean;
 }
 
 export interface RecapDisplayPlayer extends RecapPlayer {
