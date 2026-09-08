@@ -23,8 +23,10 @@ const example: RecapData = {
 
 export default function LandingRecap() {
   return (
-    <figure className="mx-auto w-48 sm:w-56">
-      <div className="overflow-hidden rounded-xl border border-white/20 shadow-xl">
+    <figure className="relative mx-auto w-48 sm:w-56 md:w-full md:max-w-60">
+      <div aria-hidden="true" className="absolute -inset-8 rounded-full bg-indigo-400/15 blur-3xl" />
+      <div aria-hidden="true" className="absolute inset-0 translate-x-3 translate-y-3 rotate-3 rounded-xl border border-white/15 bg-white/5" />
+      <div className="relative -rotate-1 overflow-hidden rounded-xl border border-white/25 shadow-2xl shadow-black/40">
         <CharacterStoryCard
           data={example}
           privacy={defaultRecapPrivacy}
@@ -32,7 +34,7 @@ export default function LandingRecap() {
           direction="society"
         />
       </div>
-      <figcaption className="mt-3 text-center text-xs text-gray-400">Example game card</figcaption>
+      <figcaption className="sr-only">Example game card</figcaption>
     </figure>
   );
 }

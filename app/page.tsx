@@ -162,9 +162,9 @@ export default function HomePage() {
           <div className="relative z-10 mx-auto w-full max-w-6xl">
             <div aria-hidden="true" className="ante-suit-card ante-cta-suit-card ante-cta-card-diamond"><span className="ante-suit-card-surface"><SuitIcon suit="diamond" /></span></div>
             <div aria-hidden="true" className="ante-suit-card ante-cta-suit-card ante-cta-card-heart"><span className="ante-suit-card-surface"><SuitIcon suit="heart" /></span></div>
-            <div className="ante-cta relative grid w-full gap-10 overflow-hidden rounded-3xl bg-gray-950 px-6 py-10 text-white sm:px-10 lg:grid-cols-[1fr_20rem] lg:items-center lg:px-14 lg:py-14">
+            <div className="ante-cta relative grid w-full gap-10 overflow-hidden rounded-3xl bg-gray-950 px-6 py-10 text-white sm:px-10 sm:py-12 md:grid-cols-[minmax(0,1fr)_15rem] md:items-center md:gap-12 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-16 lg:px-14 lg:py-14">
               <div>
-                <h2 id="sendoff-heading" className="text-3xl font-semibold tracking-tight sm:text-4xl">Give the night a send-off.</h2>
+                <h2 id="sendoff-heading" className="text-3xl font-semibold tracking-tight sm:text-4xl">Give the night a <span className="whitespace-nowrap">send-off.</span></h2>
                 <p className="mt-3 max-w-md text-sm leading-6 text-gray-300">Meet your poker-night character after settling up. Share the card with the stats you choose; names stay private.</p>
                 <Link href="/create" className={`${linkBaseClasses} mt-6 bg-white text-gray-950 hover:bg-gray-100 focus-visible:ring-white`}>Start a game</Link>
               </div>
