@@ -5,6 +5,7 @@
 }
 
 :root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
   --ante-canvas: #f7f8f6;
   --ante-surface: #ffffff;
   --ante-ink: #111512;
@@ -23,6 +24,15 @@ body {
   background: var(--ante-canvas);
   color: var(--ante-ink);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  padding-top: var(--safe-area-top);
+}
+
+.app-site-nav {
+  top: var(--safe-area-top);
+}
+
+.app-skip-link {
+  top: calc(0.75rem + var(--safe-area-top));
 }
 
 ::selection {

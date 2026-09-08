@@ -69,7 +69,7 @@ export default function SiteNav() {
     : { href: "/create", desktop: "Start a game", mobile: "Start game" };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-gray-200/80 bg-white/85 backdrop-blur-xl">
+    <header className="app-site-nav sticky z-30 border-b border-gray-200/80 bg-white/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
         <Link href="/" aria-label="Mainpot home" className="group inline-flex min-h-11 items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
           <BrandMark className="h-7 w-7 shadow-sm transition group-hover:bg-gray-800" />
