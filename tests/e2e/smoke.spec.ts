@@ -1,3 +1,4 @@
+import { runHostPlayerFlow } from "./host-player-flow";
 import { expect, test } from "@playwright/test";
 
 test.describe("public local-mode experience", () => {
@@ -5,14 +6,23 @@ test.describe("public local-mode experience", () => {
   // can otherwise answer the request before Playwright's route handler.
   test.use({ serviceWorkers: "block" });
 
+  test("runs a whole table with host-added players", async ({ page }) => {
+    test.slow();
+    await runHostPlayerFlow(page);
+  });
+
   test("shows the landing page and validates an incomplete game form", async ({ page }) => {
     await page.goto("/");
 
     await expect(page.getByRole("heading", { name: "Keep the game friendly. Keep the money exact." })).toBeVisible();
+    const sendoff = page.getByRole("region", { name: "Give the night a send-off." });
+    await expect(sendoff.getByRole("img", { name: "Mainpot poker night: The Table Celebrity" })).toBeVisible();
+    await expect(sendoff).toContainText("Good nights make great characters.");
     await page.getByRole("link", { name: /Start( a)? game/i }).first().click();
 
     await page.getByRole("button", { name: "Create game" }).click();
     await expect(page.getByText("Enter your name.")).toBeVisible();
+    await expect(page.locator("#create-name")).toBeFocused();
     await expect(page.getByText("Enter a game name.")).toBeVisible();
     await expect(page.getByText("Enter an amount greater than 0.")).toBeVisible();
   });
@@ -27,7 +37,7 @@ test.describe("public local-mode experience", () => {
     await expect(buyIn).toHaveValue("");
     await buyIn.fill("20.50");
     await expect(buyIn).toHaveValue("20.50");
-    await expect(page.getByText(/automatically records your opening buy-in of \$20\.50/i)).toBeVisible();
+    await expect(page.getByText(/records your opening buy-in of \$20\.50/i)).toBeVisible();
   });
 
   test("offers contextual iPhone install steps after creating a game", async ({ page }) => {
@@ -96,8 +106,8 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByRole("heading", { name: "Cash-outs", exact: true })).toBeVisible();
     await expect(page.getByText(roomCode, { exact: true })).toHaveCount(0);
     await expect(page.getByText("Room code", { exact: true })).toHaveCount(0);
-    await expect(page.getByText("0 of 1 cash-outs entered", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Calculate settlement" })).toBeDisabled();
+    await expect(page.getByRole("status").filter({ hasText: "0 of 1 cash-outs entered" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Review settlement" })).toBeDisabled();
 
     const cashOut = page.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
     await cashOut.fill("20");
@@ -105,14 +115,14 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
     await expect(page.getByText("Bank reconciled", { exact: true })).toBeVisible();
 
-    await page.getByRole("button", { name: "Calculate settlement" }).click();
+    await page.getByRole("button", { name: "Review settlement" }).click();
 
-    const finalizeButton = page.getByRole("button", { name: "Finalize game" });
+    const finalizeButton = page.getByRole("button", { name: "Lock settlement" });
     const editCashOutsButton = page.getByRole("button", { name: "Edit cash-outs" });
     const fullPlan = page.locator('[data-testid="full-settlement-plan"]');
     const fullPlanSummary = fullPlan.locator(":scope > summary");
     await expect(fullPlan).toHaveJSProperty("open", false);
-    await expect(page.getByText(/Payment tracking starts after the lock/)).toBeVisible();
+    await expect(page.getByText("Locking fixes the cash-outs and opens payment tracking.")).toBeVisible();
     await expect(editCashOutsButton).toBeVisible();
     await expect(page.getByRole("region", { name: "You're even." })).toHaveCount(0);
     await fullPlanSummary.click();
@@ -125,11 +135,11 @@ test.describe("public local-mode experience", () => {
 
     await editCashOutsButton.click();
     await expect(cashOut).toBeVisible();
-    await page.getByRole("button", { name: "Calculate settlement" }).click();
+    await page.getByRole("button", { name: "Review settlement" }).click();
 
     await finalizeButton.click();
     await expect(page.getByRole("alertdialog", { name: "Lock the final settlement?" })).toBeVisible();
-    await page.getByRole("button", { name: "Lock settlement" }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Lock settlement" }).click();
     await expect(page.getByText("Ended", { exact: true })).toBeVisible();
     await expect(page.getByRole("region", { name: "You're even." })).toBeVisible();
     const gameCardButton = page.getByRole("button", { name: "Customize and share your game card" });
@@ -146,6 +156,12 @@ test.describe("public local-mode experience", () => {
     expect(await feedbackPrompt.evaluate((prompt, heading) => Boolean(
       prompt.compareDocumentPosition(heading as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
     ), await gameHeading.elementHandle())).toBe(true);
+    await feedbackPrompt.click();
+    const feedbackRating = page.getByRole("radio", { name: "3 of 5", exact: true });
+    await feedbackRating.locator("..").click();
+    await feedbackRating.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("radio", { name: "4 of 5", exact: true })).toBeChecked();
     await page.getByRole("button", { name: "Dismiss feedback prompt" }).click();
     await expect(page.getByText("How did game night go?", { exact: true })).toHaveCount(0);
     await fullPlanSummary.click();
@@ -169,11 +185,43 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByRole("button", { name: /save.*image/i })).toHaveCount(0);
     await expect(page.getByRole("group", { name: "What can people see?" })).toBeVisible();
     await expect(page.getByRole("checkbox", { name: "Show amounts and losses" })).toBeVisible();
+    await expect(page.getByRole("checkbox", { name: "Show player names" })).toHaveCount(0);
+    const recapGraphic = page.getByRole("dialog", { name: "Your game card" }).locator("svg[viewBox='0 0 1080 1920']");
+    await expect(recapGraphic).toContainText("The Break-Even Baron");
+    await page.getByRole("button", { name: "Try another title" }).click();
+    await expect(recapGraphic).toContainText("The Human Chop Pot");
+    await expect(recapGraphic).toContainText("Everybody wins. Especially nobody.");
+    await expect(recapGraphic).toContainText("What’s your poker alter ego?");
+    await expect(recapGraphic).not.toContainText("Friday test game");
+    await expect(recapGraphic).not.toContainText("Casey");
+    await expect(recapGraphic).toContainText("$20");
+    await page.getByRole("checkbox", { name: "Show amounts and losses" }).uncheck();
+    await expect(recapGraphic).not.toContainText("$");
+    await expect(recapGraphic).not.toContainText("NET RESULT");
+    await expect(recapGraphic).not.toContainText("The Human Chop Pot");
+    await expect(recapGraphic).toContainText("The Poker Face");
+    await page.getByRole("checkbox", { name: "Show player count" }).uncheck();
+    await expect(recapGraphic).not.toContainText("PLAYERS");
+    await page.getByRole("checkbox", { name: "Show game duration" }).uncheck();
+    await expect(recapGraphic).not.toContainText("DURATION");
+    await page.getByRole("checkbox", { name: "Show amounts and losses" }).check();
+    await expect(recapGraphic).toContainText("$20");
+
     await expect(page.getByRole("checkbox", { name: "Show dollar amounts" })).toHaveCount(0);
     await expect(page.getByRole("checkbox", { name: "Show losses" })).toHaveCount(0);
     await expect(page.getByText("Who gets the card?", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Choose a layout", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Tap for another", { exact: true })).toHaveCount(0);
+    await page.evaluate(() => Object.defineProperty(navigator, "share", { configurable: true, value: undefined }));
+    const imageDownload = page.waitForEvent("download");
+    await page.getByRole("button", { name: /Share (your story|game card)/ }).click();
+    const imageStream = await (await imageDownload).createReadStream();
+    const chunks: Buffer[] = [];
+    for await (const chunk of imageStream!) chunks.push(Buffer.from(chunk));
+    const png = Buffer.concat(chunks);
+    expect(png.subarray(1, 4).toString()).toBe("PNG");
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([2160, 3840]);
+
     await page.getByRole("button", { name: "Close game recap" }).click();
 
     await expect(page.getByRole("button", { name: "Edit cash-outs" })).toHaveCount(0);
@@ -217,11 +265,11 @@ test.describe("public local-mode experience", () => {
     await cashOut.fill("19");
     await cashOut.blur();
 
-    await expect(page.getByText("Cash-outs don't match buy-ins", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Calculate settlement" })).toBeDisabled();
-    await page.getByRole("button", { name: "Resolve discrepancy" }).click();
+    await expect(page.getByText(/\$[\d,.]+ (short in|extra in) cash-outs/)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Resolve $1.00 difference" })).toBeEnabled();
+    await page.getByRole("button", { name: "Resolve $1.00 difference" }).click();
 
-    await expect(page.getByText("Discrepancy decision", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Resolve the $1.00 difference" })).toBeVisible();
     await expect(page.getByRole("alertdialog")).toHaveCount(0);
     const reviewButton = page.getByRole("button", { name: "Review adjusted settlement" });
     const allocationPreview = page.getByRole("group", { name: "Discrepancy impact" });
@@ -233,7 +281,7 @@ test.describe("public local-mode experience", () => {
     await expect(allocationPreview).toContainText("Discrepancy: $1.00 · exact amounts");
     await expect(reviewButton).toBeEnabled();
     await reviewButton.click();
-    await expect(page.getByRole("region", { name: "Lock this settlement" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Ready to settle?" })).toBeVisible();
     const discrepancyImpact = page.getByRole("group", { name: "Discrepancy impact" });
     await expect(discrepancyImpact).toBeVisible();
     await expect(discrepancyImpact).toContainText("Discrepancy: $1.00 · exact amounts");
@@ -243,8 +291,8 @@ test.describe("public local-mode experience", () => {
 
     const fullPlan = page.locator('[data-testid="full-settlement-plan"]');
     await expect(fullPlan).toHaveJSProperty("open", false);
-    await page.getByRole("button", { name: "Finalize game" }).click();
     await page.getByRole("button", { name: "Lock settlement" }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Lock settlement" }).click();
     await expect(page.getByRole("heading", { name: "You're even." })).toBeVisible();
     await expect(page.getByText("+$1.00 discrepancy adjustment · was -$1.00", { exact: true })).toBeVisible();
 
@@ -267,7 +315,10 @@ test.describe("public local-mode experience", () => {
 
     const invite = page.getByRole("button", { name: "Invite players" });
     await expect(invite).toBeInViewport();
-    await expect(page.getByText("How did you hear about Mainpot?")).toBeInViewport();
+    const acquisition = page.getByText("How did you hear about Mainpot?");
+    expect(await invite.evaluate((button, survey) => Boolean(
+      button.compareDocumentPosition(survey as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ), await acquisition.elementHandle())).toBe(true);
     await expect(page.getByRole("button", { name: "Personal invite" })).toHaveCount(0);
 
     await invite.click();
@@ -319,15 +370,15 @@ test.describe("public local-mode experience", () => {
     });
     await cashOut.fill("20");
     await cashOut.blur();
-    await expect(page.getByRole("button", { name: "Calculate settlement" })).toBeEnabled();
-    await page.getByRole("button", { name: "Calculate settlement" }).click();
+    await expect(page.getByRole("button", { name: "Review settlement" })).toBeEnabled();
+    await page.getByRole("button", { name: "Review settlement" }).click();
     await expect(
       page.getByRole("heading", { name: "Settlement results and payment plan" }),
     ).toBeFocused();
     await expect(page.getByText("Room code", { exact: true })).toHaveCount(0);
 
     const [finalizeBox, editBox] = await page
-      .getByRole("region", { name: "Lock this settlement" })
+      .getByRole("region", { name: "Ready to settle?" })
       .getByRole("button")
       .evaluateAll((buttons) =>
         buttons.map((button) => {
@@ -353,4 +404,29 @@ test.describe("public local-mode experience", () => {
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(320);
   });
+
+  test("lets a visitor clear the calculator example and use the keyboard skip link", async ({ page }) => {
+    await page.goto("/poker-settlement-calculator");
+    const skipLink = page.getByRole("link", { name: "Skip to content" });
+    // WebKit follows the platform setting that may skip links during Tab navigation.
+    await skipLink.focus();
+    await expect(skipLink).toBeInViewport();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("main")).toBeFocused();
+    await page.getByRole("button", { name: "Clear example" }).click();
+    await expect(page.locator("#player-1")).toBeFocused();
+    await expect(page.locator("#calculator").getByRole("textbox")).toHaveCount(2);
+    await page.locator("#player-1").fill("Alex");
+    await page.locator("#player-2").fill("Sam");
+    await page.getByLabel("Money in for Alex").fill("20");
+    await page.getByLabel("Money in for Sam").fill("20");
+    await page.getByLabel("Final stack for Alex").fill("30");
+    await page.getByLabel("Final stack for Sam").fill("10");
+    await page.getByRole("link", { name: "View payments ↓" }).click();
+    await expect(page.getByRole("complementary", { name: "Settlement results" })).toBeFocused();
+    await expect(page.locator("#calculator-results")).toContainText("$10.00");
+    await expect(page.locator("#calculator-results")).toContainText("Alex");
+    await expect(page.locator("#calculator-results")).toContainText("Sam");
+  });
+
 });
