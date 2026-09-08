@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -40,6 +40,8 @@ export default function CreateGamePage() {
   const { toast } = useToast();
 
   const [name, setName] = useState("");
+  const [ready, setReady] = useState(false);
+  const nameEdited = useRef(false);
   const [gameName, setGameName] = useState("");
   const [buyIn, setBuyIn] = useState("");
   const [templates, setTemplates] = useState<GameTemplate[]>([]);
@@ -51,7 +53,8 @@ export default function CreateGamePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setName(getPlayerName() ?? "");
+    setName((current) => current || getPlayerName() || "");
+    setReady(true);
     const previousGame = window.localStorage.getItem("ante_active_game");
     if (previousGame && !window.sessionStorage.getItem(`returned:${previousGame}`)) {
       window.sessionStorage.setItem(`returned:${previousGame}`, "1");
@@ -78,7 +81,7 @@ export default function CreateGamePage() {
       if (currentUser && !currentUser.is_anonymous) {
         setCanSaveTemplate(true);
         void getProfileById(currentUser.id).then((profile) => {
-          if (profile?.display_name?.trim()) {
+          if (profile?.display_name?.trim() && !nameEdited.current) {
             setName(profile.display_name.trim());
           }
         }).catch(() => undefined);
@@ -102,6 +105,7 @@ export default function CreateGamePage() {
     }
     setErrors(nextErrors);
     if (nextErrors.name || nextErrors.gameName || nextErrors.buyIn) {
+      document.getElementById(nextErrors.name ? "create-name" : nextErrors.gameName ? "create-game-name" : "create-buy-in")?.focus();
       return;
     }
 
@@ -146,18 +150,10 @@ export default function CreateGamePage() {
   return (
     <GameSetupShell
       eyebrow="Host a table"
-      title="Start a game. Share one code."
-      description="Set the buy-in and create a ledger everyone at the table can follow."
+      title="Start a game."
+      description="Set the buy-in, then invite your table with a code."
     >
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight text-gray-950">Game details</h2>
-              <p className="mt-1 text-sm text-gray-500">You can edit buy-ins during the game.</p>
-            </div>
-            <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">Host</span>
-          </div>
-
-          <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-5">
+          <form aria-label="Game details" onSubmit={handleSubmit} noValidate className="space-y-5">
             {templates.length ? (
               <label htmlFor="create-template" className="block text-sm font-medium text-gray-700">
                 Start from a recurring game <span className="font-normal text-gray-400">(optional)</span>
@@ -180,16 +176,18 @@ export default function CreateGamePage() {
               </label>
             ) : null}
             <Input
+              disabled={!ready}
               id="create-name"
               label="Your name"
               value={name}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => { nameEdited.current = true; setName(event.target.value); }}
               placeholder="Mike"
               autoComplete="name"
               maxLength={PLAYER_NAME_MAX_LENGTH}
               error={errors.name}
             />
             <Input
+              disabled={!ready}
               id="create-game-name"
               label="Game name"
               value={gameName}
@@ -199,6 +197,7 @@ export default function CreateGamePage() {
               error={errors.gameName}
             />
             <Input
+              disabled={!ready}
               id="create-buy-in"
               label="Buy-in amount"
               type="text"
@@ -212,8 +211,8 @@ export default function CreateGamePage() {
               placeholder="20"
               error={errors.buyIn}
             />
-            <p className="rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3 text-sm leading-6 text-emerald-900">
-              Creating the table automatically records your opening buy-in{buyIn && Number(buyIn) > 0 ? ` of $${Number(buyIn).toFixed(2)}` : ""}. You can add rebuys after the game starts.
+            <p className="text-sm leading-6 text-gray-600">
+              Creating the game records your opening buy-in{buyIn && Number(buyIn) > 0 ? ` of $${Number(buyIn).toFixed(2)}` : ""}.
             </p>
             {canSaveTemplate ? <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-800">
@@ -228,13 +227,10 @@ export default function CreateGamePage() {
               ) : null}
               {saveTemplate ? <p className="mt-2 text-xs leading-5 text-gray-500">Roster names are a reminder for the host; players still join with the private game link.</p> : null}
             </div> : null}
-            <Button type="submit" fullWidth loading={loading}>
+            <Button type="submit" fullWidth loading={loading} disabled={!ready}>
               Create game
             </Button>
           </form>
-          <p className="mt-4 text-center text-xs leading-5 text-gray-400">
-            You’ll get a private six-character code to share.
-          </p>
     </GameSetupShell>
   );
 }

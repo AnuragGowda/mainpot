@@ -143,7 +143,7 @@ export default function SelfHostPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <SiteNav />
-      <main>
+      <main tabIndex={-1} id="main-content">
         <section className="relative overflow-hidden border-b border-gray-200 px-4 py-14 sm:px-6 sm:py-20 lg:py-24">
           <div aria-hidden="true" className="ante-page-washes absolute inset-0" />
           <div aria-hidden="true" className="ante-page-glow absolute inset-x-0 top-0" />
@@ -212,7 +212,12 @@ export default function SelfHostPage() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+        <nav aria-label="On this page" className="mx-auto flex max-w-6xl flex-wrap gap-x-6 px-4 pt-6 text-sm font-semibold text-gray-700 sm:px-6">
+          <a className="inline-flex min-h-11 items-center underline underline-offset-4" href="#deployment-options">Deployment options</a>
+          <a className="inline-flex min-h-11 items-center underline underline-offset-4" href="#quick-start">Quick start</a>
+          <a className="inline-flex min-h-11 items-center underline underline-offset-4" href="#hosting-faq">Common questions</a>
+        </nav>
+        <section id="deployment-options" className="scroll-mt-20 mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-20">
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Choose a model</p>
             <h2 className={`mt-3 ${sectionHeading}`}>Start with the amount of infrastructure you actually need.</h2>
@@ -251,7 +256,7 @@ export default function SelfHostPage() {
           </div>
         </section>
 
-        <section className="border-y border-gray-200 bg-white px-4 py-16 sm:px-6 sm:py-20">
+        <section className="border-y border-gray-200 bg-white px-4 py-12 sm:px-6 sm:py-20">
           <div className="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start lg:gap-16">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">What runs where</p>
@@ -294,7 +299,7 @@ export default function SelfHostPage() {
           </div>
         </section>
 
-        <section className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+        <section id="quick-start" className="scroll-mt-20 mx-auto grid w-full max-w-6xl gap-12 px-4 py-12 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Local quick start</p>
             <h2 className={`mt-3 ${sectionHeading}`}>Clone, install, run.</h2>
@@ -336,7 +341,7 @@ npm run dev`}</code></pre>
           </div>
         </section>
 
-        <section className="border-t border-gray-200 px-4 py-16 sm:px-6 sm:py-20">
+        <section id="hosting-faq" className="scroll-mt-20 border-t border-gray-200 px-4 py-12 sm:px-6 sm:py-20">
           <div className="mx-auto w-full max-w-4xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Questions</p>
             <h2 className={`mt-3 ${sectionHeading}`}>Self-hosting, without the fine print hidden.</h2>

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { User } from "@supabase/supabase-js";
 import { ArrowRight, X } from "lucide-react";
+import ConfirmButton from "@/components/GameRoom/ConfirmButton";
 import SiteNav from "@/components/SiteNav";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
@@ -67,10 +68,13 @@ export default function DashboardPage() {
   const [friendStats, setFriendStats] = useState<FriendStats[]>([]);
   const [gameInvites, setGameInvites] = useState<IncomingGameInvite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [profileErrors, setProfileErrors] = useState<{ displayName?: string; username?: string; zelle?: string; save?: string }>({});
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [inviteBusyId, setInviteBusyId] = useState<string | null>(null);
   const [form, setForm] = useState({
     display_name: "",
     username: "",
@@ -80,13 +84,15 @@ export default function DashboardPage() {
   });
 
   const load = useCallback(async () => {
-    const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.is_anonymous) {
-      router.replace("/signin?next=/dashboard");
-      return;
-    }
-    setUser(currentUser);
+    setLoading(true);
+    setLoadError(null);
     try {
+      const currentUser = await getCurrentUser();
+      if (!currentUser || currentUser.is_anonymous) {
+        router.replace("/signin?next=/dashboard");
+        return;
+      }
+      setUser(currentUser);
       await linkSessionToUser(currentUser.id);
       const [nextProfile, nextStats, nextGames, nextFriendStats, nextInvites] = await Promise.all([
         getProfileById(currentUser.id),
@@ -108,11 +114,11 @@ export default function DashboardPage() {
         bio: nextProfile?.bio ?? "",
       });
     } catch (error) {
-      toast(error instanceof Error ? error.message : "Could not load your dashboard.", "error");
+      setLoadError(error instanceof Error ? error.message : "Could not load your dashboard.");
     } finally {
       setLoading(false);
     }
-  }, [router, toast]);
+  }, [router]);
 
   useEffect(() => {
     void load();
@@ -122,25 +128,30 @@ export default function DashboardPage() {
     event.preventDefault();
     if (!user) return;
     const username = form.username.trim().replace(/^@/, "").toLowerCase();
+    setProfileErrors({});
     const displayNameError = validateDisplayName(form.display_name);
     if (displayNameError) {
-      toast(displayNameError, "error");
+      setProfileErrors({ displayName: displayNameError });
+      document.getElementById("profile-display-name")?.focus();
       return;
     }
     const usernameError = validateUsername(username);
     if (usernameError) {
-      toast(usernameError, "error");
+      setProfileErrors({ username: usernameError });
+      document.getElementById("profile-username")?.focus();
       return;
     }
     const zelleError = validateZelleContact(form.zelle_handle);
     if (zelleError) {
-      toast(zelleError, "error");
+      setProfileErrors({ zelle: zelleError });
+      document.getElementById("profile-zelle")?.focus();
       return;
     }
     setSaving(true);
     try {
       if (username && (await isUsernameTaken(username, user.id))) {
-        toast("That username is already taken.", "error");
+        setProfileErrors({ username: "That username is already taken." });
+        document.getElementById("profile-username")?.focus();
         return;
       }
       const nextProfile = await updateProfile(user.id, {
@@ -154,7 +165,7 @@ export default function DashboardPage() {
       setEditing(false);
       toast("Profile saved", "success");
     } catch (error) {
-      toast(error instanceof Error ? error.message : "Could not save your profile.", "error");
+      setProfileErrors({ save: error instanceof Error ? error.message : "Could not save your profile." });
     } finally {
       setSaving(false);
     }
@@ -180,7 +191,6 @@ export default function DashboardPage() {
   }
 
   async function requestDeletion() {
-    if (!window.confirm("Request deletion of your Mainpot account? This cannot be undone once support completes it.")) return;
     setDeleting(true);
     try {
       await requestAccountDeletion();
@@ -192,11 +202,66 @@ export default function DashboardPage() {
     }
   }
 
+  function resetForm() {
+    setProfileErrors({});
+    setForm({
+      display_name: profile?.display_name ?? "",
+      username: profile?.username ?? "",
+      venmo_handle: profile?.venmo_handle ?? "",
+      zelle_handle: profile?.zelle_handle ?? "",
+      bio: profile?.bio ?? "",
+    });
+  }
+
+  function startEditing() {
+    resetForm();
+    setEditing(true);
+  }
+
+  function cancelEditing() {
+    resetForm();
+    setEditing(false);
+  }
+
+  async function respondToInvite(
+    invite: IncomingGameInvite,
+    status: "accepted" | "declined",
+  ) {
+    setInviteBusyId(invite.id);
+    try {
+      await respondToGameInvite(invite.id, status);
+      if (status === "accepted") {
+        router.push(`/game/${invite.game.code}`);
+      } else {
+        setGameInvites((items) => items.filter((item) => item.id !== invite.id));
+      }
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Could not update the invitation.", "error");
+    } finally {
+      setInviteBusyId(null);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f7f8f6]">
         <SiteNav />
-        <LoadingDashboard />
+        <main tabIndex={-1} id="main-content"><LoadingDashboard /></main>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-[#f7f8f6]">
+        <SiteNav />
+        <main tabIndex={-1} id="main-content" className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
+          <Card className="text-center">
+            <h1 className="text-xl font-semibold text-gray-950">Your dashboard could not load</h1>
+            <p role="alert" className="mt-2 text-sm leading-6 text-gray-600">{loadError}</p>
+            <Button className="mt-5" onClick={() => void load()}>Retry</Button>
+          </Card>
+        </main>
       </div>
     );
   }
@@ -209,11 +274,12 @@ export default function DashboardPage() {
     { label: "Win rate", value: `${stats.winRate}%`, tone: "text-gray-950" },
     { label: "Average game", value: formatSignedNet(stats.avgPL), tone: resultClass(stats.avgPL) },
   ];
+  const isFirstUse = stats.gamesPlayed === 0 && games.length === 0 && friendStats.length === 0;
 
   return (
     <div className="min-h-screen bg-[#f7f8f6]">
       <SiteNav />
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+      <main tabIndex={-1} id="main-content" className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         <section className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <Avatar profile={profile} email={user.email} size="lg" />
@@ -227,23 +293,24 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => setEditing((value) => !value)}>
-              {editing ? "Cancel" : "Edit profile"}
+          {!editing ? <div className="flex gap-2">
+            <Button variant="secondary" onClick={startEditing}>
+              Edit profile
             </Button>
             <Link href="/create" className="inline-flex h-11 items-center justify-center rounded-lg bg-gray-950 px-4 text-sm font-medium text-white transition hover:bg-gray-800">
               New game
             </Link>
-          </div>
+          </div> : null}
         </section>
 
-        {editing ? (
+        {editing ?  (
           <Card className="mt-7">
+            <h2 className="mb-5 text-lg font-semibold text-gray-950">Edit profile</h2>
             <form onSubmit={saveProfile} className="grid gap-5 sm:grid-cols-2">
-              <Input label="Display name" value={form.display_name} onChange={(event) => setForm({ ...form, display_name: event.target.value })} maxLength={PLAYER_NAME_MAX_LENGTH} />
-              <Input label="Username" prefix="@" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value.replace(/^@/, "") })} placeholder="pocketaces" maxLength={USERNAME_MAX_LENGTH} autoCapitalize="none" spellCheck={false} />
+              <Input id="profile-display-name" error={profileErrors.displayName} label="Display name" value={form.display_name} onChange={(event) => setForm({ ...form, display_name: event.target.value })} maxLength={PLAYER_NAME_MAX_LENGTH} />
+              <Input id="profile-username" error={profileErrors.username} label="Username" prefix="@" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value.replace(/^@/, "") })} placeholder="pocketaces" maxLength={USERNAME_MAX_LENGTH} autoCapitalize="none" spellCheck={false} />
               <Input label="Venmo" prefix="@" value={form.venmo_handle} onChange={(event) => setForm({ ...form, venmo_handle: event.target.value.replace(/^@/, "") })} placeholder="your-handle" />
-              <Input label="Zelle email or U.S. mobile number" value={form.zelle_handle} onChange={(event) => setForm({ ...form, zelle_handle: event.target.value })} placeholder="you@example.com or (312) 555-1234" />
+              <Input id="profile-zelle" error={profileErrors.zelle} label="Zelle email or U.S. mobile number" value={form.zelle_handle} onChange={(event) => setForm({ ...form, zelle_handle: event.target.value })} placeholder="you@example.com or (312) 555-1234" />
               <p className="-mt-2 text-xs leading-5 text-gray-500 sm:col-span-2">
                 Optional. Mainpot uses these to create settlement shortcuts; you always review and send the payment yourself.
               </p>
@@ -252,13 +319,14 @@ export default function DashboardPage() {
                 <textarea value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} maxLength={160} rows={3} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" placeholder="Tuesday $20 home game" />
                 <span className="mt-1 block text-xs leading-5 text-gray-500">Public to Mainpot members who find you, and to your friends. Never shown in a game room or payment instructions.</span>
               </label>
-              <div className="sm:col-span-2">
+              {profileErrors.save ? <p role="alert" className="text-sm text-red-700 sm:col-span-2">{profileErrors.save}</p> : null}
+              <div className="flex gap-2 sm:col-span-2">
                 <Button type="submit" loading={saving}>Save profile</Button>
+                <Button type="button" variant="secondary" disabled={saving} onClick={cancelEditing}>Cancel</Button>
               </div>
             </form>
           </Card>
-        ) : null}
-
+        ) : <>
         {gameInvites.length ? (
           <section aria-label="Game invitations" className="mt-7 space-y-2">
             {gameInvites.map((invite) => (
@@ -273,20 +341,18 @@ export default function DashboardPage() {
                     variant="ghost"
                     size="sm"
                     leftIcon={<X size={16} />}
-                    onClick={async () => {
-                      await respondToGameInvite(invite.id, "declined");
-                      setGameInvites((items) => items.filter((item) => item.id !== invite.id));
-                    }}
+                    loading={inviteBusyId === invite.id}
+                    disabled={inviteBusyId === invite.id}
+                    onClick={() => void respondToInvite(invite, "declined")}
                   >
                     Decline
                   </Button>
                   <Button
                     size="sm"
                     leftIcon={<ArrowRight size={16} />}
-                    onClick={async () => {
-                      await respondToGameInvite(invite.id, "accepted");
-                      router.push(`/game/${invite.game.code}`);
-                    }}
+                    loading={inviteBusyId === invite.id}
+                    disabled={inviteBusyId === invite.id}
+                    onClick={() => void respondToInvite(invite, "accepted")}
                   >
                     Join table
                   </Button>
@@ -296,16 +362,27 @@ export default function DashboardPage() {
           </section>
         ) : null}
 
-        <section aria-label="Poker statistics" className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {!isFirstUse ? <section aria-label="Poker statistics" className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {statCards.map((item) => (
             <Card key={item.label} padding="sm" className="rounded-xl">
               <p className="text-xs font-medium uppercase tracking-wider text-gray-500">{item.label}</p>
               <p className={`mt-3 text-2xl font-semibold tracking-tight ${item.tone}`}>{item.value}</p>
             </Card>
           ))}
-        </section>
+        </section> : null}
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.55fr_1fr]">
+        {isFirstUse ? (
+          <Card className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-semibold text-gray-950">Start your first table</h2>
+              <p className="mt-1 text-sm text-gray-600">Create a game, then add your regulars when they join.</p>
+            </div>
+            <div className="flex gap-2">
+              <Link href="/create" className="inline-flex h-10 items-center justify-center rounded-lg bg-gray-950 px-3 text-sm font-medium text-white hover:bg-gray-800">New game</Link>
+              <Link href="/friends" className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-300 bg-white px-3 text-sm font-medium text-gray-900 hover:bg-gray-50">Find friends</Link>
+            </div>
+          </Card>
+        ) : <div className="mt-6 grid gap-6 lg:grid-cols-[1.55fr_1fr]">
           <Card padding="none" className="overflow-hidden rounded-xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
               <div>
@@ -378,17 +455,26 @@ export default function DashboardPage() {
               </div>
             )}
           </Card>
-        </div>
+        </div>}
 
-        <Card className="mt-6 border-gray-200">
-          <h2 className="font-semibold text-gray-950">Your data</h2>
-          <p className="mt-1 text-sm leading-6 text-gray-600">Download the information tied to your account, or submit a deletion request for the support team to fulfill.</p>
+        <details className="mt-6 rounded-xl border border-gray-200 bg-white px-5 py-4">
+          <summary className="cursor-pointer font-semibold text-gray-950">Account data and deletion</summary>
+          <p className="mt-3 text-sm leading-6 text-gray-600">Download the information tied to your account, or submit a deletion request for the support team to fulfill.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="secondary" onClick={exportData} loading={exporting}>Export my data</Button>
-            <Button variant="danger" onClick={requestDeletion} loading={deleting}>Request account deletion</Button>
+            <ConfirmButton
+              loading={deleting}
+              onConfirm={() => void requestDeletion()}
+              confirmationTitle="Request account deletion?"
+              confirmationDescription="Support will process your request and confirm by email. This cannot be undone once completed."
+              confirmLabel="Request deletion"
+            >
+              Request account deletion
+            </ConfirmButton>
           </div>
           <p className="mt-3 text-xs leading-5 text-gray-500">Export files can include personal details and game history. Keep them private.</p>
-        </Card>
+        </details>
+        </>}
       </main>
     </div>
   );

@@ -9,7 +9,6 @@ import GoogleMark from "@/components/GoogleMark";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
-import { useToast } from "@/components/ui/Toast";
 import { linkSessionToUser } from "@/lib/accounts";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
@@ -19,13 +18,14 @@ type AuthMode = "signin" | "signup";
 
 export default function SignInPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [emailLinkSent, setEmailLinkSent] = useState<"signin" | "signup" | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authStatus, setAuthStatus] = useState<string | null>(null);
   const [next, setNext] = useState("/dashboard");
   const googleAuthEnabled = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
 
@@ -36,8 +36,8 @@ export default function SignInPage() {
       setNext(requestedNext);
     }
     const authError = params.get("error");
-    if (authError) toast("Sign-in could not be completed. Please try again.", "error");
-  }, [toast]);
+    if (authError) setAuthError("Sign-in could not be completed. Please try again.");
+  }, []);
 
   const callbackUrl = () =>
     `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
@@ -52,12 +52,14 @@ export default function SignInPage() {
     if (mode === "signup") {
       const displayNameError = validateDisplayName(displayName);
       if (displayNameError) {
-        toast(displayNameError, "error");
+        setAuthError(displayNameError);
         return;
       }
     }
 
     setLoading(true);
+    setAuthError(null);
+    setAuthStatus(null);
     try {
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
@@ -73,7 +75,7 @@ export default function SignInPage() {
           await linkSessionToUser(data.user.id);
           router.push(next);
         } else {
-          toast("Check your email to confirm your account.", "success");
+          setEmailLinkSent("signup");
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -86,7 +88,7 @@ export default function SignInPage() {
       }
       router.refresh();
     } catch (error) {
-      toast(error instanceof Error ? error.message : "Unable to sign in.", "error");
+      setAuthError(error instanceof Error ? error.message : "Unable to sign in.");
     } finally {
       setLoading(false);
     }
@@ -95,19 +97,21 @@ export default function SignInPage() {
   async function handleMagicLink() {
     const supabase = getBrowserSupabase();
     if (!supabase || !email.trim()) {
-      toast("Enter your email first.", "error");
+      setAuthError("Enter your email first.");
       return;
     }
     setLoading(true);
+    setAuthError(null);
+    setAuthStatus(null);
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: { emailRedirectTo: callbackUrl() },
       });
       if (error) throw error;
-      setMagicLinkSent(true);
+      setEmailLinkSent("signin");
     } catch (error) {
-      toast(error instanceof Error ? error.message : "Unable to send the link.", "error");
+      setAuthError(error instanceof Error ? error.message : "Unable to send the link.");
     } finally {
       setLoading(false);
     }
@@ -116,19 +120,26 @@ export default function SignInPage() {
   async function handleGoogle() {
     const supabase = getBrowserSupabase();
     if (!supabase) return;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: callbackUrl() },
-    });
-    if (error) {
-      toast(error.message, "error");
+    setLoading(true);
+    setAuthError(null);
+    setAuthStatus("Opening Google…");
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: callbackUrl() },
+      });
+      if (error) throw error;
+    } catch (error) {
+      setLoading(false);
+      setAuthStatus(null);
+      setAuthError(error instanceof Error ? error.message : "Unable to continue with Google.");
     }
   }
 
   return (
     <div className="min-h-screen bg-[#f7f8f6]">
       <SiteNav />
-      <main className="mx-auto grid w-full max-w-5xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_440px] lg:py-24">
+      <main tabIndex={-1} id="main-content" className="mx-auto grid w-full max-w-5xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_440px] lg:py-24">
         <section className="hidden lg:block">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-700">
             Keep your history
@@ -163,16 +174,16 @@ export default function SignInPage() {
                 Account history and live sync are unavailable in this setup.
               </p>
             </div>
-          ) : magicLinkSent ? (
+          ) : emailLinkSent ? (
             <div className="py-8 text-center">
               <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-800" aria-hidden="true">
                 ✓
               </span>
               <h1 className="mt-5 text-2xl font-semibold text-gray-950">Check your inbox</h1>
               <p className="mt-2 text-sm leading-6 text-gray-600">
-                We sent a secure sign-in link to <strong>{email}</strong>.
+                {emailLinkSent === "signup" ? "We sent a confirmation link to " : "We sent a secure sign-in link to "}<strong>{email}</strong>.
               </p>
-              <Button className="mt-6" variant="secondary" onClick={() => setMagicLinkSent(false)}>
+              <Button className="mt-6" variant="secondary" onClick={() => setEmailLinkSent(null)}>
                 Use another email
               </Button>
             </div>
@@ -184,10 +195,12 @@ export default function SignInPage() {
               <p className="mt-1.5 text-sm text-gray-500">
                 {mode === "signin" ? "View your saved games and results." : "Save games and track results over time."}
               </p>
+              {authError ? <p role="alert" className="mt-4 text-sm font-medium text-red-700">{authError}</p> : null}
+              {authStatus ? <p aria-live="polite" className="mt-4 text-sm text-gray-600">{authStatus}</p> : null}
 
               {googleAuthEnabled ? (
                 <>
-                  <Button fullWidth variant="secondary" className="mt-7" onClick={handleGoogle} leftIcon={<GoogleMark className="h-4 w-4" />}>
+                  <Button fullWidth variant="secondary" className="mt-7" loading={loading} onClick={handleGoogle} leftIcon={<GoogleMark className="h-4 w-4" />}>
                     Continue with Google
                   </Button>
                   <p className="mt-2 text-center text-xs leading-5 text-gray-500">
@@ -213,11 +226,12 @@ export default function SignInPage() {
               </form>
 
               <button type="button" onClick={handleMagicLink} disabled={loading} className="mt-4 w-full text-sm font-medium text-gray-800 hover:text-gray-950 disabled:opacity-50">
-                Email me a magic link
+                Email me a sign-in link
               </button>
+              {mode === "signin" ? <p className="mt-2 text-center text-xs leading-5 text-gray-500">Forgot your password? Send a sign-in link to your email instead.</p> : null}
               <p className="mt-7 text-center text-sm text-gray-500">
                 {mode === "signin" ? "New to Mainpot?" : "Already have an account?"}{" "}
-                <button type="button" onClick={() => setMode(mode === "signin" ? "signup" : "signin")} className="font-medium text-gray-900 hover:text-gray-600">
+                <button type="button" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setAuthError(null); setAuthStatus(null); }} className="font-medium text-gray-900 hover:text-gray-600">
                   {mode === "signin" ? "Create an account" : "Sign in"}
                 </button>
               </p>

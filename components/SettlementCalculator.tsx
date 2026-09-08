@@ -42,6 +42,7 @@ function amount(value: string) {
 
 export default function SettlementCalculator() {
   const [players, setPlayers] = useState(initialPlayers);
+  const [usingExample, setUsingExample] = useState(true);
   const [allocationMethod, setAllocationMethod] =
     useState<DiscrepancyAllocationMethod>("proportional");
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
@@ -154,6 +155,7 @@ export default function SettlementCalculator() {
     field: "name" | "moneyIn" | "stacksOut",
     value: string
   ) {
+    setUsingExample(false);
     setPlayers((current) =>
       current.map((player) =>
         player.id === id ? { ...player, [field]: value } : player
@@ -162,6 +164,7 @@ export default function SettlementCalculator() {
   }
 
   function addPlayer() {
+    setUsingExample(false);
     setPlayers((current) => [
       ...current,
       {
@@ -174,6 +177,7 @@ export default function SettlementCalculator() {
   }
 
   function removePlayer(id: number) {
+    setUsingExample(false);
     setPlayers((current) =>
       current.length > 2
         ? current.filter((player) => player.id !== id)
@@ -187,6 +191,18 @@ export default function SettlementCalculator() {
       delete next[String(id)];
       return next;
     });
+  }
+
+  function clearExample() {
+    setPlayers([
+      { id: 1, name: "", moneyIn: "", stacksOut: "" },
+      { id: 2, name: "", moneyIn: "", stacksOut: "" },
+    ]);
+    setUsingExample(false);
+    setAllocationMethod("proportional");
+    setSelectedPlayerIds([]);
+    setCustomAmounts({});
+    document.getElementById("player-1")?.focus();
   }
 
   function toggleSelectedPlayer(playerId: string) {
@@ -206,19 +222,15 @@ export default function SettlementCalculator() {
       <div className="mx-auto w-full max-w-6xl">
         <div className="grid gap-6 border-b border-gray-300 pb-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
-              Free poker settlement calculator
-            </p>
             <h2
               id="calculator-heading"
-              className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-gray-950 sm:text-4xl"
+              className="text-3xl font-semibold tracking-[-0.035em] text-gray-950 sm:text-4xl"
             >
-              Enter the ledger. Get the payment list.
+              Who owes whom?
             </h2>
           </div>
           <p className="text-sm leading-7 text-gray-600">
-            No account needed. If the totals do not match, correct the entry or
-            record exactly how the table agreed to allocate the difference.
+            Enter buy-ins and final stacks. Resolve any difference to see the payments. No account needed.
           </p>
         </div>
 
@@ -230,7 +242,7 @@ export default function SettlementCalculator() {
                 <h3 className="font-semibold">Settlement worksheet</h3>
               </div>
               <p className="mt-1 text-xs text-gray-400">
-                Values update as you type. Nothing is saved.
+                {usingExample ? "Example game · change any value to try it." : "Updates as you type. Nothing is saved."}
               </p>
             </div>
             <button
@@ -243,6 +255,10 @@ export default function SettlementCalculator() {
             </button>
           </header>
 
+          <div className="flex flex-wrap items-center justify-between gap-x-4 border-b border-gray-300 px-4 py-2 text-sm sm:px-6">
+            {usingExample ? <button type="button" onClick={clearExample} className="min-h-11 font-semibold text-gray-800 underline underline-offset-4">Clear example</button> : <span className="text-gray-600">{players.length} players</span>}
+            <a href="#calculator-results" className="inline-flex min-h-11 items-center font-semibold text-gray-800 underline underline-offset-4">View payments ↓</a>
+          </div>
           <div className="grid lg:grid-cols-[minmax(0,1.18fr)_minmax(21rem,0.82fr)]">
             <div className="bg-white p-4 sm:p-6 lg:border-r lg:border-gray-300">
               <div className="mb-3 hidden grid-cols-[minmax(10rem,1fr)_8.5rem_8.5rem_2.75rem] gap-3 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 sm:grid">
@@ -260,7 +276,7 @@ export default function SettlementCalculator() {
                   >
                     <div className="col-span-3 sm:col-span-1">
                       <label
-                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500 sm:sr-only"
+                        className="sr-only"
                         htmlFor={`player-${player.id}`}
                       >
                         Player {index + 1}
@@ -333,7 +349,7 @@ export default function SettlementCalculator() {
               </div>
             </div>
 
-            <aside aria-live="polite" className="min-w-0 p-4 sm:p-6">
+            <aside id="calculator-results" tabIndex={-1} aria-label="Settlement results" aria-live="polite" className="min-w-0 scroll-mt-20 p-4 focus:outline-none sm:p-6">
               <div className="grid grid-cols-2 gap-x-5 border-b border-gray-300 pb-5">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">

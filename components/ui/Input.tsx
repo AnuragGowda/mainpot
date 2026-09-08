@@ -10,7 +10,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, error, prefix, id, className, ...rest },
+  { label, error, prefix, id, className, "aria-describedby": describedBy, ...rest },
   ref
 ) {
   const autoId = useId();
@@ -40,7 +40,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           ref={ref}
           id={inputId}
           aria-invalid={error ? true : undefined}
-          aria-describedby={errorId}
+          aria-describedby={[describedBy, errorId].filter(Boolean).join(" ") || undefined}
           className={[
             "h-11 w-full rounded-lg border bg-white px-3 text-gray-900 shadow-[0_1px_1px_rgba(16,24,16,0.02)] placeholder-gray-400 transition",
             "focus:outline-none focus:border-gray-950 focus:ring-2",
@@ -54,7 +54,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         />
       </div>
       {error ? (
-        <p id={errorId} className="mt-1 text-sm text-red-600">
+        <p id={errorId} role="alert" className="mt-1 text-sm text-red-600">
           {error}
         </p>
       ) : null}

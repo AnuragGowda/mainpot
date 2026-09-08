@@ -63,7 +63,6 @@ export default function SiteNav() {
     router.refresh();
   }
 
-  const inAccountArea = pathname === "/dashboard" || pathname === "/friends";
   const hasAccount = Boolean(user && !user.is_anonymous);
   const publicAction = pathname === "/create"
     ? { href: "/join", desktop: "Join a game", mobile: "Join" }
@@ -71,25 +70,34 @@ export default function SiteNav() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-gray-200/80 bg-white/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="group inline-flex min-h-11 items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
+        <Link href="/" aria-label="Mainpot home" className="group inline-flex min-h-11 items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
           <BrandMark className="h-7 w-7 shadow-sm transition group-hover:bg-gray-800" />
-          <span className="text-lg font-semibold tracking-tight text-gray-950">
+          <span className="hidden text-lg font-semibold tracking-tight text-gray-950 min-[360px]:inline">
             Mainpot
           </span>
         </Link>
 
-        <nav aria-label="Main navigation" className="flex items-center gap-1">
+        <nav aria-label="Main navigation" className="flex shrink-0 items-center gap-0.5 sm:gap-1">
           {hasAccount ? (
             <>
               <Link
                 href="/dashboard"
-                className={`${navLink} inline-flex ${
-                  inAccountArea ? "bg-gray-100 text-gray-950" : ""
+                aria-current={pathname === "/dashboard" ? "page" : undefined}
+                className={`${navLink} inline-flex px-2 text-xs sm:px-3 sm:text-sm ${
+                  pathname === "/dashboard" ? "bg-gray-100 text-gray-950" : ""
                 }`}
               >
-                <span className="hidden sm:inline">Dashboard</span>
-                <span className="sm:hidden">Home</span>
+                Dashboard
+              </Link>
+              <Link
+                href="/friends"
+                aria-current={pathname === "/friends" ? "page" : undefined}
+                className={`${navLink} inline-flex px-2 text-xs sm:px-3 sm:text-sm ${
+                  pathname === "/friends" ? "bg-gray-100 text-gray-950" : ""
+                }`}
+              >
+                Friends
               </Link>
               <Link href="/create" className={`${navLink} hidden sm:inline-flex`}>
                 New game

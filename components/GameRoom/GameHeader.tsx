@@ -153,7 +153,7 @@ export default function GameHeader({
             </Button>
             {isHost ? (
               <ConfirmButton
-                variant="dangerOutline"
+                variant="ghost"
                 size="sm"
                 confirmationTitle="End the game?"
                 confirmationDescription="This stops new buy-ins and moves everyone to cash-out entry."
@@ -161,7 +161,7 @@ export default function GameHeader({
                 onConfirm={onEndGame}
                 loading={ending}
                 disabled={pendingPot > 0}
-                className="flex-1 sm:flex-none"
+                className="shrink-0 text-gray-600"
               >
                 End game
               </ConfirmButton>

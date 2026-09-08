@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import SiteNav from "@/components/SiteNav";
 import Avatar from "@/components/ui/Avatar";
@@ -42,8 +42,12 @@ export default function FriendsPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
+  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const searchRequest = useRef(0);
 
   const refresh = useCallback(async (id: string) => {
     const [nextFriends, nextIncoming, nextOutgoing] = await Promise.all([
@@ -56,36 +60,60 @@ export default function FriendsPage() {
     setOutgoing(nextOutgoing);
   }, []);
 
-  useEffect(() => {
-    void (async () => {
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
       const user = await getCurrentUser();
       if (!user || user.is_anonymous) {
         router.replace("/signin?next=/friends");
         return;
       }
       setUserId(user.id);
-      try {
-        await refresh(user.id);
-      } catch (error) {
-        toast(error instanceof Error ? error.message : "Could not load friends.", "error");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [refresh, router, toast]);
+      await refresh(user.id);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Could not load friends.");
+    } finally {
+      setLoading(false);
+    }
+  }, [refresh, router]);
 
-  async function handleSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!query.trim()) return;
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  async function runSearch(value: string) {
+    const submitted = value.trim();
+    if (!submitted) return;
+    const request = ++searchRequest.current;
     setSearching(true);
+    setSearchError(null);
+    setSubmittedQuery(submitted);
     try {
-      const matches = await searchUsers(query);
+      const matches = await searchUsers(submitted);
+      if (request !== searchRequest.current) return;
       setResults(matches.filter((profile) => profile.id !== userId));
     } catch (error) {
-      toast(error instanceof Error ? error.message : "Search failed.", "error");
+      if (request !== searchRequest.current) return;
+      setResults([]);
+      setSearchError(error instanceof Error ? error.message : "Search failed.");
     } finally {
-      setSearching(false);
+      if (request === searchRequest.current) setSearching(false);
     }
+  }
+
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void runSearch(query);
+  }
+
+  function changeQuery(value: string) {
+    searchRequest.current += 1;
+    setQuery(value);
+    setResults([]);
+    setSubmittedQuery(null);
+    setSearchError(null);
+    setSearching(false);
   }
 
   async function act(id: string, action: () => Promise<void>, success: string) {
@@ -126,10 +154,38 @@ export default function FriendsPage() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f7f8f6]">
+        <SiteNav />
+        <main tabIndex={-1} id="main-content" className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
+          <div className="h-44 animate-pulse rounded-xl bg-gray-200/70" />
+        </main>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-[#f7f8f6]">
+        <SiteNav />
+        <main tabIndex={-1} id="main-content" className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
+          <Card className="text-center">
+            <h1 className="text-xl font-semibold text-gray-950">Your friends could not load</h1>
+            <p role="alert" className="mt-2 text-sm leading-6 text-gray-600">{loadError}</p>
+            <Button className="mt-5" onClick={() => void load()}>Retry</Button>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
+  if (!userId) return null;
+
   return (
     <div className="min-h-screen bg-[#f7f8f6]">
       <SiteNav />
-      <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+      <main tabIndex={-1} id="main-content" className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-gray-900">← Dashboard</Link>
         <div className="mt-5">
           <h1 className="text-3xl font-semibold tracking-tight text-gray-950">Your poker circle</h1>
@@ -138,10 +194,16 @@ export default function FriendsPage() {
 
         <Card className="mt-8 rounded-xl">
           <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
-            <Input label="Find a player" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name or @username" />
+            <Input label="Find a player" value={query} onChange={(event) => changeQuery(event.target.value)} placeholder="Search name or @username" />
             <Button type="submit" loading={searching} className="sm:mt-6">Search</Button>
           </form>
-          {results.length ? (
+          {submittedQuery ? <p className="mt-4 text-sm text-gray-500">Search results for <span className="font-medium text-gray-700">{submittedQuery}</span></p> : null}
+          {searchError ? (
+            <div className="mt-5 border-t border-gray-100 pt-5">
+              <p role="alert" className="text-sm text-red-700">{searchError}</p>
+              <Button size="sm" variant="secondary" className="mt-3" onClick={() => void runSearch(submittedQuery ?? query)}>Retry search</Button>
+            </div>
+          ) : results.length ? (
             <ul className="mt-5 divide-y divide-gray-100 border-t border-gray-100">
               {results.map((profile) => (
                 <li key={profile.id} className="flex items-center gap-3 py-3.5">
@@ -154,7 +216,7 @@ export default function FriendsPage() {
                 </li>
               ))}
             </ul>
-          ) : query && !searching ? <p className="mt-5 border-t border-gray-100 pt-5 text-sm text-gray-500">No matching players yet.</p> : null}
+          ) : submittedQuery && !searching ? <p className="mt-5 border-t border-gray-100 pt-5 text-sm text-gray-500">No matching players yet.</p> : null}
         </Card>
 
         {incoming.length ? (
@@ -178,7 +240,7 @@ export default function FriendsPage() {
         <section className="mt-8">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">Friends · {friends.length}</h2>
           <Card padding="none" className="mt-3 overflow-hidden rounded-xl">
-            {loading ? <div className="h-28 animate-pulse bg-gray-100" /> : friends.length ? (
+            {friends.length ? (
               <ul className="divide-y divide-gray-100">
                 {friends.map(({ friendship, profile }) => (
                   <li key={friendship.id} className="flex items-center gap-3 px-5 py-4">

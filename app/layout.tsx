@@ -85,6 +85,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen bg-[#f7f8f6] font-sans text-gray-900">
+        <a href="#main-content" className="sr-only fixed left-4 top-3 z-[100] rounded-lg bg-gray-950 px-4 py-3 font-medium text-white focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-950">
+          Skip to content
+        </a>
         <Providers>{children}</Providers>
       </body>
     </html>

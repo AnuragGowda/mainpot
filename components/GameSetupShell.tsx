@@ -17,15 +17,15 @@ export default function GameSetupShell({
   return (
     <div className="min-h-screen bg-[#f7f8f6]">
       <SiteNav />
-      <main className="mx-auto grid w-full max-w-5xl gap-10 px-4 py-10 sm:px-6 sm:py-16 lg:grid-cols-[1fr_440px] lg:items-start lg:gap-20 lg:py-24">
+      <main id="main-content" tabIndex={-1} className="mx-auto grid w-full max-w-5xl gap-6 px-4 py-6 focus:outline-none sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-[1fr_440px] lg:items-start lg:gap-16 lg:py-20">
         <section className="pt-2 lg:sticky lg:top-36">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-700">
             {eyebrow}
           </p>
-          <h1 className="mt-4 max-w-xl text-4xl font-semibold tracking-[-0.04em] text-gray-950 sm:text-5xl">
+          <h1 className="mt-2 max-w-xl text-3xl font-semibold tracking-[-0.04em] text-gray-950 sm:mt-4 sm:text-5xl">
             {title}
           </h1>
-          <p className="mt-4 max-w-lg text-base leading-7 text-gray-600 sm:text-lg sm:leading-8">
+          <p className="mt-3 max-w-lg text-base leading-6 text-gray-600 sm:text-lg sm:leading-8">
             {description}
           </p>
         </section>

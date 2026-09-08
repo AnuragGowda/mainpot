@@ -24,13 +24,15 @@ export default function JoinGamePage() {
   const { toast } = useToast();
 
   const [name, setName] = useState("");
+  const [ready, setReady] = useState(false);
   const [code, setCode] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [joinError, setJoinError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setName(getPlayerName() ?? "");
+    setName((current) => current || getPlayerName() || "");
+    setReady(true);
   }, []);
 
   function handleCodeChange(value: string) {
@@ -60,6 +62,7 @@ export default function JoinGamePage() {
     setErrors(nextErrors);
     setJoinError(null);
     if (nextErrors.name || nextErrors.code) {
+      document.getElementById(nextErrors.name ? "join-name" : "join-code")?.focus();
       return;
     }
 
@@ -91,16 +94,12 @@ export default function JoinGamePage() {
   return (
     <GameSetupShell
       eyebrow="Join the table"
-      title="Enter the room code."
-      description="Open the host’s QR or invite link, or enter the six-character code to join the table’s ledger."
+      title="Join your table."
+      description="Enter the host’s six-character code or paste an invite link."
     >
-          <div>
-            <h2 className="text-xl font-semibold tracking-tight text-gray-950">Join a game</h2>
-            <p className="mt-1 text-sm text-gray-500">Codes are six characters and never use 0, 1, I, or O.</p>
-          </div>
-
-          <form onSubmit={handleSubmit} noValidate className="mt-7 space-y-5">
+          <form aria-label="Join a game" onSubmit={handleSubmit} noValidate className="space-y-5">
             <Input
+              disabled={!ready}
               id="join-name"
               label="Your name"
               value={name}
@@ -111,6 +110,7 @@ export default function JoinGamePage() {
               error={errors.name}
             />
             <Input
+              disabled={!ready}
               id="join-code"
               label="Room code"
               value={code}
@@ -133,12 +133,12 @@ export default function JoinGamePage() {
                 {joinError}
               </p>
             ) : null}
-            <Button type="submit" fullWidth loading={loading}>
+            <Button type="submit" fullWidth loading={loading} disabled={!ready}>
               Join game
             </Button>
           </form>
           <p className="mt-4 text-center text-xs leading-5 text-gray-400">
-            Full invite links work here too.
+            Codes never use 0, 1, I, or O.
           </p>
     </GameSetupShell>
   );

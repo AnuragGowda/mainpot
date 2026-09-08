@@ -71,32 +71,32 @@ const faqs = [
   {
     question: "What does a poker settlement calculator calculate?",
     answer:
-      "It calculates each player’s net result by subtracting their total money in from their final cash-out. It then matches the players who owe money with the players who should receive money and produces a practical payment list.",
+      "It subtracts each player’s total money in from their final cash-out, then matches players who owe with players who should receive.",
   },
   {
     question: "Why do total buy-ins have to equal total cash-outs?",
     answer:
-      "The chips on the table represent the money that entered the game. If the two totals differ, an entry may be missing, duplicated, or incorrect. Find the cause first; if the difference is intentional, the table should explicitly decide how it changes the results before creating payments.",
+      "The chips represent the money that entered the game. A difference usually means an entry is missing, duplicated, or incorrect. Find the cause before creating payments.",
   },
   {
     question: "Do rebuys and add-ons count as buy-ins?",
     answer:
-      "Yes. Every chip purchase counts as money in, whether it is the opening buy-in, a later rebuy, or a smaller add-on. All of those purchases must be included before calculating a player’s result.",
+      "Yes. Count every chip purchase, including the opening buy-in, rebuys, and add-ons, before calculating results.",
   },
   {
     question: "What if one player fronts a rebuy for someone else?",
     answer:
-      "Record an advance only when the player who paid is still owed. If they were already repaid, record a normal rebuy. Buying chips from another player’s personal stack is not a rebuy because it does not add money or chips to the bank.",
+      "Record an advance only if the payer is still owed. If they were already repaid, record a normal rebuy. A private chip sale does not add money to the bank.",
   },
   {
     question: "Does Mainpot hold or send the money?",
     answer:
-      "No. Mainpot records the game, checks the bank, and shows who should pay whom. Players review the result and make the actual transfers using the payment method their table prefers.",
+      "No. Mainpot records the game, checks the bank, and shows who should pay whom. Players make the actual transfers with their preferred method.",
   },
   {
     question: "Can a game be settled when the bank is still off?",
     answer:
-      "Mainpot first asks the table to find the discrepancy. If it is intentional, the host can adjust all affected results proportionally, choose specific players, or record exact agreed amounts. The adjusted result and the decision appear in the settlement record.",
+      "First find the discrepancy. If it is intentional, the host can apply a proportional, selected-player, or exact agreed adjustment, which stays in the settlement record.",
   },
 ];
 
@@ -135,24 +135,19 @@ export default function PokerSettlementCalculatorPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <SiteNav />
-      <main>
+      <main tabIndex={-1} id="main-content">
         <section className="border-b border-gray-300 bg-[#f7f8f6] px-4 py-10 sm:px-6 sm:py-20">
           <div className="mx-auto w-full max-w-6xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
-              Calculator + field guide
-            </p>
             <h1 className="mt-4 max-w-5xl text-4xl font-semibold tracking-[-0.055em] text-gray-950 sm:mt-5 sm:text-6xl lg:text-7xl">
-              Poker settlement, without the guesswork.
+              Poker settlement calculator
             </h1>
             <div className="mt-8 grid gap-8 border-t border-gray-300 pt-7 lg:grid-cols-[minmax(0,1fr)_22rem]">
               <p className="max-w-3xl text-base leading-7 text-gray-700 sm:text-xl sm:leading-9">
-                Enter every player&apos;s money in and final stack. Mainpot checks
-                the bank, handles an agreed discrepancy, and turns the results
-                into a clear who-pays-whom list.
+                Enter each player&apos;s money in and final stack. Mainpot checks
+                the bank and turns the results into a clear payment list.
               </p>
               <p className="hidden text-sm leading-7 text-gray-600 sm:block">
-                The guide below follows a five-player game from its first buy-in
-                through a $10 mismatch and the final payments.
+                Follow a five-player example from buy-in to final payment.
               </p>
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -175,7 +170,7 @@ export default function PokerSettlementCalculatorPage() {
 
         <SettlementCalculator />
 
-        <div className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-16">
+        <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:px-6 md:py-16 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-16">
           <aside className="hidden lg:block">
             <nav aria-label="On this page" className="sticky top-28">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">On this page</p>
@@ -192,57 +187,59 @@ export default function PokerSettlementCalculatorPage() {
             </nav>
           </aside>
 
+          <details className="group lg:hidden">
+            <summary className="flex cursor-pointer items-center justify-between border-y border-gray-200 py-3 text-sm font-semibold text-gray-950">
+              On this page
+              <span aria-hidden className="text-lg text-gray-500 transition group-open:rotate-45">+</span>
+            </summary>
+            <nav aria-label="On this page" className="border-b border-gray-200 py-2">
+              <ol className="grid grid-cols-2 gap-x-4 gap-y-1 pb-2">
+                {navigation.map(([label, id]) => (
+                  <li key={id}>
+                    <a href={`#${id}`} className="block py-2 text-sm text-gray-600 hover:text-gray-950">{label}</a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          </details>
+
           <article className="min-w-0">
             <section id="overview" className="scroll-mt-24">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">The problem</p>
-              <h2 className={`mt-3 ${sectionHeading}`}>Settlement starts long before the last hand.</h2>
+              <h2 className={sectionHeading}>Balance the bank before settling.</h2>
               <div className="mt-6 space-y-5">
                 <p className={prose}>
-                  Poker chips move between players all night, but the bank only cares about two categories of information: how much money each player put in and how much value they had when play stopped. The difference between those two numbers is the player’s result.
+                  The bank needs two numbers per player: money in and final cash-out. Their difference is the player&apos;s result.
                 </p>
                 <p className={prose}>
-                  The difficult part is making sure the inputs are complete. A forgotten rebuy makes the recorded bank too small. A mistyped cash-out changes both the table total and one player’s result. If those mistakes survive into the payment list, the math can look tidy while still being wrong.
-                </p>
-                <p className={prose}>
-                  Mainpot keeps the ledger attached to the game so the host can verify purchases as they happen, players can enter their final stacks, and the table can resolve any mismatch before money moves between people.
+                  Check every rebuy and cash-out before money moves. Mainpot keeps those entries with the game so the table can resolve a mismatch first.
                 </p>
               </div>
 
-              <div className="mt-8 grid gap-px overflow-hidden rounded-2xl border border-gray-200 bg-gray-200 sm:grid-cols-3">
-                {[
-                  ["1", "Balance the bank", "Total money in must equal total final stacks."],
-                  ["2", "Calculate results", "Cash-out minus money in gives each player’s net."],
-                  ["3", "Route payments", "Debtors pay creditors until every net reaches zero."],
-                ].map(([number, title, description]) => (
-                  <div key={number} className="bg-white p-5 sm:p-6">
-                    <span className="font-mono text-xs font-semibold text-gray-400">0{number}</span>
-                    <h3 className="mt-3 font-semibold text-gray-950">{title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-gray-600">{description}</p>
-                  </div>
-                ))}
-              </div>
+              <ol className="mt-6 space-y-3 text-sm leading-6 text-gray-600">
+                <li><strong className="text-gray-950">1. Balance the bank.</strong> Total money in must equal total final stacks.</li>
+                <li><strong className="text-gray-950">2. Calculate results.</strong> Cash-out minus money in gives each player’s net.</li>
+                <li><strong className="text-gray-950">3. Route payments.</strong> Players who owe pay those who are owed.</li>
+              </ol>
             </section>
 
-            <section id="walkthrough" className="mt-16 scroll-mt-24 border-t border-gray-200 pt-16 sm:mt-20 sm:pt-20">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Animated walkthrough</p>
-              <h2 className={`mt-3 ${sectionHeading}`}>Watch one ledger move through all four states.</h2>
+            <section id="walkthrough" className="mt-12 scroll-mt-24 border-t border-gray-200 pt-12 sm:mt-16 sm:pt-16">
+              <h2 className={sectionHeading}>See the ledger move from input to settlement.</h2>
               <p className={`mt-5 ${prose}`}>
-                The same five-player example appears throughout this guide. The animation begins with the recorded purchases, moves to the final stacks, stops at the mismatch, and then shows the corrected settlement.
+                This five-player example starts with purchases, finds the mismatch, and ends with a corrected settlement.
               </p>
               <div className="mt-8">
                 <SettlementWalkthrough />
               </div>
             </section>
 
-            <section id="example" className="mt-16 scroll-mt-24 border-t border-gray-200 pt-16 sm:mt-20 sm:pt-20">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Five-player example</p>
-              <h2 className={`mt-3 ${sectionHeading}`}>A missing add-on puts the game $10.00 out of balance.</h2>
+            <section id="example" className="mt-12 scroll-mt-24 border-t border-gray-200 pt-12 sm:mt-16 sm:pt-16">
+              <h2 className={sectionHeading}>A missing add-on creates a $10.00 mismatch.</h2>
               <div className="mt-6 space-y-5">
                 <p className={prose}>
-                  The game runs with $0.25/$0.50 blinds and a $40 opening buy-in. Alex and Sam each rebuy once. Jordan adds another $20, and Casey takes an additional $10 in chips. Casey’s add-on never reaches the ledger, so the recorded bank shows $300.00 even though $310.00 in chips are in circulation.
+                  In this $0.25/$0.50 game, Alex and Sam rebuy, Jordan adds $20, and Casey adds $10. Casey&apos;s add-on is missing, so the ledger shows $300.00 while $310.00 is in play.
                 </p>
                 <p className={prose}>
-                  When the last hand ends, stacks such as $18.75 and $132.25 are normal for these stakes. Together, the five cash-outs total $310.00. The cents are not a rounding problem; the unexplained $10.00 gap is evidence that one side of the ledger is incomplete.
+                  The five final stacks total $310.00. The $10.00 gap is an incomplete entry, not a rounding problem.
                 </p>
               </div>
 
@@ -257,17 +254,17 @@ export default function PokerSettlementCalculatorPage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-3 divide-x divide-amber-200 bg-white/55">
-                  <div className="p-4 sm:p-5">
+                  <div className="min-w-0 px-2 py-3 sm:p-5">
                     <p className="text-xs text-amber-800/70">Money in</p>
-                    <p className="mt-1 text-xl font-semibold text-amber-950">$300.00</p>
+                    <p className="mt-1 text-base font-semibold tabular-nums text-amber-950 sm:text-xl">$300.00</p>
                   </div>
-                  <div className="p-4 sm:p-5">
+                  <div className="min-w-0 px-2 py-3 sm:p-5">
                     <p className="text-xs text-amber-800/70">Stacks out</p>
-                    <p className="mt-1 text-xl font-semibold text-amber-950">$310.00</p>
+                    <p className="mt-1 text-base font-semibold tabular-nums text-amber-950 sm:text-xl">$310.00</p>
                   </div>
-                  <div className="p-4 sm:p-5">
+                  <div className="min-w-0 px-2 py-3 sm:p-5">
                     <p className="text-xs text-amber-800/70">Difference</p>
-                    <p className="mt-1 text-xl font-semibold text-red-700">−$10.00</p>
+                    <p className="mt-1 text-base font-semibold tabular-nums text-red-700 sm:text-xl">−$10.00</p>
                   </div>
                 </div>
               </div>
@@ -281,18 +278,20 @@ export default function PokerSettlementCalculatorPage() {
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Correction</p>
                     <h3 className="mt-1 text-xl font-semibold tracking-tight text-gray-950">Add Casey’s missing $10.00 purchase.</h3>
                     <p className="mt-2 text-sm leading-6 text-gray-600">
-                      Casey’s total money in changes from $40.00 to $50.00. The bank becomes $310.00, which now matches the $310.00 in final stacks. That correction also changes Casey’s loss from $40.00 to $50.00.
+                      Add the omitted $10 to Casey’s buy-ins. Both table totals become $310, and Casey’s net result becomes −$50.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-8 overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <div className="mt-8 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                <div className="border-b border-gray-200 px-5 py-4 sm:px-6">
+                  <h3 className="text-sm font-semibold text-gray-950">Corrected game ledger</h3>
+                  <p className="mt-1 text-xs text-gray-500 md:hidden">Scroll sideways to see cash-outs and net results →</p>
+                </div>
+                <div role="region" aria-label="Corrected game ledger" tabIndex={0} className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
                 <table className="w-full min-w-[680px] border-collapse text-left text-sm">
-                  <caption className="border-b border-gray-200 px-5 py-4 text-left sm:px-6">
-                    <span className="block font-semibold text-gray-950">Corrected game ledger</span>
-                    <span className="mt-1 block text-sm font-normal text-gray-500">Cash-out minus total in equals the player’s net result.</span>
-                  </caption>
+                  <caption className="sr-only">Corrected game ledger: buy-ins, cash-outs, and net results</caption>
                   <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
                     <tr>
                       <th scope="col" className="px-5 py-3 sm:px-6">Player</th>
@@ -323,12 +322,12 @@ export default function PokerSettlementCalculatorPage() {
                     </tr>
                   </tfoot>
                 </table>
+                </div>
               </div>
             </section>
 
-            <section id="net-results" className="mt-16 scroll-mt-24 border-t border-gray-200 pt-16 sm:mt-20 sm:pt-20">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Calculate each result</p>
-              <h2 className={`mt-3 ${sectionHeading}`}>Every player gets one net number.</h2>
+            <section id="net-results" className="mt-12 scroll-mt-24 border-t border-gray-200 pt-12 sm:mt-16 sm:pt-16">
+              <h2 className={sectionHeading}>Calculate each player&apos;s net result.</h2>
               <p className={`mt-5 ${prose}`}>
                 The basic calculation is the same for every player. A positive result means the player should receive money. A negative result means the player owes money. A zero means the player is already square.
               </p>
@@ -355,23 +354,22 @@ export default function PokerSettlementCalculatorPage() {
 
               <div className="mt-8 space-y-5">
                 <p className={prose}>
-                  The positive results are Morgan at $92.25 and Jordan at $40.50, for $132.75 total. The negative results are Alex at $61.25, Sam at $21.50, and Casey at $50.00, also $132.75 total. That equality is the second reconciliation check: all player results must add up to zero.
+                Morgan and Jordan receive $132.75 total. Alex, Sam, and Casey owe the same $132.75. All player results therefore add up to zero.
                 </p>
                 <p className={prose}>
-                  Notice why the missing add-on had to be fixed first. Without it, Casey would appear to lose only $40.00, the negative results would total $122.75, and the table would be unable to fund the full $132.75 owed to the winners.
+                  Without Casey&apos;s missing add-on, the losses total only $122.75 and cannot fund the winners&apos; $132.75.
                 </p>
               </div>
             </section>
 
-            <section id="payments" className="mt-16 scroll-mt-24 border-t border-gray-200 pt-16 sm:mt-20 sm:pt-20">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Build the payment list</p>
-              <h2 className={`mt-3 ${sectionHeading}`}>Move $132.75 without replaying every exchange.</h2>
+            <section id="payments" className="mt-12 scroll-mt-24 border-t border-gray-200 pt-12 sm:mt-16 sm:pt-16">
+              <h2 className={sectionHeading}>Turn those balances into payments.</h2>
               <div className="mt-6 space-y-5">
                 <p className={prose}>
-                  A settlement does not reverse individual hands or remember who won chips from whom. It works from the final net positions. The three players with negative results fund the two players with positive results until every balance reaches zero.
+                  Settlement uses final net positions, not individual hands. Players who owe fund players who should receive until every balance reaches zero.
                 </p>
                 <p className={prose}>
-                  For this particular set of balances, four payments are required. Casey must split the $50.00 loss because Morgan still needs $9.50 after receiving Alex’s and Sam’s payments, while Jordan needs $40.50.
+                  Four payments settle this example: Casey splits the remaining $50.00 between Morgan and Jordan.
                 </p>
               </div>
 
@@ -394,26 +392,11 @@ export default function PokerSettlementCalculatorPage() {
                 ))}
               </ol>
 
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Before payments</p>
-                  <p className="mt-3 text-2xl font-semibold text-gray-950">Five open balances</p>
-                  <p className="mt-2 text-sm leading-6 text-gray-600">Two players must receive $132.75. Three players owe $132.75.</p>
-                </div>
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 sm:p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">After payments</p>
-                  <p className="mt-3 text-2xl font-semibold text-emerald-950">Every balance is $0.00</p>
-                  <p className="mt-2 text-sm leading-6 text-emerald-900/70">The full $132.75 has moved once, with no extra round trips.</p>
-                </div>
-              </div>
+              <p className={`mt-5 ${prose}`}>After these four payments, all five balances are zero.</p>
             </section>
 
-            <section id="edge-cases" className="mt-16 scroll-mt-24 border-t border-gray-200 pt-16 sm:mt-20 sm:pt-20">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Special cases</p>
-              <h2 className={`mt-3 ${sectionHeading}`}>The details that usually break spreadsheet settlement.</h2>
-              <p className={`mt-5 ${prose}`}>
-                Most home games are simple until one exception appears. These are the moments where a shared, timestamped ledger is more useful than a final total typed into a group chat.
-              </p>
+            <section id="edge-cases" className="mt-12 scroll-mt-24 border-t border-gray-200 pt-12 sm:mt-16 sm:pt-16">
+              <h2 className={sectionHeading}>Special cases</h2>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 {[
@@ -438,15 +421,14 @@ export default function PokerSettlementCalculatorPage() {
               </div>
             </section>
 
-            <section id="faq" className="mt-16 scroll-mt-24 border-t border-gray-200 pt-16 sm:mt-20 sm:pt-20">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Questions</p>
-              <h2 className={`mt-3 ${sectionHeading}`}>Poker settlement, without the shorthand.</h2>
+            <section id="faq" className="mt-12 scroll-mt-24 border-t border-gray-200 pt-12 sm:mt-16 sm:pt-16">
+              <h2 className={sectionHeading}>Poker settlement questions.</h2>
               <div className="mt-8 border-y border-gray-200">
                 {faqs.map((faq, index) => (
                   <details key={faq.question} className="group border-b border-gray-200 last:border-0" open={index === 0}>
                     <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 py-4 text-base font-semibold text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
-                      {faq.question}
-                      <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-gray-200 text-gray-500 transition group-open:rotate-45 group-open:border-gray-300 group-open:bg-white">+</span>
+                      <span className="min-w-0 flex-1">{faq.question}</span>
+                      <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-gray-200 text-gray-500 transition group-open:border-gray-300 group-open:bg-white"><span className="transition group-open:rotate-45">+</span></span>
                     </summary>
                     <p className="max-w-3xl pb-6 text-sm leading-7 text-gray-600">{faq.answer}</p>
                   </details>
@@ -454,7 +436,7 @@ export default function PokerSettlementCalculatorPage() {
               </div>
             </section>
 
-            <section className="mt-16 overflow-hidden rounded-3xl bg-gray-950 px-6 py-10 text-white sm:mt-20 sm:px-10 sm:py-12">
+            <section className="mt-12 overflow-hidden rounded-3xl bg-gray-950 px-6 py-8 text-white sm:mt-16 sm:px-10 sm:py-10">
               <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                   <div className="flex items-center gap-2 text-emerald-300">
