@@ -4,8 +4,20 @@ import { useCallback, useEffect, useImperativeHandle, useRef, useState, useSyncE
 import { hasSeenRecap, rememberRecap } from '@/lib/recap-session';
 import styles from './RecapReveal.module.css';
 
-export interface RecapRevealHandle { finish: () => void }
-interface Props { sessionKey: string; description: string; children: ReactNode; ref?: Ref<RecapRevealHandle> }
+export type RecapRevealState = 'ready' | 'revealing' | 'complete';
+export interface RecapRevealHandle {
+  finish: () => void;
+  /** Returns true when the card was already revealed and its next action can run. */
+  reveal: () => boolean;
+}
+interface Props {
+  sessionKey: string;
+  description: string;
+  children: ReactNode;
+  activation?: 'automatic' | 'manual';
+  onStateChange?: (state: RecapRevealState) => void;
+  ref?: Ref<RecapRevealHandle>;
+}
 const subscribe = () => () => {};
 const clientSnapshot = () => true;
 const serverSnapshot = () => false;
@@ -22,35 +34,58 @@ function CardBack() {
   </div>;
 }
 
-function RevealSession({ sessionKey, description, children, ref }: Props) {
-  const [done, setDone] = useState(() => hasSeenRecap(sessionKey) || window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function RevealSession({ sessionKey, description, children, activation = 'automatic', onStateChange, ref }: Props) {
+  const [state, setState] = useState<RecapRevealState>(() => {
+    if (hasSeenRecap(sessionKey) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'complete';
+    return activation === 'manual' ? 'ready' : 'revealing';
+  });
   const skipRef = useRef<HTMLButtonElement>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
   const finish = useCallback(() => {
     const restoreFocus = document.activeElement === skipRef.current;
+    rememberRecap(sessionKey);
     if (restoreFocus) summaryRef.current?.focus();
-    setDone(true);
-  }, []);
-  useImperativeHandle(ref, () => ({ finish }), [finish]);
+    setState('complete');
+  }, [sessionKey]);
+  const reveal = useCallback(() => {
+    if (state === 'complete') return true;
+    if (state === 'revealing') return false;
+    rememberRecap(sessionKey);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) finish();
+    else setState('revealing');
+    return false;
+  }, [finish, sessionKey, state]);
+  useImperativeHandle(ref, () => ({ finish, reveal }), [finish, reveal]);
 
   useEffect(() => {
-    // Consume on entry, even if dismissed early; Strict Mode must not restart it.
+    onStateChange?.(state);
+  }, [onStateChange, state]);
+
+  useEffect(() => {
+    if (state !== 'revealing') return;
+    // Consume once the reveal begins, even if dismissed early; Strict Mode must not restart it.
     rememberRecap(sessionKey);
     const timer = window.setTimeout(finish, 1200);
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const changed = () => { if (motion.matches) finish(); };
     motion.addEventListener('change', changed);
     return () => { window.clearTimeout(timer); motion.removeEventListener('change', changed); };
-  }, [sessionKey, finish]);
+  }, [sessionKey, finish, state]);
 
-  return <div ref={summaryRef} tabIndex={-1} role="group" aria-label={done ? description : "Your game card"} className={styles.reveal} data-recap-reveal={done ? 'complete' : 'revealing'}>
+  const status = state === 'complete'
+    ? description
+    : state === 'ready'
+      ? 'Your game card is ready to reveal.'
+      : 'Your game card is being revealed.';
+
+  return <div ref={summaryRef} tabIndex={-1} role="group" aria-label={state === 'complete' ? description : 'Your game card'} className={styles.reveal} data-recap-reveal={state}>
     <div className={styles.stage}>
-      <div className={done ? undefined : styles.front} aria-hidden={!done || undefined}>{children}</div>
-      {!done && <CardBack/>}
+      <div className={styles.front} aria-hidden={state !== 'complete' || undefined}>{children}</div>
+      {state !== 'complete' && <CardBack/>}
     </div>
     <div className={styles.summary}>
-      {!done && <button ref={skipRef} type="button" onClick={finish} className={styles.skip}>Skip reveal</button>}
-      <span role="status" className="sr-only">{done ? description : 'Your game card is being revealed.'}</span>
+      {activation === 'automatic' && state === 'revealing' && <button ref={skipRef} type="button" onClick={finish} className={styles.skip}>Skip reveal</button>}
+      <span role="status" className="sr-only">{status}</span>
     </div>
   </div>;
 }

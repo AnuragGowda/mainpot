@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -9,6 +9,7 @@ import {
   Copy,
   RefreshCw,
   Share2,
+  Sparkles,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -17,10 +18,12 @@ import { copyText } from "@/lib/clipboard";
 import { defaultRecapPrivacy, deriveRecapData } from "@/lib/recap";
 import { clearActiveGame } from "@/lib/session";
 import { trackProductOpsEvent } from "@/lib/product-ops";
+import { recapSessionKey } from "@/lib/recap-session";
 import { buildSummaryText } from "@/lib/summary";
 import type { DiscrepancyAllocation, PlayerNet, Transfer } from "@/lib/settlement";
 import type { Game, GameSnapshot } from "@/lib/types";
 import GameRecapDialog from "./GameRecapDialog";
+import RecapReveal, { type RecapRevealHandle, type RecapRevealState } from "./RecapReveal";
 import RecapStoryCard from "./RecapStoryCard";
 
 export interface SettlementSummaryProps {
@@ -60,6 +63,8 @@ export default function SettlementSummary({
 }: SettlementSummaryProps) {
   const { toast } = useToast();
   const [showGameRecap, setShowGameRecap] = useState(false);
+  const [recapRevealState, setRecapRevealState] = useState<RecapRevealState>('ready');
+  const recapRevealRef = useRef<RecapRevealHandle>(null);
 
   const summaryText = buildSummaryText({
     game,
@@ -76,6 +81,7 @@ export default function SettlementSummary({
   const featuredPlayer = recapData.players.find((player) => player.id === featuredPlayerId)
     ?? recapData.players[0]
     ?? null;
+  const revealSessionKey = recapSessionKey(recapData.gameId, featuredPlayer?.id);
   async function copyFallback() {
     try {
       await copyText(summaryText);
@@ -136,22 +142,42 @@ export default function SettlementSummary({
           </div>
           <button
             type="button"
-            onClick={() => setShowGameRecap(true)}
-            aria-label="Customize and share your game card"
-            className="group relative block w-full overflow-hidden rounded-[28px] border border-gray-950/10 bg-[#f7f6ef] p-2.5 text-left shadow-[0_18px_45px_rgba(17,21,18,0.14)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_24px_52px_rgba(17,21,18,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
+            onClick={() => {
+              if (recapRevealRef.current?.reveal()) setShowGameRecap(true);
+            }}
+            disabled={recapRevealState === 'revealing'}
+            aria-label={recapRevealState === 'complete'
+              ? 'Customize and share your game card'
+              : recapRevealState === 'revealing'
+                ? 'Your game card is being revealed'
+                : 'Reveal your game card'}
+            className="group relative block w-full overflow-hidden rounded-[28px] border border-gray-950/10 bg-[#f7f6ef] p-2.5 text-left shadow-[0_18px_45px_rgba(17,21,18,0.14)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_24px_52px_rgba(17,21,18,0.2)] disabled:cursor-wait focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-4"
           >
             <span className="block overflow-hidden rounded-[20px]">
-              <RecapStoryCard
-                data={recapData}
-                privacy={defaultRecapPrivacy}
-                mode="summary"
-                featuredPlayerId={featuredPlayer?.id}
-                decorative
-              />
+              <RecapReveal
+                ref={recapRevealRef}
+                sessionKey={revealSessionKey}
+                description="Your revealed game card"
+                activation="manual"
+                onStateChange={setRecapRevealState}
+              >
+                <RecapStoryCard
+                  data={recapData}
+                  privacy={defaultRecapPrivacy}
+                  mode="summary"
+                  featuredPlayerId={featuredPlayer?.id}
+                  decorative
+                />
+              </RecapReveal>
             </span>
             <span className="mt-2.5 flex min-h-12 items-center justify-between rounded-[18px] bg-gray-950 px-4 text-sm font-semibold text-white transition group-hover:bg-emerald-950">
-              <span className="inline-flex items-center gap-2"><Share2 aria-hidden size={16} /> Customize &amp; share</span>
-              <ArrowUpRight aria-hidden size={18} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <span className="inline-flex items-center gap-2">
+                {recapRevealState === 'complete' ? <Share2 aria-hidden size={16} /> : <Sparkles aria-hidden size={16} />}
+                {recapRevealState === 'complete' ? 'Customize & share' : recapRevealState === 'revealing' ? 'Revealing…' : 'Tap to reveal'}
+              </span>
+              {recapRevealState === 'complete'
+                ? <ArrowUpRight aria-hidden size={18} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                : <Sparkles aria-hidden size={18} className="transition-transform group-hover:rotate-12 group-hover:scale-110" />}
             </span>
           </button>
         </section>

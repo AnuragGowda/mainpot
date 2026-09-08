@@ -70,6 +70,6 @@ export async function runHostPlayerFlow(page: Page) {
   await page.getByRole("button", { name: "Lock settlement", exact: true }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
   await expect(page.getByText("Ended", { exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Customize and share your game card" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Reveal your game card" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Add player", exact: true })).toHaveCount(0);
 }

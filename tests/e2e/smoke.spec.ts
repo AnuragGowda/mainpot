@@ -162,9 +162,17 @@ test.describe("public local-mode experience", () => {
     await page.getByRole("alertdialog").getByRole("button", { name: "Lock settlement" }).click();
     await expect(page.getByText("Ended", { exact: true })).toBeVisible();
     await expect(page.getByRole("region", { name: "You're even." })).toBeVisible();
+    const revealCardButton = page.getByRole("button", { name: "Reveal your game card" });
+    await expect(revealCardButton).toBeVisible();
+    await expect(revealCardButton.getByText("Tap to reveal", { exact: true })).toBeVisible();
+    await expect(page.locator('[data-recap-reveal]')).toHaveAttribute('data-recap-reveal', 'ready');
+    await revealCardButton.click();
+    await expect(page.getByRole("button", { name: "Your game card is being revealed" })).toBeDisabled();
+    await expect(page.locator('[data-recap-reveal]')).toHaveAttribute('data-recap-reveal', 'revealing');
     const gameCardButton = page.getByRole("button", { name: "Customize and share your game card" });
     await expect(gameCardButton).toBeVisible();
     await expect(gameCardButton.getByText("Customize & share", { exact: true })).toBeVisible();
+    await expect(page.locator('[data-recap-reveal]')).toHaveAttribute('data-recap-reveal', 'complete');
     await expect(fullPlanSummary).toContainText("Full settlement plan");
     await expect(fullPlanSummary).toContainText("Host view");
     await expect(fullPlan).toHaveJSProperty("open", false);
@@ -200,14 +208,15 @@ test.describe("public local-mode experience", () => {
     ), await fullPlan.elementHandle())).toBe(true);
 
     await recapButton.click();
-    await expect(page.getByRole("dialog", { name: "Your game card" })).toBeVisible();
+    const recapDialog = page.getByRole("dialog", { name: "Your game card" });
+    await expect(recapDialog).toBeVisible();
     await expect(page.getByRole("button", { name: /Share (your story|game card)/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /save.*image/i })).toHaveCount(0);
     await expect(page.getByRole("group", { name: "What can people see?" })).toBeVisible();
     await expect(page.getByRole("checkbox", { name: "Show amounts and losses" })).toBeVisible();
     await expect(page.getByRole("checkbox", { name: "Show player names" })).toHaveCount(0);
-    const recapGraphic = page.getByRole("dialog", { name: "Your game card" }).locator("svg[viewBox='0 0 1080 1920']");
-    await expect(page.locator('[data-recap-reveal]')).toHaveAttribute('data-recap-reveal', 'complete');
+    const recapGraphic = recapDialog.locator("svg[viewBox='0 0 1080 1920']");
+    await expect(recapDialog.locator('[data-recap-reveal]')).toHaveAttribute('data-recap-reveal', 'complete');
     await expect(recapGraphic).toContainText(/The Break-Even Baron|The Table Celebrity|The Group Chat Correspondent/);
     await expect(page.getByRole("button", { name: "Try another title" })).toHaveCount(0);
     await expect(recapGraphic).toContainText("Good nights make great characters.");
@@ -244,7 +253,7 @@ test.describe("public local-mode experience", () => {
     const sharedCardText = await recapGraphic.textContent();
     await page.getByRole("button", { name: "Close game recap" }).click();
     await recapButton.click();
-    await expect(page.locator('[data-recap-reveal]')).toHaveAttribute('data-recap-reveal', 'complete');
+    await expect(recapDialog.locator('[data-recap-reveal]')).toHaveAttribute('data-recap-reveal', 'complete');
     await expect(page.getByRole('button', { name: 'Skip reveal' })).toHaveCount(0);
     await expect(recapGraphic).toHaveText(sharedCardText!);
     await expect(page.getByRole('checkbox', { name: 'Show player count' })).not.toBeChecked();
