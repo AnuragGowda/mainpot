@@ -29,11 +29,23 @@ type Payload = {
 
 const outboxColumns = "sequence,environment,event_name,occurred_at,actor_id,session_id,journey_id,properties,idempotency_key,received_at";
 
+function telemetryRequested(): boolean {
+  return process.env.NEXT_PUBLIC_PRODUCT_OPS_ENABLED === "true";
+}
+
 function enabled(): boolean {
-  return process.env.NEXT_PUBLIC_PRODUCT_OPS_ENABLED === "true"
+  return telemetryRequested()
     && Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL)
     && Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
     && Boolean(process.env.PRODUCT_OPS_ACTOR_SALT);
+}
+
+function logOutboxFailure(
+  operation: "configuration" | "outbox_read" | "outbox_write",
+  status: 503,
+  reason: "incomplete_configuration" | "database_error" | "unexpected_error",
+): void {
+  console.error(JSON.stringify({ operation, status, reason }));
 }
 
 function collectorEnabled(): boolean {
@@ -138,18 +150,26 @@ export async function GET(request: Request) {
       .gt("sequence", parameters.after)
       .order("sequence", { ascending: true })
       .limit(parameters.limit);
-    if (error) return new Response(null, { status: 503 });
+    if (error) {
+      logOutboxFailure("outbox_read", 503, "database_error");
+      return new Response(null, { status: 503 });
+    }
     return Response.json({ events: data ?? [] }, {
       headers: { "cache-control": "private, no-store" },
     });
   } catch {
+    logOutboxFailure("outbox_read", 503, "unexpected_error");
     return new Response(null, { status: 503 });
   }
 }
 
 export async function POST(request: Request) {
-  if (!enabled()) return new Response(null, { status: 204 });
   if (!requestIsSameOrigin(request)) return new Response(null, { status: 204 });
+  if (!telemetryRequested()) return new Response(null, { status: 204 });
+  if (!enabled()) {
+    logOutboxFailure("configuration", 503, "incomplete_configuration");
+    return new Response(null, { status: 503 });
+  }
 
   const body = await request.json().catch(() => null) as Payload | null;
   if (!body || typeof body.event !== "string" || !events.has(body.event)
@@ -181,9 +201,12 @@ export async function POST(request: Request) {
       idempotency_key: idempotencyKey,
     });
     if (error?.code === "23505") return new Response(null, { status: 204 });
-    if (error) return new Response(null, { status: 503 });
+    if (error) {
+      logOutboxFailure("outbox_write", 503, "database_error");
+      return new Response(null, { status: 503 });
+    }
   } catch {
-    // Deliberately invisible to callers: telemetry must not affect game flows.
+    logOutboxFailure("outbox_write", 503, "unexpected_error");
     return new Response(null, { status: 503 });
   }
   return new Response(null, { status: 204 });

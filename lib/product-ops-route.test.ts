@@ -84,10 +84,12 @@ describe("Product Ops relay", () => {
     mocks.gt.mockReturnValue({ order: mocks.order });
     mocks.order.mockReturnValue({ limit: mocks.limit });
     mocks.limit.mockResolvedValue({ data: [], error: null });
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
     vi.clearAllMocks();
     delete process.env.NEXT_PUBLIC_PRODUCT_OPS_ENABLED;
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -239,22 +241,41 @@ describe("Product Ops relay", () => {
   });
 
   it("does not acknowledge a non-duplicate database error as a durable append", async () => {
-    mocks.insert.mockResolvedValueOnce({ error: { code: "42501" } });
+    mocks.insert.mockResolvedValueOnce({ error: { code: "never-forward" } });
 
     const response = await POST(request("44444444-4444-4444-8444-444444444444"));
 
     // The browser telemetry caller ignores this response, so game play is not
     // affected; 503 still prevents a caller from treating the event as stored.
     expect(response.status).toBe(503);
+    expect(console.error).toHaveBeenCalledWith(JSON.stringify({
+      operation: "outbox_write", status: 503, reason: "database_error",
+    }));
+    expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain("never-forward");
   });
 
-  it("does nothing when server-only outbox configuration is absent", async () => {
+  it("surfaces enabled-but-incomplete server configuration without exposing it", async () => {
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     const response = await POST(request("44444444-4444-4444-8444-444444444444"));
 
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(503);
     expect(mocks.createClient).not.toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalledWith(JSON.stringify({
+      operation: "configuration", status: 503, reason: "incomplete_configuration",
+    }));
+  });
+
+  it("logs a privacy-safe failure when the collector outbox read fails", async () => {
+    mocks.limit.mockResolvedValueOnce({ data: null, error: { code: "never-forward" } });
+
+    const response = await GET(collectorRequest());
+
+    expect(response.status).toBe(503);
+    expect(console.error).toHaveBeenCalledWith(JSON.stringify({
+      operation: "outbox_read", status: 503, reason: "database_error",
+    }));
+    expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain("never-forward");
   });
 
   it("rejects collector pulls without the app-scoped bearer key", async () => {
