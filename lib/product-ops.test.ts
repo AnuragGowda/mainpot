@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { trackProductOpsEvent } from "./product-ops";
+import { classifyProductOpsFailure, trackProductOpsEvent } from "./product-ops";
 
 function storage() {
   const values = new Map<string, string>();
@@ -30,5 +30,13 @@ describe("Product Ops browser relay", () => {
     expect(fetchMock.mock.calls[0][0]).toBe("/api/product-ops/events");
     expect(fetchMock.mock.calls[0][1]).toMatchObject({ keepalive: true });
     expect(fetchMock.mock.calls[1][1]?.body).toBe(fetchMock.mock.calls[0][1]?.body);
+  });
+
+  it("reduces client errors to privacy-safe diagnostic categories", () => {
+    expect(classifyProductOpsFailure(new Error("Failed to fetch"))).toBe("network");
+    expect(classifyProductOpsFailure(new Error("Finish your active guest game before starting another."))).toBe("guardrail");
+    expect(classifyProductOpsFailure({ code: "PGRST205", message: "Missing relation" })).toBe("database");
+    expect(classifyProductOpsFailure(new Error("Invalid refresh token"))).toBe("auth");
+    expect(classifyProductOpsFailure(new Error("Unexpected failure"))).toBe("unknown");
   });
 });

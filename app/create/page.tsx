@@ -1,20 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { ResumeGameCard, type ResumableGame } from "@/components/ResumeBanner";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import GameSetupShell from "@/components/GameSetupShell";
 import { useToast } from "@/components/ui/Toast";
-import { createGame, getGame, recordGameEvent } from "@/lib/data";
+import { createGame, getGame, recordGameEvent, usingLocalStorage } from "@/lib/data";
 import { getGameTemplates, saveGameTemplate, type GameTemplate } from "@/lib/account-data";
 import { getCurrentUser, getCurrentUserId } from "@/lib/auth-client";
 import { getProfileById } from "@/lib/friends";
-import { trackProductOpsEvent } from "@/lib/product-ops";
+import { classifyProductOpsFailure, trackProductOpsEvent } from "@/lib/product-ops";
 import { getPlayerName, getSessionId, setActiveGame, setPlayerName } from "@/lib/session";
 import { markPostGameEntry } from "@/lib/push-client";
+import { navigateToFreshAppPage } from "@/lib/navigation";
 import {
   GAME_NAME_MAX_LENGTH,
   PLAYER_NAME_MAX_LENGTH,
@@ -36,7 +37,6 @@ function toNumericAmount(value: string) {
 }
 
 export default function CreateGamePage() {
-  const router = useRouter();
   const { toast } = useToast();
 
   const [name, setName] = useState("");
@@ -51,15 +51,21 @@ export default function CreateGamePage() {
   const [preferredRoster, setPreferredRoster] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  const [resumeGame, setResumeGame] = useState<ResumableGame | null>(null);
 
   useEffect(() => {
     setName((current) => current || getPlayerName() || "");
     setReady(true);
     const previousGame = window.localStorage.getItem("ante_active_game");
-    if (previousGame && !window.sessionStorage.getItem(`returned:${previousGame}`)) {
-      window.sessionStorage.setItem(`returned:${previousGame}`, "1");
+    if (previousGame) {
       void getGame(previousGame).then(async (game) => {
-        if (!game || game.status !== "ended") return;
+        if (!game) return;
+        if (game.status !== "ended") {
+          setResumeGame({ code: game.code, name: game.name, status: game.status });
+          return;
+        }
+        if (window.sessionStorage.getItem(`returned:${previousGame}`)) return;
+        window.sessionStorage.setItem(`returned:${previousGame}`, "1");
         const userId = await getCurrentUserId();
         const isHost = game.host_user_id
           ? game.host_user_id === userId
@@ -136,8 +142,14 @@ export default function CreateGamePage() {
       markPostGameEntry(code);
       window.sessionStorage.setItem("ante_post_create_source_game", code);
       toast("Game created!", "success");
-      router.push(`/game/${code}`);
+      // A document navigation avoids carrying a stale Next.js client across a
+      // deployment and gives the new room a clean service-worker/app shell.
+      navigateToFreshAppPage(`/game/${code}`);
     } catch (err) {
+      trackProductOpsEvent("game.create_failed", {
+        reason: classifyProductOpsFailure(err),
+        storage_mode: usingLocalStorage() ? "local_storage" : "supabase",
+      });
       const message =
         err instanceof Error
           ? err.message
@@ -153,7 +165,9 @@ export default function CreateGamePage() {
       title="Start a game."
       description="Set the buy-in, then invite your table with a code."
     >
-          <form aria-label="Game details" onSubmit={handleSubmit} noValidate className="space-y-5">
+      <div className="space-y-5">
+        {resumeGame ? <ResumeGameCard game={resumeGame} /> : null}
+        <form aria-label="Game details" onSubmit={handleSubmit} noValidate className="space-y-5">
             {templates.length ? (
               <label htmlFor="create-template" className="block text-sm font-medium text-gray-700">
                 Start from a recurring game <span className="font-normal text-gray-400">(optional)</span>
@@ -230,7 +244,8 @@ export default function CreateGamePage() {
             <Button type="submit" fullWidth loading={loading} disabled={!ready}>
               Create game
             </Button>
-          </form>
+        </form>
+      </div>
     </GameSetupShell>
   );
 }

@@ -40,6 +40,26 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByText(/records your opening buy-in of \$20\.50/i)).toBeVisible();
   });
 
+  test("lets a host resume an active game from setup without clearing site data", async ({ page }) => {
+    await page.goto("/create");
+    await page.locator("#create-name").fill("Casey");
+    await page.locator("#create-game-name").fill("Resume test game");
+    await page.locator("#create-buy-in").fill("20");
+    await page.getByRole("button", { name: "Create game" }).click();
+
+    await expect(page).toHaveURL(/\/game\/[A-HJ-NP-Z2-9]{6}$/);
+    const gameUrl = page.url();
+    await page.goto("/create");
+
+    const resume = page.getByRole("region", { name: "Resume active game" });
+    await expect(resume).toContainText("Active game waiting");
+    await expect(resume).toContainText("Resume test game");
+    await resume.getByRole("button", { name: "Resume game" }).click();
+
+    await expect(page).toHaveURL(gameUrl);
+    await expect(page.getByRole("heading", { name: "Resume test game" })).toBeVisible();
+  });
+
   test("offers contextual iPhone install steps after creating a game", async ({ page }) => {
     await page.route("**/api/push/config", (route) => route.fulfill({
       status: 200,

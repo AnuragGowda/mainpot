@@ -39,6 +39,28 @@ function request(
   });
 }
 
+function failureRequest() {
+  return new Request("https://mainpot.app/api/product-ops/events", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      origin: "https://mainpot.app",
+    },
+    body: JSON.stringify({
+      event: "game.room_load_failed",
+      actorId,
+      sessionId,
+      idempotencyKey: "77777777-7777-4777-8777-777777777777",
+      properties: {
+        reason: "network",
+        storage_mode: "supabase",
+        raw_error: "never-forward",
+        room_code: "never-forward",
+      },
+    }),
+  });
+}
+
 const collectorKey = "collector-test-key-that-is-at-least-32-chars";
 
 function collectorRequest(path = "?after=0&limit=100", token = collectorKey) {
@@ -101,6 +123,18 @@ describe("Product Ops relay", () => {
     expect(serializedRow).not.toContain(sessionId);
     expect(serializedRow).not.toContain(journeyId);
     expect(serializedRow).not.toContain("never-forward");
+  });
+
+  it("keeps failure telemetry categorical and strips raw client details", async () => {
+    const response = await POST(failureRequest());
+    const row = mocks.insert.mock.calls[0][0] as Record<string, unknown>;
+
+    expect(response.status).toBe(204);
+    expect(row).toMatchObject({
+      event_name: "game.room_load_failed",
+      properties: { reason: "network", storage_mode: "supabase" },
+    });
+    expect(JSON.stringify(row)).not.toContain("never-forward");
   });
 
   it("treats a duplicate lifecycle append as a successful no-op", async () => {

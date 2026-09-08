@@ -1,5 +1,4 @@
-const SHELL_CACHE = "mainpot-shell-v1";
-const ASSET_CACHE = "mainpot-assets-v1";
+const SHELL_CACHE = "mainpot-shell-v2";
 const OFFLINE_URL = "/offline.html";
 const SHELL_ASSETS = [
   OFFLINE_URL,
@@ -29,8 +28,7 @@ serviceWorker.addEventListener("activate", (event: ExtendableEvent) => {
             .filter(
               (key) =>
                 key.startsWith("mainpot-") &&
-                key !== SHELL_CACHE &&
-                key !== ASSET_CACHE
+                key !== SHELL_CACHE
             )
             .map((key) => caches.delete(key))
         )
@@ -51,30 +49,9 @@ serviceWorker.addEventListener("fetch", (event: FetchEvent) => {
     return;
   }
 
-  const url = new URL(request.url);
-  const isStaticAsset =
-    url.origin === serviceWorker.location.origin &&
-    (url.pathname.startsWith("/_next/static/") ||
-      url.pathname.startsWith("/icon-") ||
-      url.pathname === "/apple-touch-icon.png");
-
-  if (!isStaticAsset) return;
-
-  event.respondWith(
-    caches.open(ASSET_CACHE).then(async (cache) => {
-      const cached = await cache.match(request);
-      const fresh = fetch(request)
-        .then((response) => {
-          if (response.ok) {
-            void cache.put(request, response.clone());
-          }
-          return response;
-        })
-        .catch(() => cached ?? Response.error());
-
-      return cached || fresh;
-    })
-  );
+  // Let the browser's HTTP cache manage Next.js' content-hashed assets. A
+  // service-worker cache can otherwise keep an old client runtime alive across
+  // deployments and strand users on a broken route transition.
 });
 
 serviceWorker.addEventListener("message", (event: ExtendableMessageEvent) => {

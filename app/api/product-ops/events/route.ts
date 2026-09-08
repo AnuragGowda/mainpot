@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 
 const events = new Set([
   "game.created",
+  "game.create_failed",
+  "game.room_load_failed",
   "game.second_player_joined",
   "game.entered_settling",
   "game.finalized",
@@ -14,6 +16,7 @@ const events = new Set([
 const referrerSources = new Set(["direct", "github", "documentation", "self_hosted", "other"]);
 const selfReportedSources = new Set(["personal_invite", "poker_group", "search", "other"]);
 const storageModes = new Set(["local_storage", "supabase"]);
+const failureReasons = new Set(["auth", "guardrail", "network", "database", "unknown"]);
 
 type Payload = {
   event?: unknown;
@@ -54,6 +57,12 @@ function safeProperties(event: string, properties: unknown): Record<string, stri
   if (event === "acquisition.referrer_attributed") return typeof candidate.source === "string" && referrerSources.has(candidate.source) ? { source: candidate.source } : null;
   if (event === "acquisition.self_reported") return typeof candidate.source === "string" && selfReportedSources.has(candidate.source) ? { source: candidate.source } : null;
   if (["game.created", "game.second_player_joined", "game.entered_settling", "game.finalized"].includes(event)) return typeof candidate.storage_mode === "string" && storageModes.has(candidate.storage_mode) ? { storage_mode: candidate.storage_mode } : null;
+  if (["game.create_failed", "game.room_load_failed"].includes(event)) {
+    return typeof candidate.reason === "string" && failureReasons.has(candidate.reason)
+      && typeof candidate.storage_mode === "string" && storageModes.has(candidate.storage_mode)
+      ? { reason: candidate.reason, storage_mode: candidate.storage_mode }
+      : null;
+  }
   if (event === "feedback.submitted") {
     const score = candidate.score;
     return typeof score === "number" && Number.isInteger(score) && score >= 1 && score <= 5 ? { score, feedback_present: candidate.feedback_present === true } : null;

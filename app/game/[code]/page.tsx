@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { useToast } from "@/components/ui/Toast";
 import GameHeader from "@/components/GameRoom/GameHeader";
@@ -38,8 +39,10 @@ import {
   verifyBuyIn,
 } from "@/lib/data";
 import { pendingPot, verifiedPot } from "@/lib/game";
+import { navigateToFreshAppPage } from "@/lib/navigation";
 import { getSessionId, setActiveGame } from "@/lib/session";
 import type { GameSnapshot, GameStatus } from "@/lib/types";
+import { classifyProductOpsFailure, trackProductOpsEvent } from "@/lib/product-ops";
 
 function LoadingScreen() {
   return (
@@ -70,6 +73,30 @@ function NotFoundScreen() {
         >
           Find a game
         </Link>
+      </Card>
+    </main>
+  );
+}
+
+function GameLoadErrorScreen({ message }: { message: string }) {
+  return (
+    <main tabIndex={-1} id="main-content" className="flex min-h-screen flex-col items-center justify-center px-4 py-16 sm:px-6">
+      <Card padding="lg" className="w-full max-w-md text-center">
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+          Couldn’t load this game
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-gray-600">{message}</p>
+        <p className="mt-2 text-sm leading-6 text-gray-500">
+          Your game is still saved. Reload it or return to setup to resume it.
+        </p>
+        <div className="mt-6 grid gap-3">
+          <Button fullWidth onClick={() => window.location.reload()}>
+            Reload game
+          </Button>
+          <Button fullWidth variant="secondary" onClick={() => navigateToFreshAppPage("/create")}>
+            Back to game setup
+          </Button>
+        </div>
       </Card>
     </main>
   );
@@ -125,6 +152,7 @@ export default function GameRoomPage() {
   const [snapshot, setSnapshot] = useState<GameSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] =
     useState<GameSyncStatus>("connecting");
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -170,6 +198,7 @@ export default function GameRoomPage() {
     let unsubscribe: (() => void) | null = null;
 
     async function load() {
+      let journeyId: string | undefined;
       try {
         const game = await getGame(code);
         if (cancelled) {
@@ -182,6 +211,7 @@ export default function GameRoomPage() {
         }
 
         setActiveGame(code);
+        journeyId = game.id;
 
         const gameSnapshot = await getGameSnapshot(game.id);
         if (cancelled) {
@@ -233,6 +263,15 @@ export default function GameRoomPage() {
             err instanceof Error
               ? err.message
               : "Failed to load the game. Please try again.";
+          setLoadError(message);
+          trackProductOpsEvent(
+            "game.room_load_failed",
+            {
+              reason: classifyProductOpsFailure(err),
+              storage_mode: usingLocalStorage() ? "local_storage" : "supabase",
+            },
+            journeyId,
+          );
           toast(message, "error");
         }
       }
@@ -240,6 +279,7 @@ export default function GameRoomPage() {
 
     setLoading(true);
     setNotFound(false);
+    setLoadError(null);
     setSnapshot(null);
     previousGameStatusRef.current = null;
     setSyncStatus("connecting");
@@ -573,6 +613,10 @@ export default function GameRoomPage() {
 
   if (notFound) {
     return <NotFoundScreen />;
+  }
+
+  if (loadError) {
+    return <GameLoadErrorScreen message={loadError} />;
   }
 
   if (!snapshot) {

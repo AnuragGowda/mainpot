@@ -139,7 +139,7 @@ export default function SignInPage() {
   return (
     <div className="min-h-screen bg-[#f7f8f6]">
       <SiteNav />
-      <main tabIndex={-1} id="main-content" className="mx-auto grid w-full max-w-5xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_440px] lg:py-24">
+      <main tabIndex={-1} id="main-content" className="mx-auto grid w-full max-w-5xl items-center gap-12 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[1fr_440px] lg:py-20">
         <section className="hidden lg:block">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-700">
             Keep your history
@@ -148,7 +148,7 @@ export default function SignInPage() {
             Keep every settled game in one place.
           </h2>
           <p className="mt-5 max-w-lg text-lg leading-8 text-gray-600">
-            Sign in to save results, find regular players, and track your record over time.
+            Create an account or sign in to save results, find regular players, and track your record over time.
           </p>
         </section>
 
@@ -200,18 +200,15 @@ export default function SignInPage() {
 
               {googleAuthEnabled ? (
                 <>
-                  <Button fullWidth variant="secondary" className="mt-7" loading={loading} onClick={handleGoogle} leftIcon={<GoogleMark className="h-4 w-4" />}>
+                  <Button fullWidth variant="secondary" className="mt-6" loading={loading} onClick={handleGoogle} leftIcon={<GoogleMark className="h-4 w-4" />}>
                     Continue with Google
                   </Button>
-                  <p className="mt-2 text-center text-xs leading-5 text-gray-500">
-                    Google securely shares only your basic profile and email with Mainpot.
-                  </p>
-                  <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wider text-gray-400">
+                  <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-gray-400">
                     <span className="h-px flex-1 bg-gray-200" />or<span className="h-px flex-1 bg-gray-200" />
                   </div>
                 </>
               ) : (
-                <div className="h-6" />
+                <div className="h-5" />
               )}
 
               <form onSubmit={handlePasswordAuth} className="space-y-4">
@@ -225,11 +222,12 @@ export default function SignInPage() {
                 </Button>
               </form>
 
-              <button type="button" onClick={handleMagicLink} disabled={loading} className="mt-4 w-full text-sm font-medium text-gray-800 hover:text-gray-950 disabled:opacity-50">
-                Email me a sign-in link
-              </button>
-              {mode === "signin" ? <p className="mt-2 text-center text-xs leading-5 text-gray-500">Forgot your password? Send a sign-in link to your email instead.</p> : null}
-              <p className="mt-7 text-center text-sm text-gray-500">
+              {mode === "signin" ? (
+                <button type="button" onClick={handleMagicLink} disabled={loading} className="mt-4 w-full text-sm text-gray-600 hover:text-gray-950 disabled:opacity-50">
+                  Forgot your password? <span className="font-medium text-gray-900">Get a sign-in link</span>
+                </button>
+              ) : null}
+              <p className="mt-6 text-center text-sm text-gray-500">
                 {mode === "signin" ? "New to Mainpot?" : "Already have an account?"}{" "}
                 <button type="button" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setAuthError(null); setAuthStatus(null); }} className="font-medium text-gray-900 hover:text-gray-600">
                   {mode === "signin" ? "Create an account" : "Sign in"}

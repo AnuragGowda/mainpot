@@ -2,6 +2,8 @@ import { getSessionId, randomUUID } from "./session";
 
 export type ProductOpsEvent =
   | "game.created"
+  | "game.create_failed"
+  | "game.room_load_failed"
   | "game.second_player_joined"
   | "game.entered_settling"
   | "game.finalized"
@@ -11,7 +13,22 @@ export type ProductOpsEvent =
   | "feedback.submitted";
 
 type Properties = Record<string, string | number | boolean>;
+export type ProductOpsFailureReason = "auth" | "guardrail" | "network" | "database" | "unknown";
 const PRODUCT_OPS_SESSION_KEY = "mainpot_product_ops_session_id";
+
+/** Reduces arbitrary client errors to a small, privacy-safe diagnostic bucket. */
+export function classifyProductOpsFailure(error: unknown): ProductOpsFailureReason {
+  const candidate = error as { code?: unknown; message?: unknown } | null;
+  const code = typeof candidate?.code === "string" ? candidate.code.toLowerCase() : "";
+  const message = typeof candidate?.message === "string" ? candidate.message.toLowerCase() : "";
+  const detail = `${code} ${message}`;
+
+  if (/auth|jwt|refresh|session/.test(detail)) return "auth";
+  if (/limit|too many requests|active guest game/.test(detail)) return "guardrail";
+  if (/fetch|network|offline|timeout|abort/.test(detail)) return "network";
+  if (code || /database|relation|column|row|rpc|postgres/.test(detail)) return "database";
+  return "unknown";
+}
 
 function getProductOpsSessionId(): string {
   try {
