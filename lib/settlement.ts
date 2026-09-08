@@ -1,4 +1,4 @@
-import type { BuyIn } from "./types";
+import type { BuyIn, EarlyCashOut, Player } from "./types";
 
 export interface Transfer {
   from: string;
@@ -40,6 +40,81 @@ export interface DiscrepancyAllocation {
   playerIds: string[];
   /** Exact positive amounts used by the advanced custom method. */
   playerAllocations?: PlayerDiscrepancyAllocation[];
+}
+
+/** The signed funding credit/debt that follows a player into settlement. */
+export function getPlayerFundingAdjustment(
+  buyIns: BuyIn[],
+  playerId: string
+): number {
+  return round2(buyIns.reduce((total, buyIn) => {
+    if (!buyIn.verified || !buyIn.fronted_by_player_id) return total;
+    if (buyIn.fronted_by_player_id === playerId) return total + buyIn.amount;
+    if (buyIn.player_id === playerId) return total - buyIn.amount;
+    return total;
+  }, 0));
+}
+
+/** Calculates the amount a departing player settles with the table host. */
+export function calculateEarlyCashOutNet(
+  buyIns: BuyIn[],
+  playerId: string,
+  cashOutAmount: number
+): number {
+  const invested = buyIns
+    .filter((buyIn) => buyIn.verified && buyIn.player_id === playerId)
+    .reduce((total, buyIn) => total + buyIn.amount, 0);
+  return round2(cashOutAmount - invested + getPlayerFundingAdjustment(buyIns, playerId));
+}
+
+/** Returns the one fixed host/player payment for a locked early cash-out. */
+export function getEarlyCashOutTransfer(
+  earlyCashOut: EarlyCashOut,
+  players: Player[]
+): Transfer | null {
+  const net = earlyCashOut.net_amount;
+  const bank = players.find((player) => player.id === earlyCashOut.bank_player_id);
+  const player = players.find((item) => item.id === earlyCashOut.player_id);
+  if (earlyCashOut.status !== "locked" || net == null || !bank || !player || Math.abs(net) <= EPSILON) {
+    return null;
+  }
+  return net > 0
+    ? {
+        from: bank.name,
+        to: player.name,
+        amount: round2(net),
+        fromPlayerId: bank.id,
+        toPlayerId: player.id,
+      }
+    : {
+        from: player.name,
+        to: bank.name,
+        amount: round2(Math.abs(net)),
+        fromPlayerId: player.id,
+        toPlayerId: bank.id,
+      };
+}
+
+/**
+ * Removes locked early leavers from the remaining plan and rolls each signed
+ * result into the host who settled it. Chronological processing also supports
+ * a banker who later cashes out against a successor.
+ */
+export function rollForwardEarlyCashOuts(
+  nets: PlayerNet[],
+  earlyCashOuts: EarlyCashOut[]
+): PlayerNet[] {
+  const remaining = new Map(nets.map((player) => [player.playerId, { ...player }]));
+  const locked = earlyCashOuts
+    .filter((item) => item.status === "locked" && item.bank_player_id && item.net_amount != null)
+    .sort((left, right) => (left.locked_at ?? "").localeCompare(right.locked_at ?? ""));
+
+  for (const earlyCashOut of locked) {
+    const bank = remaining.get(earlyCashOut.bank_player_id!);
+    if (bank) bank.net = round2(bank.net + earlyCashOut.net_amount!);
+    remaining.delete(earlyCashOut.player_id);
+  }
+  return Array.from(remaining.values());
 }
 
 export function discrepancyAllocationLabel(

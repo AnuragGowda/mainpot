@@ -21,7 +21,7 @@ export default function HostLeaveButton({
   onConfirm,
 }: HostLeaveButtonProps) {
   const candidates = players.filter(
-    (player) => player.id !== currentPlayerId && !player.left_at,
+    (player) => player.id !== currentPlayerId && !player.left_at && player.session_id !== null,
   );
   const [open, setOpen] = useState(false);
   const [nextHostId, setNextHostId] = useState(candidates[0]?.id ?? "");

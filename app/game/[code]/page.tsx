@@ -13,17 +13,22 @@ import JoinPrompt from "@/components/GameRoom/JoinPrompt";
 import HostLeaveButton from "@/components/GameRoom/HostLeaveButton";
 import PendingApprovals from "@/components/GameRoom/PendingApprovals";
 import OutstandingAdvances from "@/components/GameRoom/OutstandingAdvances";
+import EarlyCashOutButton from "@/components/GameRoom/EarlyCashOutButton";
+import EarlyCashOuts from "@/components/GameRoom/EarlyCashOuts";
 import AcquisitionPrompt from "@/components/GameRoom/AcquisitionPrompt";
 import GameNotifications from "@/components/GameRoom/GameNotifications";
 import SettlementScreen from "@/components/Settlement/SettlementScreen";
 import {
   addBuyIn,
+  approveEarlyCashOut,
+  cancelEarlyCashOut,
   endGame,
   getGame,
   getGameSnapshot,
   leaveGame,
   removeBuyIn,
   removePlayer,
+  requestEarlyCashOut,
   markBuyInAdvanceRepaid,
   subscribeToGame,
   updateBuyIn,
@@ -38,7 +43,7 @@ import type { GameSnapshot, GameStatus } from "@/lib/types";
 
 function LoadingScreen() {
   return (
-    <main
+    <main tabIndex={-1} id="main-content"
       role="status"
       aria-label="Loading game"
       className="flex min-h-screen items-center justify-center"
@@ -51,7 +56,7 @@ function LoadingScreen() {
 
 function NotFoundScreen() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-16 sm:px-6">
+    <main tabIndex={-1} id="main-content" className="flex min-h-screen flex-col items-center justify-center px-4 py-16 sm:px-6">
       <Card padding="lg" className="w-full max-w-md text-center">
         <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
           Game not found
@@ -123,14 +128,12 @@ export default function GameRoomPage() {
   const [syncStatus, setSyncStatus] =
     useState<GameSyncStatus>("connecting");
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [joinDismissed, setJoinDismissed] = useState(false);
   const [ending, setEnding] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [ledgerAction, setLedgerAction] = useState<"buy-in" | "rebuy" | null>(
     null,
   );
   const ledgerActionInFlight = useRef(false);
-  const joinTableActionRef = useRef<HTMLButtonElement>(null);
   const previousHostStateRef = useRef<{
     gameId: string;
     playerId: string;
@@ -240,7 +243,6 @@ export default function GameRoomPage() {
     setSnapshot(null);
     previousGameStatusRef.current = null;
     setSyncStatus("connecting");
-    setJoinDismissed(false);
     void load();
 
     return () => {
@@ -256,6 +258,11 @@ export default function GameRoomPage() {
       : null;
   const isHost = currentPlayer?.is_host === true;
   const leftGame = currentPlayer?.left_at != null;
+  const currentEarlyCashOut = currentPlayer
+    ? snapshot?.earlyCashOuts.find(
+        (item) => item.player_id === currentPlayer.id && item.status !== "cancelled"
+      ) ?? null
+    : null;
 
   useEffect(() => {
     currentPlayerRef.current = Boolean(currentPlayer);
@@ -288,9 +295,8 @@ export default function GameRoomPage() {
     };
   }, [currentPlayer, isHost, snapshot, toast]);
 
-  const handleSpectate = useCallback(() => {
-    setJoinDismissed(true);
-    window.requestAnimationFrame(() => joinTableActionRef.current?.focus());
+  const handleJoined = useCallback(async (gameId: string) => {
+    setSnapshot(await getGameSnapshot(gameId));
   }, []);
 
   const handleRetrySync = useCallback(async () => {
@@ -404,6 +410,36 @@ export default function GameRoomPage() {
     }
   }
 
+  async function handleRequestEarlyCashOut(amount: number): Promise<boolean> {
+    if (!snapshot || !currentPlayer) return false;
+    try {
+      await requestEarlyCashOut(snapshot.game.id, currentPlayer.id, amount);
+      toast("Cash-out sent to the host", "success");
+      return true;
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Could not request the early cash-out.", "error");
+      return false;
+    }
+  }
+
+  async function handleApproveEarlyCashOut(earlyCashOutId: string): Promise<void> {
+    try {
+      await approveEarlyCashOut(earlyCashOutId);
+      toast("Early cash-out locked — payment is ready", "success");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Could not approve the early cash-out.", "error");
+    }
+  }
+
+  async function handleCancelEarlyCashOut(earlyCashOutId: string): Promise<void> {
+    try {
+      await cancelEarlyCashOut(earlyCashOutId);
+      toast(isHost ? "Early cash-out declined" : "Early cash-out cancelled");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Could not cancel the early cash-out.", "error");
+    }
+  }
+
   async function handleVerify(buyInId: string) {
     try {
       await verifyBuyIn(buyInId);
@@ -502,6 +538,17 @@ export default function GameRoomPage() {
     }
   }
 
+  async function handleHostPlayerSaved() {
+    if (!snapshot) return;
+    try {
+      setSnapshot(await getGameSnapshot(snapshot.game.id));
+      toast("Table updated", "success");
+    } catch {
+      toast("Entry saved. Reconnecting to refresh the table.");
+      setSyncStatus("stale");
+    }
+  }
+
   async function handleEndGame() {
     if (!snapshot) {
       return;
@@ -532,12 +579,11 @@ export default function GameRoomPage() {
     return <LoadingScreen />;
   }
 
-  if (!currentPlayer && !joinDismissed) {
+  if (!currentPlayer) {
     return (
       <JoinPrompt
         game={snapshot.game}
-        onJoined={() => setJoinDismissed(true)}
-        onSpectate={handleSpectate}
+        onJoined={handleJoined}
       />
     );
   }
@@ -552,9 +598,8 @@ export default function GameRoomPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 pb-32 md:pb-16">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-3xl px-4 pb-32 focus:outline-none md:pb-24">
       <SyncStatusNotice status={syncStatus} onRetry={handleRetrySync} />
-      {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
       <GameHeader
         game={snapshot.game}
         verifiedPot={verifiedPot(snapshot)}
@@ -582,6 +627,13 @@ export default function GameRoomPage() {
           onEdit={handleEdit}
           onRemove={handleRemoveBuyIn}
         />
+        <EarlyCashOuts
+          snapshot={snapshot}
+          currentPlayerId={currentPlayer.id}
+          isHost={isHost}
+          onApprove={handleApproveEarlyCashOut}
+          onCancel={handleCancelEarlyCashOut}
+        />
         <OutstandingAdvances
           snapshot={snapshot}
           isHost={isHost}
@@ -591,6 +643,7 @@ export default function GameRoomPage() {
           players={snapshot.players}
           snapshot={snapshot}
           currentPlayerId={currentPlayer?.id ?? null}
+          onHostPlayerSaved={handleHostPlayerSaved}
         />
         <ActivityFeed
           snapshot={snapshot}
@@ -599,9 +652,10 @@ export default function GameRoomPage() {
           onRemoveBuyIn={handleRemoveBuyIn}
           onRemovePlayer={handleRemovePlayer}
         />
+        {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
       </div>
 
-      {currentPlayer && !leftGame ? (
+      {currentPlayer && !leftGame && currentEarlyCashOut?.status !== "requested" ? (
         <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
           <div className="mx-auto flex w-full max-w-3xl gap-2">
             <BuyInActions
@@ -624,35 +678,34 @@ export default function GameRoomPage() {
                   leaving={leaving}
                   onConfirm={handleLeave}
                 />
+              ) : snapshot.buyIns.some((buyIn) => buyIn.player_id === currentPlayer.id) ? (
+                <EarlyCashOutButton
+                  snapshot={snapshot}
+                  currentPlayerId={currentPlayer.id}
+                  leaving={leaving}
+                  onRequest={handleRequestEarlyCashOut}
+                  onLeaveWithoutCashOut={handleLeave}
+                />
               ) : undefined}
             />
           </div>
         </div>
       ) : null}
 
-      {currentPlayer && leftGame ? (
-        <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-gray-50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-center text-sm text-gray-500">
-          You left this game.
+      {currentPlayer && !leftGame && currentEarlyCashOut?.status === "requested" ? (
+        <div className="fixed inset-x-0 bottom-0 border-t border-amber-200 bg-amber-50/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-center text-sm font-medium text-amber-950 backdrop-blur">
+          Waiting for {snapshot.game.host_name} to confirm your early cash-out.
         </div>
       ) : null}
 
-      {!currentPlayer ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
-          <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3">
-            <p className="min-w-0 text-sm font-medium text-gray-700">
-              Watching as a spectator
-            </p>
-            <button
-              ref={joinTableActionRef}
-              type="button"
-              onClick={() => setJoinDismissed(false)}
-              className="inline-flex h-11 shrink-0 items-center justify-center rounded-lg bg-gray-950 px-4 text-sm font-medium text-white shadow-sm shadow-gray-950/10 transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
-            >
-              Join table
-            </button>
-          </div>
+      {currentPlayer && leftGame ? (
+        <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-gray-50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-center text-sm text-gray-500">
+          {currentEarlyCashOut?.status === "locked"
+            ? "You cashed out early. Your payment record is above."
+            : "You left this game."}
         </div>
       ) : null}
+
     </main>
   );
 }

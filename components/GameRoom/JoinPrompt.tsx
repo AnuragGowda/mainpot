@@ -16,14 +16,12 @@ import { PLAYER_NAME_MAX_LENGTH, validatePlayerName } from "@/lib/name-validatio
 
 export interface JoinPromptProps {
   game: Pick<Game, "code" | "name" | "host_name" | "buy_in_amount">;
-  onJoined: () => void;
-  onSpectate: () => void;
+  onJoined: (gameId: string) => Promise<void>;
 }
 
 export default function JoinPrompt({
   game,
   onJoined,
-  onSpectate,
 }: JoinPromptProps) {
   const { toast } = useToast();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -45,12 +43,6 @@ export default function JoinPrompt({
     const frame = window.requestAnimationFrame(focusName);
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onSpectate();
-        return;
-      }
-
       if (event.key !== "Tab") return;
       const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
         'button:not([disabled]), input:not([disabled]), [href], select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
@@ -77,7 +69,7 @@ export default function JoinPrompt({
       document.removeEventListener("keydown", handleKeyDown);
       previousFocus?.focus();
     };
-  }, [onSpectate]);
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,6 +77,7 @@ export default function JoinPrompt({
     const nameError = validatePlayerName(trimmedName, "Enter your name to join.");
     if (nameError) {
       setError(nameError);
+      nameInputRef.current?.focus();
       return;
     }
 
@@ -93,10 +86,10 @@ export default function JoinPrompt({
     try {
       setPlayerName(trimmedName);
       const userId = await getCurrentUserId();
-      await joinGame(game.code, trimmedName, userId);
+      const result = await joinGame(game.code, trimmedName, userId);
       markPostGameEntry(game.code);
+      await onJoined(result.gameId);
       toast("Joined!", "success");
-      onJoined();
     } catch (err) {
       const message =
         err instanceof Error
@@ -171,15 +164,6 @@ export default function JoinPrompt({
             />
             <Button type="submit" fullWidth loading={loading}>
               Join
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              fullWidth
-              onClick={onSpectate}
-              aria-label="View the room without joining"
-            >
-              View as spectator
             </Button>
           </form>
         </Card>

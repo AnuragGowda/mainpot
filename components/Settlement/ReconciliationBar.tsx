@@ -9,6 +9,7 @@ export interface ReconciliationBarProps {
   balanced: boolean;
   cashOutCount: number;
   playerCount: number;
+  showProgress?: boolean;
 }
 
 /**
@@ -22,6 +23,7 @@ export default function ReconciliationBar({
   balanced,
   cashOutCount,
   playerCount,
+  showProgress = true,
 }: ReconciliationBarProps) {
   const complete = cashOutCount >= playerCount;
 
@@ -30,7 +32,7 @@ export default function ReconciliationBar({
       <div className="grid grid-cols-3 divide-x divide-gray-100">
         <div className="min-w-0 px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
-            Total bought in
+            Bought in
           </p>
           <p className="mt-1 truncate text-base font-semibold text-gray-900 sm:text-lg">
             {formatCurrency(totalBoughtIn)}
@@ -38,7 +40,7 @@ export default function ReconciliationBar({
         </div>
         <div className="min-w-0 px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
-            Total cashed out
+            Cash-outs
           </p>
           <p className="mt-1 truncate text-base font-semibold text-gray-900 sm:text-lg">
             {formatCurrency(totalCashedOut)}
@@ -59,40 +61,32 @@ export default function ReconciliationBar({
         </div>
       </div>
 
-      <div className={`border-t px-4 py-3 sm:px-5 ${!complete ? "border-gray-100 bg-gray-50/80" : balanced ? "border-emerald-100 bg-emerald-50/70" : "border-red-100 bg-red-50/70"}`}>
+      {complete || showProgress ? <div className={`border-t px-4 py-3 sm:px-5 ${!complete || balanced ? "border-gray-100 bg-gray-50/80" : "border-amber-100 bg-amber-50/60"}`}>
         {!complete ? (
           <div>
             <p className="text-sm font-medium text-gray-700">
               {cashOutCount} of {playerCount} cash-outs entered
             </p>
-            <p className="mt-1 text-xs leading-5 text-gray-500">
-              Enter every final stack before checking whether the table balances.
-            </p>
           </div>
         ) : balanced ? (
           <div>
-            <p className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+            <p className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-900">
               <Check aria-hidden className="h-4 w-4" />
               Bank reconciled
-            </p>
-            <p className="mt-1 text-xs leading-5 text-emerald-800/80">
-              Every chip is accounted for. Next, calculate the payments; each player&apos;s result is their cash-out minus everything they bought in for.
             </p>
           </div>
         ) : (
           <div>
-            <p className="inline-flex items-center gap-1.5 text-sm font-medium text-red-700">
+            <p className="inline-flex items-center gap-1.5 text-sm font-medium text-amber-900">
               <TriangleAlert aria-hidden className="h-4 w-4" />
-              Cash-outs don&apos;t match buy-ins
+              {formatCurrency(Math.abs(difference))} {difference > 0 ? "short in cash-outs" : "extra in cash-outs"}
             </p>
-            <p className="mt-1 text-xs leading-5 text-red-800/80">
-              {difference > 0
-                ? `${formatCurrency(difference)} is still missing from the cash-out total. Recheck final stacks or add the missing cash-out.`
-                : `${formatCurrency(Math.abs(difference))} more has been recorded as cash-outs than was bought in. Recheck final stacks or buy-ins.`} If it is intentional, continue to choose and record how the adjustment is allocated.
+            <p className="mt-1 text-xs leading-5 text-amber-900">
+              Recheck the entries, or agree how to allocate the difference.
             </p>
           </div>
         )}
-      </div>
+      </div> : null}
     </Card>
   );
 }

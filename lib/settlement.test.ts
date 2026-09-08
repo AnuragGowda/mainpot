@@ -6,10 +6,14 @@ import {
   calculateMinTransfers,
   getPlayerNetChanges,
   getPlayerTransfers,
+  calculateEarlyCashOutNet,
+  getEarlyCashOutTransfer,
+  getPlayerFundingAdjustment,
   isPlayerInTransfer,
+  rollForwardEarlyCashOuts,
 } from "./settlement";
 import type { PlayerNet } from "./settlement";
-import type { BuyIn } from "./types";
+import type { BuyIn, EarlyCashOut, Player } from "./types";
 
 function player(playerId: string, net: number): PlayerNet {
   return { playerId, name: playerId, net };
@@ -125,6 +129,54 @@ describe("applyFundingAdjustments", () => {
     expect(applyFundingAdjustments([player("A", 0)], [ordinaryBuyIn])).toEqual([
       player("A", 0),
     ]);
+  });
+});
+
+describe("early cash-outs", () => {
+  const players: Player[] = [
+    { id: "host", game_id: "game-1", session_id: "host", user_id: null, name: "Alex", is_host: true, joined_at: "2026-09-08T00:00:00.000Z", left_at: null },
+    { id: "guest", game_id: "game-1", session_id: "guest", user_id: null, name: "Bea", is_host: false, joined_at: "2026-09-08T00:01:00.000Z", left_at: null },
+  ];
+  const buyIns: BuyIn[] = [
+    { id: "buy-1", game_id: "game-1", player_id: "guest", amount: 100, type: "buy_in", fronted_by_player_id: null, verified: true, created_at: "2026-09-08T00:01:00.000Z" },
+    { id: "buy-2", game_id: "game-1", player_id: "host", amount: 20, type: "rebuy", fronted_by_player_id: "guest", verified: true, created_at: "2026-09-08T00:02:00.000Z" },
+  ];
+  const earlyCashOut: EarlyCashOut = {
+    id: "exit-1", game_id: "game-1", player_id: "guest", bank_player_id: "host",
+    cash_out_amount: 120, verified_buy_in_amount: 100, funding_adjustment: 20,
+    net_amount: 40, status: "locked", requested_at: "2026-09-08T01:00:00.000Z",
+    locked_at: "2026-09-08T01:01:00.000Z", cancelled_at: null,
+    updated_at: "2026-09-08T01:01:00.000Z",
+  };
+
+  it("includes verified outstanding advances in the departing result", () => {
+    expect(getPlayerFundingAdjustment(buyIns, "guest")).toBe(20);
+    expect(calculateEarlyCashOutNet(buyIns, "guest", 120)).toBe(40);
+  });
+
+  it("creates one payment between the host and departing player", () => {
+    expect(getEarlyCashOutTransfer(earlyCashOut, players)).toEqual({
+      from: "Alex", to: "Bea", amount: 40, fromPlayerId: "host", toPlayerId: "guest",
+    });
+  });
+
+  it("rolls the locked result into the bank and removes the early leaver", () => {
+    expect(rollForwardEarlyCashOuts(
+      [player("host", -40), player("guest", 40)],
+      [earlyCashOut],
+    )).toEqual([player("host", 0)]);
+  });
+
+  it("processes a banker who later exits without double counting prior exits", () => {
+    const bankerExit: EarlyCashOut = {
+      ...earlyCashOut,
+      id: "exit-2", player_id: "host", bank_player_id: "successor", net_amount: 10,
+      requested_at: "2026-09-08T02:00:00.000Z", locked_at: "2026-09-08T02:01:00.000Z",
+    };
+    expect(rollForwardEarlyCashOuts(
+      [player("guest", 40), player("host", -30), player("successor", -10)],
+      [earlyCashOut, bankerExit],
+    )).toEqual([player("successor", 0)]);
   });
 });
 

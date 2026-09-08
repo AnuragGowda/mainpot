@@ -57,12 +57,14 @@ export default function PlayerSettlementSummary({
             </p>
           </>
         ) : isUp ? (
-          <div className="flex items-center gap-2.5 whitespace-nowrap">
+          <div className="flex items-start gap-2.5">
             <Trophy aria-hidden className="h-5 w-5 shrink-0 text-gray-950" />
-            <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
-              You&apos;re up {formatCurrency(incomingTotal)}.
-            </h2>
-            <p className="text-sm leading-5 text-gray-600">No payment needed.</p>
+            <div>
+              <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
+                You&apos;re up {formatCurrency(incomingTotal)}.
+              </h2>
+              <p className="mt-0.5 text-sm leading-5 text-gray-600">See exactly who is paying you below.</p>
+            </div>
           </div>
         ) : (
           <div className="flex items-center gap-2.5">
@@ -88,6 +90,16 @@ export default function PlayerSettlementSummary({
             currentPlayerId={currentPlayerId}
             actionsEnabled
             personalOutgoing
+          />
+        </div> : null}
+        {isUp ? <div className="mt-4">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">Payments coming to you</p>
+          <TransferList
+            transfers={incoming}
+            gameId={gameId}
+            mode={mode}
+            currentPlayerId={currentPlayerId}
+            actionsEnabled
           />
         </div> : null}
       </Card>

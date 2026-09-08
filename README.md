@@ -7,6 +7,7 @@ rebuys, reconcile the bank, then settle up without a spreadsheet.
 
 - Join a live room by QR code, link, or room code — no account required
 - Let the host approve and correct buy-ins, rebuys, and cash-outs
+- Run the table from one phone with host-added players and verified buy-ins
 - Reconcile the bank and generate minimum-transfer settlements
 - Share Venmo or Zelle payment shortcuts
 - Keep friends, invitations, game history, player stats, audit logs, rematches,

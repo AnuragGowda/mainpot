@@ -41,7 +41,9 @@ export interface GameFeedback {
 export interface Player {
   id: string;
   game_id: string;
-  session_id: string;
+  /** Null for a player whose seat is managed entirely by the host. */
+  session_id: string | null;
+  host_add_operation_key?: string | null;
   user_id: string | null;
   name: string;
   is_host: boolean;
@@ -73,6 +75,25 @@ export interface CashOut {
   created_at: string;
 }
 
+export type EarlyCashOutStatus = "requested" | "locked" | "cancelled";
+
+/** A host-reviewed cash-out completed while the rest of the table stays open. */
+export interface EarlyCashOut {
+  id: string;
+  game_id: string;
+  player_id: string;
+  bank_player_id: string | null;
+  cash_out_amount: number;
+  verified_buy_in_amount: number | null;
+  funding_adjustment: number | null;
+  net_amount: number | null;
+  status: EarlyCashOutStatus;
+  requested_at: string;
+  locked_at: string | null;
+  cancelled_at: string | null;
+  updated_at: string;
+}
+
 export type GameEventType =
   | "game_created"
   | "player_joined"
@@ -84,6 +105,9 @@ export type GameEventType =
   | "player_left"
   | "player_removed"
   | "host_transferred"
+  | "early_cash_out_requested"
+  | "early_cash_out_cancelled"
+  | "early_cash_out_locked"
   | "cash_out_updated"
   | "game_settling"
   | "game_finalized"
@@ -116,6 +140,7 @@ export interface GameSnapshot {
   players: Player[];
   buyIns: BuyIn[];
   cashOuts: CashOut[];
+  earlyCashOuts: EarlyCashOut[];
   events: GameEvent[];
 }
 

@@ -17,10 +17,11 @@ import {
 } from "@/lib/payment-links";
 import type { PlayerPaymentHandles } from "@/lib/payment-links";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
-import { getSettlementPaymentStatuses, setSettlementPaymentStatus, settlementPaymentKey } from "@/lib/payments";
+import { getSettlementPaymentStatuses, setEarlyCashOutPaymentStatus, setSettlementPaymentStatus, settlementPaymentKey } from "@/lib/payments";
 import type { SettlementMode } from "@/lib/payments";
 import { isPlayerInTransfer } from "@/lib/settlement";
 import type { Transfer } from "@/lib/settlement";
+import type { EarlyCashOut } from "@/lib/types";
 
 export interface TransferListProps {
   transfers: Transfer[];
@@ -31,6 +32,8 @@ export interface TransferListProps {
   actionsEnabled?: boolean;
   /** Compact sender-facing wording for a player's own outgoing payments. */
   personalOutgoing?: boolean;
+  /** Required for the active-game payment created by a locked early exit. */
+  earlyCashOut?: EarlyCashOut;
 }
 
 function PartyName({ name }: { name: string }) {
@@ -146,6 +149,7 @@ export default function TransferList({
   isHost = false,
   actionsEnabled = true,
   personalOutgoing = false,
+  earlyCashOut,
 }: TransferListProps) {
   const { toast } = useToast();
   const channelId = useId().replaceAll(":", "");
@@ -228,21 +232,28 @@ export default function TransferList({
             <li key={key} className="flex items-center gap-3 px-4 py-3">
               {canManage ? (
                 <label
-                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg transition hover:bg-gray-100 focus-within:ring-2 focus-within:ring-gray-950 focus-within:ring-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50"
+                  className="grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-lg transition hover:bg-gray-100 focus-within:ring-2 focus-within:ring-gray-950 focus-within:ring-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50"
                   title={settled ? "Reopen payment" : "Mark sent"}
                 >
                   <input
                     type="checkbox"
                     checked={settled}
                     disabled={busyKey === key}
-                    aria-label="Mark sent"
+                    aria-label={`Mark sent: ${formatCurrency(transfer.amount)} from ${transfer.from} to ${transfer.to}`}
                     onChange={async () => {
                         setBusyKey(key);
                         try {
-                          await setSettlementPaymentStatus(gameId, mode, transfer, !settled);
-                          const next = new Set(settledKeys);
-                          if (settled) next.delete(key); else next.add(key);
-                          setSettledKeys(next);
+                          if (mode === "early_exit") {
+                            if (!earlyCashOut) throw new Error("This early cash-out cannot be identified.");
+                            await setEarlyCashOutPaymentStatus(earlyCashOut, transfer, !settled);
+                          } else {
+                            await setSettlementPaymentStatus(gameId, mode, transfer, !settled);
+                          }
+                          setSettledKeys((current) => {
+                            const next = new Set(current);
+                            if (settled) next.delete(key); else next.add(key);
+                            return next;
+                          });
                           toast(settled ? "Payment reopened" : "Payment marked paid", "success");
                         } catch (error) {
                           toast(error instanceof Error ? error.message : "Could not update payment.", "error");

@@ -88,6 +88,57 @@ async function expectError(
   return result.error;
 }
 
+async function verifyHostManagedPlayers() {
+  const host = await guest("Host-managed assurance host");
+  const participant = await guest("Host-managed assurance player");
+  const outsider = await guest("Host-managed assurance outsider");
+  const game = await createGame(host, "Host-managed assurance");
+  const participantSession = randomUUID();
+  await join(participant, game.code, "Independent player", participantSession);
+  const input = { input_game_id: game.game_id, input_name: "Phone-free player", input_buy_in: 20, input_operation_key: randomUUID() };
+  await expectError(() => participant.rpc("add_host_player", input), "non-host adding players");
+  await expectError(() => outsider.rpc("add_host_player", input), "outsider adding players");
+  const unauthenticated = createClient(url, anonKey, { auth: { persistSession: false } });
+  await expectError(() => unauthenticated.rpc("add_host_player", input), "unauthenticated player creation");
+  const responses = await Promise.all(Array.from({ length: 3 }, () => host.rpc("add_host_player", input)));
+  assert(responses.every((response) => !response.error), "concurrent host-add retries succeed");
+  const player = responses[0].data;
+  assert(player?.id && responses.every((response) => response.data?.id === player.id), "retries return the same seat");
+  assert(player.session_id === null && player.user_id === null && player.is_host === false, "host-managed seat has no caller identity");
+  const entries = await host.from("buy_ins").select("id, amount, verified").eq("player_id", player.id);
+  assert(entries.data?.length === 1 && Number(entries.data[0].amount) === 20 && entries.data[0].verified, "opening buy-in is verified and never duplicated");
+  const events = await host.from("game_events").select("actor_player_id").eq("subject_player_id", player.id);
+  assert(events.data?.length === 2 && events.data.every((event) => event.actor_player_id === game.player_id), "creation and opening buy-in are audited as host actions exactly once");
+  await expectError(() => host.rpc("add_host_player", { ...input, input_name: "Changed name" }), "conflicting host-add retry name");
+  await expectError(() => host.rpc("add_host_player", { ...input, input_buy_in: 25 }), "conflicting host-add retry amount");
+  await expectError(() => host.rpc("add_host_player", { ...input, input_operation_key: randomUUID(), input_buy_in: -1 }), "negative host opening buy-in");
+  await expectError(() => host.rpc("add_host_player", { ...input, input_operation_key: randomUUID(), input_name: "X".repeat(33) }), "overlong host-added name");
+  await expectError(() => host.rpc("transfer_game_host", { target_game_id: game.game_id, target_player_id: player.id }), "host transfer to a phone-free player");
+  const zero = await host.rpc("add_host_player", { ...input, input_name: "No buy-in yet", input_buy_in: 0, input_operation_key: randomUUID() });
+  assert(!zero.error && zero.data?.id, "host adds a player before buy-in");
+  const zeroEntries = await host.from("buy_ins").select("id").eq("player_id", zero.data.id);
+  assert(zeroEntries.data?.length === 0, "zero opening creates no ledger entry");
+  const rebuy = await host.rpc("create_buy_in_idempotent", { input_game_id: game.game_id, input_player_id: player.id, input_amount: 5, input_type: "rebuy", input_fronted_by_player_id: null, input_operation_key: randomUUID() });
+  assert(!rebuy.error && rebuy.data?.[0]?.verified, "host records a verified rebuy for a managed player");
+  await expectError(() => participant.rpc("create_buy_in_idempotent", { input_game_id: game.game_id, input_player_id: player.id, input_amount: 5, input_type: "rebuy", input_fronted_by_player_id: null, input_operation_key: randomUUID() }), "participant recording a managed player's buy-in");
+  await expectError(() => participant.rpc("join_game_guarded", { input_code: game.code, input_player_name: player.name, input_session_id: null }), "null-session seat claiming");
+  const cashOutInput = { input_game_id: game.game_id, input_player_id: player.id, input_cash_out_amount: 15, input_session_id: randomUUID() };
+  await expectError(() => participant.rpc("request_early_cash_out", cashOutInput), "participant requesting a managed player's cash-out");
+  await expectError(() => participant.rpc("request_early_cash_out", { ...cashOutInput, input_session_id: null }), "null-session cash-out impersonation");
+  const early = await host.rpc("request_early_cash_out", cashOutInput);
+  assert(!early.error && early.data?.id, "host requests a managed player's early cash-out");
+  await expectError(() => participant.rpc("cancel_early_cash_out", { input_early_cash_out_id: early.data.id, input_session_id: participantSession }), "participant cancelling managed cash-out");
+  const locked = await host.rpc("approve_early_cash_out", { input_early_cash_out_id: early.data.id });
+  assert(!locked.error && locked.data?.status === "locked", "host locks managed cash-out");
+  await expectError(() => participant.rpc("set_early_cash_out_payment_status", { input_early_cash_out_id: early.data.id, input_settled: true, input_session_id: participantSession }), "unrelated participant marking managed payment");
+  const payment = await host.rpc("set_early_cash_out_payment_status", { input_early_cash_out_id: early.data.id, input_settled: true, input_session_id: randomUUID() });
+  assert(!payment.error, "host marks managed early payment");
+  const closing = await host.from("games").update({ status: "settling" }).eq("id", game.game_id);
+  assert(!closing.error, "host closes managed table");
+  await expectError(() => host.rpc("add_host_player", { ...input, input_operation_key: randomUUID() }), "adding players after active ledger closes");
+  console.log("✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits");
+}
+
 async function run() {
   console.log("Running local database assurance checks…");
   const host = await guest("Assurance host");
@@ -98,6 +149,8 @@ async function run() {
   const outsider = await guest("Game A outsider");
   const handoffHost = await guest("Handoff host");
   const handoffGuest = await guest("Handoff guest");
+  const earlyHost = await guest("Early cash-out host");
+  const earlyGuest = await guest("Early cash-out guest");
 
   await expectError(
     () => host.rpc("create_game_guarded", {
@@ -161,6 +214,119 @@ async function run() {
     "host transfer and departure leave exactly the selected player active as host",
   );
   console.log("✓ hosts must choose an active successor before leaving");
+
+  const earlyGame = await createGame(earlyHost, "Early cash-out assurance");
+  const earlyPlayerSessionId = randomUUID();
+  const earlyPlayer = await join(
+    earlyGuest,
+    earlyGame.code,
+    "Early guest",
+    earlyPlayerSessionId,
+  );
+  const earlyBuyIn = await earlyGuest.rpc("create_buy_in_idempotent", {
+    input_game_id: earlyGame.game_id,
+    input_player_id: earlyPlayer.player_id,
+    input_amount: 20,
+    input_type: "buy_in",
+    input_fronted_by_player_id: null,
+    input_operation_key: randomUUID(),
+  });
+  assert(!earlyBuyIn.error && earlyBuyIn.data?.[0]?.id, "early player buy-in is created");
+  const earlyApproval = await earlyHost
+    .from("buy_ins")
+    .update({ verified: true })
+    .eq("id", earlyBuyIn.data[0].id)
+    .select("id, verified")
+    .single();
+  assert(!earlyApproval.error && earlyApproval.data.verified, "host verifies early player buy-in");
+
+  const earlyRequest = await earlyGuest.rpc("request_early_cash_out", {
+    input_game_id: earlyGame.game_id,
+    input_player_id: earlyPlayer.player_id,
+    input_cash_out_amount: 30,
+    input_session_id: earlyPlayerSessionId,
+  });
+  assert(
+    !earlyRequest.error
+      && earlyRequest.data?.status === "requested"
+      && Number(earlyRequest.data.cash_out_amount) === 30,
+    "player can request an early cash-out",
+  );
+  await expectError(
+    () => earlyGuest.rpc("approve_early_cash_out", {
+      input_early_cash_out_id: earlyRequest.data.id,
+    }),
+    "player approving their own early cash-out",
+  );
+  await expectError(
+    () => outsider.rpc("approve_early_cash_out", {
+      input_early_cash_out_id: earlyRequest.data.id,
+    }),
+    "outsider approving an early cash-out",
+  );
+  const lockedEarlyCashOut = await earlyHost.rpc("approve_early_cash_out", {
+    input_early_cash_out_id: earlyRequest.data.id,
+  });
+  assert(
+    !lockedEarlyCashOut.error
+      && lockedEarlyCashOut.data?.status === "locked"
+      && lockedEarlyCashOut.data.bank_player_id === earlyGame.player_id
+      && Number(lockedEarlyCashOut.data.net_amount) === 10,
+    "host locks a +$10 early cash-out against the current host",
+  );
+  const { data: earlyPlayerState, error: earlyPlayerStateError } = await admin
+    .from("players")
+    .select("left_at")
+    .eq("id", earlyPlayer.player_id)
+    .single();
+  assert(!earlyPlayerStateError && earlyPlayerState.left_at, "locked early player leaves the active roster");
+  const { data: earlyCashOutRow, error: earlyCashOutRowError } = await admin
+    .from("cash_outs")
+    .select("amount")
+    .eq("game_id", earlyGame.game_id)
+    .eq("player_id", earlyPlayer.player_id)
+    .single();
+  assert(!earlyCashOutRowError && Number(earlyCashOutRow.amount) === 30, "locked final chips enter reconciliation");
+  await expectError(
+    () => earlyHost.from("buy_ins").update({ amount: 21 }).eq("id", earlyBuyIn.data[0].id).select("id"),
+    "editing a buy-in after early cash-out lock",
+  );
+  await expectError(
+    () => earlyHost.from("cash_outs").update({ amount: 31 }).eq("game_id", earlyGame.game_id).eq("player_id", earlyPlayer.player_id).select("id"),
+    "editing final chips after early cash-out lock",
+  );
+  const earlyPayment = await earlyGuest.rpc("set_early_cash_out_payment_status", {
+    input_early_cash_out_id: earlyRequest.data.id,
+    input_settled: true,
+    input_session_id: earlyPlayerSessionId,
+  });
+  assert(!earlyPayment.error, "departing player can mark the early payment complete");
+  const { data: earlyPaymentRow, error: earlyPaymentRowError } = await admin
+    .from("settlement_payments")
+    .select("from_player_id, to_player_id, amount, mode, settled")
+    .eq("game_id", earlyGame.game_id)
+    .eq("mode", "early_exit")
+    .single();
+  assert(
+    !earlyPaymentRowError
+      && earlyPaymentRow.from_player_id === earlyGame.player_id
+      && earlyPaymentRow.to_player_id === earlyPlayer.player_id
+      && Number(earlyPaymentRow.amount) === 10
+      && earlyPaymentRow.settled,
+    "early winner receives one tracked host payment while the game stays active",
+  );
+  const { data: earlyGameState, error: earlyGameStateError } = await admin
+    .from("games")
+    .select("status")
+    .eq("id", earlyGame.game_id)
+    .single();
+  assert(!earlyGameStateError && earlyGameState.status === "active", "early payment does not end the table");
+  const hiddenEarlyCashOut = await outsider
+    .from("early_cash_outs")
+    .select("id")
+    .eq("game_id", earlyGame.game_id);
+  assert(!hiddenEarlyCashOut.error && hiddenEarlyCashOut.data?.length === 0, "outsider cannot read early cash-outs");
+  console.log("✓ host-approved early cash-out locks chips, departure, and one active-game payment");
 
   await expectError(
     () => outsider.rpc("join_game_guarded", {
@@ -320,7 +486,7 @@ async function run() {
   assert(!hidden.error && hidden.data?.length === 0, "cross-game buy-ins are not readable");
   console.log("✓ cross-game reads and writes are denied");
 
-  const protectedTables = ["players", "buy_ins", "cash_outs", "game_events", "settlement_payments"];
+  const protectedTables = ["players", "buy_ins", "cash_outs", "early_cash_outs", "game_events", "settlement_payments"];
   for (const table of protectedTables) {
     const { data, error } = await outsider.from(table).select("id").eq("game_id", gameA.game_id);
     assert(!error && data?.length === 0, `outsider cannot read Game A ${table}`);
@@ -637,6 +803,7 @@ async function run() {
 }
 
 try {
+  await verifyHostManagedPlayers();
   await run();
   console.log("Database assurance passed.");
 } finally {

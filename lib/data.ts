@@ -6,6 +6,7 @@ import type {
   BuyIn,
   BuyInType,
   CashOut,
+  EarlyCashOut,
   Game,
   GameEvent,
   GameEventMetadata,
@@ -16,6 +17,7 @@ import type {
   GameSnapshot,
   Player,
 } from "./types";
+import { calculateEarlyCashOutNet, getPlayerFundingAdjustment } from "./settlement";
 import { generateRoomCode, normalizeRoomCode } from "./roomcode";
 import { getSessionId, randomUUID } from "./session";
 import { round2 } from "./format";
@@ -91,6 +93,16 @@ function toCashOut(row: CashOut): CashOut {
   return { ...row, amount: Number(row.amount) };
 }
 
+function toEarlyCashOut(row: EarlyCashOut): EarlyCashOut {
+  return {
+    ...row,
+    cash_out_amount: Number(row.cash_out_amount),
+    verified_buy_in_amount: row.verified_buy_in_amount == null ? null : Number(row.verified_buy_in_amount),
+    funding_adjustment: row.funding_adjustment == null ? null : Number(row.funding_adjustment),
+    net_amount: row.net_amount == null ? null : Number(row.net_amount),
+  };
+}
+
 function toGameEvent(row: GameEvent): GameEvent {
   return {
     ...row,
@@ -110,6 +122,7 @@ interface LocalStore {
   players: Player[];
   buyIns: BuyIn[];
   cashOuts: CashOut[];
+  earlyCashOuts: EarlyCashOut[];
   events: GameEvent[];
   feedback: GameFeedback[];
 }
@@ -117,7 +130,7 @@ interface LocalStore {
 const subscribers = new Map<string, Set<(snapshot: GameSnapshot) => void>>();
 
 function emptyStore(): LocalStore {
-  return { games: [], players: [], buyIns: [], cashOuts: [], events: [], feedback: [] };
+  return { games: [], players: [], buyIns: [], cashOuts: [], earlyCashOuts: [], events: [], feedback: [] };
 }
 
 function loadStore(): LocalStore {
@@ -135,6 +148,7 @@ function loadStore(): LocalStore {
       players: parsed.players ?? [],
       buyIns: parsed.buyIns ?? [],
       cashOuts: parsed.cashOuts ?? [],
+      earlyCashOuts: parsed.earlyCashOuts ?? [],
       events: parsed.events ?? [],
       feedback: parsed.feedback ?? [],
     };
@@ -169,10 +183,24 @@ function buildSnapshot(store: LocalStore, gameId: string): GameSnapshot | null {
   const cashOuts = store.cashOuts
     .filter((c) => c.game_id === gameId)
     .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  const earlyCashOuts = store.earlyCashOuts
+    .filter((item) => item.game_id === gameId)
+    .sort((a, b) => a.requested_at.localeCompare(b.requested_at));
   const events = store.events
     .filter((event) => event.game_id === gameId)
     .sort((a, b) => a.created_at.localeCompare(b.created_at));
-  return { game, players, buyIns, cashOuts, events };
+  return { game, players, buyIns, cashOuts, earlyCashOuts, events };
+}
+
+function lockedEarlyCashOutForPlayer(
+  store: LocalStore,
+  gameId: string,
+  playerId: string | null
+): EarlyCashOut | undefined {
+  if (!playerId) return undefined;
+  return store.earlyCashOuts.find(
+    (item) => item.game_id === gameId && item.player_id === playerId && item.status === "locked"
+  );
 }
 
 function addLocalEvent(
@@ -417,6 +445,58 @@ async function getGameLocal(code: string): Promise<Game | null> {
   return store.games.find((g) => g.code === normalized) ?? null;
 }
 
+async function addHostPlayerLocal(
+  gameId: string,
+  name: string,
+  openingBuyIn: number,
+  operationKey: string,
+): Promise<Player> {
+  const store = loadStore();
+  requireLocalGameStatus(store, gameId, "active");
+  const host = store.players.find((player) =>
+    player.game_id === gameId && player.is_host && player.session_id === getSessionId() && !player.left_at
+  );
+  if (!host) throw new Error("Only the host can add players.");
+  const existing = store.players.find((player) => player.host_add_operation_key === operationKey);
+  if (existing) {
+    if (existing.game_id !== gameId) throw new Error("This request belongs to another game.");
+    const recordedAmount = store.buyIns.find((buyIn) => buyIn.operation_key === operationKey)?.amount ?? 0;
+    if (existing.name !== name || recordedAmount !== openingBuyIn) {
+      throw new Error("This request was already used for a different player or buy-in.");
+    }
+    return existing;
+  }
+  if (store.players.filter((player) => player.game_id === gameId && !player.left_at).length >= 12) {
+    throw new Error("This game already has the maximum number of players.");
+  }
+  const now = new Date().toISOString();
+  const player: Player = {
+    id: randomUUID(), game_id: gameId, name, session_id: null, user_id: null,
+    host_add_operation_key: operationKey, is_host: false, joined_at: now, left_at: null,
+  };
+  store.players.push(player);
+  addLocalEvent(store, {
+    gameId, eventType: "player_joined", actorPlayerId: host.id, subjectPlayerId: player.id,
+    metadata: { player_name: name, added_by_host: true }, createdAt: now,
+  });
+  if (openingBuyIn > 0) {
+    const buyIn: BuyIn = {
+      id: randomUUID(), game_id: gameId, player_id: player.id, amount: openingBuyIn,
+      type: "buy_in", fronted_by_player_id: null, verified: true, created_at: now,
+      operation_key: operationKey,
+    };
+    store.buyIns.push(buyIn);
+    addLocalEvent(store, {
+      gameId, eventType: "buy_in_added", actorPlayerId: host.id, subjectPlayerId: player.id,
+      amount: openingBuyIn,
+      metadata: { player_name: name, buy_in_id: buyIn.id, buy_in_type: "buy_in" }, createdAt: now,
+    });
+  }
+  persistStore(store);
+  emitSnapshot(gameId, store);
+  return player;
+}
+
 function subscribeToGameLocal(
   gameId: string,
   callback: (snapshot: GameSnapshot) => void,
@@ -469,10 +549,20 @@ async function addBuyInLocal(
   if (frontedByPlayerId === playerId) {
     throw new Error("A player cannot advance their own buy-in.");
   }
+  if (
+    lockedEarlyCashOutForPlayer(store, gameId, playerId)
+    || lockedEarlyCashOutForPlayer(store, gameId, frontedByPlayerId)
+  ) {
+    throw new Error("Buy-ins involving a locked early cash-out cannot be changed.");
+  }
   const actorPlayerId = currentLocalPlayerId(store, gameId);
   const actorIsHost = store.players.some(
     (player) => player.id === actorPlayerId && player.is_host
   );
+  if (!actorIsHost && actorPlayerId !== playerId) {
+    throw new Error("Only the player or host can add this buy-in.");
+  }
+  if (player.left_at) throw new Error("This player has already left the table.");
   const buyIn: BuyIn = {
     id: randomUUID(),
     game_id: gameId,
@@ -508,6 +598,15 @@ async function removeBuyInLocal(buyInId: string): Promise<void> {
   const store = loadStore();
   const buyIn = store.buyIns.find((b) => b.id === buyInId);
   if (buyIn) requireLocalGameStatus(store, buyIn.game_id, "active");
+  if (
+    buyIn
+    && (
+      lockedEarlyCashOutForPlayer(store, buyIn.game_id, buyIn.player_id)
+      || lockedEarlyCashOutForPlayer(store, buyIn.game_id, buyIn.fronted_by_player_id)
+    )
+  ) {
+    throw new Error("Buy-ins involving a locked early cash-out cannot be changed.");
+  }
   if (buyIn) {
     const player = store.players.find((item) => item.id === buyIn.player_id);
     addLocalEvent(store, {
@@ -534,6 +633,15 @@ async function verifyBuyInLocal(buyInId: string): Promise<void> {
   const store = loadStore();
   const buyIn = store.buyIns.find((b) => b.id === buyInId);
   if (buyIn) requireLocalGameStatus(store, buyIn.game_id, "active");
+  if (
+    buyIn
+    && (
+      lockedEarlyCashOutForPlayer(store, buyIn.game_id, buyIn.player_id)
+      || lockedEarlyCashOutForPlayer(store, buyIn.game_id, buyIn.fronted_by_player_id)
+    )
+  ) {
+    throw new Error("Buy-ins involving a locked early cash-out cannot be changed.");
+  }
   if (buyIn) {
     buyIn.verified = true;
     const player = store.players.find((item) => item.id === buyIn.player_id);
@@ -560,6 +668,15 @@ async function updateBuyInLocal(buyInId: string, amount: number): Promise<void> 
   const store = loadStore();
   const buyIn = store.buyIns.find((b) => b.id === buyInId);
   if (buyIn) requireLocalGameStatus(store, buyIn.game_id, "active");
+  if (
+    buyIn
+    && (
+      lockedEarlyCashOutForPlayer(store, buyIn.game_id, buyIn.player_id)
+      || lockedEarlyCashOutForPlayer(store, buyIn.game_id, buyIn.fronted_by_player_id)
+    )
+  ) {
+    throw new Error("Buy-ins involving a locked early cash-out cannot be changed.");
+  }
   if (buyIn) {
     const previousAmount = buyIn.amount;
     buyIn.amount = round2(amount);
@@ -589,6 +706,12 @@ async function markBuyInAdvanceRepaidLocal(buyInId: string): Promise<void> {
   const buyIn = store.buyIns.find((item) => item.id === buyInId);
   if (!buyIn?.fronted_by_player_id) return;
   requireLocalGameStatus(store, buyIn.game_id, "active");
+  if (
+    lockedEarlyCashOutForPlayer(store, buyIn.game_id, buyIn.player_id)
+    || lockedEarlyCashOutForPlayer(store, buyIn.game_id, buyIn.fronted_by_player_id)
+  ) {
+    throw new Error("Buy-ins involving a locked early cash-out cannot be changed.");
+  }
   const actorPlayerId = currentLocalPlayerId(store, buyIn.game_id);
   const actor = store.players.find((player) => player.id === actorPlayerId);
   if (!actor?.is_host) throw new Error("Only the host can mark an advance repaid.");
@@ -632,6 +755,9 @@ async function removePlayerLocal(playerId: string): Promise<void> {
   // Mirror the DB cascade: removing a player removes their buy-ins/cash-outs.
   store.buyIns = store.buyIns.filter((b) => b.player_id !== playerId);
   store.cashOuts = store.cashOuts.filter((c) => c.player_id !== playerId);
+  store.earlyCashOuts = store.earlyCashOuts.filter(
+    (item) => item.player_id !== playerId && item.bank_player_id !== playerId
+  );
   persistStore(store);
   if (player) {
     emitSnapshot(player.game_id, store);
@@ -659,6 +785,192 @@ async function leaveGameLocal(playerId: string): Promise<void> {
   }
 }
 
+async function requestEarlyCashOutLocal(
+  gameId: string,
+  playerId: string,
+  cashOutAmount: number
+): Promise<EarlyCashOut> {
+  const store = loadStore();
+  requireLocalGameStatus(store, gameId, "active");
+  const player = store.players.find(
+    (item) => item.id === playerId && item.game_id === gameId
+  );
+  if (!player) throw new Error("Player not found.");
+  const actorPlayerId = currentLocalPlayerId(store, gameId);
+  const actorIsHost = store.players.some((item) => item.id === actorPlayerId && item.is_host);
+  if (player.session_id !== getSessionId() && !actorIsHost) {
+    throw new Error("Only the player or host can request an early cash-out.");
+  }
+  if (player.left_at) throw new Error("You already left this table.");
+  if (player.is_host) throw new Error("Transfer the host role before requesting an early cash-out.");
+  if (!Number.isFinite(cashOutAmount) || cashOutAmount < 0) {
+    throw new Error("Cash-out amount must be zero or greater.");
+  }
+
+  const existing = store.earlyCashOuts.find(
+    (item) => item.game_id === gameId && item.player_id === playerId
+  );
+  if (existing?.status === "locked") {
+    throw new Error("This early cash-out is already locked.");
+  }
+  const now = new Date().toISOString();
+  const request: EarlyCashOut = existing ?? {
+    id: randomUUID(),
+    game_id: gameId,
+    player_id: playerId,
+    bank_player_id: null,
+    cash_out_amount: 0,
+    verified_buy_in_amount: null,
+    funding_adjustment: null,
+    net_amount: null,
+    status: "requested",
+    requested_at: now,
+    locked_at: null,
+    cancelled_at: null,
+    updated_at: now,
+  };
+  Object.assign(request, {
+    bank_player_id: null,
+    cash_out_amount: round2(cashOutAmount),
+    verified_buy_in_amount: null,
+    funding_adjustment: null,
+    net_amount: null,
+    status: "requested" as const,
+    requested_at: now,
+    locked_at: null,
+    cancelled_at: null,
+    updated_at: now,
+  });
+  if (!existing) store.earlyCashOuts.push(request);
+  addLocalEvent(store, {
+    gameId,
+    eventType: "early_cash_out_requested",
+    actorPlayerId,
+    subjectPlayerId: playerId,
+    amount: request.cash_out_amount,
+    metadata: { player_name: player.name },
+    createdAt: now,
+  });
+  persistStore(store);
+  emitSnapshot(gameId, store);
+  return request;
+}
+
+async function cancelEarlyCashOutLocal(earlyCashOutId: string): Promise<EarlyCashOut> {
+  const store = loadStore();
+  const request = store.earlyCashOuts.find((item) => item.id === earlyCashOutId);
+  if (!request) throw new Error("Early cash-out request not found.");
+  requireLocalGameStatus(store, request.game_id, "active");
+  if (request.status !== "requested") {
+    throw new Error("Only a pending early cash-out can be cancelled.");
+  }
+  const player = store.players.find((item) => item.id === request.player_id);
+  const actor = store.players.find(
+    (item) => item.game_id === request.game_id && item.session_id === getSessionId()
+  );
+  if (!actor || (!actor.is_host && actor.id !== request.player_id)) {
+    throw new Error("Only the player or host can cancel this request.");
+  }
+  const now = new Date().toISOString();
+  request.status = "cancelled";
+  request.cancelled_at = now;
+  request.updated_at = now;
+  addLocalEvent(store, {
+    gameId: request.game_id,
+    eventType: "early_cash_out_cancelled",
+    actorPlayerId: actor.id,
+    subjectPlayerId: request.player_id,
+    amount: request.cash_out_amount,
+    metadata: { player_name: player?.name },
+    createdAt: now,
+  });
+  persistStore(store);
+  emitSnapshot(request.game_id, store);
+  return request;
+}
+
+async function approveEarlyCashOutLocal(earlyCashOutId: string): Promise<EarlyCashOut> {
+  const store = loadStore();
+  const request = store.earlyCashOuts.find((item) => item.id === earlyCashOutId);
+  if (!request) throw new Error("Early cash-out request not found.");
+  requireLocalGameStatus(store, request.game_id, "active");
+  if (request.status !== "requested") {
+    throw new Error("This early cash-out is no longer pending.");
+  }
+  const bank = store.players.find(
+    (item) => item.game_id === request.game_id
+      && item.is_host
+      && !item.left_at
+      && item.session_id === getSessionId()
+  );
+  if (!bank) throw new Error("Only the host can approve an early cash-out.");
+  const player = store.players.find(
+    (item) => item.id === request.player_id && item.game_id === request.game_id
+  );
+  if (!player || player.left_at) throw new Error("This player has already left the table.");
+  if (player.is_host) throw new Error("Transfer the host role before cashing out early.");
+  const hasPending = store.buyIns.some(
+    (buyIn) => buyIn.game_id === request.game_id
+      && !buyIn.verified
+      && (buyIn.player_id === player.id || buyIn.fronted_by_player_id === player.id)
+  );
+  if (hasPending) throw new Error("Resolve every pending buy-in involving this player first.");
+  if (store.cashOuts.some((item) => item.game_id === request.game_id && item.player_id === player.id)) {
+    throw new Error("This player already has a cash-out.");
+  }
+
+  const verifiedBuyIns = store.buyIns.filter(
+    (buyIn) => buyIn.game_id === request.game_id && buyIn.verified
+  );
+  const invested = verifiedBuyIns
+    .filter((buyIn) => buyIn.player_id === player.id)
+    .reduce((total, buyIn) => total + buyIn.amount, 0);
+  const priorCarry = store.earlyCashOuts
+    .filter((item) => item.game_id === request.game_id && item.bank_player_id === player.id && item.status === "locked")
+    .reduce((total, item) => total + (item.net_amount ?? 0), 0);
+  const funding = round2(getPlayerFundingAdjustment(verifiedBuyIns, player.id) + priorCarry);
+  const net = round2(calculateEarlyCashOutNet(verifiedBuyIns, player.id, request.cash_out_amount) + priorCarry);
+  const now = new Date().toISOString();
+  Object.assign(request, {
+    bank_player_id: bank.id,
+    verified_buy_in_amount: round2(invested),
+    funding_adjustment: funding,
+    net_amount: net,
+    status: "locked" as const,
+    locked_at: now,
+    cancelled_at: null,
+    updated_at: now,
+  });
+  store.cashOuts.push({
+    id: randomUUID(),
+    game_id: request.game_id,
+    player_id: player.id,
+    amount: request.cash_out_amount,
+    created_at: now,
+  });
+  player.left_at = now;
+  addLocalEvent(store, {
+    gameId: request.game_id,
+    eventType: "early_cash_out_locked",
+    actorPlayerId: bank.id,
+    subjectPlayerId: player.id,
+    amount: request.cash_out_amount,
+    metadata: { player_name: player.name, bank_player_name: bank.name, net_amount: net },
+    createdAt: now,
+  });
+  addLocalEvent(store, {
+    gameId: request.game_id,
+    eventType: "player_left",
+    actorPlayerId: player.id,
+    subjectPlayerId: player.id,
+    metadata: { player_name: player.name, cash_out_locked: true },
+    createdAt: now,
+  });
+  persistStore(store);
+  emitSnapshot(request.game_id, store);
+  return request;
+}
+
 async function transferHostAndLeaveLocal(
   gameId: string,
   playerId: string,
@@ -682,6 +994,9 @@ async function transferHostLocal(gameId: string, targetPlayerId: string): Promis
   }
   if (currentHost.session_id !== getSessionId()) {
     throw new Error("Only the host can transfer the table.");
+  }
+  if (!nextHost.session_id) {
+    throw new Error("Choose a player who has joined on their own device.");
   }
   for (const player of store.players.filter((player) => player.game_id === gameId)) {
     player.is_host = player.id === targetPlayerId;
@@ -711,6 +1026,9 @@ async function addCashOutLocal(
     (c) => c.game_id === gameId && c.player_id === playerId
   );
   if (existing) {
+    if (lockedEarlyCashOutForPlayer(store, gameId, playerId)) {
+      throw new Error("A locked early cash-out cannot be changed.");
+    }
     existing.amount = round2(amount);
     const player = store.players.find((item) => item.id === playerId);
     addLocalEvent(store, {
@@ -756,6 +1074,9 @@ async function updateCashOutLocal(
   const store = loadStore();
   const cashOut = store.cashOuts.find((c) => c.id === cashOutId);
   if (cashOut) requireLocalGameStatus(store, cashOut.game_id, "settling");
+  if (cashOut && lockedEarlyCashOutForPlayer(store, cashOut.game_id, cashOut.player_id)) {
+    throw new Error("A locked early cash-out cannot be changed.");
+  }
   if (cashOut) {
     cashOut.amount = round2(amount);
     const player = store.players.find((item) => item.id === cashOut.player_id);
@@ -1094,6 +1415,18 @@ function subscribeToGameSupabase(
       {
         event: "*",
         schema: "public",
+        table: "early_cash_outs",
+        filter: `game_id=eq.${gameId}`,
+      },
+      () => {
+        void requestRefresh();
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
         table: "game_events",
         filter: `game_id=eq.${gameId}`,
       },
@@ -1407,6 +1740,53 @@ async function leaveGameSupabase(playerId: string): Promise<void> {
   });
 }
 
+function earlyCashOutMigrationError(error: { code?: string; message?: string }): Error {
+  if (
+    error.code === "PGRST202"
+    || error.code === "PGRST205"
+    || error.code === "42P01"
+    || error.message?.includes("early_cash_out")
+  ) {
+    return new Error("This game database needs the early-cash-out migration before players can use this feature.");
+  }
+  return new Error(error.message ?? "Early cash-out could not be updated.");
+}
+
+async function requestEarlyCashOutSupabase(
+  gameId: string,
+  playerId: string,
+  cashOutAmount: number
+): Promise<EarlyCashOut> {
+  const { client } = await ensureSupabaseReady();
+  const { data, error } = await client.rpc("request_early_cash_out", {
+    input_game_id: gameId,
+    input_player_id: playerId,
+    input_cash_out_amount: cashOutAmount,
+    input_session_id: getSessionId(),
+  });
+  if (error) throw earlyCashOutMigrationError(error);
+  return toEarlyCashOut(data as EarlyCashOut);
+}
+
+async function cancelEarlyCashOutSupabase(earlyCashOutId: string): Promise<EarlyCashOut> {
+  const { client } = await ensureSupabaseReady();
+  const { data, error } = await client.rpc("cancel_early_cash_out", {
+    input_early_cash_out_id: earlyCashOutId,
+    input_session_id: getSessionId(),
+  });
+  if (error) throw earlyCashOutMigrationError(error);
+  return toEarlyCashOut(data as EarlyCashOut);
+}
+
+async function approveEarlyCashOutSupabase(earlyCashOutId: string): Promise<EarlyCashOut> {
+  const { client } = await ensureSupabaseReady();
+  const { data, error } = await client.rpc("approve_early_cash_out", {
+    input_early_cash_out_id: earlyCashOutId,
+  });
+  if (error) throw earlyCashOutMigrationError(error);
+  return toEarlyCashOut(data as EarlyCashOut);
+}
+
 async function transferHostAndLeaveSupabase(
   gameId: string,
   targetPlayerId: string,
@@ -1596,7 +1976,7 @@ async function saveDiscrepancyAllocationSupabase(
 async function getGameSnapshotSupabase(gameId: string): Promise<GameSnapshot> {
   const { client } = await ensureSupabaseReady();
 
-  const [gameResult, playersResult, buyInsResult, cashOutsResult, eventsResult] =
+  const [gameResult, playersResult, buyInsResult, cashOutsResult, earlyCashOutsResult, eventsResult] =
     await Promise.all([
       client.from("games").select("*").eq("id", gameId).maybeSingle(),
       client
@@ -1614,6 +1994,11 @@ async function getGameSnapshotSupabase(gameId: string): Promise<GameSnapshot> {
         .select("*")
         .eq("game_id", gameId)
         .order("created_at", { ascending: true }),
+      client
+        .from("early_cash_outs")
+        .select("*")
+        .eq("game_id", gameId)
+        .order("requested_at", { ascending: true }),
       client
         .from("game_events")
         .select("*")
@@ -1633,6 +2018,17 @@ async function getGameSnapshotSupabase(gameId: string): Promise<GameSnapshot> {
   if (cashOutsResult.error) {
     throw cashOutsResult.error;
   }
+  const earlyCashOutsMissing = Boolean(
+    earlyCashOutsResult.error
+    && (
+      earlyCashOutsResult.error.code === "PGRST205"
+      || earlyCashOutsResult.error.code === "42P01"
+      || earlyCashOutsResult.error.message.includes("early_cash_outs")
+    )
+  );
+  if (earlyCashOutsResult.error && !earlyCashOutsMissing) {
+    throw earlyCashOutsResult.error;
+  }
   if (eventsResult.error) {
     throw eventsResult.error;
   }
@@ -1645,6 +2041,9 @@ async function getGameSnapshotSupabase(gameId: string): Promise<GameSnapshot> {
     players: ((playersResult.data ?? []) as Player[]).map(toPlayer),
     buyIns: ((buyInsResult.data ?? []) as BuyIn[]).map(toBuyIn),
     cashOuts: ((cashOutsResult.data ?? []) as CashOut[]).map(toCashOut),
+    earlyCashOuts: earlyCashOutsMissing
+      ? []
+      : ((earlyCashOutsResult.data ?? []) as EarlyCashOut[]).map(toEarlyCashOut),
     events: ((eventsResult.data ?? []) as GameEvent[]).map(toGameEvent),
   };
 }
@@ -1757,6 +2156,36 @@ export async function getGame(code: string): Promise<Game | null> {
   return usingLocalStorage() ? getGameLocal(code) : getGameSupabase(code);
 }
 
+/** Adds a seat and its optional opening buy-in atomically, without signing in as that player. */
+export async function addHostPlayer(
+  gameId: string,
+  name: string,
+  openingBuyIn: number,
+  operationKey: string,
+): Promise<Player> {
+  const nameError = validatePlayerName(name, "Enter the player's name.");
+  if (nameError) throw new Error(nameError);
+  if (!Number.isFinite(openingBuyIn) || openingBuyIn < 0 || openingBuyIn > 99999999.99) {
+    throw new Error("Enter a buy-in between 0 and 99,999,999.99.");
+  }
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(operationKey)) {
+    throw new Error("A valid request key is required.");
+  }
+  if (usingLocalStorage()) return addHostPlayerLocal(gameId, name.trim(), round2(openingBuyIn), operationKey);
+  const { client } = await ensureSupabaseReady();
+  const { data, error } = await client.rpc("add_host_player", {
+    input_game_id: gameId, input_name: name.trim(), input_buy_in: round2(openingBuyIn),
+    input_operation_key: operationKey,
+  });
+  if (error) {
+    if (error.code === "PGRST202") throw new Error("Update this game database to enable host-added players.");
+    throw new Error(error.message);
+  }
+  const player = Array.isArray(data) ? data[0] : data;
+  if (!player) throw new Error("Could not add the player. Please try again.");
+  return toPlayer(player as Player);
+}
+
 export function subscribeToGame(
   gameId: string,
   callback: (snapshot: GameSnapshot) => void,
@@ -1814,6 +2243,31 @@ export async function leaveGame(playerId: string): Promise<void> {
   return usingLocalStorage()
     ? leaveGameLocal(playerId)
     : leaveGameSupabase(playerId);
+}
+
+export async function requestEarlyCashOut(
+  gameId: string,
+  playerId: string,
+  cashOutAmount: number
+): Promise<EarlyCashOut> {
+  if (!Number.isFinite(cashOutAmount) || cashOutAmount < 0) {
+    throw new Error("Cash-out amount must be zero or greater.");
+  }
+  return usingLocalStorage()
+    ? requestEarlyCashOutLocal(gameId, playerId, cashOutAmount)
+    : requestEarlyCashOutSupabase(gameId, playerId, cashOutAmount);
+}
+
+export async function cancelEarlyCashOut(earlyCashOutId: string): Promise<EarlyCashOut> {
+  return usingLocalStorage()
+    ? cancelEarlyCashOutLocal(earlyCashOutId)
+    : cancelEarlyCashOutSupabase(earlyCashOutId);
+}
+
+export async function approveEarlyCashOut(earlyCashOutId: string): Promise<EarlyCashOut> {
+  return usingLocalStorage()
+    ? approveEarlyCashOutLocal(earlyCashOutId)
+    : approveEarlyCashOutSupabase(earlyCashOutId);
 }
 
 export async function transferHost(gameId: string, targetPlayerId: string): Promise<void> {

@@ -24,7 +24,7 @@ const snapshot: GameSnapshot = {
     { id: "3", game_id: "game-1", player_id: "c", amount: 20, type: "buy_in", fronted_by_player_id: null, verified: true, created_at: "2026-08-20T18:00:00.000Z" },
     { id: "4", game_id: "game-1", player_id: "b", amount: 20, type: "rebuy", fronted_by_player_id: null, verified: true, created_at: "2026-08-20T19:00:00.000Z" },
   ],
-  cashOuts: [], events: [],
+  cashOuts: [], earlyCashOuts: [], events: [],
 };
 
 describe("deriveRecapData", () => {

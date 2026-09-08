@@ -20,6 +20,7 @@ interface CashOutRowProps {
   snapshot: GameSnapshot;
   editable: boolean;
   isCurrentUser: boolean;
+  earlyCashOutLocked: boolean;
   onSaveCashOut: (playerId: string, amount: number) => Promise<boolean>;
 }
 
@@ -42,6 +43,7 @@ function CashOutRow({
   snapshot,
   editable,
   isCurrentUser,
+  earlyCashOutLocked,
   onSaveCashOut,
 }: CashOutRowProps) {
   const currentCashOut = getPlayerCashOut(snapshot, player.id);
@@ -160,23 +162,31 @@ function CashOutRow({
   }
 
   const invested = playerInvested(snapshot, player.id);
-  const hint = !editable && player.left_at ? "Host will enter" : null;
+  const hint = earlyCashOutLocked
+    ? "Locked when this player left"
+    : !editable && player.left_at
+      ? "Host will enter"
+      : null;
 
   return (
-      <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+      <div className="grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_11rem] sm:px-5">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold text-gray-900">{player.name}</h3>
+            <h3 className="break-words text-sm font-semibold text-gray-900">{player.name}</h3>
             {player.is_host ? <Badge variant="gray">Host</Badge> : null}
-            {player.left_at ? <Badge variant="amber">left early</Badge> : null}
+            {earlyCashOutLocked
+              ? <Badge variant="gray">cashed out early</Badge>
+              : player.left_at
+                ? <Badge variant="amber">left early</Badge>
+                : null}
             {isCurrentUser ? <Badge variant="green">You</Badge> : null}
           </div>
-          <p className="mt-0.5 text-sm text-gray-500">
+          <p className="mt-1 text-xs text-gray-500">
             Bought in {formatCurrency(invested)}
           </p>
         </div>
 
-        <div className="w-full shrink-0 sm:w-44">
+        <div className="min-w-0">
           <Input
             // A text field avoids native number-input steppers while preserving
             // a decimal keypad on mobile for a player's own entry.
@@ -196,10 +206,10 @@ function CashOutRow({
             onBlur={handleBlur}
           />
           <p
-            className={`mt-1 text-xs ${saveStatus === "error" ? "text-red-600" : saveStatus === "saved" ? "text-emerald-700" : "text-gray-400"}`}
+            className={`mt-1 min-h-4 text-xs ${saveStatus === "error" ? "text-red-600" : "text-gray-500"}`}
             aria-live="polite"
           >
-            {hint ?? (remoteUpdateNotice ? "Updated by another player" : saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : saveStatus === "error" ? "Could not save" : editable ? "Saves automatically" : "Read only")}
+            {hint ?? (remoteUpdateNotice ? "Updated by another player" : saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : saveStatus === "error" ? "Could not save" : !value ? "Not entered" : "Saved")}
           </p>
         </div>
       </div>
@@ -210,6 +220,9 @@ function CashOutRow({
 function ReadOnlyCashOutRow({ player, snapshot }: ReadOnlyCashOutRowProps) {
   const cashOut = getPlayerCashOut(snapshot, player.id);
   const invested = playerInvested(snapshot, player.id);
+  const earlyCashOutLocked = snapshot.earlyCashOuts.some(
+    (item) => item.player_id === player.id && item.status === "locked"
+  );
 
   return (
     <li className="flex items-center justify-between gap-4 px-4 py-4 sm:px-5">
@@ -217,7 +230,11 @@ function ReadOnlyCashOutRow({ player, snapshot }: ReadOnlyCashOutRowProps) {
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="font-semibold text-gray-900">{player.name}</h3>
           {player.is_host ? <Badge variant="gray">Host</Badge> : null}
-          {player.left_at ? <Badge variant="amber">left early</Badge> : null}
+          {earlyCashOutLocked
+            ? <Badge variant="gray">cashed out early</Badge>
+            : player.left_at
+              ? <Badge variant="amber">left early</Badge>
+              : null}
         </div>
         <p className="mt-0.5 text-sm text-gray-500">Bought in {formatCurrency(invested)}</p>
       </div>
@@ -244,6 +261,12 @@ export default function CashOutEntry({
   const isPlayerView = !isHost && currentPlayerId !== null;
   const currentPlayer = snapshot.players.find((player) => player.id === currentPlayerId);
   const otherPlayers = snapshot.players.filter((player) => player.id !== currentPlayerId);
+  const currentPlayerEarlyCashOutLocked = Boolean(
+    currentPlayer
+    && snapshot.earlyCashOuts.some(
+      (item) => item.player_id === currentPlayer.id && item.status === "locked"
+    )
+  );
 
   if (isPlayerView && currentPlayer) {
     return (
@@ -254,24 +277,22 @@ export default function CashOutEntry({
             Your cash-out
           </h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-            Enter your final chip value, not your profit. Your amount saves automatically.
+            Enter your final chip value, not your profit. Saves automatically.
           </p>
         </div>
         <Card padding="none" className="overflow-hidden">
           <CashOutRow
             player={currentPlayer}
             snapshot={snapshot}
-            editable={snapshot.game.status === "settling"}
+            editable={snapshot.game.status === "settling" && !currentPlayerEarlyCashOutLocked}
             isCurrentUser
+            earlyCashOutLocked={currentPlayerEarlyCashOutLocked}
             onSaveCashOut={onSaveCashOut}
           />
         </Card>
 
         <div>
           <h3 className="text-sm font-medium uppercase tracking-widest text-gray-500">Table cash-outs</h3>
-          <p className="mt-2 text-sm leading-6 text-gray-500">
-            Other players&apos; final stacks update here as they&apos;re entered. These values are read-only.
-          </p>
         </div>
         <Card padding="none" className="overflow-hidden">
           <ul className="divide-y divide-gray-100" aria-label="Table cash-outs">
@@ -296,17 +317,21 @@ export default function CashOutEntry({
     <section aria-labelledby="cash-out-heading">
       <h2
         id="cash-out-heading"
-        className="mb-2 text-sm font-medium uppercase tracking-widest text-gray-500"
+        className="mb-1 text-base font-semibold text-gray-950"
       >
         Cash-outs
       </h2>
       <p className="mb-4 max-w-2xl text-sm leading-6 text-gray-500">
-        Enter each player&apos;s final chip value, not their profit. Players can
-        enter their own amount; the host can correct any row.
+        Final chip values, not profit. Changes save automatically.
       </p>
       <Card padding="none" className="divide-y divide-gray-100 overflow-hidden">
         {orderedPlayers.map((player) => {
-          const editable = snapshot.game.status === "settling" && (isHost || player.id === currentPlayerId);
+          const earlyCashOutLocked = snapshot.earlyCashOuts.some(
+            (item) => item.player_id === player.id && item.status === "locked"
+          );
+          const editable = !earlyCashOutLocked
+            && snapshot.game.status === "settling"
+            && (isHost || player.id === currentPlayerId);
           return (
             <CashOutRow
               key={player.id}
@@ -314,6 +339,7 @@ export default function CashOutEntry({
               snapshot={snapshot}
               editable={editable}
               isCurrentUser={player.id === currentPlayerId}
+              earlyCashOutLocked={earlyCashOutLocked}
               onSaveCashOut={onSaveCashOut}
             />
           );

@@ -65,7 +65,7 @@ function eventText(event: GameEvent, actorName: string | null): string {
     case "game_created":
       return `${playerName} opened the table`;
     case "player_joined":
-      return `${playerName} joined`;
+      return event.metadata.added_by_host ? `${actor} added ${playerName} to the table` : `${playerName} joined`;
     case "buy_in_added":
       return `${playerName} ${event.metadata.buy_in_type === "rebuy" ? "rebought" : "bought in"} for ${amount}${event.metadata.fronted_by_name ? ` — ${event.metadata.fronted_by_name} advanced the cash and is still owed` : ""}`;
     case "buy_in_advance_repaid":
@@ -82,6 +82,19 @@ function eventText(event: GameEvent, actorName: string | null): string {
       return `${actor} removed ${playerName} from the table`;
     case "host_transferred":
       return `${actor} made ${playerName} the host`;
+    case "early_cash_out_requested":
+      return `${playerName} requested an early cash-out at ${amount}`;
+    case "early_cash_out_cancelled":
+      return `${actor} cancelled ${playerName}’s early cash-out`;
+    case "early_cash_out_locked": {
+      const net = Number(event.metadata.net_amount ?? 0);
+      const payment = net > 0.005
+        ? `${event.metadata.bank_player_name ?? "the host"} pays ${playerName} ${formatCurrency(net)}`
+        : net < -0.005
+          ? `${playerName} pays ${event.metadata.bank_player_name ?? "the host"} ${formatCurrency(Math.abs(net))}`
+          : "no payment needed";
+      return `${actor} locked ${playerName}’s ${amount} early cash-out — ${payment}`;
+    }
     case "cash_out_updated":
       return `${playerName} recorded a ${amount} cash-out`;
     case "game_settling":
@@ -98,6 +111,8 @@ function eventText(event: GameEvent, actorName: string | null): string {
 function EventMark({ type }: { type: GameEvent["event_type"] }) {
   const symbol = type.includes("buy_in")
     ? "$"
+    : type.includes("early_cash_out")
+      ? "↗"
     : type.includes("player")
       ? "+"
       : type.includes("cash_out")

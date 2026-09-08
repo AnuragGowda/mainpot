@@ -1,8 +1,9 @@
 import { getBrowserSupabase } from "./supabase-browser";
 import { getSessionId } from "./session";
 import type { Transfer } from "./settlement";
+import type { EarlyCashOut } from "./types";
 
-export type SettlementMode = "min" | "bank";
+export type SettlementMode = "min" | "bank" | "early_exit";
 
 export interface SettlementPaymentStatus {
   key: string;
@@ -65,6 +66,33 @@ export async function setSettlementPaymentStatus(
     input_session_id: getSessionId(),
   });
   if (error) throw new Error(`Could not update payment status: ${error.message}`);
+}
+
+export async function setEarlyCashOutPaymentStatus(
+  earlyCashOut: EarlyCashOut,
+  transfer: Transfer,
+  settled: boolean
+): Promise<void> {
+  const supabase = getBrowserSupabase();
+  if (!supabase) {
+    const statuses = await getSettlementPaymentStatuses(earlyCashOut.game_id);
+    const key = paymentKey("early_exit", transfer);
+    const next = statuses.filter((item) => item.key !== key);
+    next.push({ key, settled });
+    window.localStorage.setItem(localKey(earlyCashOut.game_id), JSON.stringify(next));
+    return;
+  }
+  const { error } = await supabase.rpc("set_early_cash_out_payment_status", {
+    input_early_cash_out_id: earlyCashOut.id,
+    input_settled: settled,
+    input_session_id: getSessionId(),
+  });
+  if (error) {
+    if (error.code === "PGRST202" || error.message.includes("early_cash_out")) {
+      throw new Error("This game database needs the early-cash-out migration before payment tracking is available.");
+    }
+    throw new Error(`Could not update payment status: ${error.message}`);
+  }
 }
 
 export function settlementPaymentKey(mode: SettlementMode, transfer: Transfer): string {

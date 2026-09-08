@@ -1,3 +1,4 @@
+import { runHostPlayerFlow } from "./host-player-flow";
 import { expect, test } from "@playwright/test";
 
 // Local guest creation is deliberately rate-limited, so these database-backed
@@ -28,34 +29,34 @@ async function addOpeningBuyIn(page: import("@playwright/test").Page) {
   await dialog.getByRole("button", { name: "Add buy-in" }).click();
 }
 
-test("keeps spectator mode reversible and explains the game before joining", async ({ browser }) => {
+test("requires visitors to join before viewing an active game", async ({ browser }) => {
   const hostContext = await browser.newContext();
-  const spectatorContext = await browser.newContext();
+  const guestContext = await browser.newContext();
   const host = await hostContext.newPage();
-  const spectator = await spectatorContext.newPage();
+  const guest = await guestContext.newPage();
 
   try {
     await createGame(host, "Realtime test game");
-    await spectator.goto(host.url());
+    await guest.goto(host.url());
 
-    const dialog = spectator.getByRole("dialog", { name: "Realtime test game" });
+    const dialog = guest.getByRole("dialog", { name: "Realtime test game" });
     await expect(dialog).toContainText("Casey");
     await expect(dialog).toContainText("$20.00");
-    await spectator
-      .getByRole("button", { name: "View the room without joining" })
-      .click();
+    await expect(
+      guest.getByRole("button", { name: "View the room without joining" }),
+    ).toHaveCount(0);
 
-    await expect(spectator.getByText("Watching as a spectator")).toBeVisible();
-    const joinTable = spectator.getByRole("button", { name: "Join table" });
-    await expect(joinTable).toBeVisible();
-    await joinTable.click();
+    await guest.keyboard.press("Escape");
     await expect(dialog).toBeVisible();
 
-    await spectator.keyboard.press("Escape");
-    await expect(dialog).toHaveCount(0);
-    await expect(joinTable).toBeFocused();
+    await guest.locator("#join-prompt-name").fill("Jordan");
+    await guest.getByRole("button", { name: "Join", exact: true }).click();
+    await expect(
+      guest.getByRole("heading", { name: "Realtime test game" }),
+    ).toBeVisible({ timeout: 15_000 });
+    await expect(playerCard(guest, "Jordan")).toBeVisible();
   } finally {
-    await spectatorContext.close();
+    await guestContext.close();
     await hostContext.close();
   }
 });
@@ -97,6 +98,60 @@ test("syncs two guests' independent ledger entries and host approval", async ({ 
     await taylorContext.close();
     await jordanContext.close();
     await hostContext.close();
+  }
+});
+
+test("locks an early cash-out against the host and carries it out of final settlement", async ({ browser }) => {
+  test.slow();
+  const mobile = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
+  const hostContext = await browser.newContext(mobile);
+  const guestContext = await browser.newContext(mobile);
+  const host = await hostContext.newPage();
+  const guest = await guestContext.newPage();
+
+  try {
+    await createGame(host, "Realtime test game");
+    await joinGame(guest, host.url(), "Jordan");
+    await addOpeningBuyIn(guest);
+    await host.getByRole("button", { name: "Approve", exact: true }).click();
+
+    await guest.getByRole("button", { name: "Cash out", exact: true }).click();
+    const requestDialog = guest.getByRole("alertdialog", { name: "Cash out & leave" });
+    await requestDialog.getByRole("textbox", { name: "Final chips for early cash-out" }).fill("30");
+    await expect(requestDialog).toContainText("+$10.00");
+    await expect(requestDialog).toContainText("Casey will pay you $10.00.");
+    await requestDialog.getByRole("button", { name: "Send to host" }).click();
+
+    const hostEarlyCashOuts = host.getByRole("region", { name: "Early cash-outs" });
+    await expect(hostEarlyCashOuts).toContainText("Jordan", { timeout: 15_000 });
+    await expect(hostEarlyCashOuts).toContainText("host review");
+    await hostEarlyCashOuts.getByRole("button", { name: "Confirm & lock" }).click();
+
+    await expect(guest.getByText("You cashed out early. Your payment record is above.", { exact: true })).toBeVisible({ timeout: 15_000 });
+    const guestEarlyCashOuts = guest.getByRole("region", { name: "Early cash-outs" });
+    await expect(guestEarlyCashOuts).toContainText("Casey → Jordan");
+    await expect(guestEarlyCashOuts).toContainText("$10.00");
+    await guestEarlyCashOuts.getByTitle("Mark sent").click();
+    await expect(guest.getByText("Payment marked paid", { exact: true })).toBeVisible();
+
+    await host.getByRole("button", { name: "End game" }).click();
+    await host.getByRole("button", { name: "Start cash-outs" }).click();
+    await expect(host.getByRole("heading", { name: "Cash-outs", exact: true })).toBeVisible();
+    const lockedJordan = host.getByText("Jordan", { exact: true }).locator("../..");
+    await expect(lockedJordan).toContainText("cashed out early");
+    await expect(host.getByRole("spinbutton", { name: "Cash-out amount for Jordan" })).toBeDisabled();
+
+    const hostCashOut = host.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
+    await hostCashOut.fill("10");
+    await hostCashOut.blur();
+    await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await host.getByRole("button", { name: "Review settlement" }).click();
+    const fullPlan = host.locator('[data-testid="full-settlement-plan"]');
+    await fullPlan.locator(":scope > summary").click();
+    await expect(fullPlan.getByText("No transfers needed — everyone is square.").first()).toBeVisible();
+  } finally {
+    await guestContext.close().catch(() => undefined);
+    await hostContext.close().catch(() => undefined);
   }
 });
 
@@ -344,18 +399,18 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
     await guest.getByRole("textbox", { name: "Cash-out amount for Jordan" }).fill("10");
     await guest.getByRole("textbox", { name: "Cash-out amount for Jordan" }).blur();
 
-    await expect(host.getByText("Cash-outs don't match buy-ins", { exact: true })).toBeVisible();
-    await expect(host.getByRole("button", { name: "Calculate settlement" })).toBeDisabled();
+    await expect(host.getByText(/\$[\d,.]+ (short in|extra in) cash-outs/)).toBeVisible();
+    await expect(host.getByRole("button", { name: /^Resolve .* difference$/ })).toBeEnabled();
 
     await host.getByRole("spinbutton", { name: "Cash-out amount for Casey" }).fill("30");
     await host.getByRole("spinbutton", { name: "Cash-out amount for Casey" }).blur();
     await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
-    await expect(host.getByRole("button", { name: "Calculate settlement" })).toBeEnabled();
+    await expect(host.getByRole("button", { name: "Review settlement" })).toBeEnabled();
 
     await guest.getByRole("textbox", { name: "Cash-out amount for Jordan" }).fill("20");
     await guest.getByRole("textbox", { name: "Cash-out amount for Jordan" }).blur();
     await expect(host.getByRole("spinbutton", { name: "Cash-out amount for Jordan" })).toHaveValue("20");
-    await expect(host.getByText("Cash-outs don't match buy-ins", { exact: true })).toBeVisible();
+    await expect(host.getByText(/\$[\d,.]+ (short in|extra in) cash-outs/)).toBeVisible();
 
     await guest.getByRole("textbox", { name: "Cash-out amount for Jordan" }).fill("10");
     await guest.getByRole("textbox", { name: "Cash-out amount for Jordan" }).blur();
@@ -365,11 +420,11 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
     });
     await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
 
-    await host.getByRole("button", { name: "Calculate settlement" }).click();
+    await host.getByRole("button", { name: "Review settlement" }).click();
 
     const hostPlan = host.locator('[data-testid="full-settlement-plan"]');
     await expect(hostPlan).toHaveJSProperty("open", false);
-    await expect(host.getByRole("region", { name: "Lock this settlement" })).toBeVisible();
+    await expect(host.getByRole("region", { name: "Ready to settle?" })).toBeVisible();
     await expect(host.getByRole("button", { name: "Mark sent" })).toHaveCount(0);
 
     await expect(guest.getByRole("button", { name: "Preview settlement" })).toHaveCount(0);
@@ -377,13 +432,21 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
     await expect(guest.getByText("Waiting for Casey to finalize the settlement. Payment instructions will appear once it's locked.")).toBeVisible();
     await expect(guest.getByRole("button", { name: "Mark sent" })).toHaveCount(0);
 
-    await host.getByRole("button", { name: "Finalize game" }).click();
     await host.getByRole("button", { name: "Lock settlement" }).click();
+    await host.getByRole("alertdialog").getByRole("button", { name: "Lock settlement" }).click();
+    const hostSettlement = host.getByRole("region", { name: "You're up $10.00." });
+    await expect(hostSettlement).toBeVisible();
+    await expect(hostSettlement.getByText("Payments coming to you", { exact: true })).toBeVisible();
+    await expect(hostSettlement.getByRole("listitem")).toContainText("Jordan → Casey");
     const guestSettlement = guest.getByRole("region", { name: "You owe $10.00." });
     await expect(guestSettlement).toBeVisible();
     await expect(guestSettlement.getByRole("listitem")).toContainText("Casey");
     await expect(guest.locator('[data-testid="full-settlement-plan"]')).toHaveCount(0);
-    const markSent = guest.getByRole("checkbox", { name: "Mark sent" }).first();
+    const guestLedger = guest.locator('[data-testid="payment-ledger"]');
+    await expect(guestLedger.locator(":scope > summary")).toContainText("0 of 1 payment marked sent · visible to everyone");
+    await guestLedger.locator(":scope > summary").click();
+    await expect(guestLedger.getByRole("listitem")).toContainText("Jordan → Casey");
+    const markSent = guest.getByRole("checkbox", { name: /^Mark sent:/ }).first();
     const markSentControl = guest.getByTitle("Mark sent").first();
     const [paymentWrite] = await Promise.all([
       guest.waitForResponse((response) =>
@@ -395,7 +458,42 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
     expect(paymentWrite.ok()).toBe(true);
     await expect(markSent).toBeChecked();
     await expect(guest.getByText("Payment marked paid", { exact: true })).toBeVisible();
+    await expect(guestLedger.locator(":scope > summary")).toContainText("1 of 1 payment marked sent", { timeout: 15_000 });
+    await expect(host.locator('[data-testid="payment-ledger"] > summary')).toContainText("1 of 1 payment marked sent", { timeout: 15_000 });
     await expect(hostPlan).toContainText("1/1 marked sent", { timeout: 15_000 });
+  } finally {
+    await guestContext.close();
+    await hostContext.close();
+  }
+});
+
+test("runs a whole table with host-added players", async ({ page }) => {
+  test.slow();
+  await runHostPlayerFlow(page);
+});
+
+test("syncs host-added players to guests without exposing host controls", async ({ browser }) => {
+  const hostContext = await browser.newContext();
+  const guestContext = await browser.newContext();
+  const host = await hostContext.newPage();
+  const guest = await guestContext.newPage();
+  try {
+    await createGame(host, "Realtime test game");
+    await joinGame(guest, host.url(), "Jordan");
+    await host.getByRole("button", { name: "Add player", exact: true }).click();
+    const add = host.getByRole("dialog", { name: "Add a player" });
+    await add.getByRole("textbox", { name: "Player name" }).fill("Taylor");
+    await add.getByRole("button", { name: "Add player", exact: true }).click();
+    await expect(playerCard(guest, "Taylor")).toContainText("$20.00");
+    await expect(playerCard(guest, "Taylor")).toContainText("Host-managed");
+    await expect(guest.getByRole("button", { name: "Add player", exact: true })).toHaveCount(0);
+    await expect(guest.getByRole("button", { name: /Manage Taylor/ })).toHaveCount(0);
+    await host.getByRole("button", { name: "Manage Taylor" }).click();
+    const manage = host.getByRole("dialog", { name: "Manage Taylor" });
+    await manage.getByRole("textbox", { name: "Buy-in amount" }).fill("5");
+    await manage.getByRole("button", { name: "Record buy-in" }).click();
+    await expect(playerCard(guest, "Taylor")).toContainText("$25.00");
+    await expect(playerCard(guest, "Taylor")).toContainText("2 entries");
   } finally {
     await guestContext.close();
     await hostContext.close();
