@@ -1,5 +1,7 @@
 "use client";
 
+import { validateCurrencyAmount } from "@/lib/currency-input";
+
 import { useEffect, useRef, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
@@ -96,8 +98,8 @@ function CashOutRow({
     if (raw.trim() === "") {
       return;
     }
-    const parsed = round2(Number(raw));
-    if (!Number.isFinite(parsed) || parsed < 0) {
+    const parsed = Number(raw);
+    if (validateCurrencyAmount(raw)) {
       return;
     }
     if (
@@ -197,6 +199,7 @@ function CashOutRow({
             autoComplete="off"
             pattern="[0-9]*[.]?[0-9]*"
             prefix="$"
+            error={value ? validateCurrencyAmount(value) ?? undefined : undefined}
             value={value}
             disabled={!editable}
             placeholder="0.00"
@@ -209,7 +212,7 @@ function CashOutRow({
             className={`mt-1 min-h-4 text-xs ${saveStatus === "error" ? "text-red-600" : "text-gray-500"}`}
             aria-live="polite"
           >
-            {hint ?? (remoteUpdateNotice ? "Updated by another player" : saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : saveStatus === "error" ? "Could not save" : !value ? "Not entered" : "Saved")}
+            {hint ?? (value && validateCurrencyAmount(value) ? "Not saved" : remoteUpdateNotice ? "Updated by another player" : saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved" : saveStatus === "error" ? "Could not save" : !value ? "Not entered" : "Saved")}
           </p>
         </div>
       </div>
@@ -239,7 +242,7 @@ function ReadOnlyCashOutRow({ player, snapshot }: ReadOnlyCashOutRowProps) {
         <p className="mt-0.5 text-sm text-gray-500">Bought in {formatCurrency(invested)}</p>
       </div>
       <div className="shrink-0 text-right">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Final stack</p>
+        <p className="text-[11px] font-medium uppercase tracking-wide text-gray-600">Final stack</p>
         <p className="mt-0.5 font-semibold tabular-nums text-gray-900">
           {cashOut ? formatCurrency(cashOut.amount) : "Not entered"}
         </p>

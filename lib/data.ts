@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isSupabaseConfigured } from "./supabase";
 import { getBrowserSupabase } from "./supabase-browser";
+import { validateCurrencyAmount } from "./currency-input";
 import { ensureCurrentUser } from "./auth-client";
 import type {
   BuyIn,
@@ -287,7 +288,8 @@ async function createGameLocal(
   hostName: string,
   buyInAmount: number,
   userId?: string | null,
-  acquisitionSource?: AcquisitionSource | null
+  acquisitionSource?: AcquisitionSource | null,
+  hostIsPlaying = true,
 ): Promise<{ code: string; gameId: string }> {
   const store = loadStore();
   const sessionId = getSessionId();
@@ -322,20 +324,8 @@ async function createGameLocal(
     user_id: userId ?? null,
   };
 
-  const buyIn: BuyIn = {
-    id: randomUUID(),
-    game_id: gameId,
-    player_id: player.id,
-    amount: round2(buyInAmount),
-    type: "buy_in",
-    fronted_by_player_id: null,
-    verified: true,
-    created_at: now,
-  };
-
   store.games.push(game);
   store.players.push(player);
-  store.buyIns.push(buyIn);
   addLocalEvent(store, {
     gameId,
     eventType: "game_created",
@@ -352,19 +342,32 @@ async function createGameLocal(
     metadata: { player_name: hostName },
     createdAt: now,
   });
-  addLocalEvent(store, {
-    gameId,
-    eventType: "buy_in_added",
-    actorPlayerId: player.id,
-    subjectPlayerId: player.id,
-    amount: buyIn.amount,
-    metadata: {
-      player_name: hostName,
-      buy_in_id: buyIn.id,
-      buy_in_type: "buy_in",
-    },
-    createdAt: now,
-  });
+  if (hostIsPlaying) {
+    const buyIn: BuyIn = {
+      id: randomUUID(),
+      game_id: gameId,
+      player_id: player.id,
+      amount: round2(buyInAmount),
+      type: "buy_in",
+      fronted_by_player_id: null,
+      verified: true,
+      created_at: now,
+    };
+    store.buyIns.push(buyIn);
+    addLocalEvent(store, {
+      gameId,
+      eventType: "buy_in_added",
+      actorPlayerId: player.id,
+      subjectPlayerId: player.id,
+      amount: buyIn.amount,
+      metadata: {
+        player_name: hostName,
+        buy_in_id: buyIn.id,
+        buy_in_type: "buy_in",
+      },
+      createdAt: now,
+    });
+  }
   persistStore(store);
   emitSnapshot(gameId, store);
 
@@ -803,9 +806,8 @@ async function requestEarlyCashOutLocal(
   }
   if (player.left_at) throw new Error("You already left this table.");
   if (player.is_host) throw new Error("Transfer the host role before requesting an early cash-out.");
-  if (!Number.isFinite(cashOutAmount) || cashOutAmount < 0) {
-    throw new Error("Cash-out amount must be zero or greater.");
-  }
+  const amountError = validateCurrencyAmount(cashOutAmount);
+  if (amountError) throw new Error(amountError);
 
   const existing = store.earlyCashOuts.find(
     (item) => item.game_id === gameId && item.player_id === playerId
@@ -1098,6 +1100,22 @@ async function updateCashOutLocal(
 async function endGameLocal(gameId: string): Promise<void> {
   const store = loadStore();
   const game = requireLocalGameStatus(store, gameId, "active");
+  const host = store.players.find(
+    (player) => player.game_id === gameId && player.is_host && !player.left_at,
+  );
+  if (
+    host
+    && !store.buyIns.some((buyIn) => buyIn.game_id === gameId && buyIn.player_id === host.id)
+    && !store.cashOuts.some((cashOut) => cashOut.game_id === gameId && cashOut.player_id === host.id)
+  ) {
+    store.cashOuts.push({
+      id: randomUUID(),
+      game_id: gameId,
+      player_id: host.id,
+      amount: 0,
+      created_at: new Date().toISOString(),
+    });
+  }
   game.status = "settling";
   game.ended_at = new Date().toISOString();
   addLocalEvent(store, {
@@ -1219,7 +1237,8 @@ async function createGameSupabase(
   hostName: string,
   buyInAmount: number,
   _userId?: string | null,
-  acquisitionSource?: AcquisitionSource | null
+  acquisitionSource?: AcquisitionSource | null,
+  hostIsPlaying = true,
 ): Promise<{ code: string; gameId: string }> {
   const { client } = await ensureSupabaseReady();
   const sessionId = getSessionId();
@@ -1233,6 +1252,7 @@ async function createGameSupabase(
         input_host_name: hostName,
         input_buy_in: buyInAmount,
         input_session_id: sessionId,
+        input_host_is_playing: hostIsPlaying,
       })
       .single();
 
@@ -2057,19 +2077,24 @@ export async function createGame(
   hostName: string,
   buyInAmount: number,
   userId?: string | null,
-  acquisitionSource?: AcquisitionSource | null
+  acquisitionSource?: AcquisitionSource | null,
+  options?: { hostIsPlaying?: boolean },
 ): Promise<{ code: string; gameId: string }> {
   const gameNameError = validateGameName(name);
   if (gameNameError) throw new Error(gameNameError);
   const hostNameError = validatePlayerName(hostName);
   if (hostNameError) throw new Error(hostNameError);
 
+  const amountError = validateCurrencyAmount(buyInAmount, { allowZero: false });
+  if (amountError) throw new Error(amountError);
+
   const normalizedGameName = name.trim();
   const normalizedHostName = hostName.trim();
+  const hostIsPlaying = options?.hostIsPlaying ?? true;
   const localStorageMode = usingLocalStorage();
   const result = await (localStorageMode
-    ? createGameLocal(normalizedGameName, normalizedHostName, buyInAmount, userId, acquisitionSource)
-    : createGameSupabase(normalizedGameName, normalizedHostName, buyInAmount, userId, acquisitionSource));
+    ? createGameLocal(normalizedGameName, normalizedHostName, buyInAmount, userId, acquisitionSource, hostIsPlaying)
+    : createGameSupabase(normalizedGameName, normalizedHostName, buyInAmount, userId, acquisitionSource, hostIsPlaying));
   trackProductOpsEvent("game.created", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, result.gameId);
   return result;
 }
@@ -2204,6 +2229,8 @@ export async function addBuyIn(
   frontedByPlayerId: string | null,
   operationKey: string
 ): Promise<BuyIn> {
+  const amountError = validateCurrencyAmount(amount, { allowZero: false });
+  if (amountError) throw new Error(amountError);
   return usingLocalStorage()
     ? addBuyInLocal(gameId, playerId, amount, type, frontedByPlayerId, operationKey)
     : addBuyInSupabase(gameId, playerId, amount, type, frontedByPlayerId, operationKey);
@@ -2222,6 +2249,8 @@ export async function verifyBuyIn(buyInId: string): Promise<void> {
 }
 
 export async function updateBuyIn(buyInId: string, amount: number): Promise<void> {
+  const amountError = validateCurrencyAmount(amount, { allowZero: false });
+  if (amountError) throw new Error(amountError);
   return usingLocalStorage()
     ? updateBuyInLocal(buyInId, amount)
     : updateBuyInSupabase(buyInId, amount);
@@ -2250,9 +2279,8 @@ export async function requestEarlyCashOut(
   playerId: string,
   cashOutAmount: number
 ): Promise<EarlyCashOut> {
-  if (!Number.isFinite(cashOutAmount) || cashOutAmount < 0) {
-    throw new Error("Cash-out amount must be zero or greater.");
-  }
+  const amountError = validateCurrencyAmount(cashOutAmount);
+  if (amountError) throw new Error(amountError);
   return usingLocalStorage()
     ? requestEarlyCashOutLocal(gameId, playerId, cashOutAmount)
     : requestEarlyCashOutSupabase(gameId, playerId, cashOutAmount);
@@ -2292,6 +2320,8 @@ export async function addCashOut(
   playerId: string,
   amount: number
 ): Promise<CashOut> {
+  const amountError = validateCurrencyAmount(amount, { allowZero: true });
+  if (amountError) throw new Error(amountError);
   return usingLocalStorage()
     ? addCashOutLocal(gameId, playerId, amount)
     : addCashOutSupabase(gameId, playerId, amount);
@@ -2301,6 +2331,8 @@ export async function updateCashOut(
   cashOutId: string,
   amount: number
 ): Promise<void> {
+  const amountError = validateCurrencyAmount(amount, { allowZero: true });
+  if (amountError) throw new Error(amountError);
   return usingLocalStorage()
     ? updateCashOutLocal(cashOutId, amount)
     : updateCashOutSupabase(cashOutId, amount);

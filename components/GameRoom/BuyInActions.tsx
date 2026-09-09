@@ -1,5 +1,7 @@
 "use client";
 
+import { validateCurrencyAmount } from "@/lib/currency-input";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Game, Player } from "@/lib/types";
 import Button from "@/components/ui/Button";
@@ -159,7 +161,7 @@ export default function BuyInActions({
 
   async function submitRebuy() {
     const parsed = Number(rebuyAmount);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
+    if (validateCurrencyAmount(rebuyAmount, { allowZero: false })) {
       return;
     }
     const operationKey = rebuyOperationKey.current ?? randomUUID();
@@ -217,6 +219,7 @@ export default function BuyInActions({
               step={0.01}
               inputMode="decimal"
               prefix="$"
+              error={rebuyAmount ? validateCurrencyAmount(rebuyAmount, { allowZero: false }) ?? undefined : undefined}
               value={rebuyAmount}
               onChange={(event) => setRebuyAmount(event.target.value)}
               aria-label="Rebuy amount"

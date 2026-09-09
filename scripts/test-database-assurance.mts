@@ -139,6 +139,76 @@ async function verifyHostManagedPlayers() {
   console.log("✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits");
 }
 
+async function verifyOptionalHostOpeningBuyIn() {
+  const host = await guest("Host without opening buy-in");
+  const participant = await guest("Optional host participant");
+  const code = "HAST42";
+  const sessionId = randomUUID();
+  const { data, error } = await host.rpc("create_game_guarded", {
+    input_code: code,
+    input_game_name: "Optional host opening buy-in",
+    input_host_name: "Casey",
+    input_buy_in: 20,
+    input_session_id: sessionId,
+    input_host_is_playing: false,
+  });
+  const game = (Array.isArray(data) ? data[0] : data) as {
+    game_id: string;
+    player_id: string;
+  } | null;
+  assert(!error && game?.game_id && game.player_id, "non-playing host game is created by guarded RPC");
+  games.push(game.game_id);
+
+  const openingEntries = await host.from("buy_ins").select("id").eq("player_id", game.player_id);
+  assert(openingEntries.data?.length === 0, "non-playing host creates no opening monetary entry");
+  const openingEvents = await host
+    .from("game_events")
+    .select("event_type")
+    .eq("game_id", game.game_id)
+    .eq("event_type", "buy_in_added");
+  assert(openingEvents.data?.length === 0, "non-playing host creates no opening buy-in event");
+
+  const joined = await join(participant, code, "Jordan");
+  assert(joined?.player_id, "guests can join a game hosted without an opening buy-in");
+  const laterBuyIn = await host.rpc("create_buy_in_idempotent", {
+    input_game_id: game.game_id,
+    input_player_id: game.player_id,
+    input_amount: 20,
+    input_type: "buy_in",
+    input_fronted_by_player_id: null,
+    input_operation_key: randomUUID(),
+  });
+  assert(!laterBuyIn.error && laterBuyIn.data?.[0]?.verified, "host can buy in later from the same control identity");
+
+  const autoZeroHost = await guest("Automatic zero cash-out host");
+  const autoZero = await autoZeroHost.rpc("create_game_guarded", {
+    input_code: "CASH42",
+    input_game_name: "Automatic zero cash-out",
+    input_host_name: "Morgan",
+    input_buy_in: 20,
+    input_session_id: randomUUID(),
+    input_host_is_playing: false,
+  });
+  const autoZeroGame = (Array.isArray(autoZero.data) ? autoZero.data[0] : autoZero.data) as {
+    game_id: string;
+    player_id: string;
+  } | null;
+  assert(!autoZero.error && autoZeroGame?.game_id && autoZeroGame.player_id, "zero cash-out host game is created");
+  games.push(autoZeroGame.game_id);
+  const startSettlement = await autoZeroHost
+    .from("games")
+    .update({ status: "settling" })
+    .eq("id", autoZeroGame.game_id)
+    .eq("status", "active");
+  assert(!startSettlement.error, "host can start settlement without an opening buy-in");
+  const zeroCashOut = await autoZeroHost
+    .from("cash_outs")
+    .select("amount")
+    .eq("player_id", autoZeroGame.player_id);
+  assert(zeroCashOut.data?.length === 1 && Number(zeroCashOut.data[0].amount) === 0, "untouched host is reconciled at zero when settlement starts");
+  console.log("✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero");
+}
+
 async function run() {
   console.log("Running local database assurance checks…");
   const host = await guest("Assurance host");
@@ -804,6 +874,7 @@ async function run() {
 
 try {
   await verifyHostManagedPlayers();
+  await verifyOptionalHostOpeningBuyIn();
   await run();
   console.log("Database assurance passed.");
 } finally {

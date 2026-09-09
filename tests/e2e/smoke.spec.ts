@@ -24,20 +24,30 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByText("Enter your name.")).toBeVisible();
     await expect(page.locator("#create-name")).toBeFocused();
     await expect(page.getByText("Enter a game name.")).toBeVisible();
-    await expect(page.getByText("Enter an amount greater than 0.")).toBeVisible();
+    await expect(page.getByText("Enter an amount.", { exact: true })).toBeVisible();
   });
 
-  test("only accepts numeric characters for the buy-in amount", async ({ page }) => {
+  test("keeps invalid buy-in text visible and explains how to correct it", async ({ page }) => {
     await page.goto("/create");
 
     await expect(page.locator("#create-name")).toHaveAttribute("maxlength", "32");
     await expect(page.locator("#create-game-name")).toHaveAttribute("maxlength", "40");
     const buyIn = page.locator("#create-buy-in");
     await buyIn.fill("twenty dollars");
-    await expect(buyIn).toHaveValue("");
+    await expect(buyIn).toHaveValue("twenty dollars");
+    await page.locator("#create-name").fill("Casey");
+    await page.locator("#create-game-name").fill("Validation test");
+    await page.getByRole("button", { name: "Create game" }).click();
+    await expect(page.getByText("Enter a valid amount.", { exact: true })).toBeVisible();
+    await buyIn.fill("0.001");
+    await page.getByRole("button", { name: "Create game" }).click();
+    await expect(buyIn).toHaveAttribute("aria-invalid", "true");
+    await expect(page).toHaveURL(/create/);
     await buyIn.fill("20.50");
     await expect(buyIn).toHaveValue("20.50");
-    await expect(page.getByText(/records your opening buy-in of \$20\.50/i)).toBeVisible();
+    await expect(page.getByText(/your opening buy-in of \$20\.50 will be recorded/i)).toBeVisible();
+    await page.getByRole("checkbox", { name: "Add my opening buy-in" }).uncheck();
+    await expect(page.getByText("Leave this off if you’re just hosting. You can buy in later.")).toBeVisible();
   });
 
   test("lets a host resume an active game from setup without clearing site data", async ({ page }) => {

@@ -23,17 +23,12 @@ import {
   validatePlayerName,
 } from "@/lib/name-validation";
 
+import { validateCurrencyAmount } from "@/lib/currency-input";
+
 interface FormErrors {
   name?: string;
   gameName?: string;
   buyIn?: string;
-}
-
-function toNumericAmount(value: string) {
-  const numericCharacters = value.replace(/[^0-9.]/g, "");
-  const [whole, ...decimalParts] = numericCharacters.split(".");
-
-  return decimalParts.length ? `${whole}.${decimalParts.join("")}` : whole;
 }
 
 export default function CreateGamePage() {
@@ -44,6 +39,7 @@ export default function CreateGamePage() {
   const nameEdited = useRef(false);
   const [gameName, setGameName] = useState("");
   const [buyIn, setBuyIn] = useState("");
+  const [hostIsPlaying, setHostIsPlaying] = useState(true);
   const [templates, setTemplates] = useState<GameTemplate[]>([]);
   const [canSaveTemplate, setCanSaveTemplate] = useState(false);
   const [saveTemplate, setSaveTemplate] = useState(false);
@@ -106,9 +102,7 @@ export default function CreateGamePage() {
     const nextErrors: FormErrors = {};
     nextErrors.name = validatePlayerName(trimmedName) ?? undefined;
     nextErrors.gameName = validateGameName(trimmedGameName) ?? undefined;
-    if (!buyIn.trim() || !Number.isFinite(parsedBuyIn) || parsedBuyIn <= 0) {
-      nextErrors.buyIn = "Enter an amount greater than 0.";
-    }
+    nextErrors.buyIn = validateCurrencyAmount(buyIn, { allowZero: false }) ?? undefined;
     setErrors(nextErrors);
     if (nextErrors.name || nextErrors.gameName || nextErrors.buyIn) {
       document.getElementById(nextErrors.name ? "create-name" : nextErrors.gameName ? "create-game-name" : "create-buy-in")?.focus();
@@ -123,7 +117,9 @@ export default function CreateGamePage() {
         trimmedGameName,
         trimmedName,
         parsedBuyIn,
-        userId
+        userId,
+        undefined,
+        { hostIsPlaying },
       );
       if (saveTemplate && canSaveTemplate && userId) {
         try {
@@ -221,13 +217,27 @@ export default function CreateGamePage() {
               pattern="[0-9]*[.]?[0-9]*"
               prefix="$"
               value={buyIn}
-              onChange={(event) => setBuyIn(toNumericAmount(event.target.value))}
+              onChange={(event) => setBuyIn(event.target.value)}
               placeholder="20"
               error={errors.buyIn}
             />
-            <p className="text-sm leading-6 text-gray-600">
-              Creating the game records your opening buy-in{buyIn && Number(buyIn) > 0 ? ` of $${Number(buyIn).toFixed(2)}` : ""}.
-            </p>
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
+              <label className="flex cursor-pointer items-start gap-2.5 text-sm font-medium text-gray-800">
+                <input
+                  type="checkbox"
+                  checked={hostIsPlaying}
+                  onChange={(event) => setHostIsPlaying(event.target.checked)}
+                  aria-describedby="host-playing-help"
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950"
+                />
+                Add my opening buy-in
+              </label>
+              <p id="host-playing-help" className="mt-2 text-sm leading-6 text-gray-600">
+                {hostIsPlaying
+                  ? `Your opening buy-in${buyIn && Number(buyIn) > 0 ? ` of $${Number(buyIn).toFixed(2)}` : ""} will be recorded when you create the game.`
+                  : "Leave this off if you’re just hosting. You can buy in later."}
+              </p>
+            </div>
             {canSaveTemplate ? <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-800">
                 <input type="checkbox" checked={saveTemplate} onChange={(event) => setSaveTemplate(event.target.checked)} className="h-4 w-4 rounded border-gray-300" />
