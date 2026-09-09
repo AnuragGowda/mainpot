@@ -90,9 +90,10 @@ export async function acceptFriendRequest(friendshipId: string): Promise<void> {
     return;
   }
   const { error } = await supabase
-    .from("friendships")
-    .update({ status: "accepted", responded_at: new Date().toISOString() })
-    .eq("id", friendshipId);
+    .rpc("respond_to_friend_request", {
+      input_friendship_id: friendshipId,
+      input_status: "accepted",
+    });
   if (error) {
     throw new Error(`Failed to accept friend request: ${error.message}`);
   }
@@ -105,9 +106,10 @@ export async function declineFriendRequest(friendshipId: string): Promise<void> 
     return;
   }
   const { error } = await supabase
-    .from("friendships")
-    .update({ status: "declined", responded_at: new Date().toISOString() })
-    .eq("id", friendshipId);
+    .rpc("respond_to_friend_request", {
+      input_friendship_id: friendshipId,
+      input_status: "declined",
+    });
   if (error) {
     throw new Error(`Failed to decline friend request: ${error.message}`);
   }

@@ -10,6 +10,11 @@ export interface GameTemplate {
   updated_at: string;
 }
 
+export interface AccountDeletionRequest {
+  status: "pending" | "processing" | "completed" | "cancelled";
+  requested_at: string;
+}
+
 export async function getGameTemplates(userId: string): Promise<GameTemplate[]> {
   const supabase = getBrowserSupabase();
   if (!supabase) return [];
@@ -54,4 +59,15 @@ export async function requestAccountDeletion(): Promise<void> {
   if (!supabase) throw new Error("Sign in to request account deletion.");
   const { error } = await supabase.rpc("request_account_deletion");
   if (error) throw new Error(`Couldn't request deletion: ${error.message}`);
+}
+
+export async function getAccountDeletionRequest(): Promise<AccountDeletionRequest | null> {
+  const supabase = getBrowserSupabase();
+  if (!supabase) throw new Error("Sign in to view your deletion request.");
+  const { data, error } = await supabase
+    .from("account_deletion_requests")
+    .select("status, requested_at")
+    .maybeSingle();
+  if (error) throw new Error(`Couldn't load deletion request: ${error.message}`);
+  return data as AccountDeletionRequest | null;
 }

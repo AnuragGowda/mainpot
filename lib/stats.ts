@@ -72,6 +72,7 @@ interface ParticipantWithGameRow {
   net_result: number | string | null;
   games: {
     id: string;
+    code: string;
     name: string;
     buy_in_amount: number | string;
     ended_at: string | null;
@@ -97,7 +98,7 @@ export async function getUserGames(
   const { data: participants, error } = await supabase
     .from("game_participants")
     .select(
-      "game_id, net_result, games(id, name, buy_in_amount, ended_at, created_at)"
+      "game_id, net_result, games(id, code, name, buy_in_amount, ended_at, created_at)"
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
@@ -139,6 +140,7 @@ export async function getUserGames(
     }
     history.push({
       gameId: row.game_id,
+      gameCode: game.code,
       gameName: game.name,
       date: new Date(game.ended_at ?? game.created_at),
       netResult: Number(row.net_result ?? 0),

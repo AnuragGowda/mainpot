@@ -1,3 +1,4 @@
+import { checkAccountRecovery, checkSavedFriendInvitation } from "./audit-fixes-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
 import { runSettlementUxFlow } from "./settlement-ux-flow";
 import { expect, test } from "@playwright/test";
@@ -506,4 +507,14 @@ test("syncs host-added players to guests without exposing host controls", async 
     await guestContext.close();
     await hostContext.close();
   }
+});
+
+test("restores an account-owned seat and settled history across browsers", async ({ browser, baseURL }) => {
+  test.slow();
+  await checkAccountRecovery(browser, baseURL!);
+});
+
+test("delivers saved-friend invitations before the friend has room access", async ({ browser, baseURL }) => {
+  test.slow();
+  await checkSavedFriendInvitation(browser, baseURL!);
 });

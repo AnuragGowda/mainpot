@@ -180,6 +180,7 @@ export interface GameParticipant {
 
 export interface GameHistory {
   gameId: string;
+  gameCode: string;
   gameName: string;
   date: Date;
   netResult: number;

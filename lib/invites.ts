@@ -2,18 +2,21 @@ import { getCurrentUser } from "./auth-client";
 import { getBrowserSupabase } from "./supabase-browser";
 import type { GameInviteStatus, IncomingGameInvite, Profile } from "./types";
 
+export type IncomingGameInviteMetadata = Omit<IncomingGameInvite, "game"> & {
+  game: Omit<IncomingGameInvite["game"], "code">;
+};
+
 export async function inviteFriendToGame(gameId: string, inviteeId: string): Promise<void> {
   const supabase = getBrowserSupabase();
   const user = await getCurrentUser();
   if (!supabase || !user || user.is_anonymous) {
     throw new Error("Sign in to invite saved friends.");
   }
-  const { error } = await supabase.from("game_invites").insert({
-    game_id: gameId,
-    inviter_id: user.id,
-    invitee_id: inviteeId,
+  const { error } = await supabase.rpc("send_game_invite", {
+    input_game_id: gameId,
+    input_invitee_id: inviteeId,
   });
-  if (error && error.code !== "23505") {
+  if (error) {
     throw new Error(`Could not send invite: ${error.message}`);
   }
 }
@@ -26,20 +29,15 @@ interface IncomingRow {
   status: GameInviteStatus;
   created_at: string;
   responded_at: string | null;
-  game: IncomingGameInvite["game"];
-  inviter: IncomingGameInvite["inviter"];
+  game: IncomingGameInviteMetadata["game"];
+  inviter: IncomingGameInviteMetadata["inviter"];
 }
 
-export async function getIncomingGameInvites(userId: string): Promise<IncomingGameInvite[]> {
+export async function getIncomingGameInvites(): Promise<IncomingGameInviteMetadata[]> {
   const supabase = getBrowserSupabase();
   if (!supabase) return [];
   const { data, error } = await supabase
-    .from("game_invites")
-    .select("*, game:games!inner(id,code,name,buy_in_amount,host_name,status), inviter:profiles!game_invites_inviter_id_fkey(id,username,display_name,avatar_url)")
-    .eq("invitee_id", userId)
-    .eq("status", "pending")
-    .eq("game.status", "active")
-    .order("created_at", { ascending: false });
+    .rpc("get_my_incoming_game_invites");
   if (error) throw new Error(`Could not load game invites: ${error.message}`);
   return ((data ?? []) as unknown as IncomingRow[]).map((row) => ({
     ...row,
@@ -47,14 +45,19 @@ export async function getIncomingGameInvites(userId: string): Promise<IncomingGa
   }));
 }
 
-export async function respondToGameInvite(inviteId: string, status: Exclude<GameInviteStatus, "pending">): Promise<void> {
+export async function respondToGameInvite(
+  inviteId: string,
+  status: Exclude<GameInviteStatus, "pending">
+): Promise<string | null> {
   const supabase = getBrowserSupabase();
-  if (!supabase) return;
-  const { error } = await supabase
-    .from("game_invites")
-    .update({ status, responded_at: new Date().toISOString() })
-    .eq("id", inviteId);
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .rpc("respond_to_game_invite", {
+      input_invite_id: inviteId,
+      input_status: status,
+    });
   if (error) throw new Error(`Could not update invite: ${error.message}`);
+  return (data as string | null) ?? null;
 }
 
 export function friendLabel(profile: Pick<Profile, "display_name" | "username">): string {

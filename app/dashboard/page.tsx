@@ -14,13 +14,15 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import { useToast } from "@/components/ui/Toast";
 import { linkSessionToUser } from "@/lib/accounts";
-import { exportMyAccountData, requestAccountDeletion } from "@/lib/account-data";
+import { exportMyAccountData, getAccountDeletionRequest, requestAccountDeletion } from "@/lib/account-data";
 import { getCurrentUser } from "@/lib/auth-client";
 import { formatCurrency, formatSignedNet } from "@/lib/format";
 import { getProfileById, isUsernameTaken, updateProfile } from "@/lib/friends";
 import { getFriendsStats, getUserGames, getUserStats } from "@/lib/stats";
-import { friendLabel, getIncomingGameInvites, respondToGameInvite } from "@/lib/invites";
-import type { FriendStats, GameHistory, IncomingGameInvite, Profile, UserStats } from "@/lib/types";
+import { friendLabel, getIncomingGameInvites, respondToGameInvite, type IncomingGameInviteMetadata } from "@/lib/invites";
+import { SUPPORT_EMAIL } from "@/lib/product";
+import type { AccountDeletionRequest } from "@/lib/account-data";
+import type { FriendStats, GameHistory, Profile, UserStats } from "@/lib/types";
 import {
   PLAYER_NAME_MAX_LENGTH,
   USERNAME_MAX_LENGTH,
@@ -66,7 +68,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<UserStats>(emptyStats);
   const [games, setGames] = useState<GameHistory[]>([]);
   const [friendStats, setFriendStats] = useState<FriendStats[]>([]);
-  const [gameInvites, setGameInvites] = useState<IncomingGameInvite[]>([]);
+  const [gameInvites, setGameInvites] = useState<IncomingGameInviteMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -74,6 +76,7 @@ export default function DashboardPage() {
   const [profileErrors, setProfileErrors] = useState<{ displayName?: string; username?: string; zelle?: string; save?: string }>({});
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deletionRequest, setDeletionRequest] = useState<AccountDeletionRequest | null>(null);
   const [inviteBusyId, setInviteBusyId] = useState<string | null>(null);
   const [form, setForm] = useState({
     display_name: "",
@@ -94,18 +97,20 @@ export default function DashboardPage() {
       }
       setUser(currentUser);
       await linkSessionToUser(currentUser.id);
-      const [nextProfile, nextStats, nextGames, nextFriendStats, nextInvites] = await Promise.all([
+      const [nextProfile, nextStats, nextGames, nextFriendStats, nextInvites, nextDeletionRequest] = await Promise.all([
         getProfileById(currentUser.id),
         getUserStats(currentUser.id),
         getUserGames(currentUser.id, 8),
         getFriendsStats(currentUser.id),
-        currentUser.is_anonymous ? Promise.resolve([]) : getIncomingGameInvites(currentUser.id),
+        currentUser.is_anonymous ? Promise.resolve([]) : getIncomingGameInvites(),
+        getAccountDeletionRequest(),
       ]);
       setProfile(nextProfile);
       setStats(nextStats);
       setGames(nextGames);
       setFriendStats(nextFriendStats);
       setGameInvites(nextInvites);
+      setDeletionRequest(nextDeletionRequest);
       setForm({
         display_name: nextProfile?.display_name ?? "",
         username: nextProfile?.username ?? "",
@@ -194,6 +199,7 @@ export default function DashboardPage() {
     setDeleting(true);
     try {
       await requestAccountDeletion();
+      setDeletionRequest(await getAccountDeletionRequest());
       toast("Deletion requested. Support will process your account and confirm by email.", "success");
     } catch (error) {
       toast(error instanceof Error ? error.message : "Couldn't request deletion.", "error");
@@ -224,14 +230,15 @@ export default function DashboardPage() {
   }
 
   async function respondToInvite(
-    invite: IncomingGameInvite,
+    invite: IncomingGameInviteMetadata,
     status: "accepted" | "declined",
   ) {
     setInviteBusyId(invite.id);
     try {
-      await respondToGameInvite(invite.id, status);
+      const code = await respondToGameInvite(invite.id, status);
       if (status === "accepted") {
-        router.push(`/game/${invite.game.code}`);
+        if (!code) throw new Error("The invitation was accepted, but the room could not be opened. Refresh and try again.");
+        router.push(`/game/${code}`);
       } else {
         setGameInvites((items) => items.filter((item) => item.id !== invite.id));
       }
@@ -389,14 +396,19 @@ export default function DashboardPage() {
                 <h2 className="font-semibold text-gray-950">Recent games</h2>
                 <p className="text-sm text-gray-500">Your settled results</p>
               </div>
-              <span className="text-xs text-gray-400">Best win {formatCurrency(stats.biggestWin)}</span>
+              <span className="text-xs text-gray-600">Best win {formatCurrency(stats.biggestWin)}</span>
             </div>
             {games.length ? (
               <ul className="divide-y divide-gray-100">
                 {games.map((game) => (
                   <li key={game.gameId} className="flex items-center justify-between gap-4 px-5 py-4">
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-gray-900">{game.gameName}</p>
+                      <Link
+                        href={`/game/${game.gameCode}`}
+                        className="block truncate font-medium text-gray-900 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
+                      >
+                        {game.gameName}
+                      </Link>
                       <p className="mt-0.5 text-xs text-gray-500">
                         {game.date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} · {game.playerCount} players · {formatCurrency(game.buyInAmount)} buy-in
                       </p>
@@ -437,7 +449,7 @@ export default function DashboardPage() {
               <ol className="divide-y divide-gray-100">
                 {friendStats.slice(0, 5).map((friend, index) => (
                   <li key={friend.userId} className="flex items-center gap-3 px-5 py-3.5">
-                    <span className="w-5 text-xs font-medium text-gray-400">{index + 1}</span>
+                    <span className="w-5 text-xs font-medium text-gray-600">{index + 1}</span>
                     <Avatar profile={{ display_name: friend.displayName, username: friend.username, avatar_url: friend.avatarUrl }} size="sm" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-gray-900">{friend.displayName || friend.username || "Player"}</p>
@@ -462,16 +474,23 @@ export default function DashboardPage() {
           <p className="mt-3 text-sm leading-6 text-gray-600">Download the information tied to your account, or submit a deletion request for the support team to fulfill.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="secondary" onClick={exportData} loading={exporting}>Export my data</Button>
-            <ConfirmButton
-              loading={deleting}
-              onConfirm={() => void requestDeletion()}
-              confirmationTitle="Request account deletion?"
-              confirmationDescription="Support will process your request and confirm by email. This cannot be undone once completed."
-              confirmLabel="Request deletion"
-            >
-              Request account deletion
-            </ConfirmButton>
+            {!deletionRequest || deletionRequest.status === "cancelled" ? (
+              <ConfirmButton
+                loading={deleting}
+                onConfirm={() => void requestDeletion()}
+                confirmationTitle="Request account deletion?"
+                confirmationDescription="Support will process your request and confirm by email. This cannot be undone once completed."
+                confirmLabel="Request deletion"
+              >
+                Request account deletion
+              </ConfirmButton>
+            ) : null}
           </div>
+          {deletionRequest ? (
+            <p className="mt-3 text-sm leading-6 text-gray-600">
+              Your deletion request is <span className="font-semibold text-gray-900">{deletionRequest.status}</span> and was requested on {new Date(deletionRequest.requested_at).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })}. {deletionRequest.status === "pending" || deletionRequest.status === "processing" ? "Support will follow up by email. " : ""}For questions, contact <a className="font-medium text-gray-900 underline" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+            </p>
+          ) : null}
           <p className="mt-3 text-xs leading-5 text-gray-500">Export files can include personal details and game history. Keep them private.</p>
         </details>
         </>}
