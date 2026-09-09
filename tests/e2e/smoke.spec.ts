@@ -15,10 +15,8 @@ test.describe("public local-mode experience", () => {
     await page.goto("/");
 
     await expect(page.getByRole("heading", { name: "Keep the game friendly. Keep the money exact." })).toBeVisible();
-    const sendoff = page.getByRole("region", { name: "Give the night a send-off." });
-    await expect(sendoff.getByRole("img", { name: "Mainpot poker night: The Table Celebrity" })).toBeVisible();
-    await expect(sendoff).toContainText("Good nights make great characters.");
-    await page.getByRole("link", { name: /Start( a)? game/i }).first().click();
+    const closingCta = page.getByRole("region", { name: "Ready for your next poker night?" });
+    await closingCta.getByRole("link", { name: "Start a game" }).click();
 
     await page.getByRole("button", { name: "Create game" }).click();
     await expect(page.getByText("Enter your name.")).toBeVisible();

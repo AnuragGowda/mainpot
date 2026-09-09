@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import HeroGameDemo from "@/components/HeroGameDemo";
 import DeferredResumeBanner from "@/components/DeferredResumeBanner";
-import LandingRecap from "@/components/LandingRecap";
 import LandingFaq from "@/components/LandingFaq";
 import SiteFooter from "@/components/SiteFooter";
 import SiteNav from "@/components/SiteNav";
@@ -162,13 +161,9 @@ export default function HomePage() {
           <div className="relative z-10 mx-auto w-full max-w-6xl">
             <div aria-hidden="true" className="ante-suit-card ante-cta-suit-card ante-cta-card-diamond"><span className="ante-suit-card-surface"><SuitIcon suit="diamond" /></span></div>
             <div aria-hidden="true" className="ante-suit-card ante-cta-suit-card ante-cta-card-heart"><span className="ante-suit-card-surface"><SuitIcon suit="heart" /></span></div>
-            <div className="ante-cta relative grid w-full gap-10 overflow-hidden rounded-3xl bg-gray-950 px-6 py-10 text-white sm:px-10 sm:py-12 md:grid-cols-[minmax(0,1fr)_15rem] md:items-center md:gap-12 lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-16 lg:px-14 lg:py-14">
-              <div>
-                <h2 id="sendoff-heading" className="text-3xl font-semibold tracking-tight sm:text-4xl">Give the night a <span className="whitespace-nowrap">send-off.</span></h2>
-                <p className="mt-3 max-w-md text-sm leading-6 text-gray-300">Meet your poker-night character after settling up. Share the card with the stats you choose; names stay private.</p>
-                <Link href="/create" className={`${linkBaseClasses} mt-6 bg-white text-gray-950 hover:bg-gray-100 focus-visible:ring-white`}>Start a game</Link>
-              </div>
-              <LandingRecap />
+            <div className="ante-cta relative flex w-full flex-col items-start gap-6 overflow-hidden rounded-3xl bg-gray-950 px-6 py-10 text-white sm:px-10 md:flex-row md:items-center md:justify-between md:gap-10 lg:px-14 lg:py-14">
+              <h2 id="sendoff-heading" className="max-w-xl text-3xl font-semibold tracking-tight sm:text-4xl">Ready for your next poker night?</h2>
+              <Link href="/create" className={`${linkBaseClasses} ante-cta-button w-full shrink-0 bg-white text-gray-950 hover:bg-gray-100 focus-visible:ring-white focus-visible:ring-offset-gray-950 sm:w-auto`}>Start a game <span aria-hidden="true" className="ante-cta-button-arrow">→</span></Link>
             </div>
           </div>
         </section>
