@@ -1,5 +1,6 @@
-import { runSettlementUxFlow } from "./settlement-ux-flow";
+import { checkCalculatorValidation } from "./audit-fixes-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
+import { runSettlementUxFlow } from "./settlement-ux-flow";
 import { expect, test } from "@playwright/test";
 
 test.describe("public local-mode experience", () => {
@@ -471,10 +472,8 @@ test.describe("public local-mode experience", () => {
     await page.setViewportSize({ width: 320, height: 568 });
     await page.goto("/poker-settlement-calculator");
 
-    const jump = page.getByRole("link", { name: "Jump to calculator" });
-    await expect(jump).toBeVisible();
-    await jump.click();
-    await expect(page.locator("#calculator")).toBeInViewport();
+    await expect(page.locator("#player-1")).toBeInViewport();
+    await expect(page.getByRole("link", { name: "How settlement works" })).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(320);
@@ -490,7 +489,7 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByRole("main")).toBeFocused();
     await page.getByRole("button", { name: "Clear example" }).click();
     await expect(page.locator("#player-1")).toBeFocused();
-    await expect(page.locator("#calculator").getByRole("textbox")).toHaveCount(2);
+    await expect(page.locator("#calculator").getByRole("textbox")).toHaveCount(6);
     await page.locator("#player-1").fill("Alex");
     await page.locator("#player-2").fill("Sam");
     await page.getByLabel("Money in for Alex").fill("20");
@@ -504,4 +503,8 @@ test.describe("public local-mode experience", () => {
     await expect(page.locator("#calculator-results")).toContainText("Sam");
   });
 
+});
+
+test("does not show a settlement for invalid calculator amounts", async ({ page }) => {
+  await checkCalculatorValidation(page);
 });

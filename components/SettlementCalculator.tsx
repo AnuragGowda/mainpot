@@ -17,6 +17,8 @@ import {
   type DiscrepancyAllocationMethod,
 } from "@/lib/settlement";
 
+import { MAX_CURRENCY_AMOUNT, validateCurrencyAmount } from "@/lib/currency-input";
+
 type CalculatorPlayer = {
   id: number;
   name: string;
@@ -35,11 +37,6 @@ const initialPlayers: CalculatorPlayer[] = [
 const inputClass =
   "h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-950 outline-none transition placeholder:text-gray-400 focus:border-gray-950 focus:ring-2 focus:ring-gray-950/10";
 
-function amount(value: string) {
-  const parsed = Number.parseFloat(value);
-  return Number.isFinite(parsed) && parsed >= 0 ? round2(parsed) : 0;
-}
-
 export default function SettlementCalculator() {
   const [players, setPlayers] = useState(initialPlayers);
   const [usingExample, setUsingExample] = useState(true);
@@ -48,12 +45,19 @@ export default function SettlementCalculator() {
   const [selectedPlayerIds, setSelectedPlayerIds] = useState<string[]>([]);
   const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
 
+  const inputErrors = players.map((player) => ({
+    moneyIn: validateCurrencyAmount(player.moneyIn, { allowBlank: true }),
+    stacksOut: validateCurrencyAmount(player.stacksOut, { allowBlank: true }),
+  }));
+  const invalidInputs = inputErrors.some((errors) => errors.moneyIn || errors.stacksOut);
+  const hasAmounts = players.some((player) => player.moneyIn.trim() || player.stacksOut.trim());
+
   const result = useMemo(() => {
     const rows = players.map((player, index) => ({
       ...player,
       name: player.name.trim() || `Player ${index + 1}`,
-      moneyIn: amount(player.moneyIn),
-      stacksOut: amount(player.stacksOut),
+      moneyIn: validateCurrencyAmount(player.moneyIn, { allowBlank: true }) ? 0 : Number(player.moneyIn),
+      stacksOut: validateCurrencyAmount(player.stacksOut, { allowBlank: true }) ? 0 : Number(player.stacksOut),
     }));
     const totalIn = round2(
       rows.reduce((total, player) => total + player.moneyIn, 0)
@@ -93,7 +97,7 @@ export default function SettlementCalculator() {
       const raw = customAmounts[player.playerId] ?? "";
       if (raw.trim() === "") return false;
       const parsed = round2(Number(raw));
-      return !Number.isFinite(parsed)
+      return Boolean(validateCurrencyAmount(raw))
         || parsed < 0
         || parsed > Math.abs(player.net) + 0.005;
     });
@@ -217,32 +221,20 @@ export default function SettlementCalculator() {
     <section
       id="calculator"
       aria-labelledby="calculator-heading"
-      className="scroll-mt-20 border-b border-gray-200 bg-white px-4 py-12 sm:px-6 sm:py-16"
+      className="scroll-mt-20 border-b border-gray-200 bg-white px-4 py-5 sm:px-6 sm:py-8"
     >
       <div className="mx-auto w-full max-w-6xl">
-        <div className="grid gap-6 border-b border-gray-300 pb-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
-          <div className="max-w-3xl">
-            <h2
-              id="calculator-heading"
-              className="text-3xl font-semibold tracking-[-0.035em] text-gray-950 sm:text-4xl"
-            >
-              Who owes whom?
-            </h2>
-          </div>
-          <p className="text-sm leading-7 text-gray-600">
-            Enter buy-ins and final stacks. Resolve any difference to see the payments. No account needed.
-          </p>
-        </div>
+        <h2 id="calculator-heading" className="sr-only">Who owes whom?</h2>
 
-        <div className="mt-8 overflow-hidden rounded-2xl border border-gray-300 bg-[#f4f5f2]">
+        <div className="overflow-hidden rounded-2xl border border-gray-300 bg-[#f4f5f2]">
           <header className="flex flex-col gap-3 border-b border-gray-300 bg-[#111512] px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>
               <div className="flex items-center gap-2">
                 <span aria-hidden className="h-2 w-2 rounded-full bg-emerald-400" />
                 <h3 className="font-semibold">Settlement worksheet</h3>
               </div>
-              <p className="mt-1 text-xs text-gray-400">
-                {usingExample ? "Example game · change any value to try it." : "Updates as you type. Nothing is saved."}
+              <p className="mt-1 text-xs text-gray-300">
+                {usingExample ? "Example game · change any value to try it." : "Updates as you type. Blank amounts count as $0. Nothing is saved."}
               </p>
             </div>
             <button
@@ -261,7 +253,7 @@ export default function SettlementCalculator() {
           </div>
           <div className="grid lg:grid-cols-[minmax(0,1.18fr)_minmax(21rem,0.82fr)]">
             <div className="bg-white p-4 sm:p-6 lg:border-r lg:border-gray-300">
-              <div className="mb-3 hidden grid-cols-[minmax(10rem,1fr)_8.5rem_8.5rem_2.75rem] gap-3 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500 sm:grid">
+              <div className="mb-3 hidden grid-cols-[minmax(10rem,1fr)_8.5rem_8.5rem_2.75rem] gap-3 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-600 sm:grid">
                 <span>Player</span>
                 <span>Money in</span>
                 <span>Final stack</span>
@@ -293,7 +285,7 @@ export default function SettlementCalculator() {
                     </div>
                     <div>
                       <label
-                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500 sm:sr-only"
+                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-600 sm:sr-only"
                         htmlFor={`money-in-${player.id}`}
                       >
                         Money in
@@ -303,7 +295,10 @@ export default function SettlementCalculator() {
                         inputMode="decimal"
                         min="0"
                         step="0.01"
-                        type="number"
+                        type="text"
+                        max={MAX_CURRENCY_AMOUNT}
+                        aria-invalid={Boolean(inputErrors[index].moneyIn)}
+                        aria-describedby={inputErrors[index].moneyIn ? `money-in-error-${player.id}` : undefined}
                         value={player.moneyIn}
                         onChange={(event) =>
                           updatePlayer(player.id, "moneyIn", event.target.value)
@@ -312,10 +307,11 @@ export default function SettlementCalculator() {
                         aria-label={`Money in for ${player.name || `player ${index + 1}`}`}
                         className={`${inputClass} tabular-nums`}
                       />
+                      {inputErrors[index].moneyIn ? <p id={`money-in-error-${player.id}`} className="mt-1 text-xs text-red-700">{inputErrors[index].moneyIn}</p> : null}
                     </div>
                     <div>
                       <label
-                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500 sm:sr-only"
+                        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-600 sm:sr-only"
                         htmlFor={`stacks-out-${player.id}`}
                       >
                         Final stack
@@ -325,7 +321,10 @@ export default function SettlementCalculator() {
                         inputMode="decimal"
                         min="0"
                         step="0.01"
-                        type="number"
+                        type="text"
+                        max={MAX_CURRENCY_AMOUNT}
+                        aria-invalid={Boolean(inputErrors[index].stacksOut)}
+                        aria-describedby={inputErrors[index].stacksOut ? `stacks-out-error-${player.id}` : undefined}
                         value={player.stacksOut}
                         onChange={(event) =>
                           updatePlayer(player.id, "stacksOut", event.target.value)
@@ -334,6 +333,7 @@ export default function SettlementCalculator() {
                         aria-label={`Final stack for ${player.name || `player ${index + 1}`}`}
                         className={`${inputClass} tabular-nums`}
                       />
+                      {inputErrors[index].stacksOut ? <p id={`stacks-out-error-${player.id}`} className="mt-1 text-xs text-red-700">{inputErrors[index].stacksOut}</p> : null}
                     </div>
                     <button
                       type="button"
@@ -350,9 +350,14 @@ export default function SettlementCalculator() {
             </div>
 
             <aside id="calculator-results" tabIndex={-1} aria-label="Settlement results" aria-live="polite" className="min-w-0 scroll-mt-20 p-4 focus:outline-none sm:p-6">
+              {invalidInputs || !hasAmounts ? (
+                <p role="status" className="rounded-lg border border-gray-300 bg-white p-4 text-sm leading-6 text-gray-700">
+                  {invalidInputs ? "Correct the highlighted amounts to calculate payments." : "Enter money in and final stacks to calculate payments."}
+                </p>
+              ) : <>
               <div className="grid grid-cols-2 gap-x-5 border-b border-gray-300 pb-5">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-600">
                     Money in
                   </p>
                   <p className="mt-1 text-xl font-semibold tabular-nums text-gray-950">
@@ -360,7 +365,7 @@ export default function SettlementCalculator() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-600">
                     Final stacks
                   </p>
                   <p className="mt-1 text-xl font-semibold tabular-nums text-gray-950">
@@ -495,7 +500,7 @@ export default function SettlementCalculator() {
                               {player.name}
                             </span>
                             <span className="flex items-center gap-3">
-                              <span className="text-xs tabular-nums text-gray-500">
+                              <span className="text-xs tabular-nums text-gray-600">
                                 {formatCurrency(Math.abs(player.net))} capacity
                               </span>
                               <input
@@ -538,15 +543,15 @@ export default function SettlementCalculator() {
                           >
                             <span>
                               <span className="block font-medium text-gray-800">{player.name}</span>
-                              <span className="block text-xs tabular-nums text-gray-500">
+                              <span className="block text-xs tabular-nums text-gray-600">
                                 Up to {formatCurrency(Math.abs(player.net))}
                               </span>
                             </span>
                             <span className="relative w-28">
-                              <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                              <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-600">$</span>
                               <input
                                 aria-label={`Exact discrepancy adjustment for ${player.name}`}
-                                type="number"
+                                type="text"
                                 inputMode="decimal"
                                 min="0"
                                 max={Math.abs(player.net)}
@@ -572,7 +577,7 @@ export default function SettlementCalculator() {
 
                   {result.allocationValid ? (
                     <div className="mt-4 rounded-xl border border-gray-300 bg-white p-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-600">
                         Result preview
                       </p>
                       <ul className="mt-2 space-y-1.5 text-xs">
@@ -595,16 +600,16 @@ export default function SettlementCalculator() {
               <div className="pt-5">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-600">
                       {result.balanced ? "Payment list" : "Adjusted payment list"}
                     </p>
                     {!result.balanced && result.allocationValid ? (
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-xs text-gray-600">
                         Includes the {formatCurrency(discrepancyAmount)} recorded adjustment.
                       </p>
                     ) : null}
                   </div>
-                  <span className="text-xs font-medium text-gray-500">
+                  <span className="text-xs font-medium text-gray-600">
                     {result.allocationValid
                       ? `${result.transfers.length} ${result.transfers.length === 1 ? "payment" : "payments"}`
                       : "Waiting"}
@@ -656,6 +661,7 @@ export default function SettlementCalculator() {
                   Track the next game in Mainpot
                 </a>
               </div>
+              </>}
             </aside>
           </div>
         </div>

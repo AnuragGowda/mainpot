@@ -181,7 +181,7 @@ export default function ActivityFeed({
           <h2 id="activity-heading" className="text-base font-semibold text-gray-950">Activity</h2>
           <p className="text-sm text-gray-500">Newest first.</p>
         </div>
-        <span className="text-xs text-gray-400">{events.length} events</span>
+        <span className="text-xs text-gray-600">{events.length} events</span>
       </div>
       <Card padding="none" className="overflow-hidden rounded-xl shadow-none">
         <ol className="divide-y divide-gray-100">
@@ -210,7 +210,7 @@ export default function ActivityFeed({
                     <p className="text-sm leading-6 text-gray-800">
                       {eventText(event, actor?.name ?? null)}
                     </p>
-                    <time dateTime={event.created_at} className="mt-0.5 block text-xs text-gray-400">
+                    <time dateTime={event.created_at} className="mt-0.5 block text-xs text-gray-600">
                       {new Date(event.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                     </time>
                   </div>
@@ -220,7 +220,7 @@ export default function ActivityFeed({
                       aria-label={`Actions for ${eventText(event, actor?.name ?? null)}`}
                       aria-expanded={openEventId === event.id}
                       onClick={() => setOpenEventId((current) => current === event.id ? null : event.id)}
-                      className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-lg leading-none text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-md text-lg leading-none text-gray-600 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"
                     >
                       ···
                     </button>

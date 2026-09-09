@@ -137,7 +137,7 @@ export default function JoinGamePage() {
               Join game
             </Button>
           </form>
-          <p className="mt-4 text-center text-xs leading-5 text-gray-400">
+          <p className="mt-4 text-center text-xs leading-5 text-gray-600">
             Codes never use 0, 1, I, or O.
           </p>
     </GameSetupShell>

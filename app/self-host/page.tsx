@@ -189,7 +189,7 @@ export default function SelfHostPage() {
               <div className="bg-gray-950 px-5 py-4 text-white sm:px-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Mainpot stack</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-300">Mainpot stack</p>
                     <p className="mt-1 font-semibold">One application, three deployment models</p>
                   </div>
                   <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 font-mono text-xs text-gray-300">MIT</span>
@@ -235,7 +235,7 @@ export default function SelfHostPage() {
                     <span className="grid h-10 w-10 place-items-center rounded-lg bg-gray-100 text-gray-700">
                       <Icon aria-hidden className="h-4 w-4" />
                     </span>
-                    <span className="font-mono text-xs text-gray-400">0{index + 1}</span>
+                    <span className="font-mono text-xs text-gray-600">0{index + 1}</span>
                   </div>
                   <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">{model.label}</p>
                   <h3 className="mt-2 text-xl font-semibold tracking-tight text-gray-950">{model.title}</h3>
@@ -306,7 +306,7 @@ export default function SelfHostPage() {
             <p className="mt-5 text-base leading-8 text-gray-600">
               The default development command starts both the application and its local Supabase services. The first run downloads the required container images and applies the database migrations.
             </p>
-            <pre className="mt-7 max-w-full overflow-x-auto rounded-2xl bg-gray-950 p-5 text-sm leading-7 text-gray-200 shadow-lg shadow-gray-950/10"><code>{`git clone ${GITHUB_URL}.git
+            <pre tabIndex={0} aria-label="Local quick start commands" className="mt-7 max-w-full overflow-x-auto rounded-2xl bg-gray-950 p-5 text-sm leading-7 text-gray-200 shadow-lg shadow-gray-950/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"><code>{`git clone ${GITHUB_URL}.git
 cd mainpot
 npm install
 npm run dev`}</code></pre>

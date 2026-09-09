@@ -136,35 +136,11 @@ export default function PokerSettlementCalculatorPage() {
       />
       <SiteNav />
       <main tabIndex={-1} id="main-content">
-        <section className="border-b border-gray-300 bg-[#f7f8f6] px-4 py-10 sm:px-6 sm:py-20">
+        <section className="bg-[#f7f8f6] px-4 pb-2 pt-6 sm:px-6 sm:pt-10">
           <div className="mx-auto w-full max-w-6xl">
-            <h1 className="mt-4 max-w-5xl text-4xl font-semibold tracking-[-0.055em] text-gray-950 sm:mt-5 sm:text-6xl lg:text-7xl">
-              Poker settlement calculator
-            </h1>
-            <div className="mt-8 grid gap-8 border-t border-gray-300 pt-7 lg:grid-cols-[minmax(0,1fr)_22rem]">
-              <p className="max-w-3xl text-base leading-7 text-gray-700 sm:text-xl sm:leading-9">
-                Enter each player&apos;s money in and final stack. Mainpot checks
-                the bank and turns the results into a clear payment list.
-              </p>
-              <p className="hidden text-sm leading-7 text-gray-600 sm:block">
-                Follow a five-player example from buy-in to final payment.
-              </p>
-            </div>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="#calculator"
-                className="inline-flex h-12 items-center justify-center rounded-lg bg-gray-950 px-6 text-sm font-semibold text-white transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
-              >
-                <span className="sm:hidden">Jump to calculator ↓</span>
-                <span className="hidden sm:inline">Use the calculator</span>
-              </a>
-              <Link
-                href="/create"
-                className="inline-flex h-12 items-center justify-center rounded-lg border border-gray-300 bg-white px-6 text-sm font-semibold text-gray-900 transition hover:border-gray-400 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
-              >
-                Track a live game
-              </Link>
-            </div>
+            <h1 className="max-w-5xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-5xl">Poker settlement calculator</h1>
+            <p className="mt-3 max-w-3xl text-base leading-7 text-gray-700">Enter buy-ins and final stacks to see who pays whom. No account needed.</p>
+            <a href="#overview" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-gray-700 underline underline-offset-4">How settlement works ↓</a>
           </div>
         </section>
 
@@ -173,12 +149,12 @@ export default function PokerSettlementCalculatorPage() {
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:px-6 md:py-16 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-16">
           <aside className="hidden lg:block">
             <nav aria-label="On this page" className="sticky top-28">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">On this page</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">On this page</p>
               <ol className="mt-4 border-l border-gray-300">
                 {navigation.map(([label, id], index) => (
                   <li key={id}>
-                    <a href={`#${id}`} className="group flex gap-3 border-l-2 border-transparent py-2.5 pl-4 text-sm text-gray-500 transition hover:border-gray-950 hover:text-gray-950">
-                      <span className="font-mono text-xs text-gray-400">{String(index + 1).padStart(2, "0")}</span>
+                    <a href={`#${id}`} className="group flex gap-3 border-l-2 border-transparent py-2.5 pl-4 text-sm text-gray-600 transition hover:border-gray-950 hover:text-gray-950">
+                      <span className="font-mono text-xs text-gray-600">{String(index + 1).padStart(2, "0")}</span>
                       <span>{label}</span>
                     </a>
                   </li>
@@ -190,7 +166,7 @@ export default function PokerSettlementCalculatorPage() {
           <details className="group lg:hidden">
             <summary className="flex cursor-pointer items-center justify-between border-y border-gray-200 py-3 text-sm font-semibold text-gray-950">
               On this page
-              <span aria-hidden className="text-lg text-gray-500 transition group-open:rotate-45">+</span>
+              <span aria-hidden className="text-lg text-gray-600 transition group-open:rotate-45">+</span>
             </summary>
             <nav aria-label="On this page" className="border-b border-gray-200 py-2">
               <ol className="grid grid-cols-2 gap-x-4 gap-y-1 pb-2">
@@ -255,15 +231,15 @@ export default function PokerSettlementCalculatorPage() {
                 </div>
                 <div className="grid grid-cols-3 divide-x divide-amber-200 bg-white/55">
                   <div className="min-w-0 px-2 py-3 sm:p-5">
-                    <p className="text-xs text-amber-800/70">Money in</p>
+                    <p className="text-xs text-amber-800">Money in</p>
                     <p className="mt-1 text-base font-semibold tabular-nums text-amber-950 sm:text-xl">$300.00</p>
                   </div>
                   <div className="min-w-0 px-2 py-3 sm:p-5">
-                    <p className="text-xs text-amber-800/70">Stacks out</p>
+                    <p className="text-xs text-amber-800">Stacks out</p>
                     <p className="mt-1 text-base font-semibold tabular-nums text-amber-950 sm:text-xl">$310.00</p>
                   </div>
                   <div className="min-w-0 px-2 py-3 sm:p-5">
-                    <p className="text-xs text-amber-800/70">Difference</p>
+                    <p className="text-xs text-amber-800">Difference</p>
                     <p className="mt-1 text-base font-semibold tabular-nums text-red-700 sm:text-xl">−$10.00</p>
                   </div>
                 </div>
@@ -287,12 +263,12 @@ export default function PokerSettlementCalculatorPage() {
               <div className="mt-8 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                 <div className="border-b border-gray-200 px-5 py-4 sm:px-6">
                   <h3 className="text-sm font-semibold text-gray-950">Corrected game ledger</h3>
-                  <p className="mt-1 text-xs text-gray-500 md:hidden">Scroll sideways to see cash-outs and net results →</p>
+                  <p className="mt-1 text-xs text-gray-600 md:hidden">Scroll sideways to see cash-outs and net results →</p>
                 </div>
                 <div role="region" aria-label="Corrected game ledger" tabIndex={0} className="overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
                 <table className="w-full min-w-[680px] border-collapse text-left text-sm">
                   <caption className="sr-only">Corrected game ledger: buy-ins, cash-outs, and net results</caption>
-                  <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">
+                  <thead className="bg-gray-50 text-xs font-semibold uppercase tracking-[0.12em] text-gray-600">
                     <tr>
                       <th scope="col" className="px-5 py-3 sm:px-6">Player</th>
                       <th scope="col" className="px-4 py-3">Purchases</th>
@@ -376,7 +352,7 @@ export default function PokerSettlementCalculatorPage() {
               <ol className="mt-8 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                 {payments.map((payment, index) => (
                   <li key={`${payment.from}-${payment.to}`} className="grid gap-4 border-b border-gray-100 p-5 last:border-0 sm:grid-cols-[2.5rem_1fr_auto] sm:items-center sm:px-6">
-                    <span className="grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-500">
+                    <span className="grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-600">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <div>
@@ -385,7 +361,7 @@ export default function PokerSettlementCalculatorPage() {
                         <ArrowRight aria-hidden className="h-4 w-4 text-gray-400" />
                         <span>{payment.to}</span>
                       </p>
-                      <p className="mt-1 text-sm text-gray-500">{payment.note}</p>
+                      <p className="mt-1 text-sm text-gray-600">{payment.note}</p>
                     </div>
                     <span className="text-xl font-semibold tabular-nums text-gray-950">{payment.amount}</span>
                   </li>
@@ -428,7 +404,7 @@ export default function PokerSettlementCalculatorPage() {
                   <details key={faq.question} className="group border-b border-gray-200 last:border-0" open={index === 0}>
                     <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 py-4 text-base font-semibold text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
                       <span className="min-w-0 flex-1">{faq.question}</span>
-                      <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-gray-200 text-gray-500 transition group-open:border-gray-300 group-open:bg-white"><span className="transition group-open:rotate-45">+</span></span>
+                      <span aria-hidden className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-gray-200 text-gray-600 transition group-open:border-gray-300 group-open:bg-white"><span className="transition group-open:rotate-45">+</span></span>
                     </summary>
                     <p className="max-w-3xl pb-6 text-sm leading-7 text-gray-600">{faq.answer}</p>
                   </details>

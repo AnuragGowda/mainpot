@@ -143,7 +143,7 @@ export default function SettlementWalkthrough() {
             ["Players", "5"],
           ].map(([label, value]) => (
             <div key={label} className="px-3 first:pl-0 last:pr-0 sm:px-5">
-              <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500">{label}</dt>
+              <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-300">{label}</dt>
               <dd className="mt-1 text-xs font-semibold tabular-nums text-gray-100 sm:text-sm">{value}</dd>
             </div>
           ))}
@@ -178,10 +178,10 @@ export default function SettlementWalkthrough() {
               setPaused(true);
             }}
             className={`relative min-h-14 px-1 text-[10px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950 sm:min-h-16 sm:text-xs ${
-              activeIndex === index ? "text-gray-950" : "text-gray-400 hover:text-gray-700"
+              activeIndex === index ? "text-gray-950" : "text-gray-600 hover:text-gray-950"
             }`}
           >
-            <span className="mr-1 hidden font-mono text-[10px] text-gray-400 sm:inline">0{index + 1}</span>
+            <span className="mr-1 hidden font-mono text-[10px] text-gray-600 sm:inline">0{index + 1}</span>
             {stage.shortLabel}
             <span
               aria-hidden
@@ -202,7 +202,7 @@ export default function SettlementWalkthrough() {
       >
         <div className="flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-2 text-gray-600">
               <Icon aria-hidden className="h-4 w-4" />
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em]">{active.eyebrow}</p>
             </div>
@@ -211,16 +211,16 @@ export default function SettlementWalkthrough() {
           </div>
 
           <dl className="mt-6 border-t border-gray-300 pt-4">
-            <dt className="text-xs font-medium text-gray-500">{active.metricLabel}</dt>
+            <dt className="text-xs font-medium text-gray-600">{active.metricLabel}</dt>
             <dd className={`mt-1 text-xl font-semibold tabular-nums ${active.id === "cash-outs" ? "text-amber-700" : "text-gray-950"}`}>
               {active.metricValue}
             </dd>
-            <dd className="mt-1 text-xs leading-5 text-gray-500">{active.metricNote}</dd>
+            <dd className="mt-1 text-xs leading-5 text-gray-600">{active.metricNote}</dd>
           </dl>
         </div>
 
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+          <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-600">
             <span>{active.id === "payments" ? "Payment route" : "Ledger entry"}</span>
             <span>{active.id === "payments" ? "Send" : "Amount"}</span>
           </div>
@@ -233,7 +233,7 @@ export default function SettlementWalkthrough() {
             ))}
           </div>
           <div className="flex items-center justify-between gap-3 border-t border-gray-200 bg-gray-50 px-4 py-3 text-xs">
-            <span className="font-medium text-gray-500">Step {activeIndex + 1} of {stages.length}</span>
+            <span className="font-medium text-gray-600">Step {activeIndex + 1} of {stages.length}</span>
             <span className="inline-flex items-center gap-1.5 font-semibold text-gray-700">
               {activeIndex === stages.length - 1 ? "All balances closed" : stages[activeIndex + 1].shortLabel}
               {activeIndex === stages.length - 1 ? (
