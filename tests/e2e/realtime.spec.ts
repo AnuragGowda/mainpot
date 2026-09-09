@@ -154,8 +154,22 @@ test("locks an early cash-out against the host and carries it out of final settl
     await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
     await host.getByRole("button", { name: "Review settlement" }).click();
     const fullPlan = host.locator('[data-testid="full-settlement-plan"]');
+    await expect(fullPlan.getByRole("region", { name: "Early cash-outs" })).toBeHidden();
     await fullPlan.locator(":scope > summary").click();
+    await expect(fullPlan.getByRole("region", { name: "Early cash-outs" })).toBeVisible();
+    await expect(fullPlan).toContainText("Casey → Jordan");
     await expect(fullPlan.getByText("No transfers needed — everyone is square.").first()).toBeVisible();
+
+    await host.getByRole("button", { name: "Lock settlement", exact: true }).click();
+    await host.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
+
+    const paymentLedger = host.locator('[data-testid="payment-ledger"]');
+    await expect(paymentLedger.locator(":scope > summary")).toContainText("1 of 1 payment marked sent · includes early cash-outs");
+    await expect(paymentLedger.getByRole("region", { name: "Early cash-outs" })).toBeHidden();
+    await paymentLedger.locator(":scope > summary").click();
+    await expect(paymentLedger.getByRole("region", { name: "Early cash-outs" })).toBeVisible();
+    await expect(paymentLedger).toContainText("Casey → Jordan");
+    await expect(paymentLedger.getByRole("heading", { name: "Final settlement", exact: true })).toBeVisible();
   } finally {
     await guestContext.close().catch(() => undefined);
     await hostContext.close().catch(() => undefined);
@@ -450,7 +464,7 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
     await expect(guestSettlement.getByRole("listitem")).toContainText("Casey");
     await expect(guest.locator('[data-testid="full-settlement-plan"]')).toHaveCount(0);
     const guestLedger = guest.locator('[data-testid="payment-ledger"]');
-    await expect(guestLedger.locator(":scope > summary")).toContainText("0 of 1 payment marked sent · visible to everyone");
+    await expect(guestLedger.locator(":scope > summary")).toContainText("0 of 1 payment marked sent");
     await guestLedger.locator(":scope > summary").click();
     await expect(guestLedger.getByRole("listitem")).toContainText("Jordan → Casey");
     const markSent = guest.getByRole("checkbox", { name: /^Mark sent:/ }).first();

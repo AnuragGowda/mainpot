@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -26,6 +26,7 @@ export default function EarlyCashOuts({
   onApprove,
   onCancel,
 }: EarlyCashOutsProps) {
+  const headingId = useId();
   const [busyId, setBusyId] = useState<string | null>(null);
   const visible = snapshot.earlyCashOuts.filter(
     (item) => item.status === "locked"
@@ -43,10 +44,10 @@ export default function EarlyCashOuts({
   }
 
   return (
-    <section aria-labelledby="early-cash-outs-heading">
+    <section aria-labelledby={headingId}>
       <div className="mb-3">
-        <h2 id="early-cash-outs-heading" className="text-base font-semibold text-gray-950">Early cash-outs</h2>
-        <p className="text-sm text-gray-500">Locked results settle with the host while the game continues.</p>
+        <h2 id={headingId} className="text-base font-semibold text-gray-950">Early cash-outs</h2>
+        <p className="text-sm text-gray-500">Locked results settle with the host separately from the final settlement.</p>
       </div>
       <div className="space-y-3">
         {visible.map((earlyCashOut) => {

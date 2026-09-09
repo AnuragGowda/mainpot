@@ -272,13 +272,24 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   // A finalized game has one stable, canonical plan rather than a view choice.
   const displayedTab: ResultsTab = snapshot.game.status === "ended" ? "min" : tab;
   const activeTabTransfers = displayedTab === "min" ? minTransfers : bankTransfers;
-  const recapTransfers = snapshot.earlyCashOuts.flatMap((earlyCashOut) => {
+  const lockedEarlyCashOuts = snapshot.earlyCashOuts.filter(
+    (earlyCashOut) => earlyCashOut.status === "locked"
+  );
+  const earlyCashOutPayments = lockedEarlyCashOuts.flatMap((earlyCashOut) => {
     const transfer = getEarlyCashOutTransfer(earlyCashOut, snapshot.players);
-    return transfer ? [transfer] : [];
-  }).concat(activeTabTransfers);
+    return transfer ? [{ earlyCashOut, transfer }] : [];
+  });
+  const recapTransfers = earlyCashOutPayments
+    .map(({ transfer }) => transfer)
+    .concat(activeTabTransfers);
   const settledMinPaymentCount = minTransfers.filter((transfer) =>
     settledMinPaymentKeys.has(settlementPaymentKey("min", transfer))
   ).length;
+  const settledEarlyCashOutPaymentCount = earlyCashOutPayments.filter(({ transfer }) =>
+    settledMinPaymentKeys.has(settlementPaymentKey("early_exit", transfer))
+  ).length;
+  const paymentCount = minTransfers.length + earlyCashOutPayments.length;
+  const settledPaymentCount = settledMinPaymentCount + settledEarlyCashOutPaymentCount;
   const settlementPlanReadOnly = snapshot.game.status !== "ended";
   const status = statusMeta[snapshot.game.status];
 
@@ -675,14 +686,6 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             </section>
           ) : null}
 
-          {snapshot.earlyCashOuts.some((item) => item.status === "locked") ? (
-            <EarlyCashOuts
-              snapshot={snapshot}
-              currentPlayerId={currentPlayerId ?? ""}
-              isHost={isHost}
-            />
-          ) : null}
-
           {currentPlayerId && !currentPlayerEarlyCashOut && (!isHost || snapshot.game.status === "ended") ? (
             <PlayerSettlementSummary
               transfers={minTransfers}
@@ -724,7 +727,8 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   <span>
                     <span className="block text-sm font-semibold text-gray-950">Payment ledger</span>
                     <span className="mt-0.5 block text-xs text-gray-500">
-                      {settledMinPaymentCount} of {minTransfers.length} {minTransfers.length === 1 ? "payment" : "payments"} marked sent · visible to everyone
+                      {settledPaymentCount} of {paymentCount} {paymentCount === 1 ? "payment" : "payments"} marked sent
+                      {lockedEarlyCashOuts.length ? " · includes early cash-outs" : null}
                     </span>
                   </span>
                   <span aria-hidden className="text-lg text-gray-400">{paymentLedgerOpen ? "−" : "＋"}</span>
@@ -734,14 +738,30 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 <p className="mb-3 text-sm leading-6 text-gray-600">
                   The payer, recipient, or host can mark a payment sent.
                 </p>
-                <TransferList
-                  transfers={minTransfers}
-                  gameId={snapshot.game.id}
-                  mode="min"
-                  currentPlayerId={currentPlayerId}
-                  isHost={isHost}
-                  actionsEnabled
-                />
+                <div className="space-y-6">
+                  {lockedEarlyCashOuts.length ? (
+                    <EarlyCashOuts
+                      snapshot={snapshot}
+                      currentPlayerId={currentPlayerId ?? ""}
+                      isHost={isHost}
+                    />
+                  ) : null}
+                  <section aria-labelledby="final-settlement-payments-heading">
+                    {lockedEarlyCashOuts.length ? (
+                      <h2 id="final-settlement-payments-heading" className="mb-2 text-sm font-medium uppercase tracking-widest text-gray-500">
+                        Final settlement
+                      </h2>
+                    ) : null}
+                    <TransferList
+                      transfers={minTransfers}
+                      gameId={snapshot.game.id}
+                      mode="min"
+                      currentPlayerId={currentPlayerId}
+                      isHost={isHost}
+                      actionsEnabled
+                    />
+                  </section>
+                </div>
               </div>
             </details>
           ) : null}
@@ -761,8 +781,10 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   </span>
                   <span className="mt-0.5 block text-xs text-gray-500">
                     {snapshot.game.status === "ended"
-                      ? `Host controls and settlement record · ${settledMinPaymentCount}/${minTransfers.length} marked sent`
-                      : "Payments, player results, and bank view"}
+                      ? `Host controls and settlement record · ${settledPaymentCount}/${paymentCount} marked sent`
+                      : lockedEarlyCashOuts.length
+                        ? "Payments, early cash-outs, player results, and bank view"
+                        : "Payments, player results, and bank view"}
                   </span>
                 </span>
                 <span aria-hidden className="text-lg text-gray-400">{fullPlanOpen ? "−" : "＋"}</span>
@@ -817,6 +839,14 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               ) : null}
 
               <FundingNotes snapshot={snapshot} />
+
+              {lockedEarlyCashOuts.length ? (
+                <EarlyCashOuts
+                  snapshot={snapshot}
+                  currentPlayerId={currentPlayerId ?? ""}
+                  isHost={isHost}
+                />
+              ) : null}
 
               {displayedTab === "min" ? (
             <div
