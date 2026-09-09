@@ -51,7 +51,26 @@ test.describe("public local-mode experience", () => {
     await buyIn.fill("20.50");
     await expect(buyIn).toHaveValue("20.50");
     await expect(page.getByText(/your opening buy-in of \$20\.50 will be recorded/i)).toBeVisible();
-    await page.getByRole("checkbox", { name: "Add my opening buy-in" }).uncheck();
+    const openingBuyIn = page.getByRole("checkbox", { name: "Add my opening buy-in" });
+    const createGame = page.getByRole("button", { name: "Create game" });
+    const [checkboxColor, buttonColor] = await openingBuyIn.evaluate((checkbox, button) => {
+      const renderedRgb = (color: string) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1;
+        canvas.height = 1;
+        const context = canvas.getContext("2d");
+        if (!context) return [];
+        context.fillStyle = color;
+        context.fillRect(0, 0, 1, 1);
+        return Array.from(context.getImageData(0, 0, 1, 1).data);
+      };
+      return [
+        renderedRgb(getComputedStyle(checkbox).accentColor),
+        renderedRgb(getComputedStyle(button as HTMLElement).backgroundColor),
+      ];
+    }, await createGame.elementHandle());
+    expect(checkboxColor).toEqual(buttonColor);
+    await openingBuyIn.uncheck();
     await expect(page.getByText("Leave this off if you’re just hosting. You can buy in later.")).toBeVisible();
   });
 

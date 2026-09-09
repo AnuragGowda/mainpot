@@ -228,7 +228,7 @@ export default function CreateGamePage() {
                   checked={hostIsPlaying}
                   onChange={(event) => setHostIsPlaying(event.target.checked)}
                   aria-describedby="host-playing-help"
-                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-gray-950 focus:ring-gray-950"
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-gray-950 focus:ring-gray-950"
                 />
                 Add my opening buy-in
               </label>
@@ -240,7 +240,7 @@ export default function CreateGamePage() {
             </div>
             {canSaveTemplate ? <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-800">
-                <input type="checkbox" checked={saveTemplate} onChange={(event) => setSaveTemplate(event.target.checked)} className="h-4 w-4 rounded border-gray-300" />
+                <input type="checkbox" checked={saveTemplate} onChange={(event) => setSaveTemplate(event.target.checked)} className="h-4 w-4 rounded border-gray-300 accent-gray-950 focus:ring-gray-950" />
                 Save these details as a recurring game
               </label>
               {saveTemplate ? (
