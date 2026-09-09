@@ -1,7 +1,10 @@
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
-const CANARY_TIMEOUT_MS = 1_500;
+// Production probes regularly complete around two seconds. Keep each Realtime
+// phase below the uptime runner's 10-second request budget without treating
+// normal subscription or change-delivery latency as a dependency failure.
+const CANARY_TIMEOUT_MS = 3_000;
 
 function configured(): boolean {
   const key = process.env.MAINPOT_CANARY_KEY;
