@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isSupabaseConfigured } from "./supabase";
 import { getBrowserSupabase } from "./supabase-browser";
+import { resolveCurrentPlayer } from "./player-identity";
 import { validateCurrencyAmount } from "./currency-input";
 import { ensureCurrentUser } from "./auth-client";
 import type {
@@ -1176,13 +1177,13 @@ async function currentSupabasePlayerId(
   client: SupabaseClient,
   gameId: string
 ): Promise<string | null> {
-  const { data } = await client
+  const user = await ensureCurrentUser();
+  const { data, error } = await client
     .from("players")
-    .select("id")
-    .eq("game_id", gameId)
-    .eq("session_id", getSessionId())
-    .maybeSingle();
-  return (data as { id?: string } | null)?.id ?? null;
+    .select("id,user_id,session_id")
+    .eq("game_id", gameId);
+  if (error) throw error;
+  return resolveCurrentPlayer(data ?? [], getSessionId(), user?.id ?? null)?.id ?? null;
 }
 
 async function requireSupabaseGameStatus(

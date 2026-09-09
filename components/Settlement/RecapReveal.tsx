@@ -25,7 +25,7 @@ const serverSnapshot = () => false;
 function CardBack() {
   return <div className={styles.back} aria-hidden="true">
     <div className={styles.border}>
-      <span className={styles.eyebrow}>THE FELT SOCIETY</span>
+      <span className={styles.eyebrow}>MAINPOT · YOUR GAME NIGHT</span>
       <div className={styles.medallion}>
         <svg viewBox="0 0 100 120" width="68" height="82" fill="currentColor"><path d="M50 5C40 27 8 39 8 66c0 24 29 34 42 12C48 96 40 103 31 110h38c-9-7-17-14-19-32 13 22 42 12 42-12C92 39 60 27 50 5Z"/></svg>
       </div>

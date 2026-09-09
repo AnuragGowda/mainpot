@@ -1,3 +1,4 @@
+import { runSettlementUxFlow } from "./settlement-ux-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
 import { expect, test } from "@playwright/test";
 
@@ -5,6 +6,11 @@ test.describe("public local-mode experience", () => {
   // Keep network mocks deterministic in WebKit; a registered service worker
   // can otherwise answer the request before Playwright's route handler.
   test.use({ serviceWorkers: "block" });
+
+  test("reviews payments before locking and keeps completion in sync", async ({ page }) => {
+    test.slow();
+    await runSettlementUxFlow(page);
+  });
 
   test("runs a whole table with host-added players", async ({ page }) => {
     test.slow();

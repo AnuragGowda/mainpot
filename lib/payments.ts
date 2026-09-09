@@ -10,6 +10,28 @@ export interface SettlementPaymentStatus {
   settled: boolean;
 }
 
+const paymentStatusEvent = "mainpot:payment-status-changed";
+
+/** Reconcile every mounted view after a successful write, including local mode. */
+export function subscribeToPaymentChanges(gameId: string, refresh: () => void): () => void {
+  const onPaymentChange = (event: Event) => {
+    if ((event as CustomEvent<string>).detail === gameId) refresh();
+  };
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === localKey(gameId) || event.key === null) refresh();
+  };
+  window.addEventListener(paymentStatusEvent, onPaymentChange);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(paymentStatusEvent, onPaymentChange);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+function notifyPaymentChange(gameId: string): void {
+  window.dispatchEvent(new CustomEvent(paymentStatusEvent, { detail: gameId }));
+}
+
 function paymentKey(mode: SettlementMode, transfer: Transfer): string {
   return [mode, transfer.fromPlayerId, transfer.toPlayerId, transfer.amount.toFixed(2)].join(":");
 }
@@ -51,6 +73,7 @@ export async function setSettlementPaymentStatus(
     const next = statuses.filter((item) => item.key !== key);
     next.push({ key, settled });
     window.localStorage.setItem(localKey(gameId), JSON.stringify(next));
+    notifyPaymentChange(gameId);
     return;
   }
   if (!transfer.fromPlayerId || !transfer.toPlayerId) {
@@ -66,6 +89,7 @@ export async function setSettlementPaymentStatus(
     input_session_id: getSessionId(),
   });
   if (error) throw new Error(`Could not update payment status: ${error.message}`);
+  notifyPaymentChange(gameId);
 }
 
 export async function setEarlyCashOutPaymentStatus(
@@ -80,6 +104,7 @@ export async function setEarlyCashOutPaymentStatus(
     const next = statuses.filter((item) => item.key !== key);
     next.push({ key, settled });
     window.localStorage.setItem(localKey(earlyCashOut.game_id), JSON.stringify(next));
+    notifyPaymentChange(earlyCashOut.game_id);
     return;
   }
   const { error } = await supabase.rpc("set_early_cash_out_payment_status", {
@@ -93,6 +118,7 @@ export async function setEarlyCashOutPaymentStatus(
     }
     throw new Error(`Could not update payment status: ${error.message}`);
   }
+  notifyPaymentChange(earlyCashOut.game_id);
 }
 
 export function settlementPaymentKey(mode: SettlementMode, transfer: Transfer): string {

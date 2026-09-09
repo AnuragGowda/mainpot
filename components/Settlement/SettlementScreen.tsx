@@ -15,8 +15,9 @@ import EarlyCashOuts from "@/components/GameRoom/EarlyCashOuts";
 import { addCashOut, markEnded, saveDiscrepancyAllocation, submitGameFeedback } from "@/lib/data";
 import { formatCurrency, round2 } from "@/lib/format";
 import { getPlayerCashOut, playerInvested, totalPot } from "@/lib/game";
-import { getSessionId } from "@/lib/session";
-import { getSettlementPaymentStatuses, settlementPaymentKey } from "@/lib/payments";
+import { usePlayerIdentity } from "@/lib/use-player-identity";
+import { resolveCurrentPlayer } from "@/lib/player-identity";
+import { getSettlementPaymentStatuses, settlementPaymentKey, subscribeToPaymentChanges } from "@/lib/payments";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import {
   applyFundingAdjustments,
@@ -73,12 +74,12 @@ function tabClass(selected: boolean): string {
 /**
  * Settlement flow for non-active games: cash-out reconciliation (entry mode)
  * and transfer planning with min-transfers / bank tabs (results mode).
- * Self-contained — the current player is derived from the browser session id.
+ * Self-contained — the current player is derived from the account and browser session.
  */
 export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const { toast } = useToast();
 
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const { sessionId, userId } = usePlayerIdentity();
   const [mode, setMode] = useState<SettlementMode>(() =>
     snapshot.game.status === "ended" ? "results" : "entry"
   );
@@ -113,10 +114,6 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const fullPlanRef = useRef<HTMLDetailsElement>(null);
   const previousStageRef = useRef<{ mode: SettlementMode; status: GameStatus } | null>(null);
   const previousPlanContextRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    setSessionId(getSessionId());
-  }, []);
 
   useEffect(() => {
     setFeedbackDismissed(window.sessionStorage.getItem(feedbackDismissalKey(snapshot.game.id)) === "true");
@@ -177,9 +174,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const cashOutCount = new Set(snapshot.cashOuts.map((cashOut) => cashOut.player_id)).size;
   const allCashOutsEntered = cashOutCount >= players.length;
 
-  const currentPlayer = sessionId
-    ? (players.find((player) => player.session_id === sessionId) ?? null)
-    : null;
+  const currentPlayer = resolveCurrentPlayer(players, sessionId, userId);
   const currentPlayerId = currentPlayer?.id ?? null;
   const isHost = currentPlayer?.is_host === true;
 
@@ -293,13 +288,18 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
       return;
     }
     let cancelled = false;
-    const refreshSettlementProgress = () => void getSettlementPaymentStatuses(snapshot.game.id)
-      .then((statuses) => {
-        if (!cancelled) {
-          setSettledMinPaymentKeys(new Set(statuses.filter((item) => item.settled).map((item) => item.key)));
-        }
-      })
-      .catch(() => undefined);
+    let latestRead = 0;
+    const refreshSettlementProgress = () => {
+      const read = ++latestRead;
+      void getSettlementPaymentStatuses(snapshot.game.id)
+        .then((statuses) => {
+          if (!cancelled && read === latestRead) {
+            setSettledMinPaymentKeys(new Set(statuses.filter((item) => item.settled).map((item) => item.key)));
+          }
+        })
+        .catch(() => undefined);
+    };
+    const unsubscribe = subscribeToPaymentChanges(snapshot.game.id, refreshSettlementProgress);
     refreshSettlementProgress();
     const supabase = getBrowserSupabase();
     const channel = supabase
@@ -312,6 +312,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
       });
     return () => {
       cancelled = true;
+      unsubscribe();
       if (channel && supabase) void supabase.removeChannel(channel);
     };
   }, [snapshot.game.id, snapshot.game.status]);
@@ -617,6 +618,22 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             Settlement results and payment plan
           </h2>
           {isHost && snapshot.game.status === "settling" ? (
+            <section aria-labelledby="proposed-payments-heading" className="space-y-3">
+              <div>
+                <h2 id="proposed-payments-heading" className="text-lg font-semibold text-gray-950">Review the payments</h2>
+                <p className="mt-1 text-sm leading-6 text-gray-600">Check who pays whom before locking the settlement. No money moves in Mainpot.</p>
+              </div>
+              <TransferList
+                transfers={minTransfers}
+                gameId={snapshot.game.id}
+                mode="min"
+                currentPlayerId={currentPlayerId}
+                isHost
+                actionsEnabled={false}
+              />
+            </section>
+          ) : null}
+          {isHost && snapshot.game.status === "settling" ? (
             <section aria-labelledby="finalization-heading" className="rounded-xl border border-gray-300 bg-gray-50 p-4 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5">
               <div>
                 <h2 id="finalization-heading" className="text-lg font-semibold text-gray-950">Ready to settle?</h2>
@@ -674,6 +691,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               currentPlayerId={currentPlayerId}
               beforeDiscrepancyNet={currentPlayerNetBeforeDiscrepancy}
               finalNet={currentPlayerFinalNet}
+              settledPaymentKeys={settledMinPaymentKeys}
             />
           ) : null}
 

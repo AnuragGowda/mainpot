@@ -1,9 +1,15 @@
 import { runHostPlayerFlow } from "./host-player-flow";
+import { runSettlementUxFlow } from "./settlement-ux-flow";
 import { expect, test } from "@playwright/test";
 
 // Local guest creation is deliberately rate-limited, so these database-backed
 // scenarios run one at a time while each scenario still uses separate users.
 test.describe.configure({ mode: "serial" });
+
+test("reviews payments before locking and keeps completion in sync", async ({ page }) => {
+  test.slow();
+  await runSettlementUxFlow(page);
+});
 
 async function createGame(host: import("@playwright/test").Page, name: string) {
   await host.goto("/create");
@@ -132,7 +138,7 @@ test("locks an early cash-out against the host and carries it out of final settl
     await expect(guestEarlyCashOuts).toContainText("Casey → Jordan");
     await expect(guestEarlyCashOuts).toContainText("$10.00");
     await guestEarlyCashOuts.getByTitle("Mark sent").click();
-    await expect(guest.getByText("Payment marked paid", { exact: true })).toBeVisible();
+    await expect(guest.getByText("Payment marked sent", { exact: true })).toBeVisible();
 
     await host.getByRole("button", { name: "End game" }).click();
     await host.getByRole("button", { name: "Start cash-outs" }).click();
@@ -434,10 +440,10 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
 
     await host.getByRole("button", { name: "Lock settlement" }).click();
     await host.getByRole("alertdialog").getByRole("button", { name: "Lock settlement" }).click();
-    const hostSettlement = host.getByRole("region", { name: "You're up $10.00." });
+    const hostSettlement = host.getByRole("region", { name: "$10.00 coming to you." });
     await expect(hostSettlement).toBeVisible();
     await expect(hostSettlement.getByText("Payments coming to you", { exact: true })).toBeVisible();
-    await expect(hostSettlement.getByRole("listitem")).toContainText("Jordan → Casey");
+    await expect(hostSettlement.getByRole("listitem")).toContainText("From Jordan");
     const guestSettlement = guest.getByRole("region", { name: "You owe $10.00." });
     await expect(guestSettlement).toBeVisible();
     await expect(guestSettlement.getByRole("listitem")).toContainText("Casey");
@@ -457,7 +463,9 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
     ]);
     expect(paymentWrite.ok()).toBe(true);
     await expect(markSent).toBeChecked();
-    await expect(guest.getByText("Payment marked paid", { exact: true })).toBeVisible();
+    await expect(guest.getByText("Payment marked sent", { exact: true })).toBeVisible();
+    await expect(guest.getByRole("heading", { name: "All your payments are marked sent." })).toBeVisible();
+    await expect(host.getByRole("heading", { name: "All payments to you are marked sent." })).toBeVisible();
     await expect(guestLedger.locator(":scope > summary")).toContainText("1 of 1 payment marked sent", { timeout: 15_000 });
     await expect(host.locator('[data-testid="payment-ledger"] > summary')).toContainText("1 of 1 payment marked sent", { timeout: 15_000 });
     await expect(hostPlan).toContainText("1/1 marked sent", { timeout: 15_000 });

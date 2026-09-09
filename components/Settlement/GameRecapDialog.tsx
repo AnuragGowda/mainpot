@@ -148,6 +148,8 @@ function GameRecapEditor({
     setPrivacy(next);
   }
 
+  const privacySummary = `Names hidden · ${privacy.showDollarAmounts ? "Amounts shown" : "Amounts hidden"} · ${privacy.showLosses && privacy.showDollarAmounts ? "Losses shown" : "Losses hidden"}`;
+
   const setBoolean = (key: "showResult" | "showPlayerCount" | "showDuration" | "showRebuys", value: boolean) => {
     updatePrivacy({ ...privacy, [key]: value });
   };
@@ -237,6 +239,7 @@ function GameRecapEditor({
             </fieldset>
 
             <div className="hidden border-t border-gray-200 pt-5 lg:block">
+              <p aria-live="polite" className="mb-3 text-xs leading-5 text-gray-600">{privacySummary}</p>
               <Button fullWidth size="lg" loading={exporting} onClick={handleShare} leftIcon={<Share2 aria-hidden size={17} />}>Share game card</Button>
             </div>
           </aside>
@@ -244,6 +247,7 @@ function GameRecapEditor({
 
         <div className="shrink-0 border-t border-gray-200 bg-white/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
           <div className="mx-auto max-w-lg">
+            <p aria-live="polite" className="mb-2 text-center text-xs leading-5 text-gray-600">{privacySummary}</p>
             <Button fullWidth size="lg" loading={exporting} onClick={handleShare} leftIcon={<Share2 aria-hidden size={17} />}>
               Share game card
             </Button>

@@ -17,7 +17,7 @@ import {
 } from "@/lib/payment-links";
 import type { PlayerPaymentHandles } from "@/lib/payment-links";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
-import { getSettlementPaymentStatuses, setEarlyCashOutPaymentStatus, setSettlementPaymentStatus, settlementPaymentKey } from "@/lib/payments";
+import { getSettlementPaymentStatuses, setEarlyCashOutPaymentStatus, setSettlementPaymentStatus, settlementPaymentKey, subscribeToPaymentChanges } from "@/lib/payments";
 import type { SettlementMode } from "@/lib/payments";
 import { isPlayerInTransfer } from "@/lib/settlement";
 import type { Transfer } from "@/lib/settlement";
@@ -32,6 +32,8 @@ export interface TransferListProps {
   actionsEnabled?: boolean;
   /** Compact sender-facing wording for a player's own outgoing payments. */
   personalOutgoing?: boolean;
+  /** Identify the payer without repeating the current recipient. */
+  personalIncoming?: boolean;
   /** Required for the active-game payment created by a locked early exit. */
   earlyCashOut?: EarlyCashOut;
 }
@@ -121,7 +123,7 @@ function PaymentDetailsDialog({ details, onClose }: { details: PaymentDetails; o
         </div>
         <div className="mt-5 grid gap-2">
           {details.venmoUrl ? (
-            <a href={details.venmoUrl} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#008CFF] px-4 text-sm font-semibold text-white transition hover:bg-[#007be0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
+            <a href={details.venmoUrl} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#006FCC] px-4 text-sm font-semibold text-white transition hover:bg-[#005DAD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
               Pay with Venmo <ExternalLink aria-hidden size={16} />
             </a>
           ) : null}
@@ -149,6 +151,7 @@ export default function TransferList({
   isHost = false,
   actionsEnabled = true,
   personalOutgoing = false,
+  personalIncoming = false,
   earlyCashOut,
 }: TransferListProps) {
   const { toast } = useToast();
@@ -164,16 +167,19 @@ export default function TransferList({
       return;
     }
     let cancelled = false;
+    let latestRead = 0;
     const refresh = () => {
+      const read = ++latestRead;
       void getSettlementPaymentStatuses(gameId)
         .then((statuses) => {
-          if (!cancelled) {
+          if (!cancelled && read === latestRead) {
             const next = new Set(statuses.filter((item) => item.settled).map((item) => item.key));
             setSettledKeys(next);
           }
         })
         .catch(() => undefined);
     };
+    const unsubscribe = subscribeToPaymentChanges(gameId, refresh);
     refresh();
     const supabase = getBrowserSupabase();
     const channel = supabase
@@ -187,6 +193,7 @@ export default function TransferList({
       });
     return () => {
       cancelled = true;
+      unsubscribe();
       if (channel && supabase) void supabase.removeChannel(channel);
     };
   }, [actionsEnabled, channelId, gameId, mode]);
@@ -254,7 +261,7 @@ export default function TransferList({
                             if (settled) next.delete(key); else next.add(key);
                             return next;
                           });
-                          toast(settled ? "Payment reopened" : "Payment marked paid", "success");
+                          toast(settled ? "Payment reopened" : "Payment marked sent", "success");
                         } catch (error) {
                           toast(error instanceof Error ? error.message : "Could not update payment.", "error");
                         } finally {
@@ -267,20 +274,20 @@ export default function TransferList({
                     <Check aria-hidden size={14} strokeWidth={3} />
                   </span>
                 </label>
-              ) : (
+              ) : actionsEnabled ? (
                 <span aria-hidden className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border ${settled ? "border-gray-950 bg-gray-950 text-white" : "border-gray-300 bg-white"}`}>
                   {settled ? <Check size={14} strokeWidth={3} /> : null}
                 </span>
-              )}
+              ) : null}
               {canUsePaymentShortcut && (venmoUrl || zelleText) ? (
-                <button type="button" onClick={() => setPaymentDetails({ recipient: transfer.to, amount: transfer.amount, venmoUrl, zelleText })} className="flex min-w-0 flex-1 items-center justify-between gap-4 rounded-lg px-1 py-1 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
-                  <span className={`truncate font-medium ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{personalOutgoing ? transfer.to : `${transfer.from} → ${transfer.to}`}</span>
-                  <span className={`shrink-0 font-semibold tabular-nums ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
+                <button type="button" aria-label={`Payment details for ${transfer.to}, ${formatCurrency(transfer.amount)}`} onClick={() => setPaymentDetails({ recipient: transfer.to, amount: transfer.amount, venmoUrl, zelleText })} className="flex min-w-0 flex-1 items-center justify-between gap-3 rounded-lg px-1 py-1 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
+                  <span className="min-w-0"><span className={`block break-words font-medium ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{personalOutgoing ? transfer.to : `${transfer.from} → ${transfer.to}`}</span><span className="mt-0.5 block text-xs font-medium text-gray-600 underline underline-offset-2">Payment details</span></span>
+                  <span className={`shrink-0 font-semibold tabular-nums ${personalIncoming ? "self-end" : ""} ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
                 </button>
               ) : (
-                <div className="flex min-w-0 flex-1 items-center justify-between gap-4 px-1 py-1">
-                  <span className={`truncate font-medium ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{personalOutgoing ? transfer.to : <><PartyName name={transfer.from} /> <span className="text-gray-500">→</span> <PartyName name={transfer.to} /></>}</span>
-                  <span className={`shrink-0 font-semibold tabular-nums ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
+                <div className={personalIncoming ? "flex min-w-0 flex-1 flex-col gap-1 px-1 py-1" : "flex min-w-0 flex-1 items-center justify-between gap-4 px-1 py-1"}>
+                  <span className={`min-w-0 break-words font-medium ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{personalIncoming ? `From ${transfer.from}` : personalOutgoing ? transfer.to : <><PartyName name={transfer.from} /> <span className="text-gray-500">→</span> <PartyName name={transfer.to} /></>}</span>
+                  <span className={`shrink-0 font-semibold tabular-nums ${personalIncoming ? "self-end" : ""} ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
                 </div>
               )}
             </li>

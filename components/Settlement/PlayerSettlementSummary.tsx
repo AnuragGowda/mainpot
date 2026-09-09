@@ -6,6 +6,7 @@ import { formatCurrency, formatSignedNet, round2 } from "@/lib/format";
 import { getPlayerTransfers } from "@/lib/settlement";
 import type { Transfer } from "@/lib/settlement";
 import type { SettlementMode } from "@/lib/payments";
+import { settlementPaymentKey } from "@/lib/payments";
 import TransferList from "./TransferList";
 
 export interface PlayerSettlementSummaryProps {
@@ -15,6 +16,7 @@ export interface PlayerSettlementSummaryProps {
   currentPlayerId: string;
   beforeDiscrepancyNet?: number;
   finalNet?: number;
+  settledPaymentKeys: ReadonlySet<string>;
 }
 
 function totalAmount(transfers: Transfer[]): number {
@@ -29,13 +31,17 @@ export default function PlayerSettlementSummary({
   currentPlayerId,
   beforeDiscrepancyNet,
   finalNet,
+  settledPaymentKeys,
 }: PlayerSettlementSummaryProps) {
   const { outgoing, incoming } = getPlayerTransfers(transfers, currentPlayerId);
-  const outgoingTotal = totalAmount(outgoing);
-  const incomingTotal = totalAmount(incoming);
+  const outstandingOutgoing = outgoing.filter((transfer) => !settledPaymentKeys.has(settlementPaymentKey(mode, transfer)));
+  const outstandingIncoming = incoming.filter((transfer) => !settledPaymentKeys.has(settlementPaymentKey(mode, transfer)));
+  const outgoingTotal = totalAmount(outstandingOutgoing);
+  const incomingTotal = totalAmount(outstandingIncoming);
 
   const owesPayment = outgoing.length > 0;
-  const isUp = !owesPayment && incomingTotal > 0;
+  const isUp = !owesPayment && incoming.length > 0;
+  const allMarkedSent = (owesPayment || isUp) && outstandingOutgoing.length === 0 && outstandingIncoming.length === 0;
   const resultBeforeDiscrepancy = beforeDiscrepancyNet ?? finalNet ?? 0;
   const finalResult = finalNet ?? resultBeforeDiscrepancy;
   const discrepancyAdjustment = round2(finalResult - resultBeforeDiscrepancy);
@@ -45,36 +51,53 @@ export default function PlayerSettlementSummary({
     <section aria-labelledby="your-settlement-heading" className="space-y-4">
       <Card
         padding="sm"
-        className={owesPayment ? "border-gray-300 bg-gray-50/60" : isUp ? "border-emerald-200 bg-emerald-50/50" : "border-gray-300"}
+        className="border-gray-300 bg-gray-50/60"
       >
-        {owesPayment ? (
-          <>
-            <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
-              You owe {formatCurrency(outgoingTotal)}.
-            </h2>
-            <p className="mt-0.5 text-sm leading-5 text-gray-600">
-              Send each payment below, then mark it sent so the table can keep track.
-            </p>
-          </>
-        ) : isUp ? (
-          <div className="flex items-start gap-2.5">
-            <Trophy aria-hidden className="h-5 w-5 shrink-0 text-gray-950" />
-            <div>
+        <div aria-live="polite" aria-atomic="true">
+          {allMarkedSent ? (
+            <div className="flex items-start gap-2.5">
+              <CheckCircle2 aria-hidden className="h-5 w-5 shrink-0 text-gray-950" />
+              <div>
+                <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
+                  {owesPayment ? "All your payments are marked sent." : "All payments to you are marked sent."}
+                </h2>
+                <p className="mt-0.5 text-sm leading-5 text-gray-600">
+                  {owesPayment ? "Nothing left to mark. You can reopen a payment below." : "Check your payment app or cash to confirm receipt."}
+                </p>
+              </div>
+            </div>
+          ) : owesPayment ? (
+            <>
               <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
-                You&apos;re up {formatCurrency(incomingTotal)}.
+                You owe {formatCurrency(outgoingTotal)}.
               </h2>
-              <p className="mt-0.5 text-sm leading-5 text-gray-600">See exactly who is paying you below.</p>
+              <p className="mt-0.5 text-sm leading-5 text-gray-600">
+                Send each payment below, then mark it sent so the table can keep track.
+              </p>
+            </>
+          ) : isUp ? (
+            <div className="flex items-start gap-2.5">
+              <Trophy aria-hidden className="h-5 w-5 shrink-0 text-gray-950" />
+              <div>
+                <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
+                  {formatCurrency(incomingTotal)} coming to you.
+                </h2>
+                <p className="mt-0.5 text-sm leading-5 text-gray-600">See exactly who is paying you below.</p>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 aria-hidden className="h-5 w-5 shrink-0 text-emerald-700" />
-            <div>
-              <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">You&apos;re even.</h2>
-              <p className="mt-0.5 text-sm leading-5 text-gray-600">No payment needed.</p>
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 aria-hidden className="h-5 w-5 shrink-0 text-gray-950" />
+              <div>
+                <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">You&apos;re even.</h2>
+                <p className="mt-0.5 text-sm leading-5 text-gray-600">No payment needed.</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+        {typeof finalNet === "number" ? (
+          <p className="mt-2 text-sm text-gray-600">Your net result: <span className="font-semibold tabular-nums text-gray-950">{formatSignedNet(finalNet)}</span></p>
+        ) : null}
         {showDiscrepancyAdjustment ? (
           <p className="mt-2 border-t border-gray-200 pt-2 text-sm text-gray-500">
             <span className="font-semibold tabular-nums text-gray-950">{formatSignedNet(discrepancyAdjustment)}</span>
@@ -93,8 +116,9 @@ export default function PlayerSettlementSummary({
           />
         </div> : null}
         {isUp ? <div className="mt-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">Payments coming to you</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">{allMarkedSent ? "Payment record" : "Payments coming to you"}</p>
           <TransferList
+            personalIncoming
             transfers={incoming}
             gameId={gameId}
             mode={mode}

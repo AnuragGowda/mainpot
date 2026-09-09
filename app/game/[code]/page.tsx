@@ -39,9 +39,11 @@ import {
   usingLocalStorage,
   verifyBuyIn,
 } from "@/lib/data";
+import { usePlayerIdentity } from "@/lib/use-player-identity";
+import { resolveCurrentPlayer } from "@/lib/player-identity";
 import { pendingPot, verifiedPot } from "@/lib/game";
 import { navigateToFreshAppPage } from "@/lib/navigation";
-import { getSessionId, setActiveGame } from "@/lib/session";
+import { setActiveGame } from "@/lib/session";
 import type { GameSnapshot, GameStatus } from "@/lib/types";
 import { classifyProductOpsFailure, trackProductOpsEvent } from "@/lib/product-ops";
 
@@ -156,7 +158,7 @@ export default function GameRoomPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] =
     useState<GameSyncStatus>("connecting");
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const { sessionId, userId } = usePlayerIdentity();
   const [ending, setEnding] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [ledgerAction, setLedgerAction] = useState<"buy-in" | "rebuy" | null>(
@@ -174,10 +176,6 @@ export default function GameRoomPage() {
   } | null>(null);
   const currentPlayerRef = useRef(false);
   const isHostRef = useRef(false);
-
-  useEffect(() => {
-    setSessionId(getSessionId());
-  }, []);
 
   useEffect(() => {
     const handleOffline = () => setSyncStatus("offline");
@@ -292,11 +290,9 @@ export default function GameRoomPage() {
     };
   }, [code, sessionId, toast]);
 
-  const currentPlayer =
-    sessionId && snapshot
-      ? (snapshot.players.find((player) => player.session_id === sessionId) ??
-        null)
-      : null;
+  const currentPlayer = snapshot
+    ? resolveCurrentPlayer(snapshot.players, sessionId, userId)
+    : null;
   const isHost = currentPlayer?.is_host === true;
   const leftGame = currentPlayer?.left_at != null;
   const currentEarlyCashOut = currentPlayer
