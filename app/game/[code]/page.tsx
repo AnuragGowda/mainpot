@@ -641,6 +641,7 @@ export default function GameRoomPage() {
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-3xl px-4 pb-32 focus:outline-none md:pb-24">
       <SyncStatusNotice status={syncStatus} onRetry={handleRetrySync} />
+      {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
       <GameHeader
         game={snapshot.game}
         verifiedPot={verifiedPot(snapshot)}
@@ -694,7 +695,6 @@ export default function GameRoomPage() {
           onRemoveBuyIn={handleRemoveBuyIn}
           onRemovePlayer={handleRemovePlayer}
         />
-        {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
       </div>
 
       {currentPlayer && !leftGame && currentEarlyCashOut?.status !== "requested" ? (

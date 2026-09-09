@@ -111,7 +111,12 @@ test.describe("public local-mode experience", () => {
     await page.getByRole("button", { name: "Create game" }).click();
 
     await expect(page.getByRole("heading", { name: "Keep Mainpot one tap away." })).toBeVisible();
-    await expect(page.getByText("How did you hear about Mainpot?")).toBeVisible();
+    const acquisitionPrompt = page.getByRole("region", { name: "How did you hear about Mainpot?" });
+    const gameHeading = page.getByRole("heading", { name: "Install prompt game" });
+    await expect(acquisitionPrompt).toBeVisible();
+    expect(await acquisitionPrompt.evaluate((prompt, heading) => Boolean(
+      prompt.compareDocumentPosition(heading as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ), await gameHeading.elementHandle())).toBe(true);
     await page.getByRole("button", { name: "Show me how" }).click();
     await expect(page.getByText("On iPhone or iPad", { exact: true })).toBeVisible();
     await expect(page.getByText(/choose Add to Home Screen/i)).toBeVisible();
@@ -410,10 +415,10 @@ test.describe("public local-mode experience", () => {
 
     const invite = page.getByRole("button", { name: "Invite players" });
     await expect(invite).toBeInViewport();
-    const acquisition = page.getByText("How did you hear about Mainpot?");
-    expect(await invite.evaluate((button, survey) => Boolean(
-      button.compareDocumentPosition(survey as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ), await acquisition.elementHandle())).toBe(true);
+    const acquisition = page.getByRole("region", { name: "How did you hear about Mainpot?" });
+    expect(await acquisition.evaluate((survey, button) => Boolean(
+      survey.compareDocumentPosition(button as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ), await invite.elementHandle())).toBe(true);
     await expect(page.getByRole("button", { name: "Personal invite" })).toHaveCount(0);
 
     await invite.click();
