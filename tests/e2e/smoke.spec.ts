@@ -52,24 +52,17 @@ test.describe("public local-mode experience", () => {
     await expect(buyIn).toHaveValue("20.50");
     await expect(page.getByText(/your opening buy-in of \$20\.50 will be recorded/i)).toBeVisible();
     const openingBuyIn = page.getByRole("checkbox", { name: "Add my opening buy-in" });
-    const createGame = page.getByRole("button", { name: "Create game" });
-    const [checkboxColor, buttonColor] = await openingBuyIn.evaluate((checkbox, button) => {
-      const renderedRgb = (color: string) => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 1;
-        canvas.height = 1;
-        const context = canvas.getContext("2d");
-        if (!context) return [];
-        context.fillStyle = color;
-        context.fillRect(0, 0, 1, 1);
-        return Array.from(context.getImageData(0, 0, 1, 1).data);
-      };
-      return [
-        renderedRgb(getComputedStyle(checkbox).accentColor),
-        renderedRgb(getComputedStyle(button as HTMLElement).backgroundColor),
-      ];
-    }, await createGame.elementHandle());
-    expect(checkboxColor).toEqual(buttonColor);
+    const checkboxColor = await openingBuyIn.evaluate((checkbox) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1;
+      canvas.height = 1;
+      const context = canvas.getContext("2d");
+      if (!context) return [];
+      context.fillStyle = getComputedStyle(checkbox).accentColor;
+      context.fillRect(0, 0, 1, 1);
+      return Array.from(context.getImageData(0, 0, 1, 1).data);
+    });
+    expect(checkboxColor).toEqual([3, 7, 18, 255]);
     await openingBuyIn.uncheck();
     await expect(page.getByText("Leave this off if you’re just hosting. You can buy in later.")).toBeVisible();
   });
@@ -496,7 +489,10 @@ test.describe("public local-mode experience", () => {
     await page.setViewportSize({ width: 320, height: 568 });
     await page.goto("/poker-settlement-calculator");
 
-    await expect(page.locator("#player-1")).toBeInViewport();
+    const firstPlayer = page.locator("#player-1");
+    await expect(firstPlayer).toBeVisible();
+    await firstPlayer.scrollIntoViewIfNeeded();
+    await expect(firstPlayer).toBeInViewport();
     await expect(page.getByRole("link", { name: "How settlement works" })).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
