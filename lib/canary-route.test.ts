@@ -53,6 +53,7 @@ describe("Mainpot database and Realtime canary", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.clearAllMocks();
     mocks.change = undefined;
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -76,5 +77,26 @@ describe("Mainpot database and Realtime canary", () => {
     expect(mocks.insert).toHaveBeenCalledWith(expect.objectContaining({ probe_id: expect.any(String) }));
     expect(mocks.eq).toHaveBeenCalledWith("probe_id", expect.any(String));
     expect(mocks.removeChannel).toHaveBeenCalled();
+  });
+
+  it("allows Realtime change delivery beyond the former 1.5 second budget", async () => {
+    vi.useFakeTimers();
+    mocks.insert.mockImplementationOnce(async (row) => {
+      setTimeout(() => {
+        mocks.change?.({ new: { probe_id: row.probe_id } });
+      }, 1_750);
+      return { error: null };
+    });
+
+    const responsePromise = POST(request());
+    await vi.advanceTimersByTimeAsync(1_750);
+    const response = await responsePromise;
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      status: "ok",
+      database: true,
+      realtime: true,
+    });
   });
 });
