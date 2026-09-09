@@ -1,0 +1,23 @@
+{
+  "invites": [],
+  "profile": {
+    "id": "e179f357-160e-4183-8201-460cb56af01e",
+    "bio": "",
+    "plan": "free",
+    "username": "audit1788909175677",
+    "avatar_url": null,
+    "created_at": "2026-09-08T23:12:54.818465+00:00",
+    "updated_at": "2026-09-08T23:12:54.818465+00:00",
+    "display_name": "UX Casey",
+    "venmo_handle": "ux-test-only",
+    "zelle_handle": "ux-test@example.com",
+    "supporter_until": null
+  },
+  "feedback": [],
+  "templates": [],
+  "exported_at": "2026-09-08T23:12:57.403067+00:00",
+  "friendships": [],
+  "games_hosted": [],
+  "participation": [],
+  "push_subscriptions": []
+}

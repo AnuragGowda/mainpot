@@ -1,0 +1,130 @@
+Skip to content
+Mainpot
+Start game
+FOR HOME POKER CASH GAMES
+Keep the game friendly. Keep the money exact.
+
+Track buy-ins, count the final stacks, and see who owes whom. One record for the whole table.
+
+Start a cash game
+Join a table
+No app or player account
+Saved on this device
+Try the settlement calculator →
+
+FRIDAY NIGHT
+
+The Basement Game
+Live
+
+BANK
+
+$360
+
+BUY-IN
+
+$40
+
+PLAYERS
+
+4
+
+AP
+Alex
+$80
+Verified
+MK
+Morgan
+$120
+Verified
+SR
+Sam
+$80
+Verified
+JT
+Jordan
+$80
+Verified
+
+ENTER CASH-OUTS
+
+4 of 4 entered
+AP
+Alex
+$40
+MK
+Morgan
+$160
+SR
+Sam
+$120
+JT
+Jordan
+$40
+✓
+
+ALL STACKS ENTERED
+
+Bank balanced. Preparing payments.
+
+FINAL SETTLEMENT
+
+Two payments. All chips accounted for.
+
+A
+Alex
+M
+Morgan
+$40
+J
+Jordan
+S
+Sam
+$40
+
+Room code
+
+RIVER7
+
+How a game works.
+01
+Start a table
+
+Set the buy-in and invite everyone with a code or QR link.
+
+02
+Record the buy-ins
+
+Log each buy-in and rebuy. Everyone can follow the totals.
+
+03
+Settle up
+
+Count the final stacks, resolve any difference, and see who owes whom.
+
+Before you deal.
+Do I need to create an account?
+
+No. Start or join as a guest. An optional account keeps your game history and helps you find regular players.
+
+Who can change the ledger?
+What if the bank does not balance?
+Free and open source.
+
+Play here, or run Mainpot on your own server.
+
+Explore self-hosting
+View source
+Ready for your next poker night?
+Start a game
+→
+
+Built for home games.
+
+© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.
+
+Self-host
+Feedback
+Terms
+Privacy
+Open source

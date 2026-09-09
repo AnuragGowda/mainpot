@@ -1,0 +1,164 @@
+Skip to content
+Mainpot
+Start game
+
+OPEN SOURCE · MIT LICENSED
+
+Your game. Your server. Your data.
+
+Mainpot can run privately in one browser, as a complete local stack, or as a shared deployment connected to infrastructure you control.
+
+Self-hosting gives you control over where the application and game records live. It also makes you responsible for security, availability, backups, and upgrades when other people depend on the instance.
+
+View the source
+Technical setup guide
+
+MAINPOT STACK
+
+One application, three deployment models
+
+MIT
+Web application
+Next.js 16 · Node.js 22+
+Shared data
+PostgreSQL · Supabase Realtime
+Identity
+Supabase Auth · anonymous rooms supported
+Payments
+Calculated only · never processed
+Deployment options
+Quick start
+Common questions
+
+CHOOSE A MODEL
+
+Start with the amount of infrastructure you actually need.
+
+All three options use the same Mainpot interface. The difference is where data is stored and whether the game can synchronize across devices.
+
+01
+
+SIMPLEST
+
+Single-browser mode
+
+Run only the web app with no Supabase variables. Games stay in that browser’s local storage, so there is no account system or cross-device sync.
+
+Requires
+Node.js 22+
+Start with
+npm run dev:app
+02
+
+FULLY LOCAL
+
+Local full stack
+
+Run Mainpot with the bundled Supabase development stack for PostgreSQL, authentication, Realtime, and a local email inbox.
+
+Requires
+Node.js 22+ and Docker
+Start with
+npm run dev
+03
+
+SHARED INSTANCE
+
+Your own deployment
+
+Host the Next.js application and connect it to a Supabase project you control for accounts, shared rooms, and live multi-device updates.
+
+Requires
+A Node host and Supabase
+Start with
+Follow the production guide
+
+WHAT RUNS WHERE
+
+A small stack with clear boundaries.
+
+Mainpot’s web layer renders the room and settlement workflow. Supabase provides shared persistence, identity, authorization, and live updates. Payment transfers stay outside the application.
+
+In single-browser mode, local storage replaces the shared data layer. That is useful for a private test or one-device game, but it is not a server deployment.
+
+Players
+
+Phones and browsers
+
+Mainpot
+
+Next.js web application
+
+Data layer
+
+Supabase or local storage
+
+$
+
+Mainpot calculates who should pay whom. The actual payment happens separately using whatever method the table chooses.
+
+LOCAL QUICK START
+
+Clone, install, run.
+
+The default development command starts both the application and its local Supabase services. The first run downloads the required container images and applies the database migrations.
+
+git clone https://github.com/AnuragGowda/mainpot.git
+cd mainpot
+npm install
+npm run dev
+
+On macOS, the project uses OrbStack. Other platforms can use a compatible Docker runtime. No hosted Supabase account is required for the local stack.
+
+PRODUCTION REALITY
+
+Control comes with operational work.
+
+Use a production Supabase project or a hardened PostgreSQL and Supabase deployment.
+
+Link the production Supabase project, run `npx supabase db push`, then verify row-level security policies.
+
+Serve the application over HTTPS and configure authentication redirects for its real domain.
+
+Back up the database, monitor the health endpoint, and plan how updates will be applied.
+
+Keep service-role credentials out of the browser and separate production from development.
+
+Do not expose the bundled local Supabase development stack directly to the public internet.
+
+QUESTIONS
+
+Self-hosting, without the fine print hidden.
+Is Mainpot free and open source?
++
+
+Yes. Mainpot is published under the MIT License. You can inspect, run, modify, and deploy the source subject to that license.
+
+Can Mainpot run without Supabase?
++
+Is Docker required to self-host Mainpot?
++
+Can I run Mainpot on a home server?
++
+Does a self-hosted instance process poker payments?
++
+Is the bundled local stack ready to expose to the internet?
++
+
+READY TO INSPECT THE STACK?
+
+The source and full deployment guide are public.
+
+Review the code, license, database migrations, and production checklist before deciding how you want to run Mainpot.
+
+Open the setup guide
+
+Built for home games.
+
+© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.
+
+Self-host
+Feedback
+Terms
+Privacy
+Open source

@@ -1,0 +1,16 @@
+ app/create/page.tsx                               |  25 ++++-
+ app/game/[code]/page.tsx                          |   4 +-
+ app/globals.css                                   |  10 ++
+ app/page.tsx                                      |  11 +--
+ components/GameRoom/GameNotifications.tsx         | 111 ++--------------------
+ components/Settlement/PlayerSettlementSummary.tsx |  81 ++++++++++------
+ components/Settlement/RecapReveal.tsx             |   2 +-
+ components/Settlement/SettlementScreen.tsx        |  39 ++++++--
+ components/Settlement/TransferList.tsx            |  14 ++-
+ lib/data.ts                                       |  82 ++++++++++------
+ lib/payments.ts                                   |  26 +++++
+ lib/push-client.ts                                |   2 +-
+ scripts/test-database-assurance.mts               |  71 ++++++++++++++
+ tests/e2e/realtime.spec.ts                        |  14 ++-
+ tests/e2e/smoke.spec.ts                           |  59 +++++++++---
+ 15 files changed, 345 insertions(+), 206 deletions(-)

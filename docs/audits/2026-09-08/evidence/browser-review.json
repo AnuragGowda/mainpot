@@ -1,0 +1,2849 @@
+{
+  "results": [
+    {
+      "name": "landing-mobile",
+      "url": "http://127.0.0.1:3100/",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 3036,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Keep the game friendly. Keep the money exact."
+        },
+        {
+          "level": "H2",
+          "text": "The Basement Game"
+        },
+        {
+          "level": "H2",
+          "text": "How a game works."
+        },
+        {
+          "level": "H3",
+          "text": "Start a table"
+        },
+        {
+          "level": "H3",
+          "text": "Record the buy-ins"
+        },
+        {
+          "level": "H3",
+          "text": "Settle up"
+        },
+        {
+          "level": "H2",
+          "text": "Before you deal."
+        },
+        {
+          "level": "H2",
+          "text": "Free and open source."
+        },
+        {
+          "level": "H2",
+          "text": "Ready for your next poker night?"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 24
+        }
+      ]
+    },
+    {
+      "name": "landing-desktop",
+      "url": "http://127.0.0.1:3100/",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 2149,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Keep the game friendly. Keep the money exact."
+        },
+        {
+          "level": "H2",
+          "text": "The Basement Game"
+        },
+        {
+          "level": "H2",
+          "text": "How a game works."
+        },
+        {
+          "level": "H3",
+          "text": "Start a table"
+        },
+        {
+          "level": "H3",
+          "text": "Record the buy-ins"
+        },
+        {
+          "level": "H3",
+          "text": "Settle up"
+        },
+        {
+          "level": "H2",
+          "text": "Before you deal."
+        },
+        {
+          "level": "H2",
+          "text": "Free and open source."
+        },
+        {
+          "level": "H2",
+          "text": "Ready for your next poker night?"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 25
+        }
+      ]
+    },
+    {
+      "name": "create-mobile",
+      "url": "http://127.0.0.1:3100/create",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 852,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Start a game."
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "",
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "create-desktop",
+      "url": "http://127.0.0.1:3100/create",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 900,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Start a game."
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "",
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "join-mobile",
+      "url": "http://127.0.0.1:3100/join",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 852,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Join your table."
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".mt-4"
+              ],
+              "html": "<p class=\"mt-4 text-center text-xs leading-5 text-gray-400\">Codes never use 0, 1, I, or O.</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "name": "join-desktop",
+      "url": "http://127.0.0.1:3100/join",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 900,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Join your table."
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".mt-4"
+              ],
+              "html": "<p class=\"mt-4 text-center text-xs leading-5 text-gray-400\">Codes never use 0, 1, I, or O.</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "name": "calculator-mobile",
+      "url": "http://127.0.0.1:3100/poker-settlement-calculator",
+      "title": "Poker Settlement Calculator for Home Games | Mainpot",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 10374,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Poker settlement calculator"
+        },
+        {
+          "level": "H2",
+          "text": "Who owes whom?"
+        },
+        {
+          "level": "H3",
+          "text": "Settlement worksheet"
+        },
+        {
+          "level": "H2",
+          "text": "Balance the bank before settling."
+        },
+        {
+          "level": "H2",
+          "text": "See the ledger move from input to settlement."
+        },
+        {
+          "level": "H3",
+          "text": "Every chip purchase creates an entry."
+        },
+        {
+          "level": "H2",
+          "text": "A missing add-on creates a $10.00 mismatch."
+        },
+        {
+          "level": "H3",
+          "text": "The calculator should stop here."
+        },
+        {
+          "level": "H3",
+          "text": "Add Casey’s missing $10.00 purchase."
+        },
+        {
+          "level": "H3",
+          "text": "Corrected game ledger"
+        },
+        {
+          "level": "H2",
+          "text": "Calculate each player's net result."
+        },
+        {
+          "level": "H2",
+          "text": "Turn those balances into payments."
+        },
+        {
+          "level": "H2",
+          "text": "Special cases"
+        },
+        {
+          "level": "H3",
+          "text": "A buy-in was advanced"
+        },
+        {
+          "level": "H3",
+          "text": "One cash-out is missing"
+        },
+        {
+          "level": "H3",
+          "text": "The host acts as the bank"
+        },
+        {
+          "level": "H3",
+          "text": "The totals differ by cents"
+        },
+        {
+          "level": "H2",
+          "text": "Poker settlement questions."
+        },
+        {
+          "level": "H2",
+          "text": "Record the game once. Settle from facts."
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".gap-x-5 > div:nth-child(1) > .tracking-\\[0\\.14em\\].text-\\[11px\\].uppercase"
+              ],
+              "html": "<p class=\"text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Money in</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f4f5f2, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(2) > .tracking-\\[0\\.14em\\].text-\\[11px\\].uppercase"
+              ],
+              "html": "<p class=\"text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Final stacks</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f4f5f2, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".justify-between.gap-4.items-center > div > .tracking-\\[0\\.14em\\].text-\\[11px\\].uppercase"
+              ],
+              "html": "<p class=\"text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Payment list</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f4f5f2, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".justify-between.gap-4.items-center > .font-medium.text-xs.text-gray-500"
+              ],
+              "html": "<span class=\"text-xs font-medium text-gray-500\">4 payments</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f4f5f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".first\\:pl-0.last\\:pr-0.sm\\:px-5:nth-child(1) > dt"
+              ],
+              "html": "<dt class=\"text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Stakes</dt>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #6a7282, background color: #111512, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".first\\:pl-0.last\\:pr-0.sm\\:px-5:nth-child(2) > dt"
+              ],
+              "html": "<dt class=\"text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Buy-in</dt>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #6a7282, background color: #111512, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".first\\:pl-0.last\\:pr-0.sm\\:px-5:nth-child(3) > dt"
+              ],
+              "html": "<dt class=\"text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Players</dt>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #6a7282, background color: #111512, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-cash-outs"
+              ],
+              "html": "<button type=\"button\" role=\"tab\" id=\"walkthrough-tab-cash...\" aria-selected=\"false\" aria-controls=\"walkthrough-panel-ca...\" tabindex=\"-1\" class=\"relative min-h-14 px...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-reconcile"
+              ],
+              "html": "<button type=\"button\" role=\"tab\" id=\"walkthrough-tab-reco...\" aria-selected=\"false\" aria-controls=\"walkthrough-panel-re...\" tabindex=\"-1\" class=\"relative min-h-14 px...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-payments"
+              ],
+              "html": "<button type=\"button\" role=\"tab\" id=\"walkthrough-tab-paym...\" aria-selected=\"false\" aria-controls=\"walkthrough-panel-pa...\" tabindex=\"-1\" class=\"relative min-h-14 px...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".tracking-\\[0\\.16em\\].text-\\[11px\\].uppercase"
+              ],
+              "html": "<p class=\"text-[11px] font-semibold uppercase tracking-[0.16em]\">Live ledger</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f3f5f2, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".pt-4 > dt"
+              ],
+              "html": "<dt class=\"text-xs font-medium text-gray-500\">Recorded bank</dt>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f3f5f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".leading-5"
+              ],
+              "html": "<dd class=\"mt-1 text-xs leading-5 text-gray-500\">Seven approved purchases</dd>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f3f5f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".sm\\:p-5.px-2.py-3:nth-child(1) > .text-amber-800\\/70.text-xs"
+              ],
+              "html": "<p class=\"text-xs text-amber-800/70\">Money in</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.63 (foreground color: #b6764a, background color: #fffdf6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".sm\\:p-5.px-2.py-3:nth-child(2) > .text-amber-800\\/70.text-xs"
+              ],
+              "html": "<p class=\"text-xs text-amber-800/70\">Stacks out</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.63 (foreground color: #b6764a, background color: #fffdf6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".sm\\:p-5.px-2.py-3:nth-child(3) > .text-amber-800\\/70.text-xs"
+              ],
+              "html": "<p class=\"text-xs text-amber-800/70\">Difference</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.63 (foreground color: #b6764a, background color: #fffdf6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-gray-100.sm\\:grid-cols-\\[2\\.5rem_1fr_auto\\].p-5:nth-child(1) > .h-10.bg-gray-100.w-10"
+              ],
+              "html": "<span class=\"grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-500\">01</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #6a7282, background color: #f3f4f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-gray-100.sm\\:grid-cols-\\[2\\.5rem_1fr_auto\\].p-5:nth-child(2) > .h-10.bg-gray-100.w-10"
+              ],
+              "html": "<span class=\"grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-500\">02</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #6a7282, background color: #f3f4f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-gray-100.sm\\:grid-cols-\\[2\\.5rem_1fr_auto\\].p-5:nth-child(3) > .h-10.bg-gray-100.w-10"
+              ],
+              "html": "<span class=\"grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-500\">03</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #6a7282, background color: #f3f4f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-gray-100.sm\\:grid-cols-\\[2\\.5rem_1fr_auto\\].p-5:nth-child(4) > .h-10.bg-gray-100.w-10"
+              ],
+              "html": "<span class=\"grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-500\">04</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #6a7282, background color: #f3f4f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "name": "calculator-desktop",
+      "url": "http://127.0.0.1:3100/poker-settlement-calculator",
+      "title": "Poker Settlement Calculator for Home Games | Mainpot",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 7185,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Poker settlement calculator"
+        },
+        {
+          "level": "H2",
+          "text": "Who owes whom?"
+        },
+        {
+          "level": "H3",
+          "text": "Settlement worksheet"
+        },
+        {
+          "level": "H2",
+          "text": "Balance the bank before settling."
+        },
+        {
+          "level": "H2",
+          "text": "See the ledger move from input to settlement."
+        },
+        {
+          "level": "H3",
+          "text": "Every chip purchase creates an entry."
+        },
+        {
+          "level": "H2",
+          "text": "A missing add-on creates a $10.00 mismatch."
+        },
+        {
+          "level": "H3",
+          "text": "The calculator should stop here."
+        },
+        {
+          "level": "H3",
+          "text": "Add Casey’s missing $10.00 purchase."
+        },
+        {
+          "level": "H3",
+          "text": "Corrected game ledger"
+        },
+        {
+          "level": "H2",
+          "text": "Calculate each player's net result."
+        },
+        {
+          "level": "H2",
+          "text": "Turn those balances into payments."
+        },
+        {
+          "level": "H2",
+          "text": "Special cases"
+        },
+        {
+          "level": "H3",
+          "text": "A buy-in was advanced"
+        },
+        {
+          "level": "H3",
+          "text": "One cash-out is missing"
+        },
+        {
+          "level": "H3",
+          "text": "The host acts as the bank"
+        },
+        {
+          "level": "H3",
+          "text": "The totals differ by cents"
+        },
+        {
+          "level": "H2",
+          "text": "Poker settlement questions."
+        },
+        {
+          "level": "H2",
+          "text": "Record the game once. Settle from facts."
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".gap-x-5 > div:nth-child(1) > .tracking-\\[0\\.14em\\].text-\\[11px\\].uppercase"
+              ],
+              "html": "<p class=\"text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Money in</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f4f5f2, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "div:nth-child(2) > .tracking-\\[0\\.14em\\].text-\\[11px\\].uppercase"
+              ],
+              "html": "<p class=\"text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Final stacks</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f4f5f2, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".justify-between.gap-4.items-center > div > .tracking-\\[0\\.14em\\].text-\\[11px\\].uppercase"
+              ],
+              "html": "<p class=\"text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Payment list</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f4f5f2, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".justify-between.gap-4.items-center > .font-medium.text-xs.text-gray-500"
+              ],
+              "html": "<span class=\"text-xs font-medium text-gray-500\">4 payments</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f4f5f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-l-2.border-transparent[href$=\"#overview\"] > .font-mono.text-xs.text-gray-400"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">01</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-l-2.border-transparent[href$=\"#walkthrough\"] > .font-mono.text-xs.text-gray-400"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">02</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-l-2.border-transparent[href$=\"#example\"] > .font-mono.text-xs.text-gray-400"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">03</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-l-2.border-transparent[href$=\"#net-results\"] > .font-mono.text-xs.text-gray-400"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">04</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-l-2.border-transparent[href$=\"#payments\"] > .font-mono.text-xs.text-gray-400"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">05</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-l-2.border-transparent[href$=\"#edge-cases\"] > .font-mono.text-xs.text-gray-400"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">06</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-l-2.border-transparent[href$=\"#faq\"] > .font-mono.text-xs.text-gray-400"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">07</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".first\\:pl-0.last\\:pr-0.sm\\:px-5:nth-child(1) > dt"
+              ],
+              "html": "<dt class=\"text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Stakes</dt>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #6a7282, background color: #111512, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".first\\:pl-0.last\\:pr-0.sm\\:px-5:nth-child(2) > dt"
+              ],
+              "html": "<dt class=\"text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Buy-in</dt>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #6a7282, background color: #111512, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".first\\:pl-0.last\\:pr-0.sm\\:px-5:nth-child(3) > dt"
+              ],
+              "html": "<dt class=\"text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500\">Players</dt>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #6a7282, background color: #111512, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-buy-ins > .mr-1.sm\\:inline.hidden"
+              ],
+              "html": "<span class=\"mr-1 hidden font-mono text-[10px] text-gray-400 sm:inline\">0<!-- -->1</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-cash-outs"
+              ],
+              "html": "<button type=\"button\" role=\"tab\" id=\"walkthrough-tab-cash...\" aria-selected=\"false\" aria-controls=\"walkthrough-panel-ca...\" tabindex=\"-1\" class=\"relative min-h-14 px...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-cash-outs > .mr-1.sm\\:inline.hidden"
+              ],
+              "html": "<span class=\"mr-1 hidden font-mono text-[10px] text-gray-400 sm:inline\">0<!-- -->2</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-reconcile"
+              ],
+              "html": "<button type=\"button\" role=\"tab\" id=\"walkthrough-tab-reco...\" aria-selected=\"false\" aria-controls=\"walkthrough-panel-re...\" tabindex=\"-1\" class=\"relative min-h-14 px...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-reconcile > .mr-1.sm\\:inline.hidden"
+              ],
+              "html": "<span class=\"mr-1 hidden font-mono text-[10px] text-gray-400 sm:inline\">0<!-- -->3</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-payments"
+              ],
+              "html": "<button type=\"button\" role=\"tab\" id=\"walkthrough-tab-paym...\" aria-selected=\"false\" aria-controls=\"walkthrough-panel-pa...\" tabindex=\"-1\" class=\"relative min-h-14 px...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "#walkthrough-tab-payments > .mr-1.sm\\:inline.hidden"
+              ],
+              "html": "<span class=\"mr-1 hidden font-mono text-[10px] text-gray-400 sm:inline\">0<!-- -->4</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".tracking-\\[0\\.16em\\].text-\\[11px\\].uppercase"
+              ],
+              "html": "<p class=\"text-[11px] font-semibold uppercase tracking-[0.16em]\">Live ledger</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f3f5f2, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".pt-4 > dt"
+              ],
+              "html": "<dt class=\"text-xs font-medium text-gray-500\">Recorded bank</dt>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f3f5f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".leading-5"
+              ],
+              "html": "<dd class=\"mt-1 text-xs leading-5 text-gray-500\">Seven approved purchases</dd>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.41 (foreground color: #6a7282, background color: #f3f5f2, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".sm\\:p-5.px-2.py-3:nth-child(1) > .text-amber-800\\/70.text-xs"
+              ],
+              "html": "<p class=\"text-xs text-amber-800/70\">Money in</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.63 (foreground color: #b6764a, background color: #fffdf6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".sm\\:p-5.px-2.py-3:nth-child(2) > .text-amber-800\\/70.text-xs"
+              ],
+              "html": "<p class=\"text-xs text-amber-800/70\">Stacks out</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.63 (foreground color: #b6764a, background color: #fffdf6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".sm\\:p-5.px-2.py-3:nth-child(3) > .text-amber-800\\/70.text-xs"
+              ],
+              "html": "<p class=\"text-xs text-amber-800/70\">Difference</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.63 (foreground color: #b6764a, background color: #fffdf6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-gray-100.sm\\:grid-cols-\\[2\\.5rem_1fr_auto\\].p-5:nth-child(1) > .h-10.bg-gray-100.w-10"
+              ],
+              "html": "<span class=\"grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-500\">01</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #6a7282, background color: #f3f4f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-gray-100.sm\\:grid-cols-\\[2\\.5rem_1fr_auto\\].p-5:nth-child(2) > .h-10.bg-gray-100.w-10"
+              ],
+              "html": "<span class=\"grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-500\">02</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #6a7282, background color: #f3f4f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-gray-100.sm\\:grid-cols-\\[2\\.5rem_1fr_auto\\].p-5:nth-child(3) > .h-10.bg-gray-100.w-10"
+              ],
+              "html": "<span class=\"grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-500\">03</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #6a7282, background color: #f3f4f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".border-gray-100.sm\\:grid-cols-\\[2\\.5rem_1fr_auto\\].p-5:nth-child(4) > .h-10.bg-gray-100.w-10"
+              ],
+              "html": "<span class=\"grid h-10 w-10 place-items-center rounded-full bg-gray-100 font-mono text-xs font-semibold text-gray-500\">04</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.39 (foreground color: #6a7282, background color: #f3f4f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "name": "signin-local-mobile",
+      "url": "http://127.0.0.1:3100/signin",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 852,
+      "headings": [
+        {
+          "level": "H2",
+          "text": "Keep every settled game in one place."
+        },
+        {
+          "level": "H1",
+          "text": "Accounts are off in local mode"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".text-gray-400"
+              ],
+              "html": "<p class=\"mt-4 text-xs text-gray-400\">Account history and live sync are unavailable in this setup.</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "name": "signin-local-desktop",
+      "url": "http://127.0.0.1:3100/signin",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 900,
+      "headings": [
+        {
+          "level": "H2",
+          "text": "Keep every settled game in one place."
+        },
+        {
+          "level": "H1",
+          "text": "Accounts are off in local mode"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".text-gray-400"
+              ],
+              "html": "<p class=\"mt-4 text-xs text-gray-400\">Account history and live sync are unavailable in this setup.</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": []
+    },
+    {
+      "name": "feedback-mobile",
+      "url": "http://127.0.0.1:3100/feedback",
+      "title": "Feedback | Mainpot",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 1462,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Send us feedback."
+        },
+        {
+          "level": "H2",
+          "text": "Email us"
+        },
+        {
+          "level": "H2",
+          "text": "Request a feature"
+        },
+        {
+          "level": "H2",
+          "text": "Report a bug"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "feedback-desktop",
+      "url": "http://127.0.0.1:3100/feedback",
+      "title": "Feedback | Mainpot",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 1071,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Send us feedback."
+        },
+        {
+          "level": "H2",
+          "text": "Email us"
+        },
+        {
+          "level": "H2",
+          "text": "Request a feature"
+        },
+        {
+          "level": "H2",
+          "text": "Report a bug"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "self-host-mobile",
+      "url": "http://127.0.0.1:3100/self-host",
+      "title": "Self-Host Mainpot | Mainpot",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 6959,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Your game. Your server. Your data."
+        },
+        {
+          "level": "H2",
+          "text": "Start with the amount of infrastructure you actually need."
+        },
+        {
+          "level": "H3",
+          "text": "Single-browser mode"
+        },
+        {
+          "level": "H3",
+          "text": "Local full stack"
+        },
+        {
+          "level": "H3",
+          "text": "Your own deployment"
+        },
+        {
+          "level": "H2",
+          "text": "A small stack with clear boundaries."
+        },
+        {
+          "level": "H2",
+          "text": "Clone, install, run."
+        },
+        {
+          "level": "H2",
+          "text": "Control comes with operational work."
+        },
+        {
+          "level": "H2",
+          "text": "Self-hosting, without the fine print hidden."
+        },
+        {
+          "level": "H2",
+          "text": "The source and full deployment guide are public."
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".justify-between.gap-4.items-center > div > .tracking-\\[0\\.16em\\].uppercase.text-xs"
+              ],
+              "html": "<p class=\"text-xs font-semibold uppercase tracking-[0.16em] text-gray-500\">Mainpot stack</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.16 (foreground color: #6a7282, background color: #030712, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(1) > .items-start.justify-between.gap-4 > .text-gray-400.font-mono.text-xs"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">0<!-- -->1</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(2) > .items-start.justify-between.gap-4 > .text-gray-400.font-mono.text-xs"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">0<!-- -->2</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(3) > .items-start.justify-between.gap-4 > .text-gray-400.font-mono.text-xs"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">0<!-- -->3</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        },
+        {
+          "id": "scrollable-region-focusable",
+          "impact": "serious",
+          "help": "Scrollable region must have keyboard access",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/scrollable-region-focusable?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                "pre"
+              ],
+              "html": "<pre class=\"mt-7 max-w-full overflow-x-auto rounded-2xl bg-gray-950 p-5 text-sm leading-7 text-gray-200 shadow-lg shadow-gray-950/10\"><code>git clone https://github.com/AnuragGowda/mainpot.git\ncd mainpot\nnpm install\nnpm run dev</code></pre>",
+              "summary": "Fix any of the following:\n  Element should have focusable content\n  Element should be focusable"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "name": "self-host-desktop",
+      "url": "http://127.0.0.1:3100/self-host",
+      "title": "Self-Host Mainpot | Mainpot",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 4202,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Your game. Your server. Your data."
+        },
+        {
+          "level": "H2",
+          "text": "Start with the amount of infrastructure you actually need."
+        },
+        {
+          "level": "H3",
+          "text": "Single-browser mode"
+        },
+        {
+          "level": "H3",
+          "text": "Local full stack"
+        },
+        {
+          "level": "H3",
+          "text": "Your own deployment"
+        },
+        {
+          "level": "H2",
+          "text": "A small stack with clear boundaries."
+        },
+        {
+          "level": "H2",
+          "text": "Clone, install, run."
+        },
+        {
+          "level": "H2",
+          "text": "Control comes with operational work."
+        },
+        {
+          "level": "H2",
+          "text": "Self-hosting, without the fine print hidden."
+        },
+        {
+          "level": "H2",
+          "text": "The source and full deployment guide are public."
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".justify-between.gap-4.items-center > div > .tracking-\\[0\\.16em\\].uppercase.text-xs"
+              ],
+              "html": "<p class=\"text-xs font-semibold uppercase tracking-[0.16em] text-gray-500\">Mainpot stack</p>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.16 (foreground color: #6a7282, background color: #030712, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(1) > .items-start.justify-between.gap-4 > .text-gray-400.font-mono.text-xs"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">0<!-- -->1</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(2) > .items-start.justify-between.gap-4 > .text-gray-400.font-mono.text-xs"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">0<!-- -->2</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                "article:nth-child(3) > .items-start.justify-between.gap-4 > .text-gray-400.font-mono.text-xs"
+              ],
+              "html": "<span class=\"font-mono text-xs text-gray-400\">0<!-- -->3</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 6
+        }
+      ]
+    },
+    {
+      "name": "privacy-mobile",
+      "url": "http://127.0.0.1:3100/privacy",
+      "title": "Privacy policy | Mainpot",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 3164,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Privacy policy"
+        },
+        {
+          "level": "H2",
+          "text": "Information we handle"
+        },
+        {
+          "level": "H2",
+          "text": "How we use information"
+        },
+        {
+          "level": "H2",
+          "text": "Guest and local use"
+        },
+        {
+          "level": "H2",
+          "text": "Service providers and sharing"
+        },
+        {
+          "level": "H2",
+          "text": "Retention, choices, and deletion"
+        },
+        {
+          "level": "H2",
+          "text": "Security and age"
+        },
+        {
+          "level": "H2",
+          "text": "Changes and contact"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "support@mainpot.app",
+          "width": 149.625,
+          "height": 17
+        },
+        {
+          "text": "repository security page",
+          "width": 163.84375,
+          "height": 17
+        }
+      ],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "privacy-desktop",
+      "url": "http://127.0.0.1:3100/privacy",
+      "title": "Privacy policy | Mainpot",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 2240,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Privacy policy"
+        },
+        {
+          "level": "H2",
+          "text": "Information we handle"
+        },
+        {
+          "level": "H2",
+          "text": "How we use information"
+        },
+        {
+          "level": "H2",
+          "text": "Guest and local use"
+        },
+        {
+          "level": "H2",
+          "text": "Service providers and sharing"
+        },
+        {
+          "level": "H2",
+          "text": "Retention, choices, and deletion"
+        },
+        {
+          "level": "H2",
+          "text": "Security and age"
+        },
+        {
+          "level": "H2",
+          "text": "Changes and contact"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "support@mainpot.app",
+          "width": 149.625,
+          "height": 17
+        },
+        {
+          "text": "repository security page",
+          "width": 163.84375,
+          "height": 17
+        }
+      ],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "terms-mobile",
+      "url": "http://127.0.0.1:3100/terms",
+      "title": "Terms of use | Mainpot",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 2584,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Terms of use"
+        },
+        {
+          "level": "H2",
+          "text": "Using Mainpot"
+        },
+        {
+          "level": "H2",
+          "text": "A ledger, not a payment service"
+        },
+        {
+          "level": "H2",
+          "text": "Your games and invite links"
+        },
+        {
+          "level": "H2",
+          "text": "Accounts and acceptable use"
+        },
+        {
+          "level": "H2",
+          "text": "Open-source software"
+        },
+        {
+          "level": "H2",
+          "text": "Availability and liability"
+        },
+        {
+          "level": "H2",
+          "text": "Changes and contact"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "public project repository",
+          "width": 163.5,
+          "height": 17
+        }
+      ],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "terms-desktop",
+      "url": "http://127.0.0.1:3100/terms",
+      "title": "Terms of use | Mainpot",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 1800,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Terms of use"
+        },
+        {
+          "level": "H2",
+          "text": "Using Mainpot"
+        },
+        {
+          "level": "H2",
+          "text": "A ledger, not a payment service"
+        },
+        {
+          "level": "H2",
+          "text": "Your games and invite links"
+        },
+        {
+          "level": "H2",
+          "text": "Accounts and acceptable use"
+        },
+        {
+          "level": "H2",
+          "text": "Open-source software"
+        },
+        {
+          "level": "H2",
+          "text": "Availability and liability"
+        },
+        {
+          "level": "H2",
+          "text": "Changes and contact"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "public project repository",
+          "width": 163.5,
+          "height": 17
+        }
+      ],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "not-found-mobile",
+      "url": "http://127.0.0.1:3100/missing-audit-page",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 852,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "This page isn’t at the table."
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "not-found-desktop",
+      "url": "http://127.0.0.1:3100/missing-audit-page",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 900,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "This page isn’t at the table."
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "missing-game-mobile",
+      "url": "http://127.0.0.1:3100/game/ABC234",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 852,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Game not found"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "missing-game-desktop",
+      "url": "http://127.0.0.1:3100/game/ABC234",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 900,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Game not found"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "create-errors-320",
+      "url": "http://127.0.0.1:3100/create",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 320,
+      "scrollWidth": 320,
+      "height": 568,
+      "scrollHeight": 843,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Start a game."
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "",
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "name": "game-host-initial-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 970,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "At the table"
+        },
+        {
+          "level": "H2",
+          "text": "Activity"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".mb-3.items-end.justify-between > .text-gray-400"
+              ],
+              "html": "<span class=\"text-xs text-gray-400\">3 events</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".w-11"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey bo...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "invite-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 970,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Scan to join Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "At the table"
+        },
+        {
+          "level": "H2",
+          "text": "Activity"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "Sign in",
+          "width": 39.296875,
+          "height": 15
+        }
+      ],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".mb-3.items-end.justify-between > .text-gray-400"
+              ],
+              "html": "<span class=\"text-xs text-gray-400\">3 events</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".rounded-md"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey bo...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "name": "game-host-three-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 1448,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "At the table"
+        },
+        {
+          "level": "H2",
+          "text": "Activity"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".mb-3.justify-between.items-end > .text-gray-400"
+              ],
+              "html": "<span class=\"text-xs text-gray-400\">7 events</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.406Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.406Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Taylor b...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.406Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.406Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey ad...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.340Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.340Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Jordan b...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.340Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.340Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey ad...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey bo...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(6) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(7) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "game-host-three-desktop",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 1372,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "At the table"
+        },
+        {
+          "level": "H2",
+          "text": "Activity"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".mb-3.justify-between.items-end > .text-gray-400"
+              ],
+              "html": "<span class=\"text-xs text-gray-400\">7 events</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.406Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.406Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Taylor b...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.406Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.406Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey ad...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.340Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.340Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Jordan b...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.340Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.340Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey ad...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey bo...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(6) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(7) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "rebuy-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 1448,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "At the table"
+        },
+        {
+          "level": "H2",
+          "text": "Activity"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "Payment details (optional)",
+          "width": 341,
+          "height": 20
+        },
+        {
+          "text": "",
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".mb-3.justify-between.items-end > .text-gray-400"
+              ],
+              "html": "<span class=\"text-xs text-gray-400\">7 events</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-09-08T23:10:00.406Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.406Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Taylor b...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-09-08T23:10:00.406Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.406Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey ad...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-09-08T23:10:00.340Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.340Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Jordan b...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-09-08T23:10:00.340Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.340Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey ad...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey bo...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(6) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(7) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".font-normal"
+              ],
+              "html": "<span class=\"font-normal text-gray-400\">(optional)</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.53 (foreground color: #99a1af, background color: #fbfcfc, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "end-confirm-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 1448,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "At the table"
+        },
+        {
+          "level": "H2",
+          "text": "Activity"
+        },
+        {
+          "level": "H2",
+          "text": "End the game?"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "target": [
+                ".mb-3.justify-between.items-end > .text-gray-400"
+              ],
+              "html": "<span class=\"text-xs text-gray-400\">7 events</span>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.406Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.406Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Taylor b...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.406Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.406Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey ad...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.340Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.340Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Jordan b...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:10:00.340Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:10:00.340Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:10 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey ad...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .w-11.rounded-md.hover\\:text-gray-700"
+              ],
+              "html": "<button type=\"button\" aria-label=\"Actions for Casey bo...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(6) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "target": [
+                ".py-3\\.5:nth-child(7) > .items-start.gap-3.flex > .min-w-0.flex-1 > time[datetime=\"2026-09-08T23:09:56.607Z\"]"
+              ],
+              "html": "<time datetime=\"2026-09-08T23:09:56.607Z\" class=\"mt-0.5 block text-xs text-gray-400\">6:09 PM</time>",
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "name": "cashouts-empty-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 852,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Enter cash-outs"
+        },
+        {
+          "level": "H2",
+          "text": "Cash-outs"
+        },
+        {
+          "level": "H3",
+          "text": "Casey"
+        },
+        {
+          "level": "H3",
+          "text": "Jordan"
+        },
+        {
+          "level": "H3",
+          "text": "Taylor"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "cashouts-discrepancy-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 852,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Enter cash-outs"
+        },
+        {
+          "level": "H2",
+          "text": "Cash-outs"
+        },
+        {
+          "level": "H3",
+          "text": "Casey"
+        },
+        {
+          "level": "H3",
+          "text": "Jordan"
+        },
+        {
+          "level": "H3",
+          "text": "Taylor"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "name": "settlement-review-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 852,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement results and payment plan"
+        },
+        {
+          "level": "H2",
+          "text": "Review the payments"
+        },
+        {
+          "level": "H2",
+          "text": "Ready to settle?"
+        },
+        {
+          "level": "H2",
+          "text": "Fewest payments"
+        },
+        {
+          "level": "H2",
+          "text": "Net results"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement summary"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "name": "settlement-review-desktop",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "height": 900,
+      "scrollHeight": 900,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement results and payment plan"
+        },
+        {
+          "level": "H2",
+          "text": "Review the payments"
+        },
+        {
+          "level": "H2",
+          "text": "Ready to settle?"
+        },
+        {
+          "level": "H2",
+          "text": "Fewest payments"
+        },
+        {
+          "level": "H2",
+          "text": "Net results"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement summary"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "name": "lock-confirm-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 852,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement results and payment plan"
+        },
+        {
+          "level": "H2",
+          "text": "Review the payments"
+        },
+        {
+          "level": "H2",
+          "text": "Ready to settle?"
+        },
+        {
+          "level": "H2",
+          "text": "Fewest payments"
+        },
+        {
+          "level": "H2",
+          "text": "Net results"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement summary"
+        },
+        {
+          "level": "H2",
+          "text": "Lock the final settlement?"
+        }
+      ],
+      "smallTargets": [],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "aria-valid-attr-value",
+          "count": 1
+        },
+        {
+          "id": "color-contrast",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "name": "settlement-final-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 1401,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement results and payment plan"
+        },
+        {
+          "level": "H2",
+          "text": "You owe $20.00."
+        },
+        {
+          "level": "H2",
+          "text": "Your game card."
+        },
+        {
+          "level": "H2",
+          "text": "Fewest payments"
+        },
+        {
+          "level": "H2",
+          "text": "Net results"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "1 of 5: difficult",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "2 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "3 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "4 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "5 of 5: easy",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 23
+        }
+      ]
+    },
+    {
+      "name": "payment-partial-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 1401,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement results and payment plan"
+        },
+        {
+          "level": "H2",
+          "text": "You owe $10.00."
+        },
+        {
+          "level": "H2",
+          "text": "Your game card."
+        },
+        {
+          "level": "H2",
+          "text": "Fewest payments"
+        },
+        {
+          "level": "H2",
+          "text": "Net results"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "1 of 5: difficult",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "2 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "3 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "4 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "5 of 5: easy",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 23
+        }
+      ]
+    },
+    {
+      "name": "payment-complete-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 1401,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement results and payment plan"
+        },
+        {
+          "level": "H2",
+          "text": "All your payments are marked sent."
+        },
+        {
+          "level": "H2",
+          "text": "Your game card."
+        },
+        {
+          "level": "H2",
+          "text": "Fewest payments"
+        },
+        {
+          "level": "H2",
+          "text": "Net results"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "1 of 5: difficult",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "2 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "3 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "4 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "5 of 5: easy",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 23
+        }
+      ]
+    },
+    {
+      "name": "recap-dialog-mobile",
+      "url": "http://127.0.0.1:3100/game/GLBBPN",
+      "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+      "width": 393,
+      "scrollWidth": 393,
+      "height": 852,
+      "scrollHeight": 1401,
+      "headings": [
+        {
+          "level": "H1",
+          "text": "Friday night UX review"
+        },
+        {
+          "level": "H2",
+          "text": "Settlement results and payment plan"
+        },
+        {
+          "level": "H2",
+          "text": "All your payments are marked sent."
+        },
+        {
+          "level": "H2",
+          "text": "Your game card."
+        },
+        {
+          "level": "H2",
+          "text": "Your game card"
+        },
+        {
+          "level": "H2",
+          "text": "Fewest payments"
+        },
+        {
+          "level": "H2",
+          "text": "Net results"
+        }
+      ],
+      "smallTargets": [
+        {
+          "text": "1 of 5: difficult",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "2 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "3 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "4 of 5",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "5 of 5: easy",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Show amounts and losses",
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "Show net result",
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "Show player count",
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "Show game duration",
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "Show rebuys",
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Jordan",
+          "width": 1,
+          "height": 1
+        },
+        {
+          "text": "Mark sent: $10.00 from Casey to Taylor",
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "count": 44
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

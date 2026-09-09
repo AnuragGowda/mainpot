@@ -1,0 +1,27 @@
+
+> mainpot@0.1.0 test:e2e
+> playwright test --workers=2
+
+
+Running 14 tests using 2 workers
+
+(node:55254) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:55253) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/smoke.spec.ts:11:7 › public local-mode experience › reviews payments before locking and keeps completion in sync (1.7s)
+  ✓   2 [chromium] › tests/e2e/smoke.spec.ts:16:7 › public local-mode experience › runs a whole table with host-added players (1.8s)
+  ✓   3 [chromium] › tests/e2e/smoke.spec.ts:21:7 › public local-mode experience › shows the landing page and validates an incomplete game form (309ms)
+  ✓   4 [chromium] › tests/e2e/smoke.spec.ts:35:7 › public local-mode experience › keeps invalid buy-in text visible and explains how to correct it (224ms)
+  ✓   5 [chromium] › tests/e2e/smoke.spec.ts:58:7 › public local-mode experience › lets a host resume an active game from setup without clearing site data (256ms)
+  ✓   6 [chromium] › tests/e2e/smoke.spec.ts:78:7 › public local-mode experience › offers contextual iPhone install steps after creating a game (290ms)
+  ✓   7 [chromium] › tests/e2e/smoke.spec.ts:105:7 › public local-mode experience › opens the native install prompt after creating a game (218ms)
+  ✓   9 [chromium] › tests/e2e/smoke.spec.ts:307:7 › public local-mode experience › auto-approves a host rebuy in local mode (284ms)
+  ✓  10 [chromium] › tests/e2e/smoke.spec.ts:331:7 › public local-mode experience › requires an explicit allocation when completed cash-outs do not reconcile (1.2s)
+  ✓  11 [chromium] › tests/e2e/smoke.spec.ts:384:7 › public local-mode experience › keeps the complete game flow usable on a 320px-wide screen (810ms)
+  ✓  12 [chromium] › tests/e2e/smoke.spec.ts:471:7 › public local-mode experience › offers a direct mobile path to the standalone calculator (107ms)
+  ✓  13 [chromium] › tests/e2e/smoke.spec.ts:482:7 › public local-mode experience › lets a visitor clear the calculator example and use the keyboard skip link (215ms)
+  ✓  14 [chromium] › tests/e2e/smoke.spec.ts:508:5 › does not show a settlement for invalid calculator amounts (198ms)
+  ✓   8 [chromium] › tests/e2e/smoke.spec.ts:133:7 › public local-mode experience › runs a host from game creation through a balanced finalized settlement (3.6s)
+
+  14 passed (6.5s)

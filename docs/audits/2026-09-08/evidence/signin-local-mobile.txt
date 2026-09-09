@@ -1,0 +1,11 @@
+Skip to content
+Mainpot
+Start game
+♠
+Accounts are off in local mode
+
+Games stay on this device, so you can run the full ledger without signing in.
+
+Start a game
+
+Account history and live sync are unavailable in this setup.

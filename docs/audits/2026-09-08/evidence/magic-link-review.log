@@ -1,0 +1,73 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+ExpectError: expect(locator).toBeVisible() failed
+
+Locator: getByRole('heading', { name: 'Magic link audit', exact: true })
+Expected: visible
+Timeout: 5000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "to.be.visible" with timeout 5000ms
+  - waiting for getByRole('heading', { name: 'Magic link audit', exact: true })
+
+    at captureRawStack (/Users/anurag/Documents/ChatGPT/Mainpot/node_modules/playwright-core/lib/coreBundle.js:9681:17)
+    at callMatcherAsStep (/Users/anurag/Documents/ChatGPT/Mainpot/node_modules/playwright/lib/matchers/expect.js:13310:57)
+    at Object.toBeVisible (/Users/anurag/Documents/ChatGPT/Mainpot/node_modules/playwright/lib/matchers/expect.js:13300:23)
+    at /Users/anurag/Documents/ChatGPT/Mainpot/docs/audits/2026-09-08/magic-link-review.mjs:3:1166 {
+  matcherResult: {
+    message: 'expect(locator).toBeVisible() failed\n' +
+      '\n' +
+      "Locator: getByRole('heading', { name: 'Magic link audit', exact: true })\n" +
+      'Expected: visible\n' +
+      'Timeout: 5000ms\n' +
+      'Error: element(s) not found\n' +
+      '\n' +
+      'Call log:\n' +
+      '  - Expect "to.be.visible" with timeout 5000ms\n' +
+      "  - waiting for getByRole('heading', { name: 'Magic link audit', exact: true })\n",
+    pass: false,
+    actual: undefined,
+    name: 'toBeVisible',
+    expected: 'visible',
+    log: [
+      '  - Expect "to.be.visible" with timeout 5000ms',
+      "  - waiting for getByRole('heading', { name: 'Magic link audit', exact: true })"
+    ],
+    timeout: 5000,
+    ariaSnapshot: '- link "Skip to content":\n' +
+      '  - /url: "#main-content"\n' +
+      '- banner:\n' +
+      '  - link "Mainpot home":\n' +
+      '    - /url: /\n' +
+      '    - text: Mainpot\n' +
+      '  - navigation "Main navigation":\n' +
+      '    - link "Sign in":\n' +
+      '      - /url: /signin\n' +
+      '    - link "Start a game":\n' +
+      '      - /url: /create\n' +
+      '- main:\n' +
+      '  - paragraph: Keep your history\n' +
+      '  - heading "Keep every settled game in one place." [level=2]\n' +
+      '  - paragraph: Create an account or sign in to save results, find regular players, and track your record over time.\n' +
+      '  - heading "Welcome back" [level=1]\n' +
+      '  - paragraph: View your saved games and results.\n' +
+      '  - text: Email\n' +
+      '  - textbox "Email":\n' +
+      '    - /placeholder: you@example.com\n' +
+      '  - text: Password\n' +
+      '  - textbox "Password":\n' +
+      '    - /placeholder: At least 6 characters\n' +
+      '  - button "Sign in"\n' +
+      '  - button "Forgot your password? Get a sign-in link"\n' +
+      '  - paragraph:\n' +
+      '    - text: New to Mainpot?\n' +
+      '    - button "Create an account"\n' +
+      '- status\n' +
+      '- alert'
+  }
+}
+
+Node.js v22.22.1

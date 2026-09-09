@@ -1,0 +1,17 @@
+{
+  "unrelatedPaymentContactRead": {
+    "rejected": true,
+    "error": "permission denied for table profiles"
+  },
+  "senderSelfAccept": {
+    "allowed": true,
+    "status": "accepted"
+  },
+  "crossGameAuditInsert": {
+    "allowed": true,
+    "persisted": true
+  },
+  "sameAccountNewSessionJoin": {
+    "dataReturned": true
+  }
+}

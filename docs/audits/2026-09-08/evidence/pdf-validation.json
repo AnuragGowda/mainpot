@@ -1,0 +1,296 @@
+{
+  "pages": 29,
+  "pageSummary": [
+    {
+      "page": 1,
+      "chars": 655,
+      "images": 0,
+      "head": [
+        "PRODUCT REVIEW / SEPTEMBER 2026",
+        "Mainpot",
+        "Whole-app review"
+      ]
+    },
+    {
+      "page": 2,
+      "chars": 569,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Contents",
+        "1. Decision summary 4"
+      ]
+    },
+    {
+      "page": 3,
+      "chars": 1349,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Reviewed September 8, 2026 \u00b7 Current local working tree \u00b7 Independent browser contexts \u00b7 Synthetic",
+        "data"
+      ]
+    },
+    {
+      "page": 4,
+      "chars": 2681,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "1. Decision summary",
+        "Recommendation: address the four high-priority defects before expanding use, then repair money"
+      ]
+    },
+    {
+      "page": 5,
+      "chars": 2958,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "2. Review scope and evidence quality",
+        "The version actually reviewed"
+      ]
+    },
+    {
+      "page": 6,
+      "chars": 2353,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "3. Executed test results",
+        "Layer Executed check Result What it establishes"
+      ]
+    },
+    {
+      "page": 7,
+      "chars": 1067,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "52 existing browser tests passed in total. This count excludes additional exploratory journeys and the 60",
+        "screen-state scans; those are not 60 independent end-to-end tests."
+      ]
+    },
+    {
+      "page": 8,
+      "chars": 1247,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "4. Product case study: the job Mainpot is",
+        "doing"
+      ]
+    },
+    {
+      "page": 9,
+      "chars": 1804,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Journey map",
+        "Stage User question Current experience Assessment"
+      ]
+    },
+    {
+      "page": 10,
+      "chars": 1109,
+      "images": 1,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "5. Screen-by-screen UI/UX assessment",
+        "Landing page"
+      ]
+    },
+    {
+      "page": 11,
+      "chars": 1122,
+      "images": 1,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Create and join",
+        "The three-field create form is appropriately short. Showing the consequence of \u201cAdd my opening buy-in\u201d"
+      ]
+    },
+    {
+      "page": 12,
+      "chars": 1454,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Active game: host and player",
+        "The structure is easy to understand: game identity, invite/end controls, totals, roster, activity, then optional"
+      ]
+    },
+    {
+      "page": 13,
+      "chars": 1459,
+      "images": 1,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Host game with three players; the roster carries the important state.",
+        "Viewport excerpt. Full-resolution image: evidence/game-host-three-mobile.png"
+      ]
+    },
+    {
+      "page": 14,
+      "chars": 1148,
+      "images": 1,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Review and lock",
+        "The payment preview is visible before the irreversible decision. It names who pays whom, states that Mainpot"
+      ]
+    },
+    {
+      "page": 15,
+      "chars": 1409,
+      "images": 1,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "The distinction between marked sent and received is especially good. The receiver is told to confirm receipt in",
+        "their payment app or cash. The neutral checkmark and strike-through also keep completion visually calm."
+      ]
+    },
+    {
+      "page": 16,
+      "chars": 1446,
+      "images": 1,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "In the current source, names remain hidden, while dollar amounts and losses are enabled by default. The",
+        "editor states that table and player names stay private and allows money/stat visibility to be changed. The"
+      ]
+    },
+    {
+      "page": 17,
+      "chars": 1237,
+      "images": 1,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "The friend search shows a clear no-results state. A saved game template restored the setup fields, and",
+        "Rematch prefilled the previous name and buy-in. However, Recent games provides only Rematch: the title"
+      ]
+    },
+    {
+      "page": 18,
+      "chars": 1272,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Calculator, support and self-hosting",
+        "The standalone calculator works as a useful acquisition tool, with a seeded example, clear-example action,"
+      ]
+    },
+    {
+      "page": 19,
+      "chars": 2706,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "6. Findings with reproduction and",
+        "acceptance criteria"
+      ]
+    },
+    {
+      "page": 20,
+      "chars": 2911,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "F03 \u00b7 P1 \u00b7 Friend requests can be self-accepted",
+        "Observed: user A created a pending request addressed to B, then A updated that same row to accepted. The"
+      ]
+    },
+    {
+      "page": 21,
+      "chars": 2981,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Fix: retain empty, valid and invalid as distinct states. Show an inline explanation and suppress the payment",
+        "recommendation until every entered amount is valid. Apply a consistent two-decimal currency policy."
+      ]
+    },
+    {
+      "page": 22,
+      "chars": 2452,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Acceptance: a first-time participant can find how to pay without being told to tap the name; keyboard and",
+        "screen-reader users can distinguish opening details from marking sent. Confirm this with people; the"
+      ]
+    },
+    {
+      "page": 23,
+      "chars": 2536,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "F14 \u00b7 P2 \u00b7 Account history has no path back to the settlement",
+        "Observed: a finalized game appeared with the correct result, but its Recent games row contained only a"
+      ]
+    },
+    {
+      "page": 24,
+      "chars": 1410,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "7. Accessibility and responsive findings in",
+        "context"
+      ]
+    },
+    {
+      "page": 25,
+      "chars": 2093,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "8. Recommended implementation sequence",
+        "First: protect continuity and trust"
+      ]
+    },
+    {
+      "page": 26,
+      "chars": 2693,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "9. Limits, unresolved integration checks and",
+        "excluded claims"
+      ]
+    },
+    {
+      "page": 27,
+      "chars": 392,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "Likewise, the product intentionally exposes a shared payment ledger to game participants while keeping the full",
+        "host controls out of player UI. The terms and current UI do not establish a stronger per-player secrecy promise."
+      ]
+    },
+    {
+      "page": 28,
+      "chars": 1951,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "10. Proposed user-research study",
+        "Recruit six to eight people for a first formative round: experienced home-game hosts, casual players who"
+      ]
+    },
+    {
+      "page": 29,
+      "chars": 1722,
+      "images": 0,
+      "head": [
+        "MAINPOT / APP REVIEW & UX CASE STUDY",
+        "11. Evidence index and handoff",
+        "The report directory includes the editable Markdown, a reading-friendly HTML version, reproduction scripts and"
+      ]
+    }
+  ],
+  "bytes": 782571
+}

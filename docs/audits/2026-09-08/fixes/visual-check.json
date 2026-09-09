@@ -1,0 +1,50 @@
+{
+  "results": [
+    {
+      "name": "calculator-393",
+      "violations": [],
+      "overflow": false
+    },
+    {
+      "name": "self-host-393",
+      "violations": [],
+      "overflow": false
+    },
+    {
+      "name": "join-393",
+      "violations": [],
+      "overflow": false
+    },
+    {
+      "name": "subcent-rejected",
+      "violations": [],
+      "overflow": false
+    },
+    {
+      "name": "active-game",
+      "violations": [],
+      "overflow": false
+    },
+    {
+      "name": "cashout",
+      "violations": [],
+      "overflow": false
+    },
+    {
+      "name": "settled",
+      "violations": [],
+      "overflow": false
+    },
+    {
+      "name": "recap-public-320",
+      "violations": [],
+      "overflow": false
+    },
+    {
+      "name": "recap-private-320",
+      "violations": [],
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,79 @@
+[
+  {
+    "path": "/api/health",
+    "status": 200,
+    "type": "application/json",
+    "location": null
+  },
+  {
+    "path": "/api/push/config",
+    "status": 200,
+    "type": "application/json",
+    "location": null
+  },
+  {
+    "path": "/manifest.webmanifest",
+    "status": 200,
+    "type": "application/manifest+json",
+    "location": null
+  },
+  {
+    "path": "/sw.js",
+    "status": 200,
+    "type": "application/javascript; charset=utf-8",
+    "location": null
+  },
+  {
+    "path": "/robots.txt",
+    "status": 200,
+    "type": "text/plain",
+    "location": null
+  },
+  {
+    "path": "/sitemap.xml",
+    "status": 200,
+    "type": "application/xml",
+    "location": null
+  },
+  {
+    "path": "/auth/callback",
+    "status": 307,
+    "type": null,
+    "location": "http://localhost:3100/signin?error=missing_code"
+  },
+  {
+    "path": "/recap-lab",
+    "status": 404,
+    "type": "text/html; charset=utf-8",
+    "location": null
+  },
+  {
+    "path": "/api/product-ops/events",
+    "method": "GET",
+    "status": 401,
+    "body": ""
+  },
+  {
+    "path": "/api/health/canary",
+    "method": "POST",
+    "status": 401,
+    "body": ""
+  },
+  {
+    "path": "/api/push/subscriptions",
+    "method": "POST",
+    "status": 503,
+    "body": "{\"error\":\"Game alerts are not configured.\"}"
+  },
+  {
+    "path": "/api/push/dispatch",
+    "method": "POST",
+    "status": 204,
+    "body": ""
+  },
+  "Service worker registered and controls page",
+  {
+    "offlineText": "♠\nYou’re offline\n\nMainpot needs a connection to sync the table. Reconnect, then try again.\n\nTry again"
+  },
+  "Online navigation recovered"
+]

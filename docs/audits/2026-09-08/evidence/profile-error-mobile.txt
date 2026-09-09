@@ -1,0 +1,28 @@
+Skip to content
+Mainpot
+Dashboard
+Friends
+UC
+
+Your poker ledger
+
+UX Casey
+
+Add a username so friends can find you
+
+Edit profile
+Display name
+Username
+@
+Venmo
+@
+Zelle email or U.S. mobile number
+
+Enter an email address or a valid U.S. mobile number.
+
+Optional. Mainpot uses these to create settlement shortcuts; you always review and send the payment yourself.
+
+Bio
+Public to Mainpot members who find you, and to your friends. Never shown in a game room or payment instructions.
+Save profile
+Cancel

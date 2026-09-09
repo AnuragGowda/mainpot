@@ -1,0 +1,16 @@
+
+> mainpot@0.1.0 test:e2e
+> playwright test --workers=1 --grep holds a multi-user|runs a whole table|syncs host-added|restores an account|delivers saved
+
+
+Running 5 tests using 1 worker
+
+(node:59934) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › tests/e2e/realtime.spec.ts:382:5 › holds a multi-user settlement until cash-outs reconcile (5.9s)
+  ✓  2 [chromium] › tests/e2e/realtime.spec.ts:479:5 › runs a whole table with host-added players (3.6s)
+  ✓  3 [chromium] › tests/e2e/realtime.spec.ts:484:5 › syncs host-added players to guests without exposing host controls (977ms)
+  ✓  4 [chromium] › tests/e2e/realtime.spec.ts:512:5 › restores an account-owned seat and settled history across browsers (3.5s)
+  ✓  5 [chromium] › tests/e2e/realtime.spec.ts:517:5 › delivers saved-friend invitations before the friend has room access (3.0s)
+
+  5 passed (17.5s)

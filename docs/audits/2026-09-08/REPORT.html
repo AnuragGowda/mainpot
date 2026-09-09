@@ -1,0 +1,532 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mainpot - App review and UX case study</title><style>
+:root{color-scheme:light;--ink:#17201d;--muted:#53605a;--line:#dce2dd;--paper:#f5f6f2;--accent:#164d40}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.75 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}header{background:#14231e;color:#fff;padding:22px 5vw;display:flex;align-items:center;justify-content:space-between;gap:24px}header strong{letter-spacing:.15em;font-size:13px}header span{font-size:13px;color:#d1ddd5}.layout{max-width:1460px;margin:auto;display:grid;grid-template-columns:265px minmax(0,1fr);gap:36px;padding:40px 32px}nav{position:sticky;top:25px;height:max-content;max-height:90vh;overflow:auto}nav a{display:block;text-decoration:none;color:var(--muted);padding:7px 10px;font-size:13px;line-height:1.5;border-left:2px solid transparent}nav a:hover,nav a:focus{border-color:var(--accent);color:var(--accent);background:#e7ece6}.formats{margin-top:24px;border-top:1px solid var(--line);padding-top:16px}main{min-width:0;background:white;border:1px solid var(--line);border-radius:8px;padding:42px 50px;box-shadow:0 12px 30px #10201806}h1{font-size:42px;line-height:1.15;letter-spacing:-.035em;margin:0 0 24px;max-width:800px}h2{font-size:29px;line-height:1.25;letter-spacing:-.025em;margin:65px 0 22px;padding-top:25px;border-top:1px solid var(--line);scroll-margin-top:24px}h3{font-size:21px;line-height:1.4;margin:35px 0 12px}p{margin:0 0 18px}a{color:var(--accent);text-underline-offset:3px}ul,ol{padding-left:23px}li{padding-left:4px;margin:8px 0}table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.6;margin:25px 0;display:block;overflow-x:auto}th,td{padding:12px;border:1px solid var(--line);text-align:left;vertical-align:top;min-width:100px}th{background:#eaf0e9;color:#182b21}tr:nth-child(even){background:#f8faf7}code{font:12px/1.5 ui-monospace,Menlo,monospace;background:#eef2ee;padding:2px 4px;overflow-wrap:anywhere}figure{margin:32px 0;padding:22px;background:#eff2ed;border:1px solid var(--line);border-radius:8px;text-align:center}figure img{max-width:100%;max-height:750px;width:auto;height:auto;border:1px solid #cdd5cf;box-shadow:0 9px 24px #1b282714}figcaption{font-size:13px;line-height:1.6;color:var(--muted);text-align:left;margin-top:18px}figcaption a{white-space:nowrap}footer{max-width:1080px;margin:0 auto 30px;padding:0 32px;font-size:12px;color:var(--muted)}@media(max-width:950px){.layout{display:block;padding:16px}nav{position:static;max-height:none;margin:0 0 22px;display:none}main{padding:26px 22px}h1{font-size:34px}h2{font-size:26px}table{font-size:12px}header{padding:18px 22px}header span{display:none}}@media print{nav,header,footer,.formats{display:none}.layout{display:block;padding:0}main{border:0;padding:0;box-shadow:none}h2{break-before:page}h3{break-after:avoid}figure,table{break-inside:avoid}body{font-size:10pt}h1{font-size:28pt}figure img{max-height:550px}}
+</style></head><body><header><strong>MAINPOT / PRODUCT REVIEW</strong><span>September 8, 2026 · Current working tree · Synthetic data</span></header><div class="layout"><nav aria-label="Report contents"><a href="#section-1">1. Decision summary</a><a href="#section-2">2. Review scope and evidence quality</a><a href="#section-3">3. Executed test results</a><a href="#section-4">4. Product case study: the job Mainpot is doing</a><a href="#section-5">5. Screen-by-screen UI/UX assessment</a><a href="#section-6">6. Findings with reproduction and acceptance criteria</a><a href="#section-7">7. Accessibility and responsive findings in context</a><a href="#section-8">8. Recommended implementation sequence</a><a href="#section-9">9. Limits, unresolved integration checks and excluded claims</a><a href="#section-10">10. Proposed user-research study</a><a href="#section-11">11. Evidence index and handoff</a><div class="formats"><a href="../../../output/pdf/mainpot-ui-ux-case-study-2026-09-08.pdf">Download the PDF</a><a href="REPORT.md">Editable Markdown</a><a href="evidence/browser-review.json">Screen-state evidence</a></div></nav><main><h1>Mainpot: whole-app review and UI/UX case study</h1>
+<p><strong>Reviewed September 8, 2026 · Current local working tree · Independent browser contexts · Synthetic data</strong></p>
+<p>Mainpot&#39;s core game-night journey works well: create a table, record purchases, reconcile stacks, review payments, lock settlement, and track what has been sent. Its strongest product decisions are guest access, explicit host controls, visible reconciliation, and personal payment instructions. The visual system is restrained and coherent, and the app remains usable at a 320-pixel viewport.</p>
+<p>The most consequential weaknesses are in trust and continuity. This review reproduced a signed-in host getting stuck when switching browsers, a cross-game audit-history write, and a sender accepting their own friend request, and a saved-friend game invitation disappearing from the recipient dashboard. Money-input edge cases and several accessibility problems also need attention. These deserve priority over another visual redesign.</p>
+<p>This is an expert evaluation supported by executed tests and inspected screenshots. It is not a study with recruited users, an exhaustive security assessment, or proof of the deployed production system. Proposed behavioral effects and research targets below are hypotheses, not measured conversion or satisfaction results.</p>
+<h2 id="section-1">1. Decision summary</h2>
+<p><strong>Recommendation: address the four high-priority defects before expanding use, then repair money validation and accessibility. Preserve the main game and settlement structure.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Finding</th>
+<th>Evidence</th>
+<th>Recommended action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P1</td>
+<td>A signed-in host cannot resume a game in a second browser</td>
+<td>Reproduced through the UI</td>
+<td>Resolve the current seat by authenticated account as well as browser session</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>A user can append an audit event to another synthetic game</td>
+<td>Reproduced through the authenticated API</td>
+<td>Bind event actors to the event&#39;s game and generate authoritative events with the mutation</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>A sender can accept their own friendship request</td>
+<td>Reproduced through the authenticated API</td>
+<td>Restrict acceptance to the recipient and protect relationship endpoints</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>Saved-friend game invitations do not appear for the recipient</td>
+<td>UI and API reproduction</td>
+<td>Return invitation metadata through an invitee-scoped read</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>History cannot reopen the original settlement</td>
+<td>Observed UI</td>
+<td>Add an accessible link to the original game record</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Negative calculator input becomes zero while results say balanced</td>
+<td>Reproduced through the UI</td>
+<td>Validate all fields before displaying a usable payment plan</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>A sub-cent opening buy-in becomes a $0.00 local entry</td>
+<td>Reproduced through the UI</td>
+<td>Validate the rounded amount and supported precision consistently</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Supporting text and the Venmo action fail contrast checks</td>
+<td>Automated checks plus visual inspection</td>
+<td>Correct semantic color tokens across light and dark surfaces</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Payment shortcuts look like static payment rows</td>
+<td>Observed UI; discoverability impact is a hypothesis</td>
+<td>Add an explicit payment-details cue and accessible action name</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Incoming-payment labels truncate on mobile</td>
+<td>Observed at 393 pixels</td>
+<td>Show the payer first and omit the redundant recipient in personal views</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Deletion requests have no durable visible pending state</td>
+<td>UI and database reproduction</td>
+<td>Show requested date, status, and support expectations after reload</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>The self-host command block is not keyboard-focusable when it scrolls</td>
+<td>Accessibility scan</td>
+<td>Make the code region keyboard reachable and label it</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>Calculator entry starts too far down its mobile landing page</td>
+<td>Observed layout</td>
+<td>Reduce repeated introductory content above the worksheet</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>Recap privacy controls fall below the first small-screen viewport</td>
+<td>Observed at 320 x 568</td>
+<td>Surface a compact privacy summary beside the share action</td>
+</tr>
+</tbody></table>
+<p>There is also a <strong>local magic-link integration failure</strong> in the audit environment. It is reported separately in Section 9 because hostname handling limits how confidently it can be attributed to the deployed app.</p>
+<h2 id="section-2">2. Review scope and evidence quality</h2>
+<h3>The version actually reviewed</h3>
+<p>The repository was <code>/Users/anurag/Documents/ChatGPT/Mainpot</code>, based on commit <code>35e2affaee60b09548cde1bcc9415f7511d4ad9b</code>, with existing uncommitted changes. Those changes included optional host opening buy-in, installation UI, settlement presentation and payment-state updates, and related tests/migrations. The report therefore describes the <strong>working tree</strong>, not just that commit or the current production deployment.</p>
+<p>Application source was not edited, committed, pushed, or deployed by this review. A source hash snapshot and starting diff inventory are included with the evidence. Initial and final source hashes were compared to identify concurrent drift.</p>
+<h3>Environments</h3>
+<ul>
+<li><strong>Browser-only ledger:</strong> production build served at <code>http://127.0.0.1:3100</code>, with the public Supabase configuration explicitly empty at build time.</li>
+<li><strong>Shared game:</strong> separate production build served at <code>http://127.0.0.1:3110</code>, backed by a disposable Supabase project on port <code>55321</code> with the current migration chain applied.</li>
+<li><strong>Runtime:</strong> OrbStack was verified as the active Docker context and engine before starting the disposable database.</li>
+<li><strong>Browser engines:</strong> the repository suites exercised Chromium and WebKit. Mobile projects emulated Pixel 5 and iPhone 13. Additional visual review used 393 x 852, 1440 x 900, and 320 x 568 viewports.</li>
+<li><strong>Data:</strong> all new games, people, profiles, payment handles, exports, friend requests, and email messages were synthetic. No external payment was sent.</li>
+</ul>
+<p>Separate browser contexts establish separate browser identities and exercise real local realtime behavior. They do not reproduce physical radios, an iOS software keyboard, installed-PWA lifecycle, or app-to-app payment handoff.</p>
+<h3>Methods</h3>
+<p>The work combined a route and state inventory, source review, the existing test suites, additional browser journeys, local API probes, accessibility scans, and screenshot inspection. Two bounded read-only source reviews were independently checked against the complete migration chain and live probes. Preliminary concerns that were contradicted by later migrations were excluded.</p>
+<p>The heuristic review considers system feedback, understandable language, prevention and recovery of errors, discoverability, consistency, and cognitive load. These categories follow the <a href="https://www.nngroup.com/articles/ten-usability-heuristics/">Nielsen Norman Group usability heuristics</a>. Accessibility checks used axe-core 4.13 with WCAG 2 A/AA, 2.1 AA, and 2.2 AA tags. Interpretation was checked against the <a href="https://www.w3.org/WAI/WCAG22/quickref/">W3C WCAG quick reference</a>.</p>
+<p>A zero-violation scan does not establish WCAG conformance. Contrast checks, keyboard walkthroughs, viewport tests, and native assistive-technology testing cover different things. Raw DOM target dimensions were treated only as screening data: a small checkbox may have an adequately sized associated label, and inline links can qualify for target-size exceptions.</p>
+<h2 id="section-3">3. Executed test results</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Executed check</th>
+<th>Result</th>
+<th>What it establishes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Unit logic</td>
+<td><code>npm test</code></td>
+<td><strong>105 passed in 19 files</strong></td>
+<td>Existing settlement, formatting, input, recap, account/API and supporting logic assertions</td>
+</tr>
+<tr>
+<td>Static quality</td>
+<td><code>npm run lint</code></td>
+<td><strong>Passed</strong></td>
+<td>Existing application passed lint before audit scripts were added</td>
+</tr>
+<tr>
+<td>Production compilation</td>
+<td><code>npm run build</code></td>
+<td><strong>Passed</strong></td>
+<td>Current app and service worker compile successfully</td>
+</tr>
+<tr>
+<td>Shared browser flows</td>
+<td><code>npm run test:e2e:realtime -- --workers=2</code></td>
+<td><strong>13 passed</strong>; suite ran with one worker</td>
+<td>Real local Supabase, independent identities and current migrations</td>
+</tr>
+<tr>
+<td>Desktop browser-only flows</td>
+<td><code>npm run test:e2e -- --workers=2</code> against port 3100</td>
+<td><strong>13 passed</strong></td>
+<td>Browser-only create, roster, settlement, recap, validation and recovery flows</td>
+</tr>
+<tr>
+<td>Mobile browser-only flows</td>
+<td><code>npm run test:e2e:mobile -- --workers=2</code></td>
+<td><strong>26 passed</strong></td>
+<td>Same smoke coverage in emulated mobile Chromium and WebKit</td>
+</tr>
+<tr>
+<td>Database assurance</td>
+<td><code>npm run test:db:assurance</code> against disposable stack</td>
+<td><strong>Passed</strong></td>
+<td>Role restrictions, retry safety, cross-game guards and payment-write conditions covered by this script</td>
+</tr>
+<tr>
+<td>Database churn</td>
+<td><code>SOAK_DURATION_MS=60000 npm run test:db:soak</code></td>
+<td><strong>31 complete assurance cycles passed</strong></td>
+<td>A short repeated local assurance run; not a sustained-load benchmark</td>
+</tr>
+<tr>
+<td>Additional visual/accessibility review</td>
+<td>Public and game states plus account states</td>
+<td><strong>60 scanned screen states</strong></td>
+<td>Actual rendered states, DOM overflow and automated accessibility evidence</td>
+</tr>
+<tr>
+<td>Additional account flow</td>
+<td>Sign-up, sign-in, profile validation/save/reload, export, game history</td>
+<td><strong>Passed</strong></td>
+<td>Local password-account journey with email confirmation disabled</td>
+</tr>
+<tr>
+<td>Social flow</td>
+<td>Friend requests, templates, rematch and game invitations</td>
+<td><strong>Intended relationship flow passed; invitation display defect found</strong></td>
+<td>Normal relationship actions plus returning-organizer setup</td>
+</tr>
+<tr>
+<td>Negative account/API probes</td>
+<td>Contact read, sender self-accept, cross-game audit insert</td>
+<td><strong>One protection confirmed; two defects reproduced</strong></td>
+<td>Tested behavior beyond what the normal UI exposes</td>
+</tr>
+<tr>
+<td>Edge flows</td>
+<td>12-player disclosure, negative calculator, sub-cent create, private PNG export</td>
+<td><strong>Two defects; disclosure/export passed</strong></td>
+<td>Validation boundaries, full roster access and export output</td>
+</tr>
+<tr>
+<td>PWA</td>
+<td>Service-worker control, offline navigation, reconnect</td>
+<td><strong>Passed</strong></td>
+<td>Branded offline shell and successful subsequent online navigation</td>
+</tr>
+</tbody></table>
+<p><strong>52 existing browser tests passed in total.</strong> This count excludes additional exploratory journeys and the 60 screen-state scans; those are not 60 independent end-to-end tests.</p>
+<p>The realtime suite covered guest access gating, independent entries, host approval, duplicate opening-buy-in prevention, rebuys, early cash-out locking, host transfer, offline/reconnect, audit presentation, reconciliation, finalized payments, host-managed seats, and role-specific controls. The database script additionally checked anonymous-auth rotation, cross-game writes, draft-payment rejection, idempotency, and private push subscription access.</p>
+<p>Exploratory harnesses were adjusted when selectors used old copy, reduced-motion mode skipped the reveal stage, or a test attempted a thirteenth seat beyond the local 12-player cap. Those harness mismatches were not counted as app defects. Final evidence files retain the completed runs; the known magic-link failure remains explicitly unresolved.</p>
+<h2 id="section-4">4. Product case study: the job Mainpot is doing</h2>
+<h3>The real user problem</h3>
+<p>The host is trying to preserve agreement about money while also running a social evening. A player wants to know that their buy-ins were recorded and, later, exactly what action settles their obligation. The product succeeds when those questions can be answered quickly without interrupting play or making participants reconstruct the ledger from chat messages.</p>
+<p>Three useful evaluation personas emerge from the app&#39;s behavior. These are analytical personas, not interviewed people:</p>
+<ol>
+<li><strong>The playing host:</strong> creates the table, buys in, approves entries, resolves mismatches, locks settlement and follows unpaid transfers.</li>
+<li><strong>The guest player:</strong> joins without an account, records their own activity, checks their stack, and pays the right person.</li>
+<li><strong>The returning organizer:</strong> expects identity, history, contacts and recurring setup to persist across devices and games.</li>
+</ol>
+<p>The first two journeys are considerably stronger than the third. Core gameplay has explicit phases and guardrails. Account continuity currently breaks at a moment when the user reasonably expects the app to recognize them.</p>
+<h3>Journey map</h3>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>User question</th>
+<th>Current experience</th>
+<th>Assessment</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Discover</td>
+<td>Is this for my home game?</td>
+<td>Direct promise, cash-game context, create/join choices, calculator link</td>
+<td>Clear and credible</td>
+</tr>
+<tr>
+<td>Create</td>
+<td>What must I set up?</td>
+<td>Three main fields and explicit opening-buy-in choice</td>
+<td>Low friction; monetary edge validation needs work</td>
+</tr>
+<tr>
+<td>Join</td>
+<td>Is this the right room?</td>
+<td>Host, game, buy-in and code shown before joining</td>
+<td>Good orientation</td>
+</tr>
+<tr>
+<td>Play</td>
+<td>Did my money get recorded?</td>
+<td>Roster, verified totals, pending approval, activity and fixed actions</td>
+<td>Strong hierarchy; supporting text is too faint</td>
+</tr>
+<tr>
+<td>Cash out</td>
+<td>What number should I enter?</td>
+<td>Final-stack explanation, saved state and reconciliation</td>
+<td>Good distinction between stack and profit</td>
+</tr>
+<tr>
+<td>Review</td>
+<td>Who will pay whom?</td>
+<td>Payment preview precedes locking; editing remains available</td>
+<td>One of the app&#39;s strongest steps</td>
+</tr>
+<tr>
+<td>Settle</td>
+<td>What do I personally need to do?</td>
+<td>Owe/receive/even headline, personal transfers and marked-sent progress</td>
+<td>Clear intent; payment shortcuts need a visible cue</td>
+</tr>
+<tr>
+<td>Share</td>
+<td>What will other people see?</td>
+<td>Character card, privacy controls and PNG/native-share handling</td>
+<td>Distinctive reward; small-screen privacy summary could improve</td>
+</tr>
+<tr>
+<td>Return</td>
+<td>Can I use another device or find the result?</td>
+<td>Account history works, but the same seat is not recognized in another browser</td>
+<td>Major continuity defect</td>
+</tr>
+</tbody></table>
+<h3>The central design opportunity</h3>
+<p>Treat reliable identity, money validation, and trustworthy state as part of the user experience. A pleasing payment card does not repair a lost host identity or an untrustworthy activity history. Conversely, the app does not need to expose database concepts to solve these problems. Users should simply see the right room, accurate amounts, clear progress, and honest recovery messages.</p>
+<h2 id="section-5">5. Screen-by-screen UI/UX assessment</h2>
+<h3>Landing page</h3>
+<p>The headline makes both the social and accounting value clear. “Start a cash game” and “Join a table” are distinct, visible options. The mobile screenshot puts both actions within the first screen. The calculator link offers a lower-commitment route, while local mode correctly says data is saved on the current device.</p>
+<p>The pale backdrop, dark primary buttons, generous spacing and restrained suit graphics provide a recognizable identity without competing with the proposition. The footer and self-hosting content support the open-source positioning.</p>
+<p>The navigation&#39;s icon-only sign-in action is less discoverable than the prominent game CTA. That is a reasonable guest-first tradeoff, but returning users should be studied separately. Do not solve this by forcing accounts into the game-creation path.</p>
+<figure><a href="evidence/landing-cli-mobile.png" target="_blank" rel="noopener"><img src="evidence/landing-cli-mobile.png" alt="Mobile landing page: the value proposition and create/join actions fit above the demo." loading="lazy"></a><figcaption>Mobile landing page: the value proposition and create/join actions fit above the demo. <a href="evidence/landing-cli-mobile.png">Open full resolution</a></figcaption></figure>
+<h3>Create and join</h3>
+<p>The three-field create form is appropriately short. Showing the consequence of “Add my opening buy-in” reduces the risk of accidentally recording money for a non-playing organizer. Validation moves focus to the first invalid field; the 320-pixel error-state capture remained within the page width.</p>
+<p>Join supports both a code and a pasted invite URL. The invitation dialog names the host and amount before participation. A guest joins at zero and chooses to record the opening buy-in explicitly; the host then approves it. This is a useful separation of membership from money.</p>
+<p>Weaknesses are the sub-cent input hole, low-contrast code guidance, and the inability of an already signed-in person to reclaim their seat in a second browser. A successful “Joined!” toast followed by the same disabled join interface is particularly confusing because the feedback contradicts the available action.</p>
+<figure><a href="evidence/create-mobile.png" target="_blank" rel="noopener"><img src="evidence/create-mobile.png" alt="Create form with the explicit opening-buy-in option." loading="lazy"></a><figcaption>Create form with the explicit opening-buy-in option. <a href="evidence/create-mobile.png">Open full resolution</a></figcaption></figure>
+<h3>Active game: host and player</h3>
+<p>The structure is easy to understand: game identity, invite/end controls, totals, roster, activity, then optional feedback. The persistent bottom action makes common purchases accessible. Host-managed players have visible management controls, while guests do not receive those controls.</p>
+<p>The roster is primary information and remains in normal document flow. At 320 pixels, a 12-seat table initially showed ten rows, expanded to twelve, and collapsed to ten again without horizontal document overflow. This is preferable to hiding important game state inside a second scroll area.</p>
+<p>Activity timestamps, counts and overflow actions are too faint. Repeated generic “Table updated” messages can also accumulate during rapid operations. The automation generated updates faster than typical human input, so the frequency observed should not be treated as a measured real-world annoyance. A useful follow-up is to coalesce identical notices and reserve interruptions for actions requiring attention.</p>
+<p>The desktop game remains a relatively narrow single column. That preserves continuity with mobile, though it leaves substantial horizontal space at 1440 pixels. This is not inherently a defect. A host-only two-column experiment could place activity beside the roster at wide widths, but should be tested before changing the current order.</p>
+<figure><a href="evidence/game-host-three-mobile.png" target="_blank" rel="noopener"><img src="evidence/game-host-three-mobile.png" alt="Host game with three players; the roster carries the important state." loading="lazy"></a><figcaption>Host game with three players; the roster carries the important state. <a href="evidence/game-host-three-mobile.png">Open full resolution</a></figcaption></figure>
+<h3>Cash-outs and discrepancy resolution</h3>
+<p>“Final chip values, not profit” is excellent domain guidance. Per-row save state, the total bank, entered cash-outs and a visible discrepancy support a host who is reconciling under social pressure. The shared guest flow exposes the current player&#39;s editable field while showing the rest of the table as read-only.</p>
+<p>A $10 mismatch in the review generated an explicit resolution action instead of quietly producing a final payment plan. The repository suites also exercised discrepancy allocation. The report does not claim that every combination of allocation weights and roster values was manually explored; those combinations rely on the unit/database coverage and source review.</p>
+<p>There is an architectural reliability concern worth follow-up: some lifecycle and cash-out mutations write the data first and append an audit event afterward. If the second operation fails, the first can remain committed while the caller sees a failure. That ordering is source-confirmed in <code>lib/data.ts</code>, but the specific network/event-cap failure was not reproduced through the browser in this review. It should become a fault-injection test, not be described as a frequently observed user failure.</p>
+<h3>Review and lock</h3>
+<p>The payment preview is visible before the irreversible decision. It names who pays whom, states that Mainpot does not move money, and explains that locking fixes cash-outs and opens payment tracking. “Edit cash-outs” remains easy to find. The final confirmation adds a deliberate pause.</p>
+<p>This flow deserves preservation. It makes the host review an understandable financial decision instead of a generic “finish” action. Keep the preview visible even if future designs compact the rest of the page.</p>
+<figure><a href="evidence/settlement-review-mobile.png" target="_blank" rel="noopener"><img src="evidence/settlement-review-mobile.png" alt="Payment review shows the proposed transfers before locking." loading="lazy"></a><figcaption>Payment review shows the proposed transfers before locking. <a href="evidence/settlement-review-mobile.png">Open full resolution</a></figcaption></figure>
+<h3>Finalized settlement and payment completion</h3>
+<p>The personal result leads with the action: how much remains to send or receive. Partial and completed states were tested: $20 owed became $10 after the first mark, then “All your payments are marked sent,” and reopening restored the remaining amount. The final net result remains separate from payment progress. Shared host/player views updated correctly.</p>
+<p>The distinction between <strong>marked sent</strong> and <strong>received</strong> is especially good. The receiver is told to confirm receipt in their payment app or cash. The neutral checkmark and strike-through also keep completion visually calm.</p>
+<p>Two details reduce usability. First, a row with payment shortcuts looks almost the same as a static row. Tapping the recipient/amount opens Venmo and Zelle details, but the screen offers no obvious instruction or chevron. Second, incoming transfers repeat the current recipient&#39;s name and truncate at phone widths. Personal incoming rows should emphasize who is paying the user.</p>
+<p>The payment ledger is explicitly labeled visible to everyone. The full host plan is separately labeled as host view. This is a shared-ledger product; the narrower player presentation should not be confused with a promise that participants cannot inspect the shared underlying ledger.</p>
+<figure><a href="evidence/guest-owes-mobile.png" target="_blank" rel="noopener"><img src="evidence/guest-owes-mobile.png" alt="A player&#39;s amount due appears before the recap. The recipient row is interactive but has no visible payment-details cue." loading="lazy"></a><figcaption>A player&#39;s amount due appears before the recap. The recipient row is interactive but has no visible payment-details cue. <a href="evidence/guest-owes-mobile.png">Open full resolution</a></figcaption></figure>
+<h3>Recap and sharing</h3>
+<p>The character card adds personality after the money work, with distinct illustrations, a short caption and a clear sharing action. It gives the app a memorable end state rather than leaving users on a bare transaction list.</p>
+<p>In the current source, names remain hidden, while dollar amounts and losses are enabled by default. The editor states that table and player names stay private and allows money/stat visibility to be changed. The review disabled amounts and losses, exported a <strong>2160 x 3840 PNG</strong>, and visually confirmed that the amount and identifying names were absent. Reduced-motion mode correctly skipped the animated reveal stage.</p>
+<p>At 320 x 568, the first editor viewport contains the title, preview, enlargement action, privacy heading and persistent share button; the actual privacy toggles require scrolling. They are reachable, but the share action is easier to encounter than the settings that define what it shares. A concise “Names hidden · amounts shown” summary near Share would help without adding another confirmation dialog.</p>
+<figure><a href="evidence/recap-viewport-320.png" target="_blank" rel="noopener"><img src="evidence/recap-viewport-320.png" alt="Recap editor at 320 x 568; privacy controls continue below the visible area." loading="lazy"></a><figcaption>Recap editor at 320 x 568; privacy controls continue below the visible area. <a href="evidence/recap-viewport-320.png">Open full resolution</a></figcaption></figure>
+<h3>Accounts, dashboard and friends</h3>
+<p>Password sign-up, password sign-in, profile editing, invalid Zelle feedback, valid-contact persistence and account JSON export all worked in the local shared environment. A finalized signed-in game appeared in Recent games with the expected +$10 result and account statistics. The first-use dashboard gives useful next steps instead of empty charts.</p>
+<p>The friend search shows a clear no-results state. A saved game template restored the setup fields, and Rematch prefilled the previous name and buy-in. However, Recent games provides only Rematch: the title does not open the original settlement. Separately, a saved-friend game invitation was stored and marked Invited for the host but did not appear on the recipient dashboard. Two synthetic permanent accounts successfully completed request, recipient acceptance and removal. Sign-out protected the dashboard on revisit. The underlying sender-self-accept authorization flaw remains separate from this successful normal UI flow.</p>
+<p>Deletion requests are saved as pending, but the dashboard does not show that durable state after a reload. The unchanged action invites another request and gives the user no way to confirm that the first one is still queued. Also, compact legal/privacy links would be useful at account creation and profile editing, where the user provides personal information.</p>
+<figure><a href="evidence/dashboard-history-mobile.png" target="_blank" rel="noopener"><img src="evidence/dashboard-history-mobile.png" alt="The completed game appears in account history with matching statistics." loading="lazy"></a><figcaption>The completed game appears in account history with matching statistics. <a href="evidence/dashboard-history-mobile.png">Open full resolution</a></figcaption></figure>
+<h3>Calculator, support and self-hosting</h3>
+<p>The standalone calculator works as a useful acquisition tool, with a seeded example, clear-example action, player rows, live totals and payment output. The page also contains a substantial worked explanation. At 393 pixels its full height was roughly <strong>10,374 pixels</strong>; the first viewport reaches the worksheet header, with the actual inputs lower down. The jump link helps, but a person arriving specifically to calculate should reach the worksheet sooner.</p>
+<p>The negative-value behavior is more important than this layout issue. A visible <code>-20</code> field is invalid according to native input validity, yet the output says $0 in, $0 out, balanced, and no payments needed. A live calculator must not allow a final-looking result to coexist with invalid data.</p>
+<p>Feedback offers a prominently displayed email address and GitHub alternatives. The review inspected destinations but did not send a real support message. The self-host page provides practical setup commands, but its horizontally scrolling code block lacks keyboard focusability at mobile width. The legal pages rendered and their links were inspected; their legal sufficiency was not assessed.</p>
+<h2 id="section-6">6. Findings with reproduction and acceptance criteria</h2>
+<h3>F01 · P1 · Cross-browser account continuity fails</h3>
+<p><strong>Observed:</strong> browser A signed in, created a game and had host controls. Browser B signed into the same account, opened the game, and was asked to join. Submitting the name showed “Joined!” but left the join form visible and host controls absent.</p>
+<p><strong>Why:</strong> the room resolves <code>currentPlayer</code> by <code>session_id</code>. The guarded join function recognizes the account&#39;s existing row by <code>user_id</code> and returns it with the previous session value. The UI and database disagree about how to identify the same person.</p>
+<p><strong>Source:</strong> <code>app/game/[code]/page.tsx:295</code>; <code>supabase/migrations/20260908181344_host_managed_players.sql:385</code>.</p>
+<p><strong>Fix:</strong> define a single authenticated-seat ownership rule across room rendering and guarded mutations. Preserve anonymous-browser identity as the guest fallback. Avoid solving the UI by granting broader mutation permissions.</p>
+<p><strong>Acceptance:</strong> create as a permanent-account host in A; sign into the same account in B; open the invite and access the same seat and host actions. Verify both contexts remain valid, no duplicate player is created, and anonymous users cannot claim another seat.</p>
+<p><strong>Evidence:</strong> <code>account-review.json</code>; <code>same-account-second-device-after.png</code>.</p>
+<h3>F02 · P1 · Cross-game audit-history insertion</h3>
+<p><strong>Observed:</strong> authenticated synthetic user A created one game. User B created a separate game. A inserted a <code>game_finalized</code> event addressed to B&#39;s game using A&#39;s own player ID as actor. The insert succeeded and an independent database read confirmed persistence. No corresponding finalization mutation was required.</p>
+<p><strong>Why:</strong> the event INSERT policy accepts ownership of the actor row without requiring that actor to belong to the event&#39;s game. This compromises the reliability of the activity trail; it does not itself demonstrate a change to balances or game status.</p>
+<p><strong>Source:</strong> <code>supabase/migrations/20260830000000_initial.sql:221</code>; event display in <code>components/GameRoom/ActivityFeed.tsx</code>.</p>
+<p><strong>Fix:</strong> require consistent game membership for actors and subjects, and move authoritative audit-event creation into the same controlled operation as the state mutation. Review which optional analytics/feedback events should remain client-writable.</p>
+<p><strong>Acceptance:</strong> reject cross-game actors and subjects, reject fabricated lifecycle events, and continue to record each valid mutation exactly once, including retries. Test with separate accounts against the final migrated schema.</p>
+<p><strong>Evidence:</strong> <code>account-probes.json</code>, <code>crossGameAuditInsert.allowed=true</code>, <code>persisted=true</code>. This was a local synthetic probe; production exploitation was neither attempted nor inferred.</p>
+<h3>F03 · P1 · Friend requests can be self-accepted</h3>
+<p><strong>Observed:</strong> user A created a pending request addressed to B, then A updated that same row to <code>accepted</code>. The requester&#39;s authenticated API call succeeded.</p>
+<p><strong>Why:</strong> the effective UPDATE policy allows either party to update the relationship. The UI&#39;s recipient-only button is not a server-side restriction.</p>
+<p><strong>Source:</strong> <code>supabase/migrations/20260830000000_initial.sql:237</code>; <code>lib/friends.ts:92</code>.</p>
+<p><strong>Fix:</strong> protect the state transition and immutable requester/addressee fields. Only the addressee should accept a pending request; cancellation and removal need their own explicitly allowed transitions. Review insert policy constraints so an already-accepted relationship cannot be supplied at creation.</p>
+<p><strong>Acceptance:</strong> sender self-accept and endpoint rewrites fail; legitimate recipient acceptance, sender cancellation, recipient decline and either-side removal still work.</p>
+<p><strong>Evidence:</strong> <code>account-probes.json</code>; normal UI journey in <code>social-review.json</code>.</p>
+<h3>F13 · P1 · Saved-friend game invitations disappear from the inbox</h3>
+<p><strong>Observed:</strong> two accounts became friends. The host created a game, invited the friend and saw “Invited.” The recipient opened Dashboard and had no Join table action. With the recipient&#39;s authenticated credentials, a plain invitation query returned one pending row, while the query joined to <code>games!inner</code> returned zero rows without an error.</p>
+<p><strong>Why:</strong> the invitation is visible to its recipient, but the game&#39;s read policy requires room access. The dashboard&#39;s inner join removes the invitation before the person has opened the room code. The UI treats the empty result as “no invitations,” hiding the mismatch.</p>
+<p><strong>Fix:</strong> provide a narrowly scoped invitation lookup that returns only the metadata needed by its actual recipient. Do not solve this by making every game&#39;s ledger publicly readable. Define when acceptance grants room access, and handle decline/re-invite consistently.</p>
+<p><strong>Acceptance:</strong> invite a friend who has never opened the room. Their dashboard shows the correct host, game and buy-in and lets them join. Unrelated accounts cannot read the invitation or game. Repeat with an ended game and a declined invitation.</p>
+<p><strong>Source/evidence:</strong> <code>lib/invites.ts:37</code>; <code>supabase/migrations/20260830030000_public_beta_guardrails.sql</code> game access policies; <code>social-review.json</code> records <code>plainRows=1</code>, <code>joinedRows=0</code>, <code>visible=false</code>; <code>friend-game-invite-mobile.png</code>.</p>
+<h3>F04 · P2 · Invalid calculator input yields a valid-looking result</h3>
+<p><strong>Reproduce:</strong> clear the example; enter <code>-20</code> in the first Money in field; leave final stacks blank. The field remains <code>-20</code> and native validity is false, but totals become zero and the result says “Bank balanced” and “No payments needed.”</p>
+<p><strong>Source:</strong> <code>components/SettlementCalculator.tsx:40</code>, where invalid/negative values fall back to zero; live result construction and number inputs in the same file.</p>
+<p><strong>Fix:</strong> retain empty, valid and invalid as distinct states. Show an inline explanation and suppress the payment recommendation until every entered amount is valid. Apply a consistent two-decimal currency policy.</p>
+<p><strong>Acceptance:</strong> negative, non-finite, out-of-range and unsupported-precision values cannot produce a ready-to-use settlement result. Correcting the value clears the error and updates the plan.</p>
+<p><strong>Evidence:</strong> <code>edge-review.json</code>, Negative calculator input.</p>
+<h3>F05 · P2 · Sub-cent local game creation records zero</h3>
+<p><strong>Reproduce:</strong> create a local-mode game with <code>0.001</code> as the buy-in. Creation succeeds; the room displays a $0.00 buy-in, a $0.00 pot, and a recorded $0.00 purchase.</p>
+<p><strong>Source:</strong> positive-number validation in <code>app/create/page.tsx:107</code>; rounding in <code>lib/data.ts:306</code> and <code>lib/data.ts:349</code>.</p>
+<p><strong>Fix:</strong> validate the normalized currency amount, including minimum, maximum and precision, before committing a game. Align local and shared behavior and provide a user-facing field error rather than relying on a database constraint.</p>
+<p><strong>Acceptance:</strong> values below $0.01 are rejected before creation. Two-decimal values persist exactly; unsupported extra precision has an explicit policy. No zero-value purchase is recorded from an enabled opening-buy-in option.</p>
+<p><strong>Evidence:</strong> <code>subcent-create-320.png</code>; <code>edge-review.json</code>.</p>
+<h3>F06 · P2 · Contrast failures across supporting UI</h3>
+<p><strong>Observed examples:</strong> activity timestamps and action dots around 2.6:1; join-code guidance around 2.6:1; the guest “Final stack” label around 2.6:1; calculator supporting labels around 4.41:1 on pale backgrounds; white Venmo button text around 3.38:1; dashboard “Best win” text around 2.6:1.</p>
+<p>Normal-sized text requires 4.5:1 under WCAG AA. Treat both the severe and near-threshold failures as real, but address the most important controls and instructions first. These figures come from rendered CSS measured by axe, not manual estimates.</p>
+<p><strong>Fix:</strong> define accessible secondary-text colors for white, tinted and dark surfaces. Darken the Venmo action background or choose another readable foreground treatment. Preserve visual hierarchy through size, weight and spacing instead of very faint text.</p>
+<p><strong>Acceptance:</strong> affected states pass contrast checks at their actual backgrounds; review focus, disabled and hover states separately. Relevant sources include <code>ActivityFeed.tsx</code>, <code>CashOutEntry.tsx</code>, <code>TransferList.tsx:133</code>, <code>SettlementCalculator.tsx</code>, and account pages.</p>
+<h3>F07 · P2 · Payment details have weak discoverability</h3>
+<p><strong>Observed:</strong> the payer&#39;s recipient-and-amount row is a button when payment handles exist, but appears like a static row. Its accessible name is the recipient and amount, without an action description. The details sheet itself works, including Escape dismissal.</p>
+<p><strong>Fix:</strong> add a small explicit “Payment details” label or consistent directional cue. An action name such as “Payment details for Casey, $10” would distinguish it from the adjacent mark-sent checkbox.</p>
+<p><strong>Acceptance:</strong> a first-time participant can find how to pay without being told to tap the name; keyboard and screen-reader users can distinguish opening details from marking sent. Confirm this with people; the discoverability impact is currently an expert hypothesis.</p>
+<p><strong>Source/evidence:</strong> <code>components/Settlement/TransferList.tsx:280</code>; <code>guest-owes-mobile.png</code>; <code>payment-details-mobile.png</code>.</p>
+<h3>F08 · P2 · Personal incoming rows spend space on redundant names</h3>
+<p><strong>Observed:</strong> at 393 pixels, the incoming row rendered “UX Jordan -&gt; UX ...” next to $10. The sender/recipient string shares a single truncated region.</p>
+<p><strong>Fix:</strong> in the personal incoming view, show “From Jordan” or the payer&#39;s full name, with the amount separately aligned. Preserve full names in accessible text and in the detailed ledger. Test the longest supported names and visually similar names.</p>
+<p><strong>Acceptance:</strong> the person awaiting payment can identify each payer at 320 and 393 pixels without guessing from an ellipsis.</p>
+<p><strong>Source/evidence:</strong> <code>components/Settlement/PlayerSettlementSummary.tsx</code> and <code>TransferList.tsx:280</code>; <code>host-incoming-mobile.png</code>.</p>
+<h3>F09 · P2 · Deletion request progress is invisible</h3>
+<p><strong>Observed:</strong> the request was stored as <code>pending</code>; after reload, no pending/requested status was visible and the original Request account deletion action remained.</p>
+<p><strong>Fix:</strong> fetch the existing request and show state plus requested date. Explain what support will do next and offer a private contact route for questions. Allow another request only when its semantics are clear.</p>
+<p><strong>Acceptance:</strong> request, refresh, sign out/in: the account still shows the pending request without encouraging a duplicate. Export remains available while deletion is pending.</p>
+<p><strong>Source/evidence:</strong> <code>app/dashboard/page.tsx:193</code> and <code>:460</code>; <code>social-review.json</code>; <code>deletion-request-no-state-mobile.png</code>.</p>
+<h3>F10 · P2 · Self-host code scroll is not keyboard reachable</h3>
+<p><strong>Observed:</strong> the mobile command block produces axe&#39;s <code>scrollable-region-focusable</code> failure. It scrolls horizontally but has no focusable content or container.</p>
+<p><strong>Fix:</strong> make the code region keyboard-focusable with a meaningful accessible label; optionally provide a clearly labeled copy command action. Keep the page itself free of horizontal overflow.</p>
+<p><strong>Acceptance:</strong> keyboard users can reach and scroll the entire command without pointer input. Preserve code selection and readability.</p>
+<p><strong>Evidence:</strong> <code>browser-review.json</code>, self-host-mobile.</p>
+<h3>F14 · P2 · Account history has no path back to the settlement</h3>
+<p><strong>Observed:</strong> a finalized game appeared with the correct result, but its Recent games row contained only a Rematch link. The game name was static text. A user can create another game from it but cannot reopen that saved game&#39;s payment ledger or recap from the dashboard.</p>
+<p><strong>Fix:</strong> make the title or an explicit View game action open the original record, retaining Rematch as a separate secondary action. Couple this with F01 so the correct account-owned seat is restored across devices.</p>
+<p><strong>Acceptance:</strong> after playing another game or changing browsers, select a prior result from history and reach its original finalized settlement. Preserve status restrictions; opening history must not reopen mutations.</p>
+<p><strong>Source/evidence:</strong> <code>app/dashboard/page.tsx:395</code>; <code>social-review.json</code> records only <code>Rematch</code> under <code>recentGameRowLinks</code>; <code>dashboard-history-mobile.png</code>. The missing navigation is observed; its effect on retention has not been measured.</p>
+<h3>F11 · P3 · The calculator delays its main task</h3>
+<p>The mobile header, description and two navigation actions consume most of the initial viewport before the worksheet. A second explanatory heading repeats the page&#39;s intent. The long educational content is useful, but calculator users should be able to begin entering data sooner.</p>
+<p><strong>Proposal:</strong> shorten the top section, begin the worksheet immediately after the title/one-sentence explanation, and place the worked guide behind a clearly labeled learning link or below the complete tool. Compare time to first edited field with the current layout.</p>
+<p><strong>Evidence:</strong> <code>calculator-first-screen.png</code>; full-height metric in <code>browser-review.json</code>.</p>
+<h3>F12 · P3 · Make export privacy visible beside Share</h3>
+<p>At 320 x 568, privacy controls are below the first editor viewport while Share remains visible. Amounts and losses are enabled by default in the current implementation. This is a discoverability risk, not evidence of an export leak: the tested disabled-amount export correctly concealed them.</p>
+<p><strong>Proposal:</strong> place a persistent, short privacy summary beside Share. Keep names hidden, make the selected monetary visibility obvious, and avoid adding another mandatory modal.</p>
+<p><strong>Acceptance:</strong> users can accurately predict what the exported card includes before sharing it. Verify both default and changed settings, including reduced-motion mode and repeated editor openings.</p>
+<p><strong>Evidence:</strong> <code>recap-viewport-320.png</code>, <code>recap-export-private.png</code>, <code>edge-review.json</code>.</p>
+<h2 id="section-7">7. Accessibility and responsive findings in context</h2>
+<p>The app already has many good foundations: a skip link, labeled inputs, errors tied to fields, prominent focus styles, deliberate confirmation dialogs, focus restoration, native disclosures, and reduced-motion handling. The existing mobile suite includes focused checks for 320-pixel sheets, invite focus, toast placement and settlement actions.</p>
+<p>Across the 60 additional scanned states, 22 had at least one automated accessibility violation. There was no measured horizontal <strong>document</strong> overflow. That does not mean all text was visible: truncation within a row and intentional horizontal code scrolling are different problems. Screenshots were inspected specifically to avoid conflating those metrics.</p>
+<p>The broadest accessibility weakness is contrast, followed by the isolated self-host scrolling region. Screen-reader output, voice control, text-spacing overrides, browser zoom, forced colors, and real-device virtual-keyboard obstruction remain to be tested. Do not certify the product based on axe alone.</p>
+<p>Full-page screenshots can place fixed/sticky elements partway through a long document capture. Use the viewport screenshots for evaluating dialog dimensions; do not interpret that capture artifact as evidence that a dialog extends outside the real viewport.</p>
+<h2 id="section-8">8. Recommended implementation sequence</h2>
+<h3>First: protect continuity and trust</h3>
+<ol>
+<li>Resolve F01&#39;s account/seat identity mismatch with dedicated two-browser regression coverage.</li>
+<li>Restrict audit-event authoring and prove actor/game consistency for F02.</li>
+<li>Enforce friendship transitions server-side for F03.</li>
+<li>Repair the invitee-scoped game invitation read in F13.</li>
+<li>Add the adversarial probes as maintained regression tests, with synthetic identities and final-schema validation.</li>
+</ol>
+<p>These tasks need careful review of permissions and data ownership. They should be separate coherent changes rather than mixed into a large visual cleanup.</p>
+<h3>Next: make money states unambiguous</h3>
+<p>Address calculator and create-form normalization together with shared validation rules, then audit other amount-entry surfaces for the same empty/invalid/rounded distinction. Test cent boundaries, negative values, maximum values, duplicate retries, and corrected entries. Add fault-injection coverage for a successful mutation followed by a failed audit write.</p>
+<p>Make payment-details actions explicit, shorten personal incoming labels, and keep marked-sent progress separate from final game outcome. Preserve the confirmation and preview stages that already work.</p>
+<h3>Then: complete accessibility and account feedback</h3>
+<p>Fix secondary text and action contrast systematically. Repair keyboard access to the self-host code block. Show durable deletion status and a route from history to the original game record. Check privacy/help discoverability at account creation and profile editing. Re-run affected screens at 320, 393 and desktop widths, plus keyboard and screen-reader checks.</p>
+<h3>Finally: test layout hypotheses with people</h3>
+<p>Evaluate a more direct calculator opening, a compact export privacy summary, and whether a wide-screen host layout improves scanning. These are candidates for user testing, not proven redesign requirements. Keep account prompts optional and avoid obscuring the active roster with growth or installation content.</p>
+<h2 id="section-9">9. Limits, unresolved integration checks and excluded claims</h2>
+<h3>Local magic-link callback</h3>
+<p>The synthetic local SMTP inbox received the sign-in email. Following the verification link did not leave the browser signed in to the dashboard. The trace includes a change between <code>127.0.0.1</code> and <code>localhost</code>, and the browser returns to sign-in. Password authentication on the original origin worked.</p>
+<p>This is an unresolved <strong>local callback/origin integration issue</strong>, not proof that production magic links fail. Check the Next request origin, canonical site URL, Supabase redirect allowlist and cookie host together. Reproduce on one consistent hostname and then verify the actual hosted callback before making a production claim. Evidence is in <code>magic-link-review.json</code> and the failure screenshot.</p>
+<h3>What was not established</h3>
+<ul>
+<li>No real-user interviews, moderated sessions, SUS score, task-time baseline, conversion rate or retention lift was measured.</li>
+<li>No deployed build or hosted migration history was audited. Production app, realtime and database behavior may differ from this working tree.</li>
+<li>Google OAuth, hosted email delivery, hosted sign-up confirmation and password recovery on production were not verified.</li>
+<li>Native iPhone/Android installation, push permission, background delivery, native sharing, camera-based QR scanning, Venmo app launch and actual Zelle receipt were not exercised on physical devices.</li>
+<li>The installation prompts in the smoke suite use browser capability mocks. The separate offline check used an actual service worker.</li>
+<li>Product Ops outbox/canary behavior has unit coverage and unauthenticated HTTP checks here; no real collector, monitor alert, or production end-to-end canary was validated.</li>
+<li>The 60-second churn run is not a performance, load or long-duration reliability certification. No production field-performance metrics or Lighthouse score was collected.</li>
+<li>Recurring-template selection and Rematch prefill were exercised. Game invitation delivery to the dashboard failed and is reported in F13. A complete matrix of invitation decline/re-invite, template editing/deletion and every account combination was not run.</li>
+<li>Backup/restore, disaster recovery, legal sufficiency, abuse at scale and comprehensive penetration testing are outside the executed evidence.</li>
+</ul>
+<h3>Concerns explicitly checked and excluded</h3>
+<p>An initial read of the original profile RLS policy suggested broad contact visibility. Later migrations revoke table-level profile reads and grant only public columns. The live unrelated-account contact query was denied. This is a confirmed protection, not an open report finding.</p>
+<p>Likewise, the product intentionally exposes a shared payment ledger to game participants while keeping the full host controls out of player UI. The terms and current UI do not establish a stronger per-player secrecy promise. This report does not label that intentional sharing as a vulnerability.</p>
+<h2 id="section-10">10. Proposed user-research study</h2>
+<p>Recruit six to eight people for a first formative round: experienced home-game hosts, casual players who normally receive a link, and at least two people using accessibility features or older/smaller phones. This is a proposed study design, not a statistically representative sample or completed research.</p>
+<p>Use synthetic $20 games and give outcome-based tasks without describing the interface:</p>
+<ol>
+<li>Start a game while hosting without playing; invite a friend.</li>
+<li>Join as a player, record an opening buy-in, then request a rebuy.</li>
+<li>As host, find and approve the pending purchase and correct a mistaken entry.</li>
+<li>Cash out with an intentionally introduced $10 discrepancy; explain the resolution before locking.</li>
+<li>As a player, identify the recipient, find payment details, and distinguish “marked sent” from confirmed receipt.</li>
+<li>Change devices while signed in and resume the same role after F01 is fixed.</li>
+<li>Share a card without disclosing money; explain what the image will contain before exporting.</li>
+<li>Find an old result, request a data export and identify the state of a deletion request.</li>
+</ol>
+<p>Observe first action, wrong turns, assistance required, recovery, and the participant&#39;s explanation of the current state. Ask short comprehension questions after each money-related action: “What changed?”, “Who can change this now?”, and “Has any money actually moved?” Avoid leading people to the checkbox, recipient row or disclosure control.</p>
+<p>Useful targets for a follow-up release are zero unassisted money-state misunderstandings in the formative sessions, no seat-loss across supported identity transitions, no missing recipients after name truncation checks, and successful privacy prediction before export. Quantitative task-time or satisfaction targets should be set after collecting a baseline, not invented from this audit.</p>
+<h2 id="section-11">11. Evidence index and handoff</h2>
+<p>The report directory includes the editable Markdown, a reading-friendly HTML version, reproduction scripts and an evidence folder. The shareable PDF is at <code>output/pdf/mainpot-ui-ux-case-study-2026-09-08.pdf</code> in the repository. The JSON files preserve observed results; screenshots use only synthetic games and accounts.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>evidence/unit.log</code>, <code>lint.log</code>, <code>build.log</code></td>
+<td>Repository quality-gate results</td>
+</tr>
+<tr>
+<td><code>evidence/realtime.log</code>, <code>desktop-smoke.log</code>, <code>mobile-smoke.log</code></td>
+<td>Existing browser-suite results</td>
+</tr>
+<tr>
+<td><code>evidence/database-assurance.log</code>, <code>database-soak.log</code></td>
+<td>Current-migration database checks and short churn run</td>
+</tr>
+<tr>
+<td><code>evidence/browser-review.json</code></td>
+<td>38 public/local-game accessibility and viewport captures</td>
+</tr>
+<tr>
+<td><code>evidence/account-review.json</code></td>
+<td>22 account/shared-game captures and additional journey checks</td>
+</tr>
+<tr>
+<td><code>evidence/account-probes.json</code></td>
+<td>Contact-read protection, self-accept and cross-game audit probes</td>
+</tr>
+<tr>
+<td><code>evidence/social-review.json</code></td>
+<td>Friendship, templates, rematch, invitation failure and deletion status</td>
+</tr>
+<tr>
+<td><code>evidence/edge-review.json</code></td>
+<td>Negative input, sub-cent create, 12-seat disclosure and recap export</td>
+</tr>
+<tr>
+<td><code>evidence/platform-review.json</code></td>
+<td>Static endpoints, unauthenticated routes and actual offline shell</td>
+</tr>
+<tr>
+<td><code>evidence/magic-link-review.json</code></td>
+<td>Local SMTP/callback investigation</td>
+</tr>
+<tr>
+<td><code>evidence/source-snapshot.json</code>, <code>starting-diff.txt</code></td>
+<td>Version identity and pre-existing working-tree state</td>
+</tr>
+</tbody></table>
+<p>The case for the next iteration is specific: keep Mainpot&#39;s clear guest-first game flow, strengthen identity and authoritative state, make invalid money impossible to mistake for a finished calculation, and make the existing payment/privacy actions easier to discover.</p>
+</main></div><footer>Expert review with executed local tests. Production and real-device limitations are stated in the report.</footer></body></html>

@@ -1,0 +1,27 @@
+Skip to content
+Join
+
+HOST A TABLE
+
+Start a game.
+
+Set the buy-in, then invite your table with a code.
+
+Your name
+
+Enter your name.
+
+Game name
+
+Enter a game name.
+
+Buy-in amount
+$
+
+Enter an amount greater than 0.
+
+Add my opening buy-in
+
+Your opening buy-in will be recorded when you create the game.
+
+Create game

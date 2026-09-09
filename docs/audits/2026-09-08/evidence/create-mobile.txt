@@ -1,0 +1,19 @@
+Skip to content
+Mainpot
+Join
+
+HOST A TABLE
+
+Start a game.
+
+Set the buy-in, then invite your table with a code.
+
+Your name
+Game name
+Buy-in amount
+$
+Add my opening buy-in
+
+Your opening buy-in will be recorded when you create the game.
+
+Create game

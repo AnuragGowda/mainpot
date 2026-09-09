@@ -1,0 +1,26 @@
+[
+  {
+    "test": "Negative calculator input",
+    "input": "-20",
+    "nativeValid": false,
+    "result": "MONEY IN\n\n$0.00\n\nFINAL STACKS\n\n$0.00\n\nBank balanced\n\nThe payment list uses the recorded results as entered.\n\nPAYMENT LIST\n\n0 payments\n\nNo payments needed — everyone is square.\n\nTrack the next game in Mainpot",
+    "alerts": [
+      ""
+    ]
+  },
+  {
+    "test": "Subcent local opening",
+    "text": "Skip to content\nSubcent audit\nActive\n\nHosted by Audit\n\nInvite\nEnd game\n\nBUY-IN\n\n$0.00\n\nPOT\n\n$0.00\n\nPLAYERS\n\n1\n\nSaved on this device · live sync is off\nAt the table\n\nVerified buy-ins by player.\n\nAdd player\nAU\n\nAudit\n\nHost\nYou\n\n1 entry\n\n$0.00\n\nActivity\n\nNewest first.\n\n3 events\n$\n\nAudit bought in for $0.00\n\n6:16 PM\n···\n+\n\nAudit joined\n\n6:16 PM\n✓\n\nAudit opened the table\n\n6:16 PM\nAdd a rebuy\nLeave"
+  },
+  {
+    "test": "Roster disclosure",
+    "before": 10,
+    "after": 12,
+    "collapsedAgain": 10,
+    "scrollWidth": 320
+  },
+  {
+    "test": "Privacy toggle and PNG fallback export",
+    "file": "mainpot-game-recap.png"
+  }
+]

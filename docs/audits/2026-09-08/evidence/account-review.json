@@ -1,0 +1,397 @@
+{
+  "results": [
+    {
+      "name": "signin-shared-mobile",
+      "url": "http://127.0.0.1:3110/signin?next=/dashboard",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "signup-mobile",
+      "url": "http://127.0.0.1:3110/signin?next=/dashboard",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "dashboard-empty-mobile",
+      "url": "http://127.0.0.1:3110/dashboard",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "profile-error-mobile",
+      "url": "http://127.0.0.1:3110/dashboard",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "profile-mobile",
+      "url": "http://127.0.0.1:3110/dashboard",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "account-data-mobile",
+      "url": "http://127.0.0.1:3110/dashboard",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "friends-empty-mobile",
+      "url": "http://127.0.0.1:3110/friends",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "friends-no-results-mobile",
+      "url": "http://127.0.0.1:3110/friends",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "same-account-second-device-before",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "same-account-second-device-after",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "guest-invite-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "guest-before-buyin-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "html": "<span class=\"text-xs text-gray-400\">4 events</span>",
+              "target": [
+                ".mb-3.justify-between.items-end > .text-gray-400"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:13:03.982687+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:13 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:12:59.650804+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:12 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:12:59.650804+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:12 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:12:59.650804+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:12 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "host-pending-approval-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "html": "<span class=\"text-xs text-gray-400\">5 events</span>",
+              "target": [
+                ".mb-3.items-end.justify-between > .text-gray-400"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:13:04.894293+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:13 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .flex-1.min-w-0 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:13:03.982687+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:13 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .flex-1.min-w-0 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<button type=\"button\" aria-label=\"Actions for UX Jorda...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "target": [
+                "button[aria-label=\"Actions for UX Jordan joined\"]"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:12:59.650804+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:12 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .flex-1.min-w-0 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<button type=\"button\" aria-label=\"Actions for UX Casey...\" aria-expanded=\"false\" class=\"grid h-11 w-11 shrin...\">",
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .rounded-md.hover\\:text-gray-700.w-11"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 13.5pt (18px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:12:59.650804+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:12 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .flex-1.min-w-0 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:12:59.650804+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:12 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .flex-1.min-w-0 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "guest-pending-approval-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "html": "<span class=\"text-xs text-gray-400\">5 events</span>",
+              "target": [
+                ".mb-3.justify-between.items-end > .text-gray-400"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #99a1af, background color: #f7f8f6, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:13:04.894293+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:13 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:13:03.982687+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:13 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:12:59.650804+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:12 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:12:59.650804+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:12 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            },
+            {
+              "html": "<time datetime=\"2026-09-08T23:12:59.650804+00:00\" class=\"mt-0.5 block text-xs text-gray-400\">6:12 PM</time>",
+              "target": [
+                ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .min-w-0.flex-1 > time"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "guest-cashout-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "html": "<p class=\"text-[11px] font-medium uppercase tracking-wide text-gray-400\">Final stack</p>",
+              "target": [
+                ".text-\\[11px\\]"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "guest-waiting-settlement-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "html": "<p class=\"text-[11px] font-medium uppercase tracking-wide text-gray-400\">Final stack</p>",
+              "target": [
+                ".text-\\[11px\\]"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "guest-owes-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "host-incoming-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "payment-details-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "html": "<a href=\"https://venmo.com/ux...\" target=\"_blank\" rel=\"noreferrer\" class=\"inline-flex h-11 ite...\">",
+              "target": [
+                ".bg-\\[\\#008CFF\\]"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.38 (foreground color: #ffffff, background color: #008cff, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "guest-sent-mobile",
+      "url": "http://127.0.0.1:3110/game/CUBWBH",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": []
+    },
+    {
+      "name": "dashboard-history-mobile",
+      "url": "http://127.0.0.1:3110/dashboard",
+      "width": 393,
+      "scrollWidth": 393,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "html": "<span class=\"text-xs text-gray-400\">Best win $10.00</span>",
+              "target": [
+                ".text-gray-400"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "dashboard-history-desktop",
+      "url": "http://127.0.0.1:3110/dashboard",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": [
+            {
+              "html": "<span class=\"text-xs text-gray-400\">Best win $10.00</span>",
+              "target": [
+                ".text-gray-400"
+              ],
+              "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "checks": [
+    "Unauthenticated dashboard redirects to sign-in",
+    "Password signup and dashboard in local confirmation-disabled auth",
+    "Profile validation and payment-contact persistence",
+    "Account JSON export downloads",
+    "Friends search empty state",
+    "Existing account password login in second browser context",
+    {
+      "secondDeviceJoinStillShown": true,
+      "secondDeviceHostControls": false
+    },
+    "Shared settlement and sender-to-recipient payment completion",
+    "Finalized signed-in game appears in account history"
+  ],
+  "errors": []
+}

@@ -1,0 +1,7 @@
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ audit events reject cross-game references and remain append-only
+✓ only friendship recipients can resolve pending requests
+✓ invitation inbox is scoped, acceptance grants access, and declined invitations can be re-sent
+Audit security regression checks passed.

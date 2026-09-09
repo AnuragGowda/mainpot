@@ -1,0 +1,28 @@
+[
+  "Search and send friend request",
+  "Recipient accepts and both accounts list friendship",
+  {
+    "gameInvite": {
+      "plainRows": 1,
+      "joinedRows": 0,
+      "visible": false
+    }
+  },
+  "Direct room URL joins the invited game; Dashboard invitation visibility recorded separately",
+  {
+    "recentGameRowLinks": [
+      "Rematch"
+    ]
+  },
+  "Rematch pre-fills the game name and buy-in",
+  "Saved recurring template is selectable and restores setup",
+  "Remove friendship",
+  {
+    "deletionStatus": "pending"
+  },
+  {
+    "deletionPendingVisible": 0,
+    "requestButtonStillPresent": true
+  },
+  "Sign out protects dashboard"
+]

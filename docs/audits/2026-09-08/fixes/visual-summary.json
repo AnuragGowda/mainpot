@@ -1,0 +1,27 @@
+[
+  {
+    "file": "docs/audits/2026-09-08/fixes/visual-check.json",
+    "screens": 9,
+    "withViolations": 0,
+    "overflow": 0,
+    "errors": [],
+    "checks": []
+  },
+  {
+    "file": "docs/audits/2026-09-08/fixes/account-evidence/account-review.json",
+    "screens": 21,
+    "withViolations": 0,
+    "overflow": 0,
+    "errors": [],
+    "checks": [
+      "Unauthenticated dashboard redirects to sign-in",
+      "Password signup and dashboard in local confirmation-disabled auth",
+      "Profile validation and payment-contact persistence",
+      "Account JSON export downloads",
+      "Friends search empty state",
+      "Existing account password login in second browser context",
+      "Shared settlement and sender-to-recipient payment completion",
+      "Finalized signed-in game appears in account history"
+    ]
+  }
+]

@@ -1,0 +1,750 @@
+
+> mainpot@0.1.0 test:db:soak
+> node scripts/test-database-soak.mts
+
+Running local database churn soak for 1 minute(s)…
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.117.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ resumed browser sessions can update their payments after auth rotation
+Database assurance passed.
+Database churn soak passed (31 complete assurance cycles).

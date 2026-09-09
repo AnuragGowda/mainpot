@@ -1,0 +1,59 @@
+
+> mainpot@0.1.0 build
+> npm run build:service-worker && next build
+
+
+> mainpot@0.1.0 build:service-worker
+> tsc --project tsconfig.service-worker.json
+
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.mts took 43ms
+- Experiments (use with caution):
+  · optimizePackageImports
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 952ms
+  Running TypeScript ...
+  Finished TypeScript in 2.8s ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/25) ...
+  Generating static pages using 9 workers (6/25)
+  Generating static pages using 9 workers (12/25)
+  Generating static pages using 9 workers (18/25)
+✓ Generating static pages using 9 workers (25/25) in 376ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/health
+├ ƒ /api/health/canary
+├ ƒ /api/product-ops/events
+├ ƒ /api/push/config
+├ ƒ /api/push/dispatch
+├ ƒ /api/push/subscriptions
+├ ƒ /auth/callback
+├ ○ /create
+├ ○ /dashboard
+├ ○ /feedback
+├ ○ /friends
+├ ƒ /game/[code]
+├ ○ /icon.svg
+├ ○ /join
+├ ○ /manifest.webmanifest
+├ ○ /opengraph-image
+├ ○ /poker-settlement-calculator
+├ ○ /privacy
+├ ○ /recap-lab
+├ ○ /robots.txt
+├ ○ /self-host
+├ ○ /signin
+├ ○ /sitemap.xml
+└ ○ /terms
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

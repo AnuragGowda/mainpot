@@ -1,0 +1,55 @@
+Skip to content
+Mainpot
+Start game
+
+LEGAL
+
+Terms of use
+
+Mainpot is a shared record for friendly home poker games. These terms explain what the service does—and what it does not do.
+
+Effective August 30, 2026
+
+Using Mainpot
+
+By using Mainpot, you agree to these terms. You must be legally able to enter this agreement and use the service only in ways permitted where you live.
+
+Mainpot is intended for adults organizing lawful, private games. It is not designed for real-money online gambling, wagering with strangers, or commercial casino operations.
+
+A ledger, not a payment service
+
+Mainpot records buy-ins, cash-outs, and suggested settlement transfers. It does not hold funds, process payments, extend credit, determine winners, or guarantee that anyone pays. Payment handles are optional notes shared with people in a game.
+
+Your games and invite links
+
+You are responsible for the accuracy of information you enter and for deciding who can access a game. Anyone with a room code or invite link may be able to join or view game details, so share them only with people you trust.
+
+Hosts can manage participants and ledger entries. Players can enter their own cash-out amount, while hosts can correct any player's amount so the table reconciles.
+
+Accounts and acceptable use
+
+You may use guest mode or create an account where available. Do not interfere with the service, access another person's account or game without permission, upload unlawful content, or use Mainpot to facilitate illegal activity.
+
+During the public beta, features are free subject to fair-use limits that protect the shared service. We may limit excessive room creation, automated requests, player counts, or ledger activity.
+
+Open-source software
+
+The Mainpot source code is available under the MIT License. That license governs your use of the code; these terms govern your use of the hosted service.
+
+Availability and liability
+
+The service is provided “as is” and may change, become unavailable, or contain errors. To the extent permitted by law, Mainpot's contributors are not liable for losses arising from incorrect entries, settlements, payments, game activity, or use of the service.
+
+Changes and contact
+
+We may update these terms as the product evolves. Material changes will be reflected by a new effective date. Questions can be raised through the public project repository.
+
+Built for home games.
+
+© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.
+
+Self-host
+Feedback
+Terms
+Privacy
+Open source

@@ -1,0 +1,31 @@
+Skip to content
+Friday night UX review
+Settling
+
+Hosted by Casey
+
+Settlement results and payment plan
+Review the payments
+
+Check who pays whom before locking the settlement. No money moves in Mainpot.
+
+Casey → Jordan
+$10.00
+Casey → Taylor
+$10.00
+Ready to settle?
+
+Locking fixes the cash-outs and opens payment tracking.
+
+Players
+3
+Bought in
+$60.00
+Payments left
+2
+Lock settlement
+Edit cash-outs
+Full settlement plan
+HOST VIEW
+Payments, player results, and bank view
+＋

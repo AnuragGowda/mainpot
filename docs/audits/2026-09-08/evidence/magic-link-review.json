@@ -1,0 +1,26 @@
+[
+  {
+    "navigation": "http://127.0.0.1:3110/signin"
+  },
+  {
+    "navigation": "http://127.0.0.1:3110/signin"
+  },
+  "UI confirms sign-in link sent to synthetic local inbox",
+  {
+    "navigation": "http://localhost:3110/dashboard"
+  },
+  {
+    "navigation": "http://localhost:3110/dashboard"
+  },
+  {
+    "navigation": "http://localhost:3110/signin"
+  },
+  {
+    "cookieDomains": [
+      "127.0.0.1"
+    ]
+  },
+  {
+    "error": "expect(locator).toBeVisible() failed\n\nLocator: getByRole('heading', { name: 'Magic link audit', exact: true })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"to.be.visible\" with timeout 5000ms\n  - waiting for getByRole('heading', { name: 'Magic link audit', exact: true })\n"
+  }
+]

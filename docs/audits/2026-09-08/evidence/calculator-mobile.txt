@@ -1,0 +1,265 @@
+Skip to content
+Mainpot
+Start game
+Poker settlement calculator
+
+Enter each player's money in and final stack. Mainpot checks the bank and turns the results into a clear payment list.
+
+Jump to calculator ↓
+Track a live game
+Who owes whom?
+
+Enter buy-ins and final stacks. Resolve any difference to see the payments. No account needed.
+
+Settlement worksheet
+
+Example game · change any value to try it.
+
+Add player
+Clear example
+View payments ↓
+Player 1
+MONEY IN
+FINAL STACK
+Player 2
+MONEY IN
+FINAL STACK
+Player 3
+MONEY IN
+FINAL STACK
+Player 4
+MONEY IN
+FINAL STACK
+Player 5
+MONEY IN
+FINAL STACK
+
+MONEY IN
+
+$310.00
+
+FINAL STACKS
+
+$310.00
+
+Bank balanced
+
+The payment list uses the recorded results as entered.
+
+PAYMENT LIST
+
+4 payments
+AlexMorgan
+$61.25
+CaseyMorgan
+$31.00
+SamJordan
+$21.50
+CaseyJordan
+$19.00
+Track the next game in Mainpot
+On this page
++
+Balance the bank before settling.
+
+The bank needs two numbers per player: money in and final cash-out. Their difference is the player's result.
+
+Check every rebuy and cash-out before money moves. Mainpot keeps those entries with the game so the table can resolve a mismatch first.
+
+1. Balance the bank. Total money in must equal total final stacks.
+2. Calculate results. Cash-out minus money in gives each player’s net.
+3. Route payments. Players who owe pay those who are owed.
+See the ledger move from input to settlement.
+
+This five-player example starts with purchases, finds the mismatch, and ends with a corrected settlement.
+
+The Basement Game
+
+Friday · settlement review
+
+STAKES
+$0.25 / $0.50
+BUY-IN
+$40.00
+PLAYERS
+5
+Record
+Cash out
+Reconcile
+Settle
+
+LIVE LEDGER
+
+Every chip purchase creates an entry.
+
+The opening buy-ins, rebuys, and add-ons stay attached to the players who received the chips. Before cash-out, the approved ledger shows $300.00 in the bank.
+
+Recorded bank
+$300.00
+Seven approved purchases
+LEDGER ENTRY
+AMOUNT
+Alex
+$80.00 in
+Morgan
+$40.00 in
+Sam
+$80.00 in
+Jordan
+$60.00 in
+Casey
+$40.00 in
+Step 1 of 4
+Cash out
+A missing add-on creates a $10.00 mismatch.
+
+In this $0.25/$0.50 game, Alex and Sam rebuy, Jordan adds $20, and Casey adds $10. Casey's add-on is missing, so the ledger shows $300.00 while $310.00 is in play.
+
+The five final stacks total $310.00. The $10.00 gap is an incomplete entry, not a rounding problem.
+
+The calculator should stop here.
+
+Recorded buy-ins are $300.00. Final stacks are $310.00. The table needs to find the missing $10.00 before calculating payments.
+
+Money in
+
+$300.00
+
+Stacks out
+
+$310.00
+
+Difference
+
+−$10.00
+
+CORRECTION
+
+Add Casey’s missing $10.00 purchase.
+
+Add the omitted $10 to Casey’s buy-ins. Both table totals become $310, and Casey’s net result becomes −$50.
+
+Corrected game ledger
+
+Scroll sideways to see cash-outs and net results →
+
+Corrected game ledger: buy-ins, cash-outs, and net results
+PLAYER	PURCHASES	TOTAL IN	CASH-OUT	NET
+Alex	$40 + $40	$80.00	$18.75	−$61.25
+Morgan	$40	$40.00	$132.25	+$92.25
+Sam	$40 + $40	$80.00	$58.50	−$21.50
+Jordan	$40 + $20	$60.00	$100.50	+$40.50
+Casey	$40 + $10	$50.00	$0.00	−$50.00
+Totals	Balanced	$310.00	$310.00	$0.00
+Calculate each player's net result.
+
+The basic calculation is the same for every player. A positive result means the player should receive money. A negative result means the player owes money. A zero means the player is already square.
+
+SETTLEMENT FORMULA
+
+player net = final cash-out − total money in
+
+Morgan
+
+$132.25 − $40.00 = +$92.25
+
+Casey
+
+$0.00 − $50.00 = −$50.00
+
+Morgan and Jordan receive $132.75 total. Alex, Sam, and Casey owe the same $132.75. All player results therefore add up to zero.
+
+Without Casey's missing add-on, the losses total only $122.75 and cannot fund the winners' $132.75.
+
+Turn those balances into payments.
+
+Settlement uses final net positions, not individual hands. Players who owe fund players who should receive until every balance reaches zero.
+
+Four payments settle this example: Casey splits the remaining $50.00 between Morgan and Jordan.
+
+01
+
+Alex
+Morgan
+
+Alex’s full loss
+
+$61.25
+02
+
+Sam
+Morgan
+
+Sam’s full loss
+
+$21.50
+03
+
+Casey
+Morgan
+
+Finishes Morgan’s $92.25 win
+
+$9.50
+04
+
+Casey
+Jordan
+
+Finishes Jordan’s $40.50 win
+
+$40.50
+
+After these four payments, all five balances are zero.
+
+Special cases
+A buy-in was advanced
+
+Record the player receiving the bank chips and, only while repayment is outstanding, the player who advanced the cash. Mark it repaid if they settle during the game.
+
+One cash-out is missing
+
+Do not treat a blank as zero unless the player actually busted. A missing final stack keeps the table from proving that the bank balances.
+
+The host acts as the bank
+
+A bank-style settlement can route every payment through one person. It is easier to coordinate, but may create more transfers than direct netting.
+
+The totals differ by cents
+
+Use the same currency precision for purchases, cash-outs, and payments. Fix the source entry instead of hiding a rounding difference in the final list.
+
+Poker settlement questions.
+What does a poker settlement calculator calculate?
++
+
+It subtracts each player’s total money in from their final cash-out, then matches players who owe with players who should receive.
+
+Why do total buy-ins have to equal total cash-outs?
++
+Do rebuys and add-ons count as buy-ins?
++
+What if one player fronts a rebuy for someone else?
++
+Does Mainpot hold or send the money?
++
+Can a game be settled when the bank is still off?
++
+
+READY FOR THE NEXT TABLE
+
+Record the game once. Settle from facts.
+
+Create a room, share the code, and let the table keep one ledger from the opening buy-in through the final payment.
+
+Start a game
+
+Built for home games.
+
+© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.
+
+Self-host
+Feedback
+Terms
+Privacy
+Open source

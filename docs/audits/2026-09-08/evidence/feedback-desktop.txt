@@ -1,0 +1,44 @@
+Skip to content
+Mainpot
+Local mode
+Sign in
+Start a game
+
+FEEDBACK
+
+Send us feedback.
+
+Something broken, confusing, or missing? We’d like to hear about it.
+
+Email us
+
+For ideas, bugs, or private account and game-access help. No GitHub account needed.
+
+support@mainpot.app
+Request a feature
+
+Tell us what would make your next poker night easier.
+
+Request a feature on GitHub
+Report a bug
+
+Share what happened, what you expected, and how to reproduce it.
+
+Report a bug on GitHub
+
+Want to contribute code?
+
+Browse the source, roadmap, and open issues.
+
+View GitHub
+← Back home
+
+Built for home games.
+
+© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.
+
+Self-host
+Feedback
+Terms
+Privacy
+Open source
