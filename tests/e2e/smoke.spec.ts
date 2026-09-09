@@ -71,11 +71,6 @@ test.describe("public local-mode experience", () => {
   });
 
   test("offers contextual iPhone install steps after creating a game", async ({ page }) => {
-    await page.route("**/api/push/config", (route) => route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ enabled: true, publicKey: "test-public-key" }),
-    }));
     await page.addInitScript(() => {
       Object.defineProperty(navigator, "userAgent", {
         configurable: true,
@@ -91,13 +86,43 @@ test.describe("public local-mode experience", () => {
     await page.locator("#create-buy-in").fill("20");
     await page.getByRole("button", { name: "Create game" }).click();
 
-    await expect(page.getByRole("heading", {
-      name: "Put your phone down. We’ll tell you when it matters.",
-    })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Keep Mainpot one tap away." })).toBeVisible();
     await expect(page.getByText("How did you hear about Mainpot?")).toBeVisible();
-    await page.getByRole("button", { name: "Show install steps" }).click();
+    await page.getByRole("button", { name: "Show me how" }).click();
     await expect(page.getByText("On iPhone or iPad", { exact: true })).toBeVisible();
     await expect(page.getByText(/choose Add to Home Screen/i)).toBeVisible();
+    await page.getByRole("button", { name: "Got it" }).click();
+    await expect(page.getByRole("heading", { name: "Keep Mainpot one tap away." })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Keep Mainpot one tap away." })).toHaveCount(0);
+  });
+
+  test("opens the native install prompt after creating a game", async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "userAgent", {
+        configurable: true,
+        value: "Mozilla/5.0 (Linux; Android 15; Pixel 9)",
+      });
+      Object.defineProperty(navigator, "platform", { configurable: true, value: "Linux armv8l" });
+      Object.defineProperty(navigator, "maxTouchPoints", { configurable: true, value: 5 });
+      window.__mainpotInstallPrompt = Object.assign(new Event("beforeinstallprompt"), {
+        prompt: async () => window.sessionStorage.setItem("install_prompt_opened", "true"),
+        userChoice: Promise.resolve({ outcome: "accepted" as const, platform: "web" }),
+      });
+    });
+    await page.goto("/create");
+
+    await page.locator("#create-name").fill("Casey");
+    await page.locator("#create-game-name").fill("Native install game");
+    await page.locator("#create-buy-in").fill("20");
+    await page.getByRole("button", { name: "Create game" }).click();
+
+    await page.getByRole("button", { name: "Install Mainpot" }).click();
+    await expect(page.getByText("Mainpot installed — it’s ready for poker night.")).toBeVisible();
+    await expect.poll(() => page.evaluate(
+      () => window.sessionStorage.getItem("install_prompt_opened"),
+    )).toBe("true");
+    await expect(page.getByRole("heading", { name: "Keep Mainpot one tap away." })).toHaveCount(0);
   });
 
   test("runs a host from game creation through a balanced finalized settlement", async ({ page }) => {

@@ -18,6 +18,7 @@ import EarlyCashOutButton from "@/components/GameRoom/EarlyCashOutButton";
 import EarlyCashOuts from "@/components/GameRoom/EarlyCashOuts";
 import AcquisitionPrompt from "@/components/GameRoom/AcquisitionPrompt";
 import GameNotifications from "@/components/GameRoom/GameNotifications";
+import PwaInstallCard from "@/components/PwaInstallCard";
 import SettlementScreen from "@/components/Settlement/SettlementScreen";
 import {
   addBuyIn,
@@ -655,9 +656,10 @@ export default function GameRoomPage() {
         ending={ending}
       />
 
+      <PwaInstallCard gameCode={snapshot.game.code} />
+
       {currentPlayer && !leftGame ? (
         <GameNotifications
-          game={snapshot.game}
           isHost={isHost}
         />
       ) : null}

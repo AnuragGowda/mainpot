@@ -1,51 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, BellRing, Download, Share2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Bell, BellRing } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
-import type { Game } from "@/lib/types";
 import {
-  PUSH_NUDGE_SNOOZE_KEY,
-  consumePostGameEntry,
   getCurrentPushSubscription,
   getPushConfig,
   isIosDevice,
   isStandaloneDisplay,
   subscribeToPush,
   unsubscribeFromPush,
-  type BeforeInstallPromptEvent,
   type PushConfig,
 } from "@/lib/push-client";
 
-const NUDGE_SNOOZE_MS = 14 * 24 * 60 * 60 * 1000;
-
-function nudgeIsSnoozed(): boolean {
-  try {
-    return Number(window.localStorage.getItem(PUSH_NUDGE_SNOOZE_KEY)) > Date.now();
-  } catch {
-    return false;
-  }
-}
-
-function snoozeNudge(): void {
-  try {
-    window.localStorage.setItem(
-      PUSH_NUDGE_SNOOZE_KEY,
-      String(Date.now() + NUDGE_SNOOZE_MS)
-    );
-  } catch {
-    // A dismissed card can still collapse when storage is unavailable.
-  }
-}
-
 export interface GameNotificationsProps {
-  game: Pick<Game, "id" | "code" | "name">;
   isHost: boolean;
 }
 
 export default function GameNotifications({
-  game,
   isHost,
 }: GameNotificationsProps) {
   const { toast } = useToast();
@@ -55,10 +28,7 @@ export default function GameNotifications({
   const [pushSupported, setPushSupported] = useState(false);
   const [ios, setIos] = useState(false);
   const [standalone, setStandalone] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [installAccepted, setInstallAccepted] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [showInstallSteps, setShowInstallSteps] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,20 +46,6 @@ export default function GameNotifications({
     setPushSupported(supportsPush);
     setIos(nextIos);
     setStandalone(isStandaloneDisplay());
-    setInstallPrompt(window.__mainpotInstallPrompt ?? null);
-
-    const handleInstallAvailable = () => {
-      setInstallPrompt(window.__mainpotInstallPrompt ?? null);
-    };
-    const handleInstalled = () => {
-      setInstallPrompt(null);
-      setInstallAccepted(true);
-      setStandalone(true);
-      setShowInstallSteps(false);
-    };
-    window.addEventListener("mainpot:install-available", handleInstallAvailable);
-    window.addEventListener("mainpot:installed", handleInstalled);
-
     void getPushConfig()
       .then(async (nextConfig) => {
         if (!active) return;
@@ -105,21 +61,12 @@ export default function GameNotifications({
 
     return () => {
       active = false;
-      window.removeEventListener("mainpot:install-available", handleInstallAvailable);
-      window.removeEventListener("mainpot:installed", handleInstalled);
     };
   }, []);
 
-  const available = config?.enabled === true && (pushSupported || (ios && !standalone));
-  const installed = standalone || installAccepted;
-
-  useEffect(() => {
-    if (!available || subscription || nudgeIsSnoozed()) return;
-    const timeout = window.setTimeout(() => {
-      if (consumePostGameEntry(game.code)) setExpanded(true);
-    }, 500);
-    return () => window.clearTimeout(timeout);
-  }, [available, game.code, subscription]);
+  const available = config?.enabled === true
+    && pushSupported
+    && (!ios || standalone);
 
   useEffect(() => {
     if (!expanded) return;
@@ -132,37 +79,10 @@ export default function GameNotifications({
     return () => window.clearTimeout(timeout);
   }, [expanded]);
 
-  const primaryAction = useMemo(() => {
-    if (!installed && ios) return { label: "Show install steps", icon: <Share2 aria-hidden size={16} /> };
-    if (!installed && installPrompt) return { label: "Install Mainpot", icon: <Download aria-hidden size={16} /> };
-    return { label: "Turn on game alerts", icon: <Bell aria-hidden size={16} /> };
-  }, [installed, installPrompt, ios]);
-
   if (!available) return null;
 
   async function handlePrimaryAction() {
     setError(null);
-
-    if (!installed && ios) {
-      setShowInstallSteps(true);
-      return;
-    }
-
-    if (!installed && installPrompt) {
-      setBusy(true);
-      try {
-        await installPrompt.prompt();
-        const choice = await installPrompt.userChoice;
-        if (choice.outcome === "accepted") {
-          setInstallAccepted(true);
-          setInstallPrompt(null);
-          toast("Mainpot installed — turn on alerts when you’re ready.", "success");
-        }
-      } finally {
-        setBusy(false);
-      }
-      return;
-    }
 
     if (!config?.publicKey) return;
     setBusy(true);
@@ -235,18 +155,9 @@ export default function GameNotifications({
               {subscription
                 ? "Mainpot will alert this device when a player joins, cash-outs begin, or the final settlement is ready."
                 : isHost
-                  ? "Install Mainpot and get a quiet alert when someone joins, cash-outs begin, or the final settlement is ready."
-                  : "Install Mainpot and get a quiet alert when cash-outs begin or the final settlement is ready."}
+                  ? "Get a quiet alert when someone joins, cash-outs begin, or the final settlement is ready."
+                  : "Get a quiet alert when cash-outs begin or the final settlement is ready."}
             </p>
-
-            {showInstallSteps ? (
-              <div className="mt-4 rounded-lg border border-emerald-200 bg-white/80 p-3.5 text-sm leading-6 text-gray-700">
-                <p className="font-semibold text-gray-950">On iPhone or iPad</p>
-                <p className="mt-1">
-                  Open the browser’s Share menu, choose <strong>Add to Home Screen</strong>, then open Mainpot from the new icon. You’ll be able to turn on alerts there.
-                </p>
-              </div>
-            ) : null}
 
             {error ? (
               <p role="alert" className="mt-3 text-sm font-medium text-red-700">{error}</p>
@@ -257,11 +168,9 @@ export default function GameNotifications({
                 <Button size="sm" variant="secondary" loading={busy} onClick={handleUnsubscribe}>
                   Turn off alerts
                 </Button>
-              ) : showInstallSteps ? (
-                <Button size="sm" onClick={() => setExpanded(false)}>Got it</Button>
               ) : (
-                <Button size="sm" loading={busy} leftIcon={primaryAction.icon} onClick={handlePrimaryAction}>
-                  {primaryAction.label}
+                <Button size="sm" loading={busy} leftIcon={<Bell aria-hidden size={16} />} onClick={handlePrimaryAction}>
+                  Turn on game alerts
                 </Button>
               )}
               <Button
@@ -269,9 +178,7 @@ export default function GameNotifications({
                 variant="ghost"
                 disabled={busy}
                 onClick={() => {
-                  if (!subscription) snoozeNudge();
                   setExpanded(false);
-                  setShowInstallSteps(false);
                   setError(null);
                 }}
               >

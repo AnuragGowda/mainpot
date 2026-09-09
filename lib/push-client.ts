@@ -1,5 +1,5 @@
 export const POST_GAME_ENTRY_KEY = "mainpot_post_game_entry";
-export const PUSH_NUDGE_SNOOZE_KEY = "mainpot_push_nudge_snoozed_until";
+export const PWA_INSTALL_SNOOZE_KEY = "mainpot_pwa_install_snoozed_until";
 
 export interface PushConfig {
   enabled: boolean;

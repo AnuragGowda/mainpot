@@ -31,6 +31,16 @@ body {
   top: var(--safe-area-top);
 }
 
+.app-site-nav::before {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  left: 0;
+  height: var(--safe-area-top);
+  background: var(--ante-surface);
+  content: "";
+}
+
 .app-skip-link {
   top: calc(0.75rem + var(--safe-area-top));
 }
