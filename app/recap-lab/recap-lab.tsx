@@ -11,6 +11,7 @@ import { defaultRecapPrivacy, type RecapData, type RecapPrivacy } from '@/lib/re
 import { renderRecapPng } from '@/lib/recap-image';
 import { getRecapCharacter } from '@/lib/recap-characters';
 import { recapSessionKey } from '@/lib/recap-session';
+import CharacterGallery from './character-gallery';
 
 const initial = { ...defaultRecapPrivacy, showResult: true, showPlayerCount: true, showDuration: true, showRebuys: true };
 const privateStats = { ...initial, showResult: false, showDollarAmounts: false, showPlayerCount: false, showDuration: false, showRebuys: false };
@@ -90,6 +91,8 @@ export default function RecapLab() {
       <h1 className="mt-3 text-4xl font-semibold tracking-[-.055em] sm:text-5xl">The Felt Society.</h1>
       <p className="mt-3 text-sm text-gray-500">Good nights make great characters.</p>
     </header>
+    <CharacterGallery/>
+    <h2 className="mb-6 border-t border-[#dedfdc] pt-7 text-xl font-semibold tracking-tight">Try a game card</h2>
     <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-12">
       <section aria-label="Your game card" className="min-w-0 lg:sticky lg:top-6" data-direction="society">
         <div className="mx-auto max-w-[400px] rounded-[24px] border border-[#dedfdc] bg-white p-2 shadow-[0_12px_50px_-25px_#20242140]">
