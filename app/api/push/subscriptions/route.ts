@@ -1,5 +1,6 @@
 import { createServerSupabase } from "@/lib/supabase-server";
 import { pushIsConfigured } from "@/lib/push-server";
+import { isTrustedPushEndpoint } from "@/lib/push-endpoint";
 
 interface SubscriptionBody {
   endpoint?: unknown;
@@ -9,15 +10,6 @@ interface SubscriptionBody {
 function requestIsSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   return !origin || origin === new URL(request.url).origin;
-}
-
-function validEndpoint(value: unknown): value is string {
-  if (typeof value !== "string" || value.length < 12 || value.length > 2048) return false;
-  try {
-    return new URL(value).protocol === "https:";
-  } catch {
-    return false;
-  }
 }
 
 function validKey(value: unknown): value is string {
@@ -43,7 +35,7 @@ export async function POST(request: Request) {
   const auth = await authenticatedClient();
   if (!auth) return new Response(null, { status: 401 });
   const body = await request.json().catch(() => null) as SubscriptionBody | null;
-  if (!body || !validEndpoint(body.endpoint)
+  if (!body || !isTrustedPushEndpoint(body.endpoint)
     || !validKey(body.keys?.p256dh) || !validKey(body.keys?.auth)) {
     return Response.json({ error: "The browser returned an invalid push subscription." }, { status: 400 });
   }
@@ -67,7 +59,11 @@ export async function DELETE(request: Request) {
   const auth = await authenticatedClient();
   if (!auth) return new Response(null, { status: 401 });
   const body = await request.json().catch(() => null) as { endpoint?: unknown } | null;
-  if (!validEndpoint(body?.endpoint)) return new Response(null, { status: 400 });
+  // Owned legacy subscriptions can always be removed, including providers
+  // that are no longer accepted for registration or delivery.
+  if (typeof body?.endpoint !== "string" || body.endpoint.length < 12 || body.endpoint.length > 2048) {
+    return new Response(null, { status: 400 });
+  }
 
   const { error } = await auth.client
     .from("push_subscriptions")

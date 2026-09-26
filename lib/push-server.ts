@@ -1,4 +1,5 @@
 import webpush from "web-push";
+import { isTrustedPushEndpoint } from "./push-endpoint";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -46,6 +47,11 @@ export async function sendWebPush(
   payload: Record<string, unknown>,
   ttlSeconds: number
 ): Promise<void> {
+  // Validate again at delivery: direct Data API writes and legacy rows never
+  // get to bypass the subscription route's destination check.
+  if (!isTrustedPushEndpoint(subscription.endpoint)) {
+    throw new Error("Untrusted push subscription endpoint");
+  }
   configureWebPush();
   await webpush.sendNotification(
     {
