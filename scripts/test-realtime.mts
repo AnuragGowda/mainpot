@@ -14,7 +14,8 @@ const testDistDirectory = ".next-e2e";
 const testConfig = join(repositoryRoot, "tests", "supabase", "config.toml");
 const sourceMigrations = join(repositoryRoot, "supabase", "migrations");
 const stackLockDirectory = join(tmpdir(), "mainpot-e2e-supabase.lock");
-const operationalAssurance = process.argv.includes("--operational-assurance");
+const recoveryOnly = process.argv.includes("--recovery-only");
+const operationalAssurance = process.argv.includes("--operational-assurance") || recoveryOnly;
 const databaseAssuranceOnly = process.argv.includes("--database-assurance-only") || operationalAssurance;
 const authEmailOnly = process.argv.includes("--auth-email");
 
@@ -116,6 +117,7 @@ try {
   lockHeld = true;
   verifyDockerContext();
   workdir = createTestWorkdir();
+  console.log("Disposable test workdir:", workdir);
   console.log("Starting disposable Supabase test stack…");
   run(supabaseCommand, ["--workdir", workdir, "start"], { capture: true });
   stackStarted = true;
@@ -131,7 +133,7 @@ try {
     throw new Error("Disposable Supabase stack did not report its expected local API configuration.");
   }
 
-  if (databaseAssuranceOnly || process.env.MAINPOT_DB_ASSURANCE_BEFORE_BROWSER === "1") {
+  if (!recoveryOnly && (databaseAssuranceOnly || process.env.MAINPOT_DB_ASSURANCE_BEFORE_BROWSER === "1")) {
     console.log("Running database assurance checks against the disposable migration stack…");
     const failures: unknown[] = [];
     const assuranceScripts = [
@@ -159,7 +161,7 @@ try {
   }
   if (operationalAssurance) {
     const operationalEnv = { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl };
-    run(process.execPath, [join(scriptDirectory, "test-database-soak.mts")], { env: { ...operationalEnv, SOAK_DURATION_MS: process.env.SOAK_DURATION_MS ?? "300000" } });
+    if (!recoveryOnly) run(process.execPath, [join(scriptDirectory, "test-database-soak.mts")], { env: { ...operationalEnv, SOAK_DURATION_MS: process.env.SOAK_DURATION_MS ?? "300000" } });
     run(process.execPath, [join(scriptDirectory, "test-local-recovery.mts")], { env: operationalEnv });
     run(process.execPath, [join(scriptDirectory, "test-product-ops-canary.mts")], { env: operationalEnv });
   }

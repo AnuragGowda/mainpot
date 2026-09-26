@@ -4,6 +4,10 @@ import { createClient, type RealtimeChannel } from "@supabase/supabase-js";
 
 const supabaseCommand = process.platform === "win32" ? "supabase.cmd" : "supabase";
 const timeoutMs = 3_000;
+const localReadinessTimeoutMs = 30_000;
+const disposableApiUrl = "http://127.0.0.1:55321";
+const localRealtimeContainer = "supabase_realtime_mainpot-e2e";
+const localReadyMarker = /Muster\[realtime@127\.0\.0\.1\|realtime_channels_local\] status .* -> :ready/;
 
 function localStatus() {
   const status = JSON.parse(execFileSync(supabaseCommand, [...(process.env.SUPABASE_WORKDIR ? ["--workdir", process.env.SUPABASE_WORKDIR] : []), "status", "--output", "json"], { encoding: "utf8" }));
@@ -44,6 +48,37 @@ function waitForChange(register: (handler: () => void) => void): Promise<boolean
   });
 }
 
+function currentRealtimeContainerId(): string {
+  return execFileSync("docker", ["inspect", "--format", "{{.Id}} {{.State.StartedAt}}", localRealtimeContainer], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+}
+
+function currentRealtimeContainerIsReady(containerId: string): boolean {
+  try {
+    if (currentRealtimeContainerId() !== containerId) return false;
+    const [id, startedAt] = containerId.split(" ");
+    const logs = execFileSync("docker", ["logs", "--since", startedAt, id], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    return localReadyMarker.test(logs);
+  } catch {
+    return false;
+  }
+}
+
+async function waitForLocalRealtimeReadiness(): Promise<{ ready: boolean; elapsedMs: number }> {
+  const startedAt = Date.now();
+  let containerId: string;
+  try {
+    containerId = currentRealtimeContainerId();
+  } catch {
+    return { ready: false, elapsedMs: Date.now() - startedAt };
+  }
+
+  while (Date.now() - startedAt < localReadinessTimeoutMs) {
+    if (currentRealtimeContainerIsReady(containerId)) return { ready: true, elapsedMs: Date.now() - startedAt };
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  return { ready: false, elapsedMs: Date.now() - startedAt };
+}
+
 const status = localStatus();
 const url = status.API_URL;
 const serviceKey = status.SERVICE_ROLE_KEY;
@@ -69,10 +104,19 @@ try {
   const subscribed = await waitForSubscription(channel);
   assert(subscribed, "canary subscribes to the dedicated Realtime table");
 
+  if (url === disposableApiUrl && process.env.SUPABASE_EXPECTED_API_URL === disposableApiUrl) {
+    // The local single-node image reports cluster readiness after HTTP health
+    // and replication startup. Do not measure delivery during that setup gap.
+    const readiness = await waitForLocalRealtimeReadiness();
+    assert(readiness.ready, "current disposable Realtime cluster reports ready before canary insert");
+    console.log(`Disposable Realtime cluster ready (${readiness.elapsedMs} ms); INSERT delivery keeps its ${timeoutMs} ms budget.`);
+  }
+
   const changed = waitForChange((handler: () => void) => { acknowledgeChange = handler; });
+  // A lost acknowledgement can hide a committed insert; cleanup its exact ID.
+  inserted = true;
   const { error: insertError } = await database.from("product_ops_canary").insert({ probe_id: probeId });
   assert(!insertError, "server role can insert a synthetic canary row");
-  inserted = true;
   assert(await changed, "canary insert is delivered through Realtime");
 
   const { error: deleteError } = await database.from("product_ops_canary").delete().eq("probe_id", probeId);
