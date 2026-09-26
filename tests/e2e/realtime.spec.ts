@@ -126,6 +126,7 @@ test("locks an early cash-out against the host and carries it out of final settl
     await guest.getByRole("button", { name: "Cash out", exact: true }).click();
     const requestDialog = guest.getByRole("alertdialog", { name: "Cash out & leave" });
     await requestDialog.getByRole("textbox", { name: "Final chips for early cash-out" }).fill("30");
+    await expect(requestDialog.getByRole("textbox", { name: "Final chips for early cash-out" })).toHaveValue("30");
     await expect(requestDialog).toContainText("+$10.00");
     await expect(requestDialog).toContainText("Casey will pay you $10.00.");
     await requestDialog.getByRole("button", { name: "Send to host" }).click();

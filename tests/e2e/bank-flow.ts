@@ -30,6 +30,7 @@ export async function runBankPlanFlow(browser: Browser, baseURL: string, evidenc
     for (const [name, amount] of [["Casey", "0"], ["Jordan", "40"], ["Taylor", "0"], ["Riley", "40"]]) {
       const input = host.getByRole("spinbutton", { name: `Cash-out amount for ${name}` });
       await input.fill(amount);
+      await expect(input).toHaveValue(amount);
       await input.blur();
     }
     await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
