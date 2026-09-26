@@ -17,6 +17,12 @@ export interface SettlementPaymentStatusState {
 
 const EMPTY_KEYS: ReadonlySet<string> = new Set<string>();
 
+/** Do not start a network read while this client cannot reliably reach the server. */
+export function canReadPaymentStatuses(): boolean {
+  return typeof navigator !== "undefined" && navigator.onLine
+    && typeof document !== "undefined" && document.visibilityState === "visible";
+}
+
 /**
  * Holds the one authoritative payment-status read for a finalized settlement.
  * A failed refresh never replaces confirmed records with an empty status set.
@@ -28,12 +34,23 @@ export function useSettlementPaymentStatus(
   const [phase, setPhase] = useState<PaymentStatusReadPhase>("loading");
   const [settledKeys, setSettledKeys] = useState<ReadonlySet<string>>(EMPTY_KEYS);
   const latestRead = useRef(0);
+  const readInFlight = useRef<{ gameId: string; read: number } | null>(null);
+  const refreshQueuedFor = useRef<string | null>(null);
   const hasKnownStatus = useRef(false);
 
   const refresh = useCallback(() => {
-    if (!enabled) return;
+    if (!enabled || !canReadPaymentStatuses()) return;
+    if (readInFlight.current?.gameId === gameId) {
+      // Collapse bursts into one trailing reconciliation after the current read.
+      refreshQueuedFor.current = gameId;
+      return;
+    }
+    refreshQueuedFor.current = null;
     const read = ++latestRead.current;
-    if (!hasKnownStatus.current) {
+    readInFlight.current = { gameId, read };
+    if (hasKnownStatus.current) {
+      setPhase("stale");
+    } else {
       setPhase("loading");
       setSettledKeys(EMPTY_KEYS);
     }
@@ -47,6 +64,13 @@ export function useSettlementPaymentStatus(
       .catch(() => {
         if (read !== latestRead.current) return;
         setPhase(hasKnownStatus.current ? "stale" : "unavailable");
+      })
+      .finally(() => {
+        if (readInFlight.current?.read !== read) return;
+        readInFlight.current = null;
+        if (refreshQueuedFor.current !== gameId) return;
+        refreshQueuedFor.current = null;
+        refresh();
       });
   }, [enabled, gameId]);
 
@@ -59,6 +83,18 @@ export function useSettlementPaymentStatus(
 
     refresh();
     const unsubscribe = subscribeToPaymentChanges(gameId, refresh);
+    const onOnline = () => refresh();
+    const onOffline = () => {
+      // Ignore any response from a read that was in flight when connectivity was lost.
+      latestRead.current += 1;
+      setPhase(hasKnownStatus.current ? "stale" : "unavailable");
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     const supabase = getBrowserSupabase();
     const channel = supabase
       ?.channel(`settlement-payment-status-${gameId}`)
@@ -75,6 +111,9 @@ export function useSettlementPaymentStatus(
     return () => {
       latestRead.current += 1;
       unsubscribe();
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       if (channel && supabase) void supabase.removeChannel(channel);
     };
   }, [enabled, gameId, refresh]);
