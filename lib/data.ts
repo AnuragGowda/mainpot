@@ -844,8 +844,11 @@ async function markBuyInAdvanceRepaidLocal(buyInId: string): Promise<void> {
 async function removePlayerLocal(playerId: string): Promise<void> {
   const store = loadStore();
   const player = store.players.find((p) => p.id === playerId);
-  if (player) requireLocalGameStatus(store, player.game_id, "active");
   if (player) {
+    requireLocalGameStatus(store, player.game_id, "active");
+    const actor = store.players.find(item => item.id === currentLocalPlayerId(store, player.game_id));
+    if (!actor?.is_host || actor.left_at) throw new Error("Only the active host can remove a player.");
+    if (player.is_host) throw new Error("Transfer the host role and leave instead of deleting the host seat.");
     addLocalEvent(store, {
       gameId: player.game_id,
       eventType: "player_removed",

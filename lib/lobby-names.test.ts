@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { addHostPlayer, createGame, getGameSnapshot, joinGame, leaveGame, restorePlayerToTableLocal } from "./data";
+import { addHostPlayer, createGame, getGameSnapshot, joinGame, leaveGame, removePlayer, restorePlayerToTableLocal } from "./data";
 import { lobbyNameKey } from "./name-validation";
 import { randomUUID } from "./session";
 
@@ -54,6 +54,20 @@ describe("lobby seat name uniqueness", () => {
     const resumed = await joinGame(game.code, "Casey", hostUser);
     expect(resumed.playerId).toBe((await getGameSnapshot(game.gameId)).players[0].id);
     expect((await getGameSnapshot(game.gameId)).buyIns).toHaveLength(1);
+  });
+
+  it("blocks guest deletion of ledger-backed seats and host self-deletion", async () => {
+    const game = await createGame("Friday", "Casey", 20);
+    const hostSession = window.localStorage.getItem("ante_session_id")!;
+    window.localStorage.setItem("ante_session_id", randomUUID());
+    const guest = await joinGame(game.code, "Jordan");
+    await expect(removePlayer(guest.playerId)).rejects.toThrow("Only the active host");
+    expect((await getGameSnapshot(game.gameId)).buyIns).toHaveLength(2);
+    window.localStorage.setItem("ante_session_id", hostSession);
+    const host = (await getGameSnapshot(game.gameId)).players.find(player => player.is_host)!;
+    await expect(removePlayer(host.id)).rejects.toThrow("Transfer the host role");
+    await removePlayer(guest.playerId);
+    expect((await getGameSnapshot(game.gameId)).players).toHaveLength(1);
   });
 
   it("allows the same display name in a different game", async () => {
