@@ -312,7 +312,7 @@ test("transfers host authority when the host leaves", async ({ browser }) => {
     await host.getByRole("button", { name: "Transfer & leave" }).click();
 
     await expect(host.getByRole("button", { name: "End game" })).toHaveCount(0);
-    await expect(host.getByText("You left this game.", { exact: true })).toBeVisible();
+    await expect(host.getByText("You left this game. Ask Jordan to return your existing seat to the table.", { exact: true })).toBeVisible();
     await expect(jordan.getByRole("button", { name: "End game" })).toBeVisible();
     await expect(
       jordan.getByText(
