@@ -7,12 +7,12 @@ type ContextOptions = NonNullable<Parameters<Browser["newContext"]>[0]>;
  * Playwright project's device emulation. Direct `browser.newContext()` calls
  * otherwise default to desktop Chromium even in mobile and tablet projects.
  */
-export function createDeviceContext(
+export async function createDeviceContext(
   browser: Browser,
   explicitOptions: ContextOptions = {},
 ) {
   const { viewport, userAgent, deviceScaleFactor, isMobile, hasTouch } = test.info().project.use;
-  return browser.newContext({
+  const context = await browser.newContext({
     viewport,
     userAgent,
     deviceScaleFactor,
@@ -23,4 +23,29 @@ export function createDeviceContext(
     serviceWorkers: "block",
     ...explicitOptions,
   });
+  if (process.env.PLAYWRIGHT_INPUT_DIAGNOSTICS === "1") {
+    await context.addInitScript(() => {
+      const nodes = new WeakMap<Element, number>();
+      let sequence = 0;
+      const nodeId = (node: Element) => {
+        if (!nodes.has(node)) nodes.set(node, ++sequence);
+        return nodes.get(node);
+      };
+      for (const type of ["focusin", "input", "change", "focusout"]) {
+        document.addEventListener(type, (event) => {
+          const input = event.target;
+          if (!(input instanceof HTMLInputElement)) return;
+          const label = input.getAttribute("aria-label") ?? "";
+          if (!/Cash-out amount|Final chips for early cash-out/.test(label)) return;
+          const log = (phase: string) => {
+            const current = Array.from(document.querySelectorAll("input")).find(node => node.getAttribute("aria-label") === label);
+            console.debug("[amount-event]", JSON.stringify({ phase, type, label, value: input.value, node: nodeId(input), connected: input.isConnected, currentNode: current ? nodeId(current) : null, currentValue: current?.value }));
+          };
+          log("event");
+          requestAnimationFrame(() => log("frame"));
+        }, true);
+      }
+    });
+  }
+  return context;
 }
