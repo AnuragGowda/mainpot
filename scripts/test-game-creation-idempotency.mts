@@ -74,6 +74,8 @@ async function run() {
   assert(stolen.error, "another account cannot replay the owner operation key");
   const changed = await owner.client.rpc("create_game_idempotent", { ...input, input_game_name: "Changed details" });
   assert(changed.error, "the same operation key rejects changed game details");
+  const changedAmount = await owner.client.rpc("create_game_idempotent", { ...input, input_buy_in: 20.001 });
+  assert(changedAmount.error, "replay rejects a changed amount even when it rounds to the original");
   console.log("✓ idempotent game creation replays one table/seat/buy-in and rejects cross-account or changed payloads");
 }
 
