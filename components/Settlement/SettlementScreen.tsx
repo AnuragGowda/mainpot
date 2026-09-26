@@ -17,8 +17,8 @@ import { formatCurrency, round2 } from "@/lib/format";
 import { getPlayerCashOut, playerInvested, totalPot } from "@/lib/game";
 import { usePlayerIdentity } from "@/lib/use-player-identity";
 import { resolveCurrentPlayer } from "@/lib/player-identity";
-import { getSettlementPaymentStatuses, settlementPaymentKey, subscribeToPaymentChanges } from "@/lib/payments";
-import { getBrowserSupabase } from "@/lib/supabase-browser";
+import { settlementPaymentKey } from "@/lib/payments";
+import { useSettlementPaymentStatus } from "@/lib/use-settlement-payment-status";
 import {
   applyFundingAdjustments,
   applyDiscrepancyAllocation,
@@ -34,6 +34,7 @@ import CashOutEntry from "./CashOutEntry";
 import DiscrepancyImpact from "./DiscrepancyImpact";
 import FundingNotes from "./FundingNotes";
 import NetList from "./NetList";
+import PaymentStatusNotice from "./PaymentStatusNotice";
 import PlayerSettlementSummary from "./PlayerSettlementSummary";
 import ReconciliationBar from "./ReconciliationBar";
 import SettlementSummary from "./SettlementSummary";
@@ -92,7 +93,6 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const [finalizing, setFinalizing] = useState(false);
   const [fullPlanOpen, setFullPlanOpen] = useState(false);
   const [paymentLedgerOpen, setPaymentLedgerOpen] = useState(false);
-  const [settledMinPaymentKeys, setSettledMinPaymentKeys] = useState<Set<string>>(new Set());
   const [allocationMethod, setAllocationMethod] = useState<DiscrepancyAllocationMethod>(
     snapshot.game.discrepancy_allocation?.method ?? "proportional"
   );
@@ -302,52 +302,21 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     })),
     ...activeTabTransfers.map((transfer) => ({ mode: displayedTab, transfer })),
   ];
+  const paymentStatus = useSettlementPaymentStatus(
+    snapshot.game.id,
+    snapshot.game.status === "ended",
+  );
   const settledPlanPaymentCount = activeTabTransfers.filter((transfer) =>
-    settledMinPaymentKeys.has(settlementPaymentKey(displayedTab, transfer))
+    paymentStatus.settledKeys.has(settlementPaymentKey(displayedTab, transfer))
   ).length;
   const settledEarlyCashOutPaymentCount = earlyCashOutPayments.filter(({ transfer }) =>
-    settledMinPaymentKeys.has(settlementPaymentKey("early_exit", transfer))
+    paymentStatus.settledKeys.has(settlementPaymentKey("early_exit", transfer))
   ).length;
   const paymentCount = activeTabTransfers.length + earlyCashOutPayments.length;
   const settledPaymentCount = settledPlanPaymentCount + settledEarlyCashOutPaymentCount;
   const canEditSettlementPlan = isHost && snapshot.game.status === "settling";
   const settlementPlanReadOnly = !canEditSettlementPlan;
   const status = statusMeta[snapshot.game.status];
-
-  useEffect(() => {
-    if (snapshot.game.status !== "ended") {
-      setSettledMinPaymentKeys(new Set());
-      return;
-    }
-    let cancelled = false;
-    let latestRead = 0;
-    const refreshSettlementProgress = () => {
-      const read = ++latestRead;
-      void getSettlementPaymentStatuses(snapshot.game.id)
-        .then((statuses) => {
-          if (!cancelled && read === latestRead) {
-            setSettledMinPaymentKeys(new Set(statuses.filter((item) => item.settled).map((item) => item.key)));
-          }
-        })
-        .catch(() => undefined);
-    };
-    const unsubscribe = subscribeToPaymentChanges(snapshot.game.id, refreshSettlementProgress);
-    refreshSettlementProgress();
-    const supabase = getBrowserSupabase();
-    const channel = supabase
-      ?.channel(`settlement-plan-progress-${snapshot.game.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "settlement_payments", filter: `game_id=eq.${snapshot.game.id}` }, refreshSettlementProgress)
-      .subscribe((channelStatus) => {
-        // Close the read/subscribe race: if a player records a payment while
-        // this channel is joining, the post-subscribe read still sees it.
-        if (channelStatus === "SUBSCRIBED") refreshSettlementProgress();
-      });
-    return () => {
-      cancelled = true;
-      unsubscribe();
-      if (channel && supabase) void supabase.removeChannel(channel);
-    };
-  }, [snapshot.game.id, snapshot.game.status]);
 
   useEffect(() => {
     if (snapshot.game.status !== "ended" || window.location.hash !== "#payment-ledger") return;
@@ -720,7 +689,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               currentPlayerId={currentPlayerId}
               beforeDiscrepancyNet={currentPlayerNetBeforeDiscrepancy}
               finalNet={currentPlayerFinalNet}
-              settledPaymentKeys={settledMinPaymentKeys}
+              paymentStatus={paymentStatus}
             />
           ) : null}
 
@@ -736,23 +705,27 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   <span>
                     <span className="block text-sm font-semibold text-gray-950">Payment ledger</span>
                     <span className="mt-0.5 block text-xs text-gray-500">
-                      {settledPaymentCount} of {paymentCount} {paymentCount === 1 ? "payment" : "payments"} marked sent
-                      {lockedEarlyCashOuts.length ? " · includes early cash-outs" : null}
+                      {paymentStatus.phase === "known" || paymentStatus.phase === "stale"
+                        ? <>{settledPaymentCount} of {paymentCount} {paymentCount === 1 ? "payment" : "payments"} marked sent{paymentStatus.phase === "stale" ? " · status needs refresh" : null}{lockedEarlyCashOuts.length ? " · includes early cash-outs" : null}</>
+                        : paymentStatus.phase === "loading"
+                          ? "Checking payment status"
+                          : "Payment status unavailable"}
                     </span>
                   </span>
                   <span aria-hidden className="text-lg text-gray-400">{paymentLedgerOpen ? "−" : "＋"}</span>
                 </span>
               </summary>
               <div className="border-t border-gray-200 p-5">
-                <p className="mb-3 text-sm leading-6 text-gray-600">
+                {paymentStatus.phase === "known" ? <p className="mb-3 text-sm leading-6 text-gray-600">
                   The payer, recipient, or host can mark a payment sent.
-                </p>
-                <div className="space-y-6">
+                </p> : <div className="mb-3"><PaymentStatusNotice status={paymentStatus} /></div>}
+                {(paymentStatus.phase === "known" || paymentStatus.phase === "stale") ? <div className="space-y-6">
                   {lockedEarlyCashOuts.length ? (
                     <EarlyCashOuts
                       snapshot={snapshot}
                       currentPlayerId={currentPlayerId ?? ""}
                       isHost={isHost}
+                      paymentStatus={paymentStatus}
                     />
                   ) : null}
                   <section aria-labelledby="final-settlement-payments-heading">
@@ -768,9 +741,10 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                       currentPlayerId={currentPlayerId}
                       isHost={isHost}
                       actionsEnabled
+                      paymentStatus={paymentStatus}
                     />
                   </section>
-                </div>
+                </div> : null}
               </div>
             </details>
           ) : null}
@@ -808,7 +782,11 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   </span>
                   <span className="mt-0.5 block text-xs text-gray-500">
                     {snapshot.game.status === "ended"
-                      ? `Host controls and settlement record · ${settledPaymentCount}/${paymentCount} marked sent`
+                      ? paymentStatus.phase === "known" || paymentStatus.phase === "stale"
+                        ? `Host controls and settlement record · ${settledPaymentCount}/${paymentCount} marked sent${paymentStatus.phase === "stale" ? " · status needs refresh" : ""}`
+                        : paymentStatus.phase === "loading"
+                          ? "Host controls and settlement record · checking payment status"
+                          : "Host controls and settlement record · payment status unavailable"
                       : lockedEarlyCashOuts.length
                         ? "Payments, early cash-outs, player results, and bank view"
                         : "Payments, player results, and bank view"}
@@ -867,11 +845,16 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
 
               <FundingNotes snapshot={snapshot} />
 
+              {snapshot.game.status === "ended" && paymentStatus.phase !== "known" ? (
+                <PaymentStatusNotice status={paymentStatus} />
+              ) : null}
+
               {lockedEarlyCashOuts.length ? (
                 <EarlyCashOuts
                   snapshot={snapshot}
                   currentPlayerId={currentPlayerId ?? ""}
                   isHost={isHost}
+                  paymentStatus={snapshot.game.status === "ended" ? paymentStatus : undefined}
                 />
               ) : null}
 
@@ -896,6 +879,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   currentPlayerId={currentPlayerId}
                   isHost={isHost}
                   actionsEnabled={snapshot.game.status === "ended"}
+                  paymentStatus={snapshot.game.status === "ended" ? paymentStatus : undefined}
                 />
               </section>
 
@@ -953,6 +937,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   currentPlayerId={currentPlayerId}
                   isHost={isHost}
                   actionsEnabled={snapshot.game.status === "ended"}
+                  paymentStatus={snapshot.game.status === "ended" ? paymentStatus : undefined}
                 />
               </section>
 

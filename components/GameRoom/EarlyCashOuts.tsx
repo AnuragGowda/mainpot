@@ -7,6 +7,7 @@ import Card from "@/components/ui/Card";
 import { formatCurrency, formatSignedNet } from "@/lib/format";
 import { calculateEarlyCashOutNet, getEarlyCashOutTransfer } from "@/lib/settlement";
 import type { GameSnapshot } from "@/lib/types";
+import type { SettlementPaymentStatusState } from "@/lib/use-settlement-payment-status";
 import TransferList from "@/components/Settlement/TransferList";
 import ConfirmButton from "./ConfirmButton";
 
@@ -16,6 +17,7 @@ interface EarlyCashOutsProps {
   isHost: boolean;
   onApprove?: (earlyCashOutId: string) => Promise<void>;
   onCancel?: (earlyCashOutId: string) => Promise<void>;
+  paymentStatus?: SettlementPaymentStatusState;
 }
 
 /** Shared request queue and payment record for players leaving before game end. */
@@ -25,6 +27,7 @@ export default function EarlyCashOuts({
   isHost,
   onApprove,
   onCancel,
+  paymentStatus,
 }: EarlyCashOutsProps) {
   const headingId = useId();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -144,6 +147,7 @@ export default function EarlyCashOuts({
                       isHost={isHost}
                       actionsEnabled
                       earlyCashOut={earlyCashOut}
+                      paymentStatus={paymentStatus}
                     />
                   ) : (
                     <p className="rounded-lg bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700">No payment needed — this player is even.</p>

@@ -16,12 +16,13 @@ import {
   getPlayerPaymentHandles,
 } from "@/lib/payment-links";
 import type { PlayerPaymentHandles } from "@/lib/payment-links";
-import { getBrowserSupabase } from "@/lib/supabase-browser";
-import { getSettlementPaymentStatuses, setEarlyCashOutPaymentStatus, setSettlementPaymentStatus, settlementPaymentKey, subscribeToPaymentChanges } from "@/lib/payments";
+import { setEarlyCashOutPaymentStatus, setSettlementPaymentStatus, settlementPaymentKey } from "@/lib/payments";
 import type { SettlementMode } from "@/lib/payments";
 import { isPlayerInTransfer } from "@/lib/settlement";
 import type { Transfer } from "@/lib/settlement";
 import type { EarlyCashOut } from "@/lib/types";
+import { useSettlementPaymentStatus } from "@/lib/use-settlement-payment-status";
+import type { SettlementPaymentStatusState } from "@/lib/use-settlement-payment-status";
 
 export interface TransferListProps {
   transfers: Transfer[];
@@ -36,6 +37,8 @@ export interface TransferListProps {
   personalIncoming?: boolean;
   /** Required for the active-game payment created by a locked early exit. */
   earlyCashOut?: EarlyCashOut;
+  /** Shared read state for all finalized settlement views. */
+  paymentStatus?: SettlementPaymentStatusState;
 }
 
 function PartyName({ name }: { name: string }) {
@@ -153,50 +156,17 @@ export default function TransferList({
   personalOutgoing = false,
   personalIncoming = false,
   earlyCashOut,
+  paymentStatus,
 }: TransferListProps) {
   const { toast } = useToast();
-  const channelId = useId().replaceAll(":", "");
-  const [settledKeys, setSettledKeys] = useState<Set<string>>(new Set());
+  // Standalone early-cash-out cards still need a reader. Finalized settlement
+  // views receive their one shared source from SettlementScreen instead.
+  const ownPaymentStatus = useSettlementPaymentStatus(gameId, actionsEnabled && !paymentStatus);
+  const activePaymentStatus = paymentStatus ?? ownPaymentStatus;
+  const settledKeys = activePaymentStatus.settledKeys;
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [paymentHandles, setPaymentHandles] = useState<Map<string, PlayerPaymentHandles>>(new Map());
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
-
-  useEffect(() => {
-    if (!actionsEnabled) {
-      setSettledKeys(new Set());
-      return;
-    }
-    let cancelled = false;
-    let latestRead = 0;
-    const refresh = () => {
-      const read = ++latestRead;
-      void getSettlementPaymentStatuses(gameId)
-        .then((statuses) => {
-          if (!cancelled && read === latestRead) {
-            const next = new Set(statuses.filter((item) => item.settled).map((item) => item.key));
-            setSettledKeys(next);
-          }
-        })
-        .catch(() => undefined);
-    };
-    const unsubscribe = subscribeToPaymentChanges(gameId, refresh);
-    refresh();
-    const supabase = getBrowserSupabase();
-    const channel = supabase
-      ?.channel(`settlement-payments-${gameId}-${mode}-${channelId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "settlement_payments", filter: `game_id=eq.${gameId}` }, refresh)
-      .subscribe((status) => {
-        // A payment can be recorded after the initial read but before the
-        // channel is ready. Reconcile once subscribed so that update cannot be
-        // missed permanently.
-        if (status === "SUBSCRIBED") refresh();
-      });
-    return () => {
-      cancelled = true;
-      unsubscribe();
-      if (channel && supabase) void supabase.removeChannel(channel);
-    };
-  }, [actionsEnabled, channelId, gameId, mode]);
 
   useEffect(() => {
     if (!actionsEnabled) {
@@ -226,8 +196,8 @@ export default function TransferList({
         {transfers.map((transfer) => {
           const key = settlementPaymentKey(mode, transfer);
           const settled = settledKeys.has(key);
-          const canManage = actionsEnabled && (isHost || isPlayerInTransfer(transfer, currentPlayerId));
-          const canUsePaymentShortcut = actionsEnabled && (isHost || transfer.fromPlayerId === currentPlayerId);
+          const canManage = actionsEnabled && activePaymentStatus.canMutate && (isHost || isPlayerInTransfer(transfer, currentPlayerId));
+          const canUsePaymentShortcut = actionsEnabled && activePaymentStatus.canMutate && (isHost || transfer.fromPlayerId === currentPlayerId);
           const handles = transfer.toPlayerId ? paymentHandles.get(transfer.toPlayerId) : undefined;
           const venmoUrl = canUsePaymentShortcut && handles?.venmo
             ? buildVenmoPaymentUrl(handles.venmo, transfer.amount)
@@ -256,11 +226,7 @@ export default function TransferList({
                           } else {
                             await setSettlementPaymentStatus(gameId, mode, transfer, !settled);
                           }
-                          setSettledKeys((current) => {
-                            const next = new Set(current);
-                            if (settled) next.delete(key); else next.add(key);
-                            return next;
-                          });
+                          activePaymentStatus.retry();
                           toast(settled ? "Payment reopened" : "Payment marked sent", "success");
                         } catch (error) {
                           toast(error instanceof Error ? error.message : "Could not update payment.", "error");
