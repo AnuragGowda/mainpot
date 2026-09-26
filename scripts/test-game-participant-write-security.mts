@@ -102,10 +102,46 @@ async function run() {
   assert(!ownRead.error && ownRead.data?.player_id === participantSeat.player_id && Number(ownRead.data.net_result) === -5,
     "trusted finalization writes the canonical participant result");
 
-  const visibleRead = await observer.client.from("game_participants")
+  const outsiderRead = await observer.client.from("game_participants")
+    .select("user_id,net_result").eq("game_id", game.game_id).eq("user_id", participant.id);
+  assert(!outsiderRead.error && outsiderRead.data?.length === 0,
+    "unrelated authenticated users cannot read participant results");
+
+  const pendingFriendship = await participant.client.from("friendships").insert({
+    requester_id: participant.id,
+    addressee_id: observer.id,
+    status: "pending",
+  }).select("id").single();
+  assert(!pendingFriendship.error && pendingFriendship.data?.id,
+    "participant can create a pending friendship request");
+  const pendingRead = await observer.client.from("game_participants")
+    .select("user_id,net_result").eq("game_id", game.game_id).eq("user_id", participant.id);
+  assert(!pendingRead.error && pendingRead.data?.length === 0,
+    "a pending friend cannot read participant results");
+
+  const acceptedFriendship = await observer.client.rpc("respond_to_friend_request", {
+    input_friendship_id: pendingFriendship.data.id,
+    input_status: "accepted",
+  });
+  assert(!acceptedFriendship.error && acceptedFriendship.data?.status === "accepted",
+    "recipient can accept the friendship request");
+  const friendRead = await observer.client.from("game_participants")
     .select("user_id,net_result").eq("game_id", game.game_id).eq("user_id", participant.id).single();
-  assert(!visibleRead.error && visibleRead.data?.user_id === participant.id,
-    "the existing authenticated participant read visibility remains unchanged");
+  assert(!friendRead.error && friendRead.data?.user_id === participant.id && Number(friendRead.data.net_result) === -5,
+    "an accepted friend can read participant statistics");
+
+  const removedFriendship = await observer.client.from("friendships")
+    .delete().eq("id", pendingFriendship.data.id).select("id");
+  assert(!removedFriendship.error && removedFriendship.data?.length === 1,
+    "either party can remove an accepted friendship");
+  const revokedFriendRead = await observer.client.from("game_participants")
+    .select("user_id,net_result").eq("game_id", game.game_id).eq("user_id", participant.id);
+  assert(!revokedFriendRead.error && revokedFriendRead.data?.length === 0,
+    "removing a friendship revokes participant-stat visibility");
+  const ownReadAfterFriendship = await participant.client.from("game_participants")
+    .select("user_id,net_result").eq("game_id", game.game_id).eq("user_id", participant.id).single();
+  assert(!ownReadAfterFriendship.error && ownReadAfterFriendship.data?.user_id === participant.id,
+    "own participant history remains readable after friendship removal");
 
   // Use an active game with no derived result so this denial cannot be caused
   // by the finalized game's (game_id, user_id) uniqueness constraint.
