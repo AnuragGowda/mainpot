@@ -29,7 +29,7 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(`Assertion failed: ${message}`);
 }
 
-async function permanent(label: string): Promise<{ id: string; client: SupabaseClient }> {
+async function permanent(label: string): Promise<{ id: string; email: string; client: SupabaseClient }> {
   const email = `transfer-${label}-${randomUUID()}@example.test`;
   const password = `Transfer-${randomUUID()}`;
   const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
@@ -38,7 +38,7 @@ async function permanent(label: string): Promise<{ id: string; client: SupabaseC
   const client = createClient(url, anonKey, { auth: { autoRefreshToken: false, persistSession: false } });
   const { error: signInError } = await client.auth.signInWithPassword({ email, password });
   if (signInError) throw signInError;
-  return { id: data.user.id, client };
+  return { id: data.user.id, email, client };
 }
 
 async function anonymous(): Promise<{ id: string; client: SupabaseClient }> {
@@ -79,19 +79,24 @@ async function run() {
     });
     assert(!joined.error, "permanent account can hold a normal game seat before a transfer conflict");
 
-    const permanentIssue = await recoveredAccount.client.rpc("issue_anonymous_account_transfer");
+    const permanentIssue = await recoveredAccount.client.rpc("issue_anonymous_account_transfer", { input_destination_email: null });
     assert(permanentIssue.error, "permanent accounts cannot issue guest-transfer capabilities");
-    const staleTokenResult = await guest.client.rpc("issue_anonymous_account_transfer");
-    assert(!staleTokenResult.error && typeof staleTokenResult.data === "string", "anonymous identity can prepare a guest transfer");
+    const boundTokenResult = await guest.client.rpc("issue_anonymous_account_transfer", {
+      input_destination_email: recoveredAccount.email,
+    });
+    assert(!boundTokenResult.error && typeof boundTokenResult.data === "string", "anonymous identity can prepare an email-bound guest transfer");
+    const wrongEmailClaim = await outsider.client.rpc("claim_anonymous_account_transfer", { input_token: boundTokenResult.data });
+    assert(wrongEmailClaim.error, "an email-bound transfer cannot be claimed by a different account");
+
     const expireToken = await admin
       .from("account_transfer_tokens")
       .update({ expires_at: new Date(Date.now() - 1_000).toISOString() })
       .eq("source_user_id", guest.id);
     if (expireToken.error) throw expireToken.error;
-    const expiredClaim = await outsider.client.rpc("claim_anonymous_account_transfer", { input_token: staleTokenResult.data });
+    const expiredClaim = await recoveredAccount.client.rpc("claim_anonymous_account_transfer", { input_token: boundTokenResult.data });
     assert(expiredClaim.error, "expired transfer capabilities cannot be claimed");
 
-    const tokenResult = await guest.client.rpc("issue_anonymous_account_transfer");
+    const tokenResult = await guest.client.rpc("issue_anonymous_account_transfer", { input_destination_email: null });
     assert(!tokenResult.error && typeof tokenResult.data === "string" && /^[0-9a-f]{64}$/.test(tokenResult.data), "anonymous identity issues an opaque transfer token");
     transferToken = tokenResult.data;
 
@@ -115,7 +120,9 @@ async function run() {
     const successClaim = await recoveredAccount.client.rpc("claim_anonymous_account_transfer", { input_token: transferToken });
     assert(!successClaim.error, "a permanent account can claim the anonymous identity with its capability");
     const replayClaim = await recoveredAccount.client.rpc("claim_anonymous_account_transfer", { input_token: transferToken });
-    assert(replayClaim.error, "a transfer capability is single-use");
+    assert(!replayClaim.error, "the same claimant can safely retry after a lost response");
+    const differentClaim = await outsider.client.rpc("claim_anonymous_account_transfer", { input_token: transferToken });
+    assert(differentClaim.error, "a consumed transfer capability cannot be claimed by a different account");
 
     const [game, player, result] = await Promise.all([
       admin.from("games").select("host_user_id,host_is_anonymous,expires_at").eq("id", created.game_id).single(),

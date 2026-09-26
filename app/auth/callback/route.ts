@@ -13,9 +13,7 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
   const cookieStore = await cookies();
-  const transferToken = searchParams.get("transfer")
-    ?? cookieStore.get(ACCOUNT_TRANSFER_COOKIE)?.value
-    ?? null;
+  const transferToken = cookieStore.get(ACCOUNT_TRANSFER_COOKIE)?.value ?? null;
 
   if (!code) {
     return NextResponse.redirect(
@@ -43,10 +41,9 @@ export async function GET(request: Request) {
     const { error: claimError } = await supabase.rpc("claim_anonymous_account_transfer", {
       input_token: transferToken,
     });
-    // Never leave a capability in the browser after a claim attempt. The
-    // account session is valid even if an expired/conflicting transfer needs
-    // support, so preserve the sign-in and disclose only a generic status.
-    cookieStore.delete(ACCOUNT_TRANSFER_COOKIE);
+    // Keep a failed capability for the same authenticated browser to retry;
+    // a successful claim consumes it permanently.
+    if (!claimError) cookieStore.delete(ACCOUNT_TRANSFER_COOKIE);
     recoveryFailed = Boolean(claimError);
   }
 
@@ -56,7 +53,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/", origin));
   }
   if (recoveryFailed) {
-    forwardUrl.searchParams.set("account_recovery", "failed");
+    const retryUrl = new URL("/signin", origin);
+    retryUrl.searchParams.set("next", forwardUrl.pathname + forwardUrl.search);
+    retryUrl.searchParams.set("account_recovery", "failed");
+    return NextResponse.redirect(retryUrl);
   }
   return NextResponse.redirect(forwardUrl);
 }

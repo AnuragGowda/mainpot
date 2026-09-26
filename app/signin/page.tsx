@@ -10,7 +10,6 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import {
-  accountTransferCallbackUrl,
   claimAnonymousAccountTransfer,
   prepareAnonymousAccountTransfer,
 } from "@/lib/accounts";
@@ -30,6 +29,8 @@ export default function SignInPage() {
   const [emailLinkSent, setEmailLinkSent] = useState<"signin" | "signup" | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authStatus, setAuthStatus] = useState<string | null>(null);
+  const [accountReady, setAccountReady] = useState(false);
+  const [recoveryPending, setRecoveryPending] = useState(false);
   const [next, setNext] = useState("/dashboard");
   const googleAuthEnabled = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
 
@@ -41,13 +42,46 @@ export default function SignInPage() {
     }
     const authError = params.get("error");
     if (authError) setAuthError("Sign-in could not be completed. Please try again.");
+    if (params.get("account_recovery") === "failed") {
+      const supabase = getBrowserSupabase();
+      void supabase?.auth.getUser().then(({ data }) => {
+        if (!data.user?.is_anonymous) {
+          setAccountReady(true);
+          setAuthError("Your account is signed in, but guest-game recovery needs another try.");
+          setAuthStatus("Retry recovery from the same browser where you played as a guest.");
+        }
+      });
+    }
   }, []);
 
-  const callbackUrl = (transferToken: string | null) =>
-    accountTransferCallbackUrl(
-      `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      transferToken,
-    );
+  const callbackUrl = () =>
+    `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+
+  async function continueAfterAuthentication(transferToken: string | null) {
+    try {
+      await claimAnonymousAccountTransfer(transferToken);
+      router.push(next);
+      router.refresh();
+    } catch (error) {
+      setAccountReady(true);
+      setAuthError(error instanceof Error ? error.message : "Your account is ready, but guest games could not be recovered.");
+      setAuthStatus("Your account is signed in. Retry recovery from this browser, or continue without the guest games.");
+    }
+  }
+
+  async function retryRecovery() {
+    setLoading(true);
+    setAuthError(null);
+    try {
+      await claimAnonymousAccountTransfer();
+      router.push(next);
+      router.refresh();
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Could not recover guest games.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handlePasswordAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,20 +102,19 @@ export default function SignInPage() {
     setAuthError(null);
     setAuthStatus(null);
     try {
-      const transferToken = await prepareAnonymousAccountTransfer();
+      const transferToken = await prepareAnonymousAccountTransfer(email);
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
             data: { display_name: displayName.trim() || email.split("@")[0] },
-            emailRedirectTo: callbackUrl(transferToken),
+            emailRedirectTo: callbackUrl(),
           },
         });
         if (error) throw error;
         if (data.user && data.session) {
-          await claimAnonymousAccountTransfer(transferToken);
-          router.push(next);
+          await continueAfterAuthentication(transferToken);
         } else {
           setEmailLinkSent("signup");
         }
@@ -91,10 +124,8 @@ export default function SignInPage() {
           password,
         });
         if (error) throw error;
-        await claimAnonymousAccountTransfer(transferToken);
-        router.push(next);
+        await continueAfterAuthentication(transferToken);
       }
-      router.refresh();
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Unable to sign in.");
     } finally {
@@ -112,12 +143,13 @@ export default function SignInPage() {
     setAuthError(null);
     setAuthStatus(null);
     try {
-      const transferToken = await prepareAnonymousAccountTransfer();
+      const transferToken = await prepareAnonymousAccountTransfer(email);
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        options: { emailRedirectTo: callbackUrl(transferToken) },
+        options: { emailRedirectTo: callbackUrl() },
       });
       if (error) throw error;
+      setRecoveryPending(Boolean(transferToken));
       setEmailLinkSent("signin");
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Unable to send the link.");
@@ -133,10 +165,10 @@ export default function SignInPage() {
     setAuthError(null);
     setAuthStatus("Opening Google…");
     try {
-      const transferToken = await prepareAnonymousAccountTransfer();
+      await prepareAnonymousAccountTransfer();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: callbackUrl(transferToken) },
+        options: { redirectTo: callbackUrl() },
       });
       if (error) throw error;
     } catch (error) {
@@ -184,6 +216,17 @@ export default function SignInPage() {
                 Account history and live sync are unavailable in this setup.
               </p>
             </div>
+          ) : accountReady ? (
+            <div className="py-8 text-center">
+              <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-800" aria-hidden="true">✓</span>
+              <h1 className="mt-5 text-2xl font-semibold text-gray-950">You&apos;re signed in</h1>
+              <p className="mt-2 text-sm leading-6 text-gray-600">Your account is ready. We could not finish recovering the guest games yet. Retry from the browser where you played as a guest.</p>
+              {authError ? <p role="alert" className="mt-4 text-sm font-medium text-red-700">{authError}</p> : null}
+              <div className="mt-6 grid gap-3">
+                <Button fullWidth loading={loading} onClick={retryRecovery}>Retry guest recovery</Button>
+                <Button fullWidth variant="secondary" onClick={() => router.push(next)}>Continue to your account</Button>
+              </div>
+            </div>
           ) : emailLinkSent ? (
             <div className="py-8 text-center">
               <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-800" aria-hidden="true">
@@ -193,6 +236,7 @@ export default function SignInPage() {
               <p className="mt-2 text-sm leading-6 text-gray-600">
                 {emailLinkSent === "signup" ? "We sent a confirmation link to " : "We sent a secure sign-in link to "}<strong>{email}</strong>.
               </p>
+              {recoveryPending ? <p className="mt-3 text-sm leading-6 text-gray-600">To recover your guest games, open this link in the same browser where you played as a guest.</p> : null}
               <Button className="mt-6" variant="secondary" onClick={() => setEmailLinkSent(null)}>
                 Use another email
               </Button>

@@ -5,9 +5,15 @@ create table public.account_transfer_tokens (
   id uuid primary key default gen_random_uuid(),
   token_hash bytea not null unique,
   source_user_id uuid not null references auth.users(id) on delete cascade,
+  destination_email text,
   expires_at timestamptz not null,
+  claimed_by_user_id uuid references auth.users(id) on delete cascade,
+  claimed_at timestamptz,
+  claim_result jsonb,
   created_at timestamptz not null default now(),
-  check (expires_at > created_at)
+  check (expires_at > created_at),
+  check ((claimed_by_user_id is null and claimed_at is null and claim_result is null)
+    or (claimed_by_user_id is not null and claimed_at is not null and claim_result is not null))
 );
 
 create index account_transfer_tokens_source_expiry_idx
@@ -16,7 +22,7 @@ create index account_transfer_tokens_source_expiry_idx
 alter table public.account_transfer_tokens enable row level security;
 revoke all on table public.account_transfer_tokens from anon, authenticated;
 
-create or replace function public.issue_anonymous_account_transfer()
+create or replace function public.issue_anonymous_account_transfer(input_destination_email text default null)
 returns text
 language plpgsql
 security definer
@@ -29,16 +35,28 @@ begin
     or coalesce((auth.jwt()->>'is_anonymous')::boolean, false) = false then
     raise exception 'Only an anonymous session can prepare an account transfer';
   end if;
+  if input_destination_email is not null
+    and trim(input_destination_email) <> ''
+    and (
+      char_length(trim(input_destination_email)) > 320
+      or lower(trim(input_destination_email)) !~ '^[^@[:space:]]+@[^@[:space:]]+$'
+    ) then
+    raise exception 'The destination email is invalid';
+  end if;
 
   -- One current capability per anonymous identity limits the replay window.
   delete from public.account_transfer_tokens
   where source_user_id = auth.uid() or expires_at <= now();
 
   transfer_token := encode(extensions.gen_random_bytes(32), 'hex');
-  insert into public.account_transfer_tokens(token_hash, source_user_id, expires_at)
+  insert into public.account_transfer_tokens(
+    token_hash, source_user_id, destination_email, expires_at
+  )
   values (
     extensions.digest(transfer_token, 'sha256'),
     auth.uid(),
+    case when input_destination_email is null or trim(input_destination_email) = ''
+      then null else lower(trim(input_destination_email)) end,
     now() + interval '10 minutes'
   );
   return transfer_token;
@@ -57,6 +75,7 @@ declare
   transferred_players integer := 0;
   transferred_hosted_games integer := 0;
   finalized_results integer := 0;
+  claim_payload jsonb;
 begin
   if target_user_id is null
     or coalesce((auth.jwt()->>'is_anonymous')::boolean, true) then
@@ -70,8 +89,21 @@ begin
   from public.account_transfer_tokens
   where token_hash = extensions.digest(input_token, 'sha256')
   for update;
-  if not found or transfer.expires_at <= now() then
+  if not found then
     raise exception 'The guest transfer token is invalid or expired';
+  end if;
+  if transfer.claimed_by_user_id is not null then
+    if transfer.claimed_by_user_id = target_user_id then
+      return transfer.claim_result;
+    end if;
+    raise exception 'The guest transfer token has already been claimed';
+  end if;
+  if transfer.expires_at <= now() then
+    raise exception 'The guest transfer token is invalid or expired';
+  end if;
+  if transfer.destination_email is not null
+    and transfer.destination_email <> lower(coalesce(auth.jwt()->>'email', '')) then
+    raise exception 'This guest transfer belongs to a different account email';
   end if;
   if not exists (
     select 1 from auth.users
@@ -142,17 +174,21 @@ begin
   where host_user_id = transfer.source_user_id;
   get diagnostics transferred_hosted_games = row_count;
 
-  delete from public.account_transfer_tokens where id = transfer.id;
-
-  return jsonb_build_object(
+  claim_payload := jsonb_build_object(
     'players', transferred_players,
     'hosted_games', transferred_hosted_games,
     'finalized_results', finalized_results
   );
+  update public.account_transfer_tokens
+  set claimed_by_user_id = target_user_id,
+      claimed_at = now(),
+      claim_result = claim_payload
+  where id = transfer.id;
+  return claim_payload;
 end;
 $$;
 
-revoke all on function public.issue_anonymous_account_transfer() from public;
+revoke all on function public.issue_anonymous_account_transfer(text) from public;
 revoke all on function public.claim_anonymous_account_transfer(text) from public;
-grant execute on function public.issue_anonymous_account_transfer() to authenticated;
+grant execute on function public.issue_anonymous_account_transfer(text) to authenticated;
 grant execute on function public.claim_anonymous_account_transfer(text) to authenticated;

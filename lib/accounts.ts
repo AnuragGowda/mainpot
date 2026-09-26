@@ -2,6 +2,17 @@ import { getBrowserSupabase } from "./supabase-browser";
 import { ACCOUNT_TRANSFER_COOKIE } from "./account-transfer";
 
 const accountTransferStorageKey = "mainpot_account_transfer";
+const accountTransferDeadlineMs = 8_000;
+
+function withDeadline<T>(operation: PromiseLike<T>, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timeout = window.setTimeout(() => reject(new Error(`${label} timed out. Please try again.`)), accountTransferDeadlineMs);
+    void operation.then(
+      (value) => { window.clearTimeout(timeout); resolve(value); },
+      (error: unknown) => { window.clearTimeout(timeout); reject(error); },
+    );
+  });
+}
 
 function writeTransferToken(token: string): void {
   window.sessionStorage.setItem(accountTransferStorageKey, token);
@@ -15,7 +26,13 @@ function clearTransferToken(): void {
 }
 
 function storedTransferToken(): string | null {
-  return window.sessionStorage.getItem(accountTransferStorageKey);
+  const stored = window.sessionStorage.getItem(accountTransferStorageKey);
+  if (stored) return stored;
+  const cookie = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith(`${ACCOUNT_TRANSFER_COOKIE}=`))
+    ?.slice(ACCOUNT_TRANSFER_COOKIE.length + 1);
+  return cookie ? decodeURIComponent(cookie) : null;
 }
 
 /**
@@ -24,15 +41,24 @@ function storedTransferToken(): string | null {
  * a sign-in that replaces that anonymous UID; a browser session ID is never
  * used to claim players.
  */
-export async function prepareAnonymousAccountTransfer(): Promise<string | null> {
+export async function prepareAnonymousAccountTransfer(destinationEmail?: string): Promise<string | null> {
   const supabase = getBrowserSupabase();
   if (!supabase) return null;
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError) throw new Error(`Could not prepare guest games: ${userError.message}`);
+  // A clean sign-in page has no session to recover. Supabase reports that as
+  // AuthSessionMissingError; it is not an authentication failure.
+  if (userError && userError.name !== "AuthSessionMissingError") {
+    throw new Error(`Could not prepare guest games: ${userError.message}`);
+  }
   if (!user?.is_anonymous) return null;
 
-  const { data, error } = await supabase.rpc("issue_anonymous_account_transfer");
+  const { data, error } = await withDeadline(
+    supabase.rpc("issue_anonymous_account_transfer", {
+      input_destination_email: destinationEmail?.trim() || null,
+    }),
+    "Preparing guest games",
+  );
   if (error) throw new Error(`Could not prepare guest games: ${error.message}`);
   if (typeof data !== "string" || !/^[0-9a-f]{64}$/.test(data)) {
     throw new Error("Could not prepare guest games.");
@@ -47,9 +73,10 @@ export async function claimAnonymousAccountTransfer(token = storedTransferToken(
   const supabase = getBrowserSupabase();
   if (!supabase) return;
 
-  const { error } = await supabase.rpc("claim_anonymous_account_transfer", {
-    input_token: token,
-  });
+  const { error } = await withDeadline(
+    supabase.rpc("claim_anonymous_account_transfer", { input_token: token }),
+    "Recovering guest games",
+  );
   if (error) throw new Error(`Could not recover guest games: ${error.message}`);
   clearTransferToken();
 }
@@ -64,12 +91,4 @@ export async function linkSessionToUser(_userId: string): Promise<void> {
   // still has the one-time token. This intentionally does not infer ownership
   // from a persistent browser identifier.
   void _userId;
-}
-
-/** Adds the opaque, single-use handoff token to an Auth callback URL. */
-export function accountTransferCallbackUrl(baseUrl: string, token: string | null): string {
-  if (!token) return baseUrl;
-  const url = new URL(baseUrl);
-  url.searchParams.set("transfer", token);
-  return url.toString();
 }
