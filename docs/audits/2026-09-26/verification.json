@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-26",
+  "baseline": "2360a44",
+  "final_application_revision": "536dda9",
+  "checks": {
+    "unit": { "command": "npm test", "passed": 155, "files": 24, "exit_code": 0 },
+    "lint": { "command": "npm run lint", "revision": "536dda9", "exit_code": 0 },
+    "types": { "command": "npx tsc --noEmit", "revision": "536dda9", "exit_code": 0 },
+    "production_build": { "command": "npm run build", "revision": "536dda9", "exit_code": 0 },
+    "database": {
+      "command": "npm run test:db:assurance:isolated",
+      "environment": "disposable mainpot-e2e Supabase, API 55321",
+      "exit_code": 0,
+      "passed_scripts": [
+        "test-database-assurance.mts",
+        "test-audit-security.mts",
+        "test-settlement-allocation-guard.mts",
+        "test-account-transfer-security.mts",
+        "test-early-cashout-phase-race.mts",
+        "test-game-creation-idempotency.mts"
+      ]
+    },
+    "realtime": {
+      "command": "PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --workers=3 --trace=retain-on-failure",
+      "revision": "20d3844", "passed": 110, "failed": 0, "retries": 0, "exit_code": 0
+    },
+    "smoke_pwa": {
+      "command": "NEXT_PUBLIC_SUPABASE_URL='' NEXT_PUBLIC_SUPABASE_ANON_KEY='' PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e -- --workers=3",
+      "revision": "223eb17", "passed": 72, "failed": 0, "skipped": 3, "retries": 0, "exit_code": 0,
+      "skip_reason": "Playwright WebKit does not expose required service-worker control; physical iOS PWA validation remains required",
+      "real_service_worker": "Chromium desktop and Android profile offline/recovery passed"
+    },
+    "hosted_follow_up": {
+      "command": "PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --grep 'restores an account-owned|shares a selected bank' --workers=3",
+      "revision": "223eb17", "passed": 10, "failed": 0, "exit_code": 0
+    },
+    "diagnostic_repeats": {
+      "tablet_serial": 9,
+      "all_profile_parallel": 45,
+      "result": "passed; lost input was not reproduced in these traced repeats; browser caching was a hypothesis, not a proven cause"
+    },
+    "independent_review": "Lifecycle, bank/account, PWA, phase guards, JWT retry, fresh-read policy, and cash-out refixes reviewed; reported blockers addressed"
+  },
+  "device_profiles": [
+    { "name": "chromium", "engine": "Chromium", "css_width": 1280 },
+    { "name": "mobile-chrome", "engine": "Chromium", "emulation": "Pixel 5", "css_width": 393 },
+    { "name": "mobile-safari", "engine": "WebKit", "emulation": "iPhone 13", "css_width": 390 },
+    { "name": "desktop-safari", "engine": "WebKit", "css_width": 1440 },
+    { "name": "tablet-safari", "engine": "WebKit", "emulation": "iPad Mini", "css_width": 768 }
+  ],
+  "extra_layout_width": 320,
+  "boundaries": {
+    "git": "local commits only",
+    "pushed": false,
+    "ci_run": false,
+    "deployed": false,
+    "developer_database_migrated": false,
+    "production_database_migrated": false,
+    "production_independently_verified": false,
+    "physical_devices_tested": false,
+    "native_install_prompts": "simulated browser tests, not physical OS installation",
+    "physical_suspend_resume_and_cached_history_restore": "manual platform acceptance remains unverified",
+    "real_oauth_and_email_delivery": "not established by disposable-provider tests"
+  }
+}
