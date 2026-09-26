@@ -263,8 +263,8 @@ async function run() {
     input_invitee_id: invitee.id,
   });
   assert(!endedInvitation.error && endedInvitation.data?.id, "host creates ended-game invitation fixture");
-  const ended = await admin.from("games").update({ status: "ended", ended_at: new Date().toISOString() }).eq("id", endedInviteGame.game_id);
-  assert(!ended.error, "service role ends invitation fixture");
+  const ended = await hostA.client.from("games").update({ status: "ended", ended_at: new Date().toISOString() }).eq("id", endedInviteGame.game_id);
+  assert(!ended.error, "host ends invitation fixture");
   const inboxAfterEnd = await invitee.client.rpc("get_my_incoming_game_invites");
   assert(inboxAfterEnd.data?.length === 0, "ended games are absent from the invitation inbox");
 
@@ -285,6 +285,23 @@ async function run() {
   });
   assert(!resent.error && resent.data?.status === "pending", "host explicitly re-sends a declined invitation");
   console.log("✓ invitation inbox is scoped, acceptance grants access, and declined invitations can be re-sent");
+
+  const bankGame = await createGame(hostA.client, "Audit bank plan");
+  const bankSeat = await joinGame(invitee.client, bankGame.code, "Selected banker");
+  await expectDenied(() => hostA.client.from("games").update({ settlement_mode: "bank", settlement_bank_player_id: bankSeat.player_id }).eq("id", bankGame.game_id).select("id"), "bank plan changes during active play");
+  const approve = await hostA.client.from("buy_ins").update({ verified: true }).eq("game_id", bankGame.game_id);
+  assert(!approve.error, "host approves opening entries for bank fixture");
+  const settling = await hostA.client.from("games").update({ status: "settling" }).eq("id", bankGame.game_id);
+  assert(!settling.error, "bank fixture enters settlement");
+  await expectDenied(() => invitee.client.from("games").update({ settlement_mode: "bank", settlement_bank_player_id: bankSeat.player_id }).eq("id", bankGame.game_id).select("id"), "participant cannot choose the shared settlement plan");
+  await expectDenied(() => hostA.client.from("games").update({ status: "ended", settlement_mode: "bank", settlement_bank_player_id: gameB.player_id }).eq("id", bankGame.game_id).select("id"), "bank from another game");
+  const locked = await hostA.client.from("games").update({ status: "ended", settlement_mode: "bank", settlement_bank_player_id: bankSeat.player_id }).eq("id", bankGame.game_id).select("settlement_mode,settlement_bank_player_id").single();
+  assert(!locked.error && locked.data?.settlement_mode === "bank" && locked.data?.settlement_bank_player_id === bankSeat.player_id, "host locks selected player as shared bank");
+  const shared = await invitee.client.from("games").select("settlement_mode,settlement_bank_player_id").eq("id", bankGame.game_id).single();
+  assert(!shared.error && shared.data?.settlement_bank_player_id === bankSeat.player_id, "participant reads the same persisted banker");
+  await expectDenied(() => hostA.client.from("games").update({ settlement_mode: "min", settlement_bank_player_id: null }).eq("id", bankGame.game_id).select("id"), "ended bank plan is immutable");
+  console.log("✓ settlement bank selection is host-only, game-scoped, shared, and immutable after lock");
+
 }
 
 try {

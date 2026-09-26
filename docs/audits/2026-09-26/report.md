@@ -16,6 +16,7 @@ Audit complete host/player journeys: account sign-in, dashboard, existing unfini
 | A06 | High | Host edits appear in approval queue | A host's authorized amount correction verifies the entry atomically. Guest-created entries remain pending; guest permissions stay enforced by database rules. |
 | A07 | Medium | Bank settlement choice ineffective | Existing bank calculation is only a preview: `SettlementScreen` forces finalized mode to `min`. Host must choose Fewest payments or named banker before lock; save shared immutable choice and use it consistently for all player instructions, counts, ledger, summaries, and payment status after reload. |
 | A08 | Medium | General polish and mobile/PWA recovery | Test focus, validation, dialogs, loading/error escape paths, narrow-screen overflow, reload and offline recovery with captured evidence. Address concrete defects; document platform limitations. |
+| A09 | High | Guest games can be lost from account recovery after sign-in/sign-up | Preserve proven guest ownership through authentication; never allow an arbitrary browser-session value to claim another user's ledger. Verify account-wide resume after transfer and reject token replay/expiry/conflicting seats. |
 
 ## Initial evidence
 
@@ -52,6 +53,10 @@ The existing Bank tab looks like a payment method but is only a temporary view: 
 PWA navigation falls back to a dedicated offline page, but its retry link used to go home and lose the game context. The service worker's update promise was unhandled on reconnect. Both are addressed in the first fix commit. Private room/API responses deliberately remain uncached; the app is not an offline financial-write queue. This behavior should stay explicit. Screenshot review also found the optional acquisition survey above the room header and invitation controls; core game actions should take visual priority.
 
 Identity initialization currently depends exclusively on an auth callback; if it never arrives, room loading cannot start. Bound that initialization and give a recoverable error instead of a permanent spinner. Device testing must distinguish Playwright's viewport/user-agent/touch emulation from OS-level PWA lifecycle behavior.
+
+### A09 — guest-to-account transition
+
+Guarded guest creation/join assigns a real anonymous auth UID to seats and hosted games. `linkSessionToUser` only queries `user_id IS NULL`, so it misses those rows after sign-in or sign-up changes the auth UID. The dashboard can then show no unfinished tables even though the device played one. This is a separate ownership problem from a stale room key. Preserve an authenticated proof of guest ownership before switching identities, consume it once after successful account authentication, and transfer the ledger references transactionally. Supabase distinguishes anonymous users from the unauthenticated API role and documents identity conversion/conflict handling in its [anonymous authentication guide](https://supabase.com/docs/guides/auth/auth-anonymous).
 
 ## Test coverage gaps found during the audit
 

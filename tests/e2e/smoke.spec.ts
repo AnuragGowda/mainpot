@@ -4,6 +4,16 @@ import { runSettlementUxFlow } from "./settlement-ux-flow";
 import { expect, test } from "@playwright/test";
 import { checkPwaRecovery } from "./pwa-flow";
 
+const runtimeErrors = new WeakMap<import("@playwright/test").Page, string[]>();
+test.beforeEach(async ({ page }) => {
+  const errors: string[] = [];
+  runtimeErrors.set(page, errors);
+  page.on("pageerror", error => errors.push(error.message));
+});
+test.afterEach(async ({ page }) => {
+  expect(runtimeErrors.get(page) ?? [], "The journey must not leave uncaught browser errors").toEqual([]);
+});
+
 test.describe("public local-mode experience", () => {
   // Keep network mocks deterministic in WebKit; a registered service worker
   // can otherwise answer the request before Playwright's route handler.

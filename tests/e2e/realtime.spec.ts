@@ -1,3 +1,4 @@
+import { runBankPlanFlow } from "./bank-flow";
 import { checkAccountRecovery, checkSavedFriendInvitation } from "./audit-fixes-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
 import { runSettlementUxFlow } from "./settlement-ux-flow";
@@ -531,4 +532,10 @@ test("restores an account-owned seat and settled history across browsers", async
 test("delivers saved-friend invitations before the friend has room access", async ({ browser, baseURL }) => {
   test.slow();
   await checkSavedFriendInvitation(browser, baseURL!);
+});
+
+
+test("shares a selected bank plan and keeps both bank payment directions visible", async ({ browser, baseURL }, testInfo) => {
+  test.slow();
+  await runBankPlanFlow(browser, baseURL!, `docs/audits/2026-09-26/evidence/${testInfo.project.name}-bank`);
 });

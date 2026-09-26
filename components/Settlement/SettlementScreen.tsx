@@ -281,7 +281,11 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const bankPlayer =
     players.find((player) => player.id === selectedBankPlayerId) ?? null;
   const bankTransfers = selectedBankPlayerId
-    ? calculateBankSettlement(allocatedNets, selectedBankPlayerId)
+    ? calculateBankSettlement(allocatedNets, selectedBankPlayerId).map((transfer) => ({
+        ...transfer,
+        from: transfer.fromPlayerId === selectedBankPlayerId ? bankPlayer?.name ?? "Bank" : transfer.from,
+        to: transfer.toPlayerId === selectedBankPlayerId ? bankPlayer?.name ?? "Bank" : transfer.to,
+      }))
     : [];
   const activeTabTransfers = displayedTab === "min" ? minTransfers : bankTransfers;
   const lockedEarlyCashOuts = snapshot.earlyCashOuts.filter(

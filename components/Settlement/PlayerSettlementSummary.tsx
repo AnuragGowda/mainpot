@@ -40,7 +40,9 @@ export default function PlayerSettlementSummary({
   const incomingTotal = totalAmount(outstandingIncoming);
 
   const owesPayment = outgoing.length > 0;
-  const isUp = !owesPayment && incoming.length > 0;
+  const hasIncoming = incoming.length > 0;
+  const handlesBothDirections = owesPayment && hasIncoming;
+  const isUp = !owesPayment && hasIncoming;
   const allMarkedSent = (owesPayment || isUp) && outstandingOutgoing.length === 0 && outstandingIncoming.length === 0;
   const resultBeforeDiscrepancy = beforeDiscrepancyNet ?? finalNet ?? 0;
   const finalResult = finalNet ?? resultBeforeDiscrepancy;
@@ -66,7 +68,16 @@ export default function PlayerSettlementSummary({
                 </p>
               </div>
             </div>
-          ) : owesPayment ? (
+          ) : handlesBothDirections && outgoingTotal > 0 && incomingTotal > 0 ? (
+            <>
+              <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
+                Send {formatCurrency(outgoingTotal)} · collect {formatCurrency(incomingTotal)}.
+              </h2>
+              <p className="mt-0.5 text-sm leading-5 text-gray-600">
+                Collect the incoming payments and send the outgoing payments below. Your net result is shown separately.
+              </p>
+            </>
+          ) : owesPayment && outgoingTotal > 0 ? (
             <>
               <h2 id="your-settlement-heading" className="text-lg font-semibold tracking-tight text-gray-950">
                 You owe {formatCurrency(outgoingTotal)}.
@@ -75,7 +86,7 @@ export default function PlayerSettlementSummary({
                 Send each payment below, then mark it sent so the table can keep track.
               </p>
             </>
-          ) : isUp ? (
+          ) : isUp || incomingTotal > 0 ? (
             <div className="flex items-start gap-2.5">
               <Trophy aria-hidden className="h-5 w-5 shrink-0 text-gray-950" />
               <div>
@@ -115,7 +126,7 @@ export default function PlayerSettlementSummary({
             personalOutgoing
           />
         </div> : null}
-        {isUp ? <div className="mt-4">
+        {hasIncoming ? <div className="mt-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">{allMarkedSent ? "Payment record" : "Payments coming to you"}</p>
           <TransferList
             personalIncoming
