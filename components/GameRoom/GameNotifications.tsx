@@ -54,7 +54,10 @@ export default function GameNotifications({
       setConfig({ enabled: false, publicKey: null });
       return;
     }
-    const abortConfig = () => controller.abort();
+    const abortConfig = (event: PageTransitionEvent) => {
+      // A cached history entry resumes this effect instead of mounting again.
+      if (!event.persisted) controller.abort();
+    };
     window.addEventListener("pagehide", abortConfig);
     void getPushConfig(controller.signal)
       .then(async (nextConfig) => {
