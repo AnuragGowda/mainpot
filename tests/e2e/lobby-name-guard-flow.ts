@@ -10,7 +10,9 @@ function pot(page: Page) {
 }
 
 async function createGame(host: Page, gameName: string, hostName: string) {
+  await host.waitForLoadState("networkidle");
   await host.goto("/create");
+  await host.waitForLoadState("networkidle");
   await host.locator("#create-name").fill(hostName);
   await host.locator("#create-game-name").fill(gameName);
   await host.locator("#create-buy-in").fill("20");
@@ -19,6 +21,7 @@ async function createGame(host: Page, gameName: string, hostName: string) {
 }
 
 async function expectDuplicateJoin(page: Page, gameUrl: string, name: string) {
+  await page.waitForLoadState("networkidle");
   await page.goto(gameUrl);
   const input = page.locator("#join-prompt-name");
   await expect(input).toBeVisible({ timeout: 15_000 });
@@ -68,6 +71,7 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
     const guestSession = await firstGuest.evaluate(() => localStorage.getItem("ante_session_id"));
     const hostSession = await host.evaluate(() => localStorage.getItem("ante_session_id"));
     await firstGuest.evaluate(session => localStorage.setItem("ante_session_id", session!), hostSession);
+    await firstGuest.waitForLoadState("networkidle");
     await firstGuest.reload();
     await expect(firstGuest.locator("#join-prompt-name")).toBeVisible();
     await expect(firstGuest.getByRole("button", { name: "End game", exact: true })).toHaveCount(0);
@@ -86,6 +90,7 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
 
     await createGame(host, "Lobby name race", "Morgan");
     const raceGameUrl = host.url();
+    await Promise.all([firstGuest.waitForLoadState("networkidle"), secondGuest.waitForLoadState("networkidle")]);
     await Promise.all([firstGuest.goto(raceGameUrl), secondGuest.goto(raceGameUrl)]);
     await Promise.all([
       expect(firstGuest.locator("#join-prompt-name")).toBeVisible({ timeout: 15_000 }),
@@ -121,6 +126,7 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
     await expect(pot(host)).toContainText("$20.00");
     await expect(pot(host)).toContainText("(+$20.00)");
 
+    await winner.waitForLoadState("networkidle");
     await winner.reload();
     await expect(winner.locator("#join-prompt-name")).toHaveCount(0, { timeout: 15_000 });
     await expect(playerList(winner)).toHaveCount(2);

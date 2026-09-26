@@ -59,6 +59,9 @@ export async function runExpiredGuestRecoveryWindowFlow(browser: Browser, baseUR
     await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Create account", exact: true }).click();
     await expect(page).toHaveURL(/dashboard/);
+    // The dashboard finishes its own account-link read before the expired
+    // token is injected, so it cannot consume this test fixture concurrently.
+    await expect(page.getByRole("heading", { name: "Expired Casey", exact: true })).toBeVisible();
 
     await page.evaluate(() => window.sessionStorage.setItem("mainpot_account_transfer", "0".repeat(64)));
     await page.goto("/signin?next=%2Fdashboard&account_recovery=failed");

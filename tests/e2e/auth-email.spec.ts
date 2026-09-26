@@ -31,6 +31,7 @@ test("confirms email, preserves guest ownership, signs in and recovers by email"
   await expect(page).toHaveURL(/\/game\/[A-HJ-NP-Z2-9]{6}$/);
   const gameUrl = page.url();
   const dashboardUrl = new URL("/dashboard", gameUrl).href;
+  const homepageUrl = new URL("/", gameUrl).href;
   await page.goto("/signin");
   await page.getByRole("button", { name: "Create an account", exact: true }).click();
   await page.getByLabel("Display name", { exact: true }).fill("Email Casey");
@@ -46,6 +47,8 @@ test("confirms email, preserves guest ownership, signs in and recovers by email"
   await expect(page.getByRole("button", { name: "End game", exact: true })).toBeEnabled();
   await page.goto("/dashboard");
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(page).toHaveURL(homepageUrl);
+  await page.waitForLoadState("networkidle");
   await page.goto("/signin");
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
@@ -53,6 +56,8 @@ test("confirms email, preserves guest ownership, signs in and recovers by email"
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByRole("region", { name: "Your unfinished games" })).toContainText("Confirmed email recovery");
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(page).toHaveURL(homepageUrl);
+  await page.waitForLoadState("networkidle");
   await page.goto("/signin");
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByRole("button", { name: /Get a sign-in link/ }).click();

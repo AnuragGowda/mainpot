@@ -28,7 +28,7 @@ jobs:
       - run: npm run test:e2e
 
   realtime:
-    name: Realtime browser tests
+    name: Realtime browser tests across five profiles
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -38,8 +38,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e:realtime
+      - run: npx playwright install --with-deps chromium webkit
+      - run: PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --workers=2
 
   database-assurance:
     name: Database migrations and RLS assurance
