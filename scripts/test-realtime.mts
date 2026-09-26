@@ -137,6 +137,9 @@ try {
     run(process.execPath, [join(scriptDirectory, "test-audit-security.mts")], {
       env: { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl },
     });
+    run(process.execPath, [join(scriptDirectory, "test-account-transfer-security.mts")], {
+      env: { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl },
+    });
   } else {
     console.log("Running realtime browser tests…");
     const result = spawnSync(

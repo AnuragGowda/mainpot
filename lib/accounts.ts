@@ -45,7 +45,7 @@ export async function prepareAnonymousAccountTransfer(destinationEmail?: string)
   const supabase = getBrowserSupabase();
   if (!supabase) return null;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await withDeadline(supabase.auth.getUser(), "Checking guest identity");
   // A clean sign-in page has no session to recover. Supabase reports that as
   // AuthSessionMissingError; it is not an authentication failure.
   if (userError && userError.name !== "AuthSessionMissingError") {
@@ -91,4 +91,5 @@ export async function linkSessionToUser(_userId: string): Promise<void> {
   // still has the one-time token. This intentionally does not infer ownership
   // from a persistent browser identifier.
   void _userId;
+  await claimAnonymousAccountTransfer();
 }

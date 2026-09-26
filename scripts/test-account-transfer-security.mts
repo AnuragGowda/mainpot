@@ -88,9 +88,11 @@ async function run() {
     const wrongEmailClaim = await outsider.client.rpc("claim_anonymous_account_transfer", { input_token: boundTokenResult.data });
     assert(wrongEmailClaim.error, "an email-bound transfer cannot be claimed by a different account");
 
+    const tokenRow = await admin.from("account_transfer_tokens").select("created_at").eq("source_user_id", guest.id).single();
+    assert(!tokenRow.error && tokenRow.data, "maintenance can inspect the expiry fixture");
     const expireToken = await admin
       .from("account_transfer_tokens")
-      .update({ expires_at: new Date(Date.now() - 1_000).toISOString() })
+      .update({ expires_at: new Date(Date.parse(tokenRow.data.created_at) + 1).toISOString() })
       .eq("source_user_id", guest.id);
     if (expireToken.error) throw expireToken.error;
     const expiredClaim = await recoveredAccount.client.rpc("claim_anonymous_account_transfer", { input_token: boundTokenResult.data });
@@ -110,11 +112,17 @@ async function run() {
     const sourceAfterConflict = await admin.from("players").select("user_id").eq("id", created.player_id).single();
     assert(sourceAfterConflict.data?.user_id === guest.id, "a rejected conflict leaves guest ownership intact");
 
-    const cashOut = await admin.from("cash_outs").insert({
-      game_id: created.game_id, player_id: created.player_id, amount: 25,
-    });
+    const approved = await guest.client.from("buy_ins").update({ verified: true }).eq("game_id", created.game_id);
+    assert(!approved.error, "guest host approves opening entries");
+    const settling = await guest.client.from("games").update({ status: "settling" }).eq("id", created.game_id);
+    assert(!settling.error, "guest table enters cash-outs");
+    const joinedSeat = Array.isArray(joined.data) ? joined.data[0] : joined.data;
+    const cashOut = await guest.client.from("cash_outs").insert([
+      { game_id: created.game_id, player_id: created.player_id, amount: 25 },
+      { game_id: created.game_id, player_id: joinedSeat.player_id, amount: 15 },
+    ]);
     if (cashOut.error) throw cashOut.error;
-    const finalized = await admin.from("games").update({ status: "ended" }).eq("id", created.game_id);
+    const finalized = await guest.client.from("games").update({ status: "ended" }).eq("id", created.game_id);
     if (finalized.error) throw finalized.error;
 
     const successClaim = await recoveredAccount.client.rpc("claim_anonymous_account_transfer", { input_token: transferToken });

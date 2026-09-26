@@ -67,7 +67,7 @@ begin
       into current_difference;
     if abs(current_difference) >= 0.005 and (
       new.discrepancy_allocation is null
-      or new.discrepancy_allocation->>'method' not in ('proportional', 'selected', 'custom')
+      or coalesce(new.discrepancy_allocation->>'method', '') not in ('proportional', 'selected', 'custom')
       or coalesce((new.discrepancy_allocation->>'amount')::numeric, 0) <> abs(current_difference)
     ) then
       raise exception 'Resolve the current cash-out difference before locking the settlement';

@@ -263,6 +263,11 @@ async function run() {
     input_invitee_id: invitee.id,
   });
   assert(!endedInvitation.error && endedInvitation.data?.id, "host creates ended-game invitation fixture");
+  await expectDenied(() => hostA.client.from("games").update({ status: "ended" }).eq("id", endedInviteGame.game_id).select("id"), "skipping the cash-out phase");
+  const inviteSettling = await hostA.client.from("games").update({ status: "settling" }).eq("id", endedInviteGame.game_id);
+  assert(!inviteSettling.error, "invitation fixture enters settlement");
+  const inviteCashOut = await hostA.client.from("cash_outs").insert({ game_id: endedInviteGame.game_id, player_id: endedInviteGame.player_id, amount: 20 });
+  assert(!inviteCashOut.error, "invitation fixture has a balanced cash-out");
   const ended = await hostA.client.from("games").update({ status: "ended", ended_at: new Date().toISOString() }).eq("id", endedInviteGame.game_id);
   assert(!ended.error, "host ends invitation fixture");
   const inboxAfterEnd = await invitee.client.rpc("get_my_incoming_game_invites");
@@ -295,6 +300,9 @@ async function run() {
   assert(!settling.error, "bank fixture enters settlement");
   await expectDenied(() => invitee.client.from("games").update({ settlement_mode: "bank", settlement_bank_player_id: bankSeat.player_id }).eq("id", bankGame.game_id).select("id"), "participant cannot choose the shared settlement plan");
   await expectDenied(() => hostA.client.from("games").update({ status: "ended", settlement_mode: "bank", settlement_bank_player_id: gameB.player_id }).eq("id", bankGame.game_id).select("id"), "bank from another game");
+  await expectDenied(() => hostA.client.from("games").update({ status: "ended" }).eq("id", bankGame.game_id).select("id"), "missing cash-outs prevent locking");
+  const bankCashOuts = await hostA.client.from("cash_outs").insert([{ game_id: bankGame.game_id, player_id: bankGame.player_id, amount: 20 }, { game_id: bankGame.game_id, player_id: bankSeat.player_id, amount: 20 }]);
+  assert(!bankCashOuts.error, "bank fixture has complete balanced cash-outs");
   const locked = await hostA.client.from("games").update({ status: "ended", settlement_mode: "bank", settlement_bank_player_id: bankSeat.player_id }).eq("id", bankGame.game_id).select("settlement_mode,settlement_bank_player_id").single();
   assert(!locked.error && locked.data?.settlement_mode === "bank" && locked.data?.settlement_bank_player_id === bankSeat.player_id, "host locks selected player as shared bank");
   const shared = await invitee.client.from("games").select("settlement_mode,settlement_bank_player_id").eq("id", bankGame.game_id).single();

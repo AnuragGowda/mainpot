@@ -1,3 +1,4 @@
+import { withTimeout } from "@/lib/request-timeout";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { ACCOUNT_TRANSFER_COOKIE } from "@/lib/account-transfer";
@@ -29,7 +30,9 @@ export async function GET(request: Request) {
     );
   }
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const exchange = await withTimeout(supabase.auth.exchangeCodeForSession(code), "Sign-in timed out. Please try again.")
+    .catch((error: unknown) => ({ error: { message: error instanceof Error ? error.message : "Sign-in failed" } }));
+  const { error } = exchange;
   if (error) {
     return NextResponse.redirect(
       new URL(`/signin?error=${encodeURIComponent(error.message)}`, origin)
@@ -38,9 +41,9 @@ export async function GET(request: Request) {
 
   let recoveryFailed = false;
   if (transferToken) {
-    const { error: claimError } = await supabase.rpc("claim_anonymous_account_transfer", {
+    const { error: claimError } = await withTimeout(supabase.rpc("claim_anonymous_account_transfer", {
       input_token: transferToken,
-    });
+    }), "Guest recovery timed out. Please try again.").catch(() => ({ error: true }));
     // Keep a failed capability for the same authenticated browser to retry;
     // a successful claim consumes it permanently.
     if (!claimError) cookieStore.delete(ACCOUNT_TRANSFER_COOKIE);
