@@ -51,3 +51,10 @@ create trigger serialize_buy_in_phase before insert or update or delete on publi
 for each row execute function mainpot_private.serialize_ledger_phase();
 create trigger serialize_cash_out_phase before insert or update or delete on public.cash_outs
 for each row execute function mainpot_private.serialize_ledger_phase();
+
+-- The observer-host zero entry is created after the phase change so it uses
+-- the same settlement-only cash-out rule as every other entry.
+drop trigger if exists set_zero_cash_out_for_nonplaying_host on public.games;
+create trigger set_zero_cash_out_for_nonplaying_host
+after update of status on public.games
+for each row execute function public.set_zero_cash_out_for_nonplaying_host();
