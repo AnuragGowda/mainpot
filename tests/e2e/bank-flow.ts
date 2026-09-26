@@ -47,6 +47,7 @@ export async function runBankPlanFlow(browser: Browser, baseURL: string, evidenc
     await expect(personal).toContainText("Riley");
     await expect(winner.locator('section[aria-labelledby="your-settlement-heading"]')).toContainText("From Taylor");
     expect(await banker.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(banker.viewportSize()!.width);
+    await expect(banker.getByRole("status").filter({ hasText: "Final settlement is ready to review." })).toHaveCount(0);
     await banker.screenshot({ path: `${evidencePrefix}-${banker.viewportSize()!.width}.png`, fullPage: true });
     await personal.getByTitle("Mark sent").first().click();
     await expect(personal.getByRole("heading")).toHaveText("Send $20.00 · collect $20.00.");
