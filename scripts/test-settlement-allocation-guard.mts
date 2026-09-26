@@ -109,9 +109,9 @@ async function run() {
   await setAllocation({ method: "custom", player_ids: [playerA], player_allocations: [{ player_id: hostPlayerId, amount: 10 }], amount: 10 });
   await tryFinalize("custom allocation requires matching participant ids");
 
-  await setAllocation({ method: "selected", player_ids: [hostPlayerId], amount: 10 });
+  await setAllocation({ method: "custom", player_ids: [hostPlayerId], player_allocations: [{ player_id: hostPlayerId, amount: 10 }], amount: 10 });
   const finalized = await host.from("games").update({ status: "ended" }).eq("id", gameId).eq("status", "settling").select("id");
-  assert(!finalized.error && finalized.data?.length === 1, "eligible selected allocation finalizes the balanced plan");
+  assert(!finalized.error && finalized.data?.length === 1, "eligible custom allocation finalizes the balanced plan");
   await expectRejected(
     () => host.from("games").update({ status: "settling" }).eq("id", gameId).select("id"),
     "a finalized game cannot reopen",

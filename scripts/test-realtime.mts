@@ -127,22 +127,20 @@ try {
 
   if (databaseAssuranceOnly) {
     console.log("Running database assurance checks against the disposable migration stack…");
-    run(process.execPath, [join(scriptDirectory, "test-database-assurance.mts")], {
-      env: {
-        ...process.env,
-        SUPABASE_WORKDIR: workdir,
-        SUPABASE_EXPECTED_API_URL: apiUrl,
-      },
-    });
-    run(process.execPath, [join(scriptDirectory, "test-audit-security.mts")], {
-      env: { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl },
-    });
-    run(process.execPath, [join(scriptDirectory, "test-settlement-allocation-guard.mts")], {
-      env: { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl },
-    });
-    run(process.execPath, [join(scriptDirectory, "test-account-transfer-security.mts")], {
-      env: { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl },
-    });
+    const failures: unknown[] = [];
+    for (const script of [
+      "test-database-assurance.mts", "test-audit-security.mts",
+      "test-settlement-allocation-guard.mts", "test-account-transfer-security.mts",
+    ]) {
+      try {
+        run(process.execPath, [join(scriptDirectory, script)], {
+          env: { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl },
+        });
+      } catch (error) {
+        failures.push(error);
+      }
+    }
+    if (failures.length) throw new AggregateError(failures, "Database assurance scripts failed");
   } else {
     console.log("Running realtime browser tests…");
     const result = spawnSync(
