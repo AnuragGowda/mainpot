@@ -44,3 +44,32 @@ export async function runGuestAccountTransfer(browser: Browser, baseURL: string)
     await fresh.close();
   }
 }
+
+/** An expired recovery proof must leave the new account usable without a retry loop. */
+export async function runExpiredGuestRecoveryWindowFlow(browser: Browser, baseURL: string) {
+  const context = await createDeviceContext(browser, { baseURL });
+  const page = await context.newPage();
+  const email = `expired-guest-transfer-${crypto.randomUUID()}@example.com`;
+  const password = `Expired-${crypto.randomUUID()}`;
+  try {
+    await page.goto("/signin");
+    await page.getByRole("button", { name: "Create an account", exact: true }).click();
+    await page.getByLabel("Display name", { exact: true }).fill("Expired Casey");
+    await page.getByLabel("Email", { exact: true }).fill(email);
+    await page.getByLabel("Password", { exact: true }).fill(password);
+    await page.getByRole("button", { name: "Create account", exact: true }).click();
+    await expect(page).toHaveURL(/dashboard/);
+
+    await page.evaluate(() => window.sessionStorage.setItem("mainpot_account_transfer", "0".repeat(64)));
+    await page.goto("/signin?next=%2Fdashboard&account_recovery=expired");
+    await expect(page.getByRole("heading", { name: "You're signed in" })).toBeVisible();
+    await expect(page.getByRole("alert")).toContainText("Your guest-game recovery window expired.");
+    await expect(page.getByText("Guest games can only be recovered within one hour after requesting the confirmation email, from the same browser.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Retry guest recovery" })).toHaveCount(0);
+    await expect.poll(() => page.evaluate(() => window.sessionStorage.getItem("mainpot_account_transfer"))).toBeNull();
+    await page.getByRole("button", { name: "Continue to your account" }).click();
+    await expect(page).toHaveURL(/dashboard/);
+  } finally {
+    await context.close();
+  }
+}

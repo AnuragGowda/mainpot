@@ -12,6 +12,8 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import {
   claimAnonymousAccountTransfer,
+  discardAnonymousAccountTransfer,
+  GUEST_RECOVERY_WINDOW_EXPIRED,
   prepareAnonymousAccountTransfer,
 } from "@/lib/accounts";
 import { isSupabaseConfigured } from "@/lib/supabase";
@@ -31,6 +33,7 @@ export default function SignInPage() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [authStatus, setAuthStatus] = useState<string | null>(null);
   const [accountReady, setAccountReady] = useState(false);
+  const [recoveryCanRetry, setRecoveryCanRetry] = useState(true);
   const [recoveryPending, setRecoveryPending] = useState(false);
   const [next, setNext] = useState("/dashboard");
   const googleAuthEnabled = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
@@ -43,13 +46,21 @@ export default function SignInPage() {
     }
     const authError = params.get("error");
     if (authError) setAuthError("Sign-in could not be completed. Please try again.");
-    if (params.get("account_recovery") === "failed") {
+    const accountRecovery = params.get("account_recovery");
+    if (accountRecovery === "failed" || accountRecovery === "expired") {
       const supabase = getBrowserSupabase();
       void supabase?.auth.getUser().then(({ data }) => {
         if (!data.user?.is_anonymous) {
           setAccountReady(true);
-          setAuthError("Your account is signed in, but guest-game recovery needs another try.");
-          setAuthStatus("Retry recovery from the same browser where you played as a guest.");
+          if (accountRecovery === "expired") {
+            discardAnonymousAccountTransfer();
+            setRecoveryCanRetry(false);
+            setAuthError(`${GUEST_RECOVERY_WINDOW_EXPIRED} Your account is still ready.`);
+            setAuthStatus("Guest games can only be recovered within one hour after requesting the confirmation email, from the same browser.");
+          } else {
+            setAuthError("Your account is signed in, but guest-game recovery needs another try.");
+            setAuthStatus("Retry recovery from the same browser where you played as a guest.");
+          }
         }
       });
     }
@@ -65,8 +76,13 @@ export default function SignInPage() {
       router.refresh();
     } catch (error) {
       setAccountReady(true);
-      setAuthError(error instanceof Error ? error.message : "Your account is ready, but guest games could not be recovered.");
-      setAuthStatus("Your account is signed in. Retry recovery from this browser, or continue without the guest games.");
+      const message = error instanceof Error ? error.message : "Your account is ready, but guest games could not be recovered.";
+      const expired = message === GUEST_RECOVERY_WINDOW_EXPIRED;
+      setRecoveryCanRetry(!expired);
+      setAuthError(message);
+      setAuthStatus(expired
+        ? "Guest games can only be recovered within one hour after requesting the confirmation email, from the same browser."
+        : "Your account is signed in. Retry recovery from this browser, or continue without the guest games.");
     }
   }
 
@@ -78,7 +94,9 @@ export default function SignInPage() {
       router.push(next);
       router.refresh();
     } catch (error) {
-      setAuthError(error instanceof Error ? error.message : "Could not recover guest games.");
+      const message = error instanceof Error ? error.message : "Could not recover guest games.";
+      if (message === GUEST_RECOVERY_WINDOW_EXPIRED) setRecoveryCanRetry(false);
+      setAuthError(message);
     } finally {
       setLoading(false);
     }
@@ -117,6 +135,7 @@ export default function SignInPage() {
         if (data.user && data.session) {
           await continueAfterAuthentication(transferToken);
         } else {
+          setRecoveryPending(Boolean(transferToken));
           setEmailLinkSent("signup");
         }
       } else {
@@ -224,7 +243,7 @@ export default function SignInPage() {
               <p className="mt-2 text-sm leading-6 text-gray-600">Your account is ready. We could not finish recovering the guest games yet. Retry from the browser where you played as a guest.</p>
               {authError ? <p role="alert" className="mt-4 text-sm font-medium text-red-700">{authError}</p> : null}
               <div className="mt-6 grid gap-3">
-                <Button fullWidth loading={loading} onClick={retryRecovery}>Retry guest recovery</Button>
+                {recoveryCanRetry ? <Button fullWidth loading={loading} onClick={retryRecovery}>Retry guest recovery</Button> : null}
                 <Button fullWidth variant="secondary" onClick={() => router.push(next)}>Continue to your account</Button>
               </div>
             </div>
@@ -237,7 +256,7 @@ export default function SignInPage() {
               <p className="mt-2 text-sm leading-6 text-gray-600">
                 {emailLinkSent === "signup" ? "We sent a confirmation link to " : "We sent a secure sign-in link to "}<strong>{email}</strong>.
               </p>
-              {recoveryPending ? <p className="mt-3 text-sm leading-6 text-gray-600">To recover your guest games, open this link in the same browser where you played as a guest.</p> : null}
+              {recoveryPending ? <p className="mt-3 text-sm leading-6 text-gray-600">Your guest-game recovery is reserved for this email for up to one hour. Open this link in the same browser where you played as a guest.</p> : null}
               <Button className="mt-6" variant="secondary" onClick={() => setEmailLinkSent(null)}>
                 Use another email
               </Button>

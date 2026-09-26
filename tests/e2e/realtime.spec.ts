@@ -1,4 +1,4 @@
-import { runGuestAccountTransfer } from "./account-transfer-flow";
+import { runExpiredGuestRecoveryWindowFlow, runGuestAccountTransfer } from "./account-transfer-flow";
 import { runBankPlanFlow } from "./bank-flow";
 import { checkAccountRecovery, checkSavedFriendInvitation } from "./audit-fixes-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
@@ -646,6 +646,11 @@ test("shares a selected bank plan and keeps both bank payment directions visible
 test("keeps guest-host ownership after account signup across devices", async ({ browser, baseURL }) => {
   test.slow();
   await runGuestAccountTransfer(browser, baseURL!);
+});
+
+test("ends an expired guest recovery window without trapping the signed-in account", async ({ browser, baseURL }) => {
+  test.slow();
+  await runExpiredGuestRecoveryWindowFlow(browser, baseURL!);
 });
 
 test("starts a second guest table and keeps both unfinished games recoverable", async ({ page }) => {

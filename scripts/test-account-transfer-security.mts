@@ -51,6 +51,7 @@ async function anonymous(): Promise<{ id: string; client: SupabaseClient }> {
 
 async function run() {
   const guest = await anonymous();
+  const longLivedGuest = await anonymous();
   const conflictedAccount = await permanent("conflict");
   const recoveredAccount = await permanent("recovered");
   const outsider = await permanent("outsider");
@@ -97,6 +98,43 @@ async function run() {
     if (expireToken.error) throw expireToken.error;
     const expiredClaim = await recoveredAccount.client.rpc("claim_anonymous_account_transfer", { input_token: boundTokenResult.data });
     assert(expiredClaim.error, "expired transfer capabilities cannot be claimed");
+
+    const longLivedTokenResult = await longLivedGuest.client.rpc("issue_anonymous_account_transfer", {
+      input_destination_email: recoveredAccount.email,
+    });
+    assert(!longLivedTokenResult.error && typeof longLivedTokenResult.data === "string", "an email-bound transfer can be prepared for confirmation");
+    const longLivedTokenRow = await admin.from("account_transfer_tokens").select("created_at").eq("source_user_id", longLivedGuest.id).single();
+    assert(!longLivedTokenRow.error && longLivedTokenRow.data, "maintenance can inspect the long-lived email-bound fixture");
+    const createdAt = Date.parse(longLivedTokenRow.data.created_at);
+    const beyondMaximum = await admin
+      .from("account_transfer_tokens")
+      .update({ expires_at: new Date(createdAt + (24 * 60 * 60 * 1000) + 1).toISOString() })
+      .eq("source_user_id", longLivedGuest.id);
+    assert(beyondMaximum.error, "an email-bound transfer cannot exceed the 24-hour maximum");
+    const now = Date.now();
+    const ageBeyondUnbound = await admin
+      .from("account_transfer_tokens")
+      .update({
+        created_at: new Date(now - (11 * 60 * 1000)).toISOString(),
+        expires_at: new Date(now + (60 * 1000)).toISOString(),
+      })
+      .eq("source_user_id", longLivedGuest.id);
+    if (ageBeyondUnbound.error) throw ageBeyondUnbound.error;
+    const longLivedClaim = await recoveredAccount.client.rpc("claim_anonymous_account_transfer", { input_token: longLivedTokenResult.data });
+    assert(!longLivedClaim.error, "an email-bound transfer remains valid after the ten-minute unbound window");
+
+    const expiredUnboundResult = await guest.client.rpc("issue_anonymous_account_transfer", { input_destination_email: null });
+    assert(!expiredUnboundResult.error && typeof expiredUnboundResult.data === "string", "anonymous identity can prepare an unbound OAuth transfer");
+    const expiredUnbound = await admin
+      .from("account_transfer_tokens")
+      .update({
+        created_at: new Date(now - (11 * 60 * 1000)).toISOString(),
+        expires_at: new Date(now - 1000).toISOString(),
+      })
+      .eq("source_user_id", guest.id);
+    if (expiredUnbound.error) throw expiredUnbound.error;
+    const expiredUnboundClaim = await recoveredAccount.client.rpc("claim_anonymous_account_transfer", { input_token: expiredUnboundResult.data });
+    assert(expiredUnboundClaim.error, "an unbound transfer cannot be claimed after ten minutes");
 
     const tokenResult = await guest.client.rpc("issue_anonymous_account_transfer", { input_destination_email: null });
     assert(!tokenResult.error && typeof tokenResult.data === "string" && /^[0-9a-f]{64}$/.test(tokenResult.data), "anonymous identity issues an opaque transfer token");

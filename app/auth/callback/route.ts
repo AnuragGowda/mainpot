@@ -1,7 +1,7 @@
 import { withTimeout } from "@/lib/request-timeout";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { ACCOUNT_TRANSFER_COOKIE } from "@/lib/account-transfer";
+import { ACCOUNT_TRANSFER_COOKIE, isExpiredAccountTransferError } from "@/lib/account-transfer";
 import { createServerSupabase } from "@/lib/supabase-server";
 
 /**
@@ -40,13 +40,18 @@ export async function GET(request: Request) {
   }
 
   let recoveryFailed = false;
+  let recoveryExpired = false;
   if (transferToken) {
     const { error: claimError } = await withTimeout(supabase.rpc("claim_anonymous_account_transfer", {
       input_token: transferToken,
     }), "Guest recovery timed out. Please try again.").catch(() => ({ error: true }));
     // Keep a failed capability for the same authenticated browser to retry;
     // a successful claim consumes it permanently.
-    if (!claimError) cookieStore.delete(ACCOUNT_TRANSFER_COOKIE);
+    recoveryExpired = typeof claimError === "object"
+      && claimError !== null
+      && "message" in claimError
+      && isExpiredAccountTransferError(String(claimError.message));
+    if (!claimError || recoveryExpired) cookieStore.delete(ACCOUNT_TRANSFER_COOKIE);
     recoveryFailed = Boolean(claimError);
   }
 
@@ -58,7 +63,7 @@ export async function GET(request: Request) {
   if (recoveryFailed) {
     const retryUrl = new URL("/signin", origin);
     retryUrl.searchParams.set("next", forwardUrl.pathname + forwardUrl.search);
-    retryUrl.searchParams.set("account_recovery", "failed");
+    retryUrl.searchParams.set("account_recovery", recoveryExpired ? "expired" : "failed");
     return NextResponse.redirect(retryUrl);
   }
   return NextResponse.redirect(forwardUrl);

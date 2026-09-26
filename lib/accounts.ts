@@ -1,8 +1,12 @@
 import { getBrowserSupabase } from "./supabase-browser";
-import { ACCOUNT_TRANSFER_COOKIE } from "./account-transfer";
+import { ACCOUNT_TRANSFER_COOKIE, isExpiredAccountTransferError } from "./account-transfer";
 
 const accountTransferStorageKey = "mainpot_account_transfer";
 const accountTransferDeadlineMs = 8_000;
+const unboundTransferLifetimeSeconds = 10 * 60;
+const emailBoundTransferLifetimeSeconds = 60 * 60;
+
+export const GUEST_RECOVERY_WINDOW_EXPIRED = "Your guest-game recovery window expired.";
 
 function withDeadline<T>(operation: PromiseLike<T>, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -14,15 +18,19 @@ function withDeadline<T>(operation: PromiseLike<T>, label: string): Promise<T> {
   });
 }
 
-function writeTransferToken(token: string): void {
+function writeTransferToken(token: string, maxAgeSeconds: number): void {
   window.sessionStorage.setItem(accountTransferStorageKey, token);
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${ACCOUNT_TRANSFER_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=600; SameSite=Lax${secure}`;
+  document.cookie = `${ACCOUNT_TRANSFER_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax${secure}`;
 }
 
 function clearTransferToken(): void {
   window.sessionStorage.removeItem(accountTransferStorageKey);
   document.cookie = `${ACCOUNT_TRANSFER_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
+export function discardAnonymousAccountTransfer(): void {
+  clearTransferToken();
 }
 
 function storedTransferToken(): string | null {
@@ -36,10 +44,10 @@ function storedTransferToken(): string | null {
 }
 
 /**
- * Mints a ten-minute, single-use capability while the browser still holds its
- * anonymous Auth identity. The token is the only recovery proof carried over
- * a sign-in that replaces that anonymous UID; a browser session ID is never
- * used to claim players.
+ * Mints a single-use capability while the browser still holds its anonymous
+ * Auth identity. An unbound OAuth proof lasts ten minutes. A proof bound to a
+ * destination email lasts one hour, matching the default Supabase email-link
+ * lifetime. A browser session ID is never used to claim players.
  */
 export async function prepareAnonymousAccountTransfer(destinationEmail?: string): Promise<string | null> {
   const supabase = getBrowserSupabase();
@@ -53,9 +61,10 @@ export async function prepareAnonymousAccountTransfer(destinationEmail?: string)
   }
   if (!user?.is_anonymous) return null;
 
+  const normalizedDestinationEmail = destinationEmail?.trim() || null;
   const { data, error } = await withDeadline(
     supabase.rpc("issue_anonymous_account_transfer", {
-      input_destination_email: destinationEmail?.trim() || null,
+      input_destination_email: normalizedDestinationEmail,
     }),
     "Preparing guest games",
   );
@@ -63,7 +72,7 @@ export async function prepareAnonymousAccountTransfer(destinationEmail?: string)
   if (typeof data !== "string" || !/^[0-9a-f]{64}$/.test(data)) {
     throw new Error("Could not prepare guest games.");
   }
-  writeTransferToken(data);
+  writeTransferToken(data, normalizedDestinationEmail ? emailBoundTransferLifetimeSeconds : unboundTransferLifetimeSeconds);
   return data;
 }
 
@@ -77,7 +86,13 @@ export async function claimAnonymousAccountTransfer(token = storedTransferToken(
     supabase.rpc("claim_anonymous_account_transfer", { input_token: token }),
     "Recovering guest games",
   );
-  if (error) throw new Error(`Could not recover guest games: ${error.message}`);
+  if (error) {
+    if (isExpiredAccountTransferError(error.message)) {
+      clearTransferToken();
+      throw new Error(GUEST_RECOVERY_WINDOW_EXPIRED);
+    }
+    throw new Error(`Could not recover guest games: ${error.message}`);
+  }
   clearTransferToken();
 }
 
