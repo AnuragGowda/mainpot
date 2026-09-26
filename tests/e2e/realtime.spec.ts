@@ -458,8 +458,9 @@ test("keeps a zero cash-out draft through a delayed failure and retries it", asy
       await route.continue();
       return;
     }
+    const response = await route.fetch({ url: route.request().url().replace("rpc/save_cash_out", "cash_outs?select=id&limit=0"), method: "GET", postData: undefined });
     await saveReleased;
-    await route.abort();
+    await route.fulfill({ response, status: 400, json: { message: "Injected delayed cash-out response failure" } });
   };
 
   try {
@@ -467,7 +468,7 @@ test("keeps a zero cash-out draft through a delayed failure and retries it", asy
     await host.getByRole("button", { name: "End game" }).click();
     await host.getByRole("button", { name: "Start cash-outs" }).click();
 
-    await host.route("**/rest/v1/cash_outs*", stallFirstCashOutSave);
+    await host.route("**/rest/v1/rpc/save_cash_out", stallFirstCashOutSave);
     const cashOut = host.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
     await cashOut.fill("0");
     await cashOut.blur();
@@ -479,7 +480,7 @@ test("keeps a zero cash-out draft through a delayed failure and retries it", asy
     await expect(host.getByText("Could not save", { exact: true })).toBeVisible();
     await expect(cashOut).toHaveValue("0");
 
-    await host.unroute("**/rest/v1/cash_outs*", stallFirstCashOutSave);
+    await host.unroute("**/rest/v1/rpc/save_cash_out", stallFirstCashOutSave);
     let releaseSnapshotRead: (() => void) | undefined;
     const snapshotReadReleased = new Promise<void>((resolve) => {
       releaseSnapshotRead = resolve;
@@ -489,18 +490,18 @@ test("keeps a zero cash-out draft through a delayed failure and retries it", asy
       markSnapshotReadHeld = resolve;
     });
     let successfulSaveStarted = false;
+    const observeSuccessfulSave = async (route: Route) => {
+      if (route.request().method() === "POST") successfulSaveStarted = true;
+      await route.continue();
+    };
     const holdSnapshotAfterSuccessfulSave = async (route: Route) => {
-      if (route.request().method() === "POST") {
-        successfulSaveStarted = true;
-        await route.continue();
-        return;
-      }
       if (route.request().method() === "GET" && successfulSaveStarted) {
         markSnapshotReadHeld?.();
         await snapshotReadReleased;
       }
       await route.continue();
     };
+    await host.route("**/rest/v1/rpc/save_cash_out", observeSuccessfulSave);
     await host.route("**/rest/v1/cash_outs*", holdSnapshotAfterSuccessfulSave);
     await cashOut.focus();
     await cashOut.blur();

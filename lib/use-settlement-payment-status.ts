@@ -16,6 +16,7 @@ export interface SettlementPaymentStatusState {
 }
 
 const EMPTY_KEYS: ReadonlySet<string> = new Set<string>();
+const PAYMENT_STATUS_RECONCILIATION_MS = 5_000;
 
 /** Do not start a network read while this client cannot reliably reach the server. */
 export function canReadPaymentStatuses(): boolean {
@@ -39,21 +40,23 @@ export function useSettlementPaymentStatus(
   const latestRefresh = useRef<((force?: boolean) => void) | null>(null);
   const hasKnownStatus = useRef(false);
 
-  const refresh = useCallback((force = false) => {
+  const refresh = useCallback((force = false, quiet = false) => {
     if (!enabled || !canReadPaymentStatuses()) return;
     if (!force && readInFlight.current?.gameId === gameId) {
       // Collapse bursts into one trailing reconciliation after the current read.
-      refreshQueuedFor.current = gameId;
+      if (!quiet) refreshQueuedFor.current = gameId;
       return;
     }
     refreshQueuedFor.current = null;
     const read = ++latestRead.current;
     readInFlight.current = { gameId, read };
-    if (hasKnownStatus.current) {
-      setPhase("stale");
-    } else {
-      setPhase("loading");
-      setSettledKeys(EMPTY_KEYS);
+    if (!quiet) {
+      if (hasKnownStatus.current) {
+        setPhase("stale");
+      } else {
+        setPhase("loading");
+        setSettledKeys(EMPTY_KEYS);
+      }
     }
     void withTimeout(getSettlementPaymentStatuses(gameId), "Payment status read timed out.", 12_000)
       .then((statuses) => {
@@ -98,6 +101,9 @@ export function useSettlementPaymentStatus(
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") refresh();
     };
+    // Realtime is a latency optimization. A foreground, online settlement
+    // must eventually converge when a WebSocket frame is missed.
+    const reconciliation = window.setInterval(() => refresh(false, true), PAYMENT_STATUS_RECONCILIATION_MS);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
     document.addEventListener("visibilitychange", onVisibilityChange);
@@ -120,6 +126,7 @@ export function useSettlementPaymentStatus(
       if (latestRefresh.current === refresh) latestRefresh.current = null;
       refreshQueuedFor.current = null;
       unsubscribe();
+      window.clearInterval(reconciliation);
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
       document.removeEventListener("visibilitychange", onVisibilityChange);
