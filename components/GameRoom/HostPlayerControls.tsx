@@ -168,6 +168,7 @@ function ManagePlayerForm({ snapshot, player, onSaved, onClose }: { snapshot: Ga
   const [error, setError] = useState("");
   const request = useRef<{ signature: string; key: string; type: "buy_in" | "rebuy" } | null>(null);
   const inFlight = useRef(false);
+  const amountInput = useRef<HTMLInputElement>(null);
   const pendingCashOut = snapshot.earlyCashOuts.some((item) => item.player_id === player.id && item.status === "requested");
   const locked = snapshot.earlyCashOuts.some((item) => item.player_id === player.id && item.status === "locked");
   const hasBuyIn = snapshot.buyIns.some((item) => item.player_id === player.id);
@@ -183,8 +184,11 @@ function ManagePlayerForm({ snapshot, player, onSaved, onClose }: { snapshot: Ga
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (inFlight.current) return;
-    const parsed = Number(amount);
-    if (!amount.trim() || !Number.isFinite(parsed) || parsed < 0 || parsed > 99999999.99 || (mode === "buy-in" && round2(parsed) <= 0)) {
+    // The native input holds the latest keystroke even if a submit immediately
+    // follows it before React has committed the controlled-state update.
+    const submittedAmount = amountInput.current?.value ?? amount;
+    const parsed = Number(submittedAmount);
+    if (!submittedAmount.trim() || !Number.isFinite(parsed) || parsed < 0 || parsed > 99999999.99 || (mode === "buy-in" && round2(parsed) <= 0)) {
       setError(mode === "buy-in" ? "Enter a buy-in greater than 0." : "Enter a cash-out of 0 or greater.");
       return;
     }
@@ -214,7 +218,7 @@ function ManagePlayerForm({ snapshot, player, onSaved, onClose }: { snapshot: Ga
         {value === "buy-in" ? "Buy-in" : "Cash-out"}
       </button>)}
     </div>
-    <Input label={mode === "buy-in" ? "Buy-in amount" : "Final stack"} prefix="$" inputMode="decimal" value={amount} onChange={(event) => setAmount(numericAmount(event.target.value))} disabled={busy} />
+    <Input ref={amountInput} label={mode === "buy-in" ? "Buy-in amount" : "Final stack"} prefix="$" inputMode="decimal" value={amount} onChange={(event) => setAmount(numericAmount(event.target.value))} disabled={busy} />
     {mode === "buy-in" ? <p className="text-xs text-gray-500">Table buy-in: {formatCurrency(snapshot.game.buy_in_amount)}</p> : null}
     {mode === "cash-out" ? (
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm">

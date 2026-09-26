@@ -30,7 +30,9 @@ export async function runHostPlayerFlow(page: Page) {
 
   await jordan.getByRole("button", { name: "Manage Jordan" }).click();
   const jordanForm = page.getByRole("dialog", { name: "Manage Jordan" });
-  await jordanForm.getByRole("textbox", { name: "Buy-in amount" }).fill("5.50");
+  const jordanAmount = jordanForm.getByRole("textbox", { name: "Buy-in amount" });
+  await jordanAmount.fill("5.50");
+  await expect(jordanAmount).toHaveValue("5.50");
   await jordanForm.getByRole("button", { name: "Record buy-in" }).click();
   await expect(jordanForm).toHaveCount(0);
   await expect(jordan).toContainText("$25.50");
