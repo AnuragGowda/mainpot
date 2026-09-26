@@ -1372,6 +1372,7 @@ async function addSupabaseEvent(
     metadata: input.metadata ?? {},
   });
   if (error) {
+    if (error.code === "PGRST202") throw new Error("Update this game database to finalize safely.");
     throw error;
   }
 }
@@ -1781,24 +1782,18 @@ async function removePlayerSupabase(playerId: string): Promise<void> {
   const { client } = await ensureSupabaseReady();
   const { data: player, error: lookupError } = await client
     .from("players")
-    .select("*")
+    .select("game_id")
     .eq("id", playerId)
     .single();
   if (lookupError) throw lookupError;
-  const row = player as Player;
-  await requireSupabaseGameStatus(client, row.game_id, "active");
-  const actorPlayerId = await currentSupabasePlayerId(client, row.game_id);
-  await addSupabaseEvent(client, {
-    gameId: row.game_id,
-    eventType: "player_removed",
-    actorPlayerId,
-    subjectPlayerId: row.id,
-    metadata: { player_name: row.name },
+  const { error } = await client.rpc("remove_player_guarded", {
+    input_game_id: (player as { game_id: string }).game_id,
+    input_player_id: playerId,
   });
-  const { error } = await client.from("players").delete().eq("id", playerId);
-  if (error) {
-    throw error;
+  if (error?.code === "PGRST202") {
+    throw new Error("Update this game database to remove players safely.");
   }
+  if (error) throw error;
 }
 
 async function leaveGameSupabase(playerId: string): Promise<void> {
@@ -1809,24 +1804,12 @@ async function leaveGameSupabase(playerId: string): Promise<void> {
     .eq("id", playerId)
     .single();
   if (lookupError) throw lookupError;
-  await requireSupabaseGameStatus(client, (existing as { game_id: string }).game_id, "active");
-  const { data, error } = await client
-    .from("players")
-    .update({ left_at: new Date().toISOString() })
-    .eq("id", playerId)
-    .select()
-    .single();
-  if (error) {
-    throw error;
-  }
-  const row = data as Player;
-  await addSupabaseEvent(client, {
-    gameId: row.game_id,
-    eventType: "player_left",
-    actorPlayerId: row.id,
-    subjectPlayerId: row.id,
-    metadata: { player_name: row.name },
+  const { error } = await client.rpc("leave_game_guarded", {
+    input_game_id: (existing as { game_id: string }).game_id,
+    input_player_id: playerId,
   });
+  if (error?.code === "PGRST202") throw new Error("Update this game database to leave safely.");
+  if (error) throw error;
 }
 
 function earlyCashOutMigrationError(error: { code?: string; message?: string }): Error {
@@ -1940,34 +1923,23 @@ async function updateCashOutSupabase(
 
 async function endGameSupabase(gameId: string): Promise<void> {
   const { client } = await ensureSupabaseReady();
-  const { data, error } = await client
-    .from("games")
-    .update({ status: "settling", ended_at: new Date().toISOString() })
-    .eq("id", gameId)
-    .eq("status", "active")
-    .select("id")
-    .maybeSingle();
-  if (error) {
-    throw error;
+  const { error } = await client.rpc("start_settlement_guarded", {
+    input_game_id: gameId,
+  });
+  if (error?.code === "PGRST202") {
+    throw new Error("Update this game database to start cash-outs safely.");
   }
-  if (!data) throw new Error("The active ledger is already closed.");
-  await addSupabaseEvent(client, { gameId, eventType: "game_settling" });
+  if (error) throw error;
 }
 
 async function markEndedSupabase(gameId: string, plan?: FinalSettlementPlan): Promise<void> {
   const { client } = await ensureSupabaseReady();
   const normalizedPlan = normalizedSettlementPlan(plan);
-  const { data, error } = await client
-    .from("games")
-    .update({
-      status: "ended",
-      settlement_mode: normalizedPlan.mode,
-      settlement_bank_player_id: normalizedPlan.bankPlayerId,
-    })
-    .eq("id", gameId)
-    .eq("status", "settling")
-    .select("id")
-    .maybeSingle();
+  const { error } = await client.rpc("finalize_settlement_guarded", {
+    input_game_id: gameId,
+    input_mode: normalizedPlan.mode,
+    input_bank_player_id: normalizedPlan.bankPlayerId,
+  });
   if (error) {
     if (
       error.code === "42703"
@@ -1979,8 +1951,6 @@ async function markEndedSupabase(gameId: string, plan?: FinalSettlementPlan): Pr
     }
     throw error;
   }
-  if (!data) throw new Error("Finalized games are read-only.");
-  await addSupabaseEvent(client, { gameId, eventType: "game_finalized" });
 }
 
 async function saveDiscrepancyAllocationSupabase(
@@ -1988,14 +1958,12 @@ async function saveDiscrepancyAllocationSupabase(
   allocation: DiscrepancyAllocationRecord
 ): Promise<void> {
   const { client } = await ensureSupabaseReady();
-  const { data, error } = await client
-    .from("games")
-    .update({ discrepancy_allocation: allocation })
-    .eq("id", gameId)
-    .eq("status", "settling")
-    .select("id")
-    .maybeSingle();
+  const { error } = await client.rpc("save_discrepancy_allocation_guarded", {
+    input_game_id: gameId,
+    input_allocation: allocation,
+  });
   if (error) {
+    if (error.code === "PGRST202") throw new Error("Update this game database to save a discrepancy safely.");
     if (
       error.code === "42703"
       || error.code === "PGRST204"
@@ -2005,15 +1973,6 @@ async function saveDiscrepancyAllocationSupabase(
     }
     throw error;
   }
-  if (!data) {
-    throw new Error("Only the host can save a discrepancy decision, and finalized games are read-only.");
-  }
-  await addSupabaseEvent(client, {
-    gameId,
-    eventType: "discrepancy_allocated",
-    amount: allocation.amount,
-    metadata: { method: allocation.method, player_count: allocation.player_ids.length },
-  });
 }
 
 async function getGameSnapshotSupabase(gameId: string): Promise<GameSnapshot> {

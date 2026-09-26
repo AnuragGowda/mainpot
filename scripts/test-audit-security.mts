@@ -133,16 +133,18 @@ async function run() {
 
   const validEvent = await hostA.client.from("game_events").insert({
     game_id: gameA.game_id,
-    event_type: "buy_in_updated",
+    event_type: "host_returned_to_create",
     actor_player_id: gameA.player_id,
   }).select("id").single();
-  assert(!validEvent.error && validEvent.data?.id, "same-game host audit append remains valid");
-  const actorEvent = await hostB.client.from("game_events").insert({
+  assert(!validEvent.error && validEvent.data?.id, "host return notice remains appendable");
+  await expectDenied(
+    () => hostB.client.from("game_events").insert({
     game_id: gameA.game_id,
     event_type: "buy_in_updated",
     actor_player_id: hostBInGameA.player_id,
-  }).select("id").single();
-  assert(!actorEvent.error && actorEvent.data?.id, "same-game player audit append remains valid");
+    }).select("id"),
+    "participant financial audit append",
+  );
   await expectDenied(
     () => hostA.client.from("game_events").update({ amount: 999 }).eq("id", validEvent.data.id).select("id"),
     "audit event update",

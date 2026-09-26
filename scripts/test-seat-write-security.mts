@@ -97,38 +97,6 @@ async function verifiedLedger(playerId: string) {
   return data;
 }
 
-/** Demonstrates the replaced policy's cascade without changing the fixture. */
-function proveLegacyGuestDeleteCascade(gameId: string, playerId: string, userId: string) {
-  // The disposable full-suite stack has a stable database container name. The
-  // API assertions below cover other local project names without assuming a
-  // Docker container convention.
-  if (status.API_URL !== "http://127.0.0.1:55321") return;
-  const sql = `
-begin;
-drop policy if exists "players host deletes non-host seats" on public.players;
-create policy "players self or host delete" on public.players
-  for delete to authenticated
-  using (public.game_has_status(game_id, 'active') and (auth.uid() = user_id or public.is_game_host(game_id)));
-select pg_catalog.set_config('request.jwt.claims', '{"sub":"${userId}","role":"authenticated"}', true);
-set local role authenticated;
-delete from public.players where id = '${playerId}' returning id;
-reset role;
-select case when not exists (select 1 from public.players where id = '${playerId}')
-  and not exists (select 1 from public.buy_ins where player_id = '${playerId}')
-  and exists (select 1 from public.games where id = '${gameId}')
-  then 'legacy-self-delete-cascades-ledger' else 'legacy-probe-failed' end;
-rollback;
-`;
-  const output = execFileSync("docker", [
-    "exec", "-i", "supabase_db_mainpot-e2e", "psql", "-U", "postgres", "-d", "postgres", "-X", "-v", "ON_ERROR_STOP=1", "-At",
-  ], { input: sql, encoding: "utf8" });
-  assert(
-    output.includes(playerId) && output.includes("legacy-self-delete-cascades-ledger"),
-    "the replaced self-or-host policy lets a guest cascade their verified ledger",
-  );
-  console.log("✓ legacy guest self-delete cascaded the verified ledger in a probe that was rolled back");
-}
-
 async function run() {
   const host = await account("host");
   const guest = await account("guest");
@@ -161,15 +129,13 @@ async function run() {
   assert(fakeHost.error, "raw insert cannot create a host seat");
 
   const ledgerBefore = await verifiedLedger(guestPlayerId);
-  proveLegacyGuestDeleteCascade(game.game_id, guestPlayerId, guest.id);
-  assert(JSON.stringify(await verifiedLedger(guestPlayerId)) === JSON.stringify(ledgerBefore), "rolled-back legacy-policy probe leaves the verified ledger intact");
   await assertDeleteBlocked(guest.client, guestPlayerId, "guest");
   assert(JSON.stringify(await verifiedLedger(guestPlayerId)) === JSON.stringify(ledgerBefore), "guest deletion attempt preserves verified ledger");
   await assertDeleteBlocked(outsider.client, guestPlayerId, "outsider");
   assert(JSON.stringify(await verifiedLedger(guestPlayerId)) === JSON.stringify(ledgerBefore), "outsider deletion attempt preserves verified ledger");
 
-  const hostDelete = await host.client.from("players").delete().eq("id", managedPlayerId).select("id");
-  assert(!hostDelete.error && hostDelete.data?.[0]?.id === managedPlayerId, "active host can remove a non-host seat");
+  const hostDelete = await host.client.rpc("remove_player_guarded", { input_game_id: game.game_id, input_player_id: managedPlayerId });
+  assert(!hostDelete.error, "active host can remove a non-host seat through the audited RPC");
   const managedAfterDelete = await admin.from("players").select("id").eq("id", managedPlayerId).maybeSingle();
   assert(!managedAfterDelete.error && !managedAfterDelete.data, "host removal deletes the selected non-host seat");
 
