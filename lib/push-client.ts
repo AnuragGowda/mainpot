@@ -73,8 +73,8 @@ function sameApplicationServerKey(
     && bytes.every((value, index) => value === expected[index]);
 }
 
-export async function getPushConfig(): Promise<PushConfig> {
-  const response = await fetch("/api/push/config", { cache: "no-store" });
+export async function getPushConfig(signal?: AbortSignal): Promise<PushConfig> {
+  const response = await fetch("/api/push/config", { cache: "no-store", signal });
   if (!response.ok) return { enabled: false, publicKey: null };
   const config = await response.json() as Partial<PushConfig>;
   return {

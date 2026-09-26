@@ -34,6 +34,7 @@ export default function GameNotifications({
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     const supportsPush = "serviceWorker" in navigator
       && "PushManager" in window
       && "Notification" in window;
@@ -46,7 +47,7 @@ export default function GameNotifications({
     setPushSupported(supportsPush);
     setIos(nextIos);
     setStandalone(isStandaloneDisplay());
-    void getPushConfig()
+    void getPushConfig(controller.signal)
       .then(async (nextConfig) => {
         if (!active) return;
         setConfig(nextConfig);
@@ -61,6 +62,7 @@ export default function GameNotifications({
 
     return () => {
       active = false;
+      controller.abort();
     };
   }, []);
 
