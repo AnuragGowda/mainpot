@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, BellRing } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import {
   getCurrentPushSubscription,
   getPushConfig,
@@ -47,6 +48,14 @@ export default function GameNotifications({
     setPushSupported(supportsPush);
     setIos(nextIos);
     setStandalone(isStandaloneDisplay());
+    // Device-only games have no server ledger to send push notifications for.
+    // Avoid starting an unsupported request that can outlive full navigation.
+    if (!isSupabaseConfigured) {
+      setConfig({ enabled: false, publicKey: null });
+      return;
+    }
+    const abortConfig = () => controller.abort();
+    window.addEventListener("pagehide", abortConfig);
     void getPushConfig(controller.signal)
       .then(async (nextConfig) => {
         if (!active) return;
@@ -62,6 +71,7 @@ export default function GameNotifications({
 
     return () => {
       active = false;
+      window.removeEventListener("pagehide", abortConfig);
       controller.abort();
     };
   }, []);

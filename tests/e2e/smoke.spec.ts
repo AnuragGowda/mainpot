@@ -79,6 +79,10 @@ test.describe("public local-mode experience", () => {
   });
 
   test("lets a host resume an active game from setup without clearing site data", async ({ page }) => {
+    let pushConfigRequests = 0;
+    page.on("request", request => {
+      if (new URL(request.url()).pathname === "/api/push/config") pushConfigRequests += 1;
+    });
     await page.goto("/create");
     await page.locator("#create-name").fill("Casey");
     await page.locator("#create-game-name").fill("Resume test game");
@@ -96,6 +100,7 @@ test.describe("public local-mode experience", () => {
 
     await expect(page).toHaveURL(gameUrl);
     await expect(page.getByRole("heading", { name: "Resume test game" })).toBeVisible();
+    expect(pushConfigRequests, "Device-only games cannot receive server push notifications").toBe(0);
   });
 
   test("offers contextual iPhone install steps after creating a game", async ({ page }) => {
