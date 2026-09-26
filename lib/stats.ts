@@ -8,7 +8,7 @@ export async function getUnfinishedGames(userId: string): Promise<Game[]> {
   if (!supabase) return [];
   const [hosted, seats] = await Promise.all([
     supabase.from("games").select("*").eq("host_user_id", userId).in("status", ["active", "settling"]),
-    supabase.from("players").select("games!inner(*)").eq("user_id", userId).is("left_at", null)
+    supabase.from("players").select("games!players_game_id_fkey!inner(*)").eq("user_id", userId).is("left_at", null)
       .in("games.status", ["active", "settling"]),
   ]);
   if (hosted.error) throw new Error(`Could not load hosted tables: ${hosted.error.message}`);

@@ -182,7 +182,7 @@ begin
             or seen_player_ids ? custom_player_id
             or not (active_players ? custom_player_id)
             or net_by_player->>custom_player_id is null
-            or coalesce(custom_item->>'amount', '') !~ '^\\d+(\\.\\d{1,2})?$' then
+            or coalesce(custom_item->>'amount', '') !~ '^[0-9]+([.][0-9]{1,2})?$' then
             raise exception 'Discrepancy allocation includes an invalid custom amount or player';
           end if;
           custom_amount := round((custom_item->>'amount')::numeric, 2);
