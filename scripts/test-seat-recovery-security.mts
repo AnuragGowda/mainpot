@@ -83,11 +83,28 @@ async function expectError(operation: () => PromiseLike<{ data: unknown; error: 
   assert(result.error, `${label} is rejected`);
 }
 
+async function expectPatchRejected(operation: () => PromiseLike<{ data: unknown; error: unknown }>, label: string) {
+  const result = await operation();
+  const rows = result.data as { id?: string } | { id?: string }[] | null;
+  assert(
+    result.error || rows === null || (Array.isArray(rows) && rows.length === 0),
+    `${label} is rejected without changing the departed seat`,
+  );
+}
+
 function restore(client: SupabaseClient, gameId: string, playerId: string) {
   return client.rpc("restore_player_to_table", {
     input_game_id: gameId,
     input_player_id: playerId,
   });
+}
+
+function patchReturn(client: SupabaseClient, playerId: string) {
+  return client.from("players")
+    .update({ left_at: null })
+    .eq("id", playerId)
+    .select("id")
+    .maybeSingle();
 }
 
 async function markLeft(client: SupabaseClient, playerId: string) {
@@ -138,6 +155,8 @@ async function run() {
     .order("created_at");
   assert(!originalBuyIns.error && originalBuyIns.data?.length === 1, "departed player has one original opening entry");
 
+  await expectPatchRejected(() => patchReturn(playerClient, player.playerId), "departed player direct self PATCH");
+  await expectPatchRejected(() => patchReturn(host, player.playerId), "host direct PATCH without the restore RPC");
   await expectError(() => restore(playerClient, game.game_id, player.playerId), "departed player self-restoration");
   await expectError(() => restore(outsider, game.game_id, player.playerId), "unrelated user restoration");
   await expectError(() => restore(host, game.game_id, game.player_id), "host restoration through player return");
@@ -199,6 +218,7 @@ async function run() {
   });
   assert(!pendingRequest.error && pendingRequest.data?.id, "host creates a pending early cash-out request");
   await markLeft(requestedPlayerClient, pendingPlayer.playerId);
+  await expectPatchRejected(() => patchReturn(host, pendingPlayer.playerId), "host PATCH with a requested early cash-out");
   await expectError(() => restore(host, game.game_id, pendingPlayer.playerId), "return with a requested early cash-out");
 
   const lockedPlayer = await join(lockedPlayerClient, game.code, "Locked return");
@@ -212,7 +232,26 @@ async function run() {
   assert(!lockedRequest.error && lockedRequest.data?.id, "host creates an early cash-out to lock");
   const locked = await host.rpc("approve_early_cash_out", { input_early_cash_out_id: lockedRequest.data.id });
   assert(!locked.error && locked.data?.status === "locked", "early cash-out can be locked");
+  await expectPatchRejected(() => patchReturn(host, lockedPlayer.playerId), "host PATCH with a locked early cash-out");
   await expectError(() => restore(host, game.game_id, lockedPlayer.playerId), "return with a locked early cash-out");
+
+  const capacityCandidateClient = await guest("At-capacity return candidate");
+  const capacityCandidate = await join(capacityCandidateClient, game.code, "At-capacity candidate");
+  await markLeft(capacityCandidateClient, capacityCandidate.playerId);
+  const [{ data: config, error: configError }, { count: activeCount, error: countError }] = await Promise.all([
+    admin.from("app_config").select("max_players_per_game").eq("id", true).single(),
+    admin.from("players").select("id", { count: "exact", head: true }).eq("game_id", game.game_id).is("left_at", null),
+  ]);
+  if (configError) throw configError;
+  if (countError) throw countError;
+  const playerLimit = Number(config?.max_players_per_game ?? 12);
+  assert(activeCount !== null && activeCount < playerLimit, "the table has room to create a full-roster fixture");
+  for (let index = 0; index < playerLimit - activeCount; index += 1) {
+    const fullRosterGuest = await guest(`Full roster guest ${index + 1}`);
+    await join(fullRosterGuest, game.code, `Full roster ${index + 1}`);
+  }
+  await expectPatchRejected(() => patchReturn(host, capacityCandidate.playerId), "host PATCH at the player limit");
+  await expectError(() => restore(host, game.game_id, capacityCandidate.playerId), "host return at the player limit");
 
   const closedGame = await createGame(otherHost, "Closed seat return assurance");
   const closedPlayerClient = await guest("Closed seat return player");
@@ -221,6 +260,7 @@ async function run() {
   await markLeft(closedPlayerClient, closedPlayer.playerId);
   const close = await otherHost.from("games").update({ status: "settling" }).eq("id", closedGame.game_id);
   assert(!close.error, "host closes the table");
+  await expectPatchRejected(() => patchReturn(otherHost, closedPlayer.playerId), "host PATCH after the active phase closes");
   await expectError(() => restore(otherHost, closedGame.game_id, closedPlayer.playerId), "return after active phase closes");
 
   console.log("✓ self-service, unrelated, cash-out, and closed-ledger seat returns are rejected");
