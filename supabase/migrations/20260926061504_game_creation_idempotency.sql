@@ -67,9 +67,9 @@ begin
   end if;
 
   if request.game_id is not null then
-    select id into host_player_id
-    from public.players
-    where game_id = request.game_id and is_host = true and user_id = auth.uid()
+    select player.id into host_player_id
+    from public.players as player
+    where player.game_id = request.game_id and player.is_host = true and player.user_id = auth.uid()
     limit 1;
     if host_player_id is null then
       raise exception 'The original game could not be recovered.';
