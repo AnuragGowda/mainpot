@@ -15,6 +15,8 @@ export async function checkCalculatorValidation(page: Page) {
   }
   await amount.fill("20");
   await page.getByLabel("Final stack for player 1", { exact: true }).fill("20");
+  await page.getByLabel("Money in for player 2", { exact: true }).fill("0");
+  await page.getByLabel("Final stack for player 2", { exact: true }).fill("0");
   await expect(amount).toHaveAttribute("aria-invalid", "false");
   await expect(result).toContainText("Bank balanced");
 }

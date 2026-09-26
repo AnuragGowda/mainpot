@@ -50,7 +50,9 @@ export default function SettlementCalculator() {
     stacksOut: validateCurrencyAmount(player.stacksOut, { allowBlank: true }),
   }));
   const invalidInputs = inputErrors.some((errors) => errors.moneyIn || errors.stacksOut);
-  const hasAmounts = players.some((player) => player.moneyIn.trim() || player.stacksOut.trim());
+  const incompleteAmounts = players.some(
+    (player) => !player.moneyIn.trim() || !player.stacksOut.trim()
+  );
 
   const result = useMemo(() => {
     const rows = players.map((player, index) => ({
@@ -234,7 +236,7 @@ export default function SettlementCalculator() {
                 <h3 className="font-semibold">Settlement worksheet</h3>
               </div>
               <p className="mt-1 text-xs text-gray-300">
-                {usingExample ? "Example game · change any value to try it." : "Updates as you type. Blank amounts count as $0. Nothing is saved."}
+                {usingExample ? "Example game · change any value to try it." : "Updates as you type. Enter 0 when a player has no money in or no final chips. Nothing is saved."}
               </p>
             </div>
             <button
@@ -350,9 +352,11 @@ export default function SettlementCalculator() {
             </div>
 
             <aside id="calculator-results" tabIndex={-1} aria-label="Settlement results" aria-live="polite" className="min-w-0 scroll-mt-20 p-4 focus:outline-none sm:p-6">
-              {invalidInputs || !hasAmounts ? (
+              {invalidInputs || incompleteAmounts ? (
                 <p role="status" className="rounded-lg border border-gray-300 bg-white p-4 text-sm leading-6 text-gray-700">
-                  {invalidInputs ? "Correct the highlighted amounts to calculate payments." : "Enter money in and final stacks to calculate payments."}
+                  {invalidInputs
+                    ? "Correct the highlighted amounts to calculate payments."
+                    : "Enter money in and a final stack for every player. Enter 0 when either amount is zero."}
                 </p>
               ) : <>
               <div className="grid grid-cols-2 gap-x-5 border-b border-gray-300 pb-5">
