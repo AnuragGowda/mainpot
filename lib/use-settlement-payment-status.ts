@@ -77,6 +77,7 @@ export function useSettlementPaymentStatus(
 
   useEffect(() => {
     latestRead.current += 1;
+    readInFlight.current = null;
     hasKnownStatus.current = false;
     latestRefresh.current = refresh;
     refreshQueuedFor.current = null;
@@ -90,6 +91,8 @@ export function useSettlementPaymentStatus(
     const onOffline = () => {
       // Ignore any response from a read that was in flight when connectivity was lost.
       latestRead.current += 1;
+      readInFlight.current = null;
+      refreshQueuedFor.current = null;
       setPhase(hasKnownStatus.current ? "stale" : "unavailable");
     };
     const onVisibilityChange = () => {
@@ -113,6 +116,7 @@ export function useSettlementPaymentStatus(
 
     return () => {
       latestRead.current += 1;
+      readInFlight.current = null;
       if (latestRefresh.current === refresh) latestRefresh.current = null;
       refreshQueuedFor.current = null;
       unsubscribe();

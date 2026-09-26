@@ -21,8 +21,8 @@ async function joinGame(page: Page, gameUrl: string, name: string) {
 
 /**
  * Hosted regression helper for F01. The caller owns its enclosing realtime spec.
- * It leaves the status-read failure scoped to the payer browser and never issues
- * a payment mutation after the two initial recorded sends.
+ * It injects status-read failures separately for payer and recipient, proves
+ * failed reads disable mutations, and reconciles later server changes on resume.
  */
 export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: string) {
   const contexts = await Promise.all(
@@ -114,8 +114,21 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     await recipient.route(paymentStatusRead, paymentReadFailure);
     await recipient.evaluate(() => window.dispatchEvent(new StorageEvent("storage")));
     await expect(recipientPersonal.getByRole("heading")).toHaveText("Payment status needs refresh");
+    // The payer changes the authoritative state while the recipient cannot
+    // read it. Recovery must not depend on another Realtime event or a click.
+    await personal.getByRole("checkbox", { name: "Mark sent: $10.00 from Jordan to Taylor", exact: true }).locator("..").click();
+    await expect(personal.getByRole("heading")).toHaveText("You owe $10.00.");
+    await expect(recipientPersonal.getByRole("heading")).toHaveText("Payment status needs refresh");
     await recipient.unroute(paymentStatusRead);
-    await recipientPersonal.getByRole("button", { name: "Retry payment status" }).click();
+    await recipient.evaluate(() => window.dispatchEvent(new Event("online")));
+    await expect(recipientPersonal.getByRole("heading")).toHaveText("$10.00 coming to you.");
+    await personal.getByTitle("Mark sent").click();
+    await expect(personal.getByRole("heading")).toHaveText("All your payments are marked sent.");
+    await recipient.route(paymentStatusRead, paymentReadFailure);
+    await recipient.evaluate(() => window.dispatchEvent(new StorageEvent("storage")));
+    await expect(recipientPersonal.getByRole("heading")).toHaveText("Payment status needs refresh");
+    await recipient.unroute(paymentStatusRead);
+    await recipient.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
     await expect(recipientPersonal.getByRole("heading")).toHaveText("All payments to you are marked sent.");
     expect(runtimeErrors, "Independent devices must not leave uncaught browser errors").toEqual([]);
   } catch (error) {
@@ -123,7 +136,7 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     console.error("Payment-read recovery failed before teardown:", error);
     throw error;
   } finally {
-    await Promise.all([payer, recipient].map(page => page.unrouteAll({ behavior: "wait" })));
+    await Promise.all([payer, recipient].map(page => page.unrouteAll({ behavior: "ignoreErrors" })));
     await Promise.all(contexts.map(async (context, index) => {
       let timer: ReturnType<typeof setTimeout> | undefined;
       try {
