@@ -179,7 +179,11 @@ export default function PendingApprovals({
                       inputMode="decimal"
                       prefix="$"
                       value={amount}
-                      onChange={(event) => setAmount(event.target.value)}
+                      onChange={(event) => {
+                        const next = event.target.value;
+                        if (next !== amount) setEditOperationKey(randomUUID());
+                        setAmount(next);
+                      }}
                       disabled={savingId === buyIn.id}
                     />
                     {editError ? <p role="alert" className="text-sm text-red-700 sm:mb-2">{editError}</p> : null}

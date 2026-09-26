@@ -247,7 +247,11 @@ export default function ActivityFeed({
                   <div className="ml-11 mt-3 rounded-lg bg-gray-50 p-3">
                     {editing && buyIn ? (
                       <div className="flex items-end gap-2">
-                        <Input aria-label={`Edit ${buyIn.type === "rebuy" ? "rebuy" : "buy-in"} amount for ${subject?.name ?? "player"}`} type="number" min={0.01} step={0.01} inputMode="decimal" prefix="$" value={editValue} onChange={(event) => setEditValue(event.target.value)} disabled={savingId === buyIn.id} />
+                        <Input aria-label={`Edit ${buyIn.type === "rebuy" ? "rebuy" : "buy-in"} amount for ${subject?.name ?? "player"}`} type="number" min={0.01} step={0.01} inputMode="decimal" prefix="$" value={editValue} onChange={(event) => {
+                          const next = event.target.value;
+                          if (next !== editValue) setEditOperationKey(randomUUID());
+                          setEditValue(next);
+                        }} disabled={savingId === buyIn.id} />
                         {editError ? <p role="alert" className="text-sm text-red-700">{editError}</p> : null}
                         <Button size="sm" loading={savingId === buyIn.id} onClick={() => void saveEdit(buyIn.id)}>Save</Button>
                         <Button size="sm" variant="ghost" disabled={savingId === buyIn.id} onClick={() => { setEditingId(null); setEditOperationKey(null); setEditError(""); }}>Cancel</Button>

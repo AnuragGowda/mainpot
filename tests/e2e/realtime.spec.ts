@@ -404,11 +404,12 @@ test("releases a stalled host correction and keeps the amount ready to retry", a
     await expect(jordanPending.getByRole("alert")).toContainText("couldn't confirm whether the correction was saved", { timeout: 18_000 });
     await expect(amount).toHaveValue("25");
     await expect(jordanPending.getByRole("button", { name: "Save" })).toBeEnabled();
+    await amount.fill("26");
     await host.unroute("**/rest/v1/rpc/correct_buy_in_as_host", stalledCorrection);
     await jordanPending.getByRole("button", { name: "Save" }).click();
     await expect(host.getByRole("region", { name: "Needs approval" })).toHaveCount(0, { timeout: 15_000 });
     await expect(playerCard(host, "Jordan").getByText("1 entry", { exact: true })).toBeVisible();
-    await expect(playerCard(host, "Jordan")).toContainText("$25.00");
+    await expect(playerCard(host, "Jordan")).toContainText("$26.00");
   } finally {
     await guestContext.close();
     await hostContext.close();

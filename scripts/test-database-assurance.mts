@@ -144,6 +144,14 @@ async function verifyHostManagedPlayers() {
   await expectError(() => participant.rpc("set_early_cash_out_payment_status", { input_early_cash_out_id: early.data.id, input_settled: true, input_session_id: participantSession }), "unrelated participant marking managed payment");
   const payment = await host.rpc("set_early_cash_out_payment_status", { input_early_cash_out_id: early.data.id, input_settled: true, input_session_id: randomUUID() });
   assert(!payment.error, "host marks managed early payment");
+  const participantApproval = await host
+    .from("buy_ins")
+    .update({ verified: true })
+    .eq("game_id", game.game_id)
+    .eq("player_id", joinedParticipant.player_id)
+    .select("id, verified")
+    .single();
+  assert(!participantApproval.error && participantApproval.data?.verified, "host approves the participant opening buy-in before settlement");
   const closing = await host.from("games").update({ status: "settling" }).eq("id", game.game_id);
   assert(!closing.error, "host closes managed table");
   await expectError(() => host.rpc("add_host_player", { ...input, input_operation_key: randomUUID() }), "adding players after active ledger closes");
@@ -434,6 +442,14 @@ async function run() {
   });
   assert(!otherGameBuyIn.error && otherGameBuyIn.data?.[0]?.id, "other game buy-in fixture is created");
   const otherGameBuyInId = otherGameBuyIn.data[0].id;
+  const otherOpeningApproval = await otherHost
+    .from("buy_ins")
+    .update({ verified: true })
+    .eq("game_id", gameB.game_id)
+    .eq("player_id", otherPlayer.player_id)
+    .select("id, verified")
+    .single();
+  assert(!otherOpeningApproval.error && otherOpeningApproval.data?.verified, "other game opening buy-in is approved before settlement");
   const otherGameSettling = await otherHost
     .from("games")
     .update({ status: "settling", ended_at: new Date().toISOString() })
@@ -786,6 +802,14 @@ async function run() {
   }
   console.log("✓ cross-game row-rewrite probe is denied");
 
+  const pendingApproval = await host
+    .from("buy_ins")
+    .update({ verified: true })
+    .eq("game_id", gameA.game_id)
+    .eq("verified", false)
+    .select("id");
+  assert(!pendingApproval.error, "host resolves every pending entry before settlement");
+
   const gameASettling = await host
     .from("games")
     .update({ status: "settling", ended_at: new Date().toISOString() })
@@ -793,10 +817,20 @@ async function run() {
     .select("id");
   assert(!gameASettling.error && gameASettling.data?.[0]?.id, "host can enter settlement");
 
+  const cashOutFixture = await host
+    .from("cash_outs")
+    .insert([
+      { game_id: gameA.game_id, player_id: gameA.player_id, amount: 40 },
+      { game_id: gameA.game_id, player_id: playerA.player_id, amount: 50 },
+      { game_id: gameA.game_id, player_id: playerB.player_id, amount: 20 },
+    ])
+    .select("id");
+  assert(cashOutFixture.data?.length === 3 && !cashOutFixture.error, "every player has a current cash-out before settlement lock");
+
   const allocation = {
     method: "proportional",
     player_ids: [playerA.player_id, playerB.player_id],
-    amount: 5,
+    amount: 2,
   };
   const hostAllocation = await host
     .from("games")

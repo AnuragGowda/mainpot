@@ -75,18 +75,21 @@ export default function PlayerCard({
   const [expanded, setExpanded] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [editOperationKey, setEditOperationKey] = useState<string | null>(null);
   const [editError, setEditError] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
 
   function startEdit(buyIn: BuyIn) {
     setEditingId(buyIn.id);
     setEditValue(String(buyIn.amount));
+    setEditOperationKey(randomUUID());
     setEditError("");
   }
 
   function cancelEdit() {
     setEditingId(null);
     setEditValue("");
+    setEditOperationKey(null);
     setEditError("");
   }
 
@@ -99,7 +102,7 @@ export default function PlayerCard({
     setSavingId(buyInId);
     setEditError("");
     try {
-      await onEdit(buyInId, parsed, randomUUID());
+      await onEdit(buyInId, parsed, editOperationKey ?? randomUUID());
       cancelEdit();
     } catch (error) {
       setEditError(error instanceof Error ? error.message : "Could not update the buy-in.");
@@ -165,7 +168,11 @@ export default function PlayerCard({
                             inputMode="decimal"
                             prefix="$"
                             value={editValue}
-                            onChange={(event) => setEditValue(event.target.value)}
+                            onChange={(event) => {
+                              const next = event.target.value;
+                              if (next !== editValue) setEditOperationKey(randomUUID());
+                              setEditValue(next);
+                            }}
                             aria-label={`Edit amount for ${player.name}'s buy-in`}
                             autoFocus
                             disabled={savingId === buyIn.id}
