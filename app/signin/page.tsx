@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { withTimeout } from "@/lib/request-timeout";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
@@ -104,14 +105,14 @@ export default function SignInPage() {
     try {
       const transferToken = await prepareAnonymousAccountTransfer(email);
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await withTimeout(supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
             data: { display_name: displayName.trim() || email.split("@")[0] },
             emailRedirectTo: callbackUrl(),
           },
-        });
+        }), "We could not confirm account creation. Check your email or try signing in.");
         if (error) throw error;
         if (data.user && data.session) {
           await continueAfterAuthentication(transferToken);
@@ -119,10 +120,10 @@ export default function SignInPage() {
           setEmailLinkSent("signup");
         }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await withTimeout(supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
-        });
+        }), "Sign-in timed out. Please try again.");
         if (error) throw error;
         await continueAfterAuthentication(transferToken);
       }
@@ -144,10 +145,10 @@ export default function SignInPage() {
     setAuthStatus(null);
     try {
       const transferToken = await prepareAnonymousAccountTransfer(email);
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await withTimeout(supabase.auth.signInWithOtp({
         email: email.trim(),
         options: { emailRedirectTo: callbackUrl() },
-      });
+      }), "We could not confirm the email was sent. Check your inbox before retrying.");
       if (error) throw error;
       setRecoveryPending(Boolean(transferToken));
       setEmailLinkSent("signin");
@@ -166,10 +167,10 @@ export default function SignInPage() {
     setAuthStatus("Opening Google…");
     try {
       await prepareAnonymousAccountTransfer();
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { error } = await withTimeout(supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: callbackUrl() },
-      });
+      }), "Opening Google timed out. Please try again.");
       if (error) throw error;
     } catch (error) {
       setLoading(false);
