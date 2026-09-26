@@ -81,8 +81,7 @@ export async function runSeatContinuityFlow(browser: Browser, baseURL: string) {
     await leaveDialog.getByRole("button", { name: "Leave now and settle when the game ends", exact: true }).click();
     await expect(leaveDialog).toHaveAccessibleName("Leave without cashing out?");
     await leaveDialog.getByRole("button", { name: "Leave & settle later", exact: true }).click();
-    await expect(guest.getByText("You left this game.", { exact: true })).toBeVisible({ timeout: 15_000 });
-    await guest.getByRole("button", { name: "Ask host to return you", exact: true }).click();
+    await expect(guest.getByText("You left this game. Ask Casey to return your existing seat to the table.", { exact: true })).toBeVisible({ timeout: 15_000 });
 
     await expect(jordanOnHost).toContainText("Left", { timeout: 15_000 });
     await jordanOnHost.getByRole("button", { name: "Return Jordan to table", exact: true }).click();
@@ -94,7 +93,7 @@ export async function runSeatContinuityFlow(browser: Browser, baseURL: string) {
     await expect(host.getByRole("region", { name: "Needs approval" })).toHaveCount(0);
     await expect(pot(host)).toContainText("$40.00");
 
-    await expect(guest.getByText("You left this game.", { exact: true })).toHaveCount(0, { timeout: 15_000 });
+    await expect(guest.getByText("You left this game. Ask Casey to return your existing seat to the table.", { exact: true })).toHaveCount(0, { timeout: 15_000 });
     await expect(playerCard(guest, "Jordan")).toContainText("1 entry");
     await expect(guest.getByRole("button", { name: "Add a rebuy", exact: true })).toBeVisible();
     await expect(guest.getByRole("button", { name: "Cash out", exact: true })).toBeVisible();

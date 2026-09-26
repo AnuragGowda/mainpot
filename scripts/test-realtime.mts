@@ -128,12 +128,18 @@ try {
   if (databaseAssuranceOnly) {
     console.log("Running database assurance checks against the disposable migration stack…");
     const failures: unknown[] = [];
-    for (const script of [
+    const assuranceScripts = [
       "test-database-assurance.mts", "test-audit-security.mts",
       "test-settlement-allocation-guard.mts", "test-account-transfer-security.mts",
       "test-early-cashout-phase-race.mts", "test-game-creation-idempotency.mts",
-      "test-payment-plan-security.mts",
-    ]) {
+      "test-payment-plan-security.mts", "test-atomic-ledger-activity.mts",
+      "test-lobby-name-security.mts", "test-seat-recovery-security.mts", "test-seat-claim-security.mts",
+    ];
+    const focusedScripts = process.env.MAINPOT_DB_ASSURANCE_SCRIPTS?.split(",");
+    if (focusedScripts?.some(script => !assuranceScripts.includes(script))) {
+      throw new Error("Unknown focused database assurance script.");
+    }
+    for (const script of focusedScripts ?? assuranceScripts) {
       try {
         run(process.execPath, [join(scriptDirectory, script)], {
           env: { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl },

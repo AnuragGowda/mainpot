@@ -17,6 +17,9 @@ function localStatus() {
 
 const status = localStatus();
 const url = status.API_URL;
+if (url !== "http://127.0.0.1:55321" || process.env.SUPABASE_EXPECTED_API_URL !== url) {
+  throw new Error("Seat claim security requires the disposable mainpot-e2e stack.");
+}
 const anonKey = status.PUBLISHABLE_KEY ?? status.ANON_KEY;
 const serviceKey = status.SERVICE_ROLE_KEY;
 if (!url || !anonKey || !serviceKey) throw new Error("Local Supabase credentials are incomplete.");
@@ -55,7 +58,7 @@ function expireClaim(hash: string) {
   execFileSync(supabaseCommand, [
     ...(workdir ? ["--workdir", workdir] : []),
     "db", "query", "--local",
-    `update mainpot_private.host_managed_seat_claims set expires_at = now() - interval '1 minute' where token_hash = decode('${hash}', 'hex');`,
+    `update mainpot_private.host_managed_seat_claims set created_at = now() - interval '30 minutes', expires_at = now() - interval '1 minute' where token_hash = decode('${hash}', 'hex');`,
   ], { stdio: "pipe" });
 }
 
@@ -87,7 +90,7 @@ async function run() {
   const conflicted = await anonymous();
 
   try {
-    const created = await host.client.rpc("create_game_guarded", {
+    const created = await host.client.rpc("create_game_idempotent", {
       input_code: gameCode(),
       input_game_name: "Seat claim security",
       input_host_name: "Casey",
@@ -136,7 +139,8 @@ async function run() {
     const claimed = await claimant.client.rpc("claim_host_managed_seat", {
       input_game_id: game.game_id, input_token: rawToken, input_session_id: randomUUID(),
     });
-    assert(!claimed.error && claimed.data?.player_id === managed.id, "the bearer claims the original managed seat");
+    if (claimed.error) throw new Error(`Seat claim failed: ${claimed.error.code}: ${claimed.error.message}`);
+    assert(claimed.data?.player_id === managed.id, "the bearer claims the original managed seat");
     assert(claimed.data?.game_id === game.game_id,
       "the correct game can still claim the capability after a wrong-game attempt");
     const replay = await claimant.client.rpc("claim_host_managed_seat", {
@@ -149,11 +153,11 @@ async function run() {
     assert(foreignReplay.error, "a claimed capability cannot be replayed by another identity");
 
     const [claimedPlayer, claimedOpening, access] = await Promise.all([
-      admin.from("players").select("id,user_id").eq("id", managed.id).single(),
+      admin.from("players").select("id,user_id,host_add_operation_key").eq("id", managed.id).single(),
       admin.from("buy_ins").select("player_id,amount,verified").eq("player_id", managed.id).single(),
       admin.from("game_access").select("game_id,user_id").eq("game_id", game.game_id).eq("user_id", claimant.id).single(),
     ]);
-    assert(claimedPlayer.data?.id === managed.id && claimedPlayer.data.user_id === claimant.id,
+    assert(claimedPlayer.data?.id === managed.id && claimedPlayer.data.user_id === claimant.id && claimedPlayer.data.host_add_operation_key !== null,
       "claim keeps the same player row and binds it to the claimant");
     assert(claimedOpening.data?.player_id === managed.id && Number(claimedOpening.data.amount) === 20 && claimedOpening.data.verified,
       "claim preserves the managed seat's opening entry");
@@ -200,6 +204,14 @@ async function run() {
     assert(departedClaim.error, "a departed managed seat cannot be claimed");
     const departedMint = await mint(host.client, game.game_id, departedSeat.id, token());
     assert(departedMint.error, "a departed seat cannot receive a claim link");
+
+    const deletedClaimant = await admin.auth.admin.deleteUser(claimant.id);
+    if (deletedClaimant.error) throw deletedClaimant.error;
+    const preservedHistory = await admin.from("players").select("id,user_id,host_add_operation_key")
+      .eq("id", managed.id).single();
+    assert(!preservedHistory.error && preservedHistory.data?.user_id === null
+      && preservedHistory.data.host_add_operation_key !== null,
+      "account deletion clears identity without destroying the claimed seat's retry key or history");
 
     console.log("✓ host-managed seat claims are hashed, host-authorized, single-use, conflict-safe, and preserve the recorded seat");
   } finally {

@@ -1,3 +1,6 @@
+import { runSeatContinuityFlow } from "./seat-continuity-flow";
+import { runLobbyNameGuardFlow } from "./lobby-name-guard-flow";
+import { runPaymentReadRecoveryFlow } from "./payment-read-recovery-flow";
 import { runAccountPolishFlow } from "./account-polish-flow";
 import { runExpiredGuestRecoveryWindowFlow, runGuestAccountTransfer } from "./account-transfer-flow";
 import { runBankPlanFlow } from "./bank-flow";
@@ -756,4 +759,19 @@ test("retries a temporary future-JWT rejection with the same creation request", 
   } finally {
     await context.close();
   }
+});
+
+test("keeps failed payment reads unknown and retries without duplicate sends", async ({ browser, baseURL }) => {
+  test.slow();
+  await runPaymentReadRecoveryFlow(browser, baseURL!);
+});
+
+test("rejects duplicate lobby names even when two devices join together", async ({ browser, baseURL }) => {
+  test.slow();
+  await runLobbyNameGuardFlow(browser, baseURL!);
+});
+
+test("claims and restores the same host-managed seat without another buy-in", async ({ browser, baseURL }) => {
+  test.slow();
+  await runSeatContinuityFlow(browser, baseURL!);
 });

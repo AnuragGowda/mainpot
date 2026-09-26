@@ -26,7 +26,7 @@ import { getSessionId, randomUUID } from "./session";
 import { round2 } from "./format";
 import { productOpsEnabled, trackProductOpsEvent } from "./product-ops";
 import { dispatchGamePush } from "./push-client";
-import { validateGameName, validatePlayerName } from "./name-validation";
+import { DUPLICATE_LOBBY_NAME_MESSAGE, lobbyNameKey, validateGameName, validatePlayerName } from "./name-validation";
 import { withTimeout } from "./request-timeout";
 
 export { isSupabaseConfigured };
@@ -190,6 +190,14 @@ function loadStore(): LocalStore {
       return emptyStore();
     }
     const parsed = JSON.parse(raw) as Partial<LocalStore>;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("Invalid saved ledger.");
+    }
+    for (const key of ["games", "players", "buyIns", "cashOuts", "earlyCashOuts", "events", "feedback"] as const) {
+      if (parsed[key] !== undefined && !Array.isArray(parsed[key])) {
+        throw new Error("Invalid saved ledger.");
+      }
+    }
     return {
       games: parsed.games ?? [],
       players: parsed.players ?? [],
@@ -199,9 +207,8 @@ function loadStore(): LocalStore {
       events: parsed.events ?? [],
       feedback: parsed.feedback ?? [],
     };
-  } catch (err) {
-    console.error("Failed to read ante local store:", err);
-    return emptyStore();
+  } catch {
+    throw new Error("Could not read the ledger saved in this browser. Your saved data has not been replaced. Restore browser storage access and reload, or contact support before clearing it.");
   }
 }
 
@@ -211,8 +218,8 @@ function persistStore(store: LocalStore): void {
   }
   try {
     window.localStorage.setItem(STORE_KEY, JSON.stringify(store));
-  } catch (err) {
-    console.error("Failed to write ante local store:", err);
+  } catch {
+    throw new Error("This change was not saved. Browser storage is unavailable or full. Keep this page open, restore storage access, then retry.");
   }
 }
 
@@ -465,6 +472,13 @@ async function joinGameLocal(
     return { gameId: game.id, playerId: existing.id };
   }
 
+  if (store.players.some(player => player.game_id === game.id && lobbyNameKey(player.name) === lobbyNameKey(playerName))) {
+    throw new Error(DUPLICATE_LOBBY_NAME_MESSAGE);
+  }
+  if (store.players.filter(player => player.game_id === game.id && !player.left_at).length >= 12) {
+    throw new Error("This game already has the maximum number of players.");
+  }
+
   const player: Player = {
     id: randomUUID(),
     game_id: game.id,
@@ -540,6 +554,9 @@ async function addHostPlayerLocal(
       throw new Error("This request was already used for a different player or buy-in.");
     }
     return existing;
+  }
+  if (store.players.some(player => player.game_id === gameId && lobbyNameKey(player.name) === lobbyNameKey(name))) {
+    throw new Error(DUPLICATE_LOBBY_NAME_MESSAGE);
   }
   if (store.players.filter((player) => player.game_id === gameId && !player.left_at).length >= 12) {
     throw new Error("This game already has the maximum number of players.");
@@ -848,6 +865,30 @@ async function removePlayerLocal(playerId: string): Promise<void> {
   if (player) {
     emitSnapshot(player.game_id, store);
   }
+}
+
+/** Host-approved return keeps the original seat and all financial entries. */
+export async function restorePlayerToTableLocal(gameId: string, playerId: string): Promise<void> {
+  const store = loadStore();
+  requireLocalGameStatus(store, gameId, "active");
+  const host = store.players.find(player => player.game_id === gameId
+    && player.is_host && !player.left_at && player.session_id === getSessionId());
+  if (!host) throw new Error("Only the host can return a player to the table.");
+  const player = store.players.find(item => item.id === playerId && item.game_id === gameId);
+  if (!player || player.is_host) throw new Error("Choose a non-host player in this game.");
+  if (store.earlyCashOuts.some(item => item.player_id === playerId
+    && item.game_id === gameId && (item.status === "requested" || item.status === "locked"))) {
+    throw new Error("This player has a pending or locked early cash-out and cannot return.");
+  }
+  if (!player.left_at) return;
+  if (store.players.filter(item => item.game_id === gameId && !item.left_at).length >= 12) {
+    throw new Error("This game already has the maximum number of players.");
+  }
+  player.left_at = null;
+  addLocalEvent(store, { gameId, eventType: "player_joined", actorPlayerId: host.id,
+    subjectPlayerId: player.id, metadata: { player_name: player.name, returned_to_table: true } });
+  persistStore(store);
+  emitSnapshot(gameId, store);
 }
 
 async function leaveGameLocal(playerId: string): Promise<void> {
@@ -1481,7 +1522,8 @@ async function joinGameSupabase(
     .abortSignal(signal)
     .single(), "We couldn't confirm whether you joined. Retry to safely continue.");
   if (error) {
-    throw error;
+    throw new Error(error.code === "23505" && error.message.includes("name")
+      ? DUPLICATE_LOBBY_NAME_MESSAGE : error.message);
   }
   const row = data as { game_id: string; player_id: string };
   return { gameId: row.game_id, playerId: row.player_id };
@@ -1678,107 +1720,37 @@ async function addBuyInSupabase(
     input_fronted_by_player_id: frontedByPlayerId,
     input_operation_key: operationKey,
   }).abortSignal(signal), "We couldn't confirm whether the buy-in was added. Retry to safely continue.");
-  let result = data?.[0] as (BuyIn & { created: boolean }) | undefined;
+  const result = data?.[0] as (BuyIn & { created: boolean }) | undefined;
   if (error?.code === "PGRST202") {
     throw new Error("Update this game database to enable safe, retryable buy-ins.");
   }
   if (error) throw error;
-  if (!result) {
-    throw new Error("Could not create or find the buy-in.");
+  if (!result) throw new Error("Could not create or find the buy-in.");
+  // The RPC commits the financial entry and activity record together.
+  return toBuyIn(result);
+}
+
+async function applyHostBuyInActionSupabase(
+  buyInId: string,
+  action: "remove" | "verify" | "repay_advance",
+): Promise<void> {
+  const { client } = await ensureSupabaseReady();
+  const { error } = await awaitAbortableMutation((signal) => client.rpc("apply_host_buy_in_action", {
+    input_buy_in_id: buyInId,
+    input_action: action,
+  }).abortSignal(signal), "We couldn't confirm whether this entry changed. Reload the ledger before retrying.");
+  if (error?.code === "PGRST202") {
+    throw new Error("Update this game database to enable safe host entry actions.");
   }
-  const { created, ...row } = result;
-  const buyIn = toBuyIn(row);
-  if (!created) {
-    return buyIn;
-  }
-  const [{ data: player }, { data: frontedBy }] = await Promise.all([
-    client
-      .from("players")
-      .select("name")
-      .eq("id", playerId)
-      .maybeSingle(),
-    frontedByPlayerId
-      ? client
-          .from("players")
-          .select("name")
-          .eq("id", frontedByPlayerId)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
-  ]);
-  await addSupabaseEvent(client, {
-    gameId,
-    eventType: "buy_in_added",
-    subjectPlayerId: playerId,
-    amount: buyIn.amount,
-    metadata: {
-      player_name: (player as { name?: string } | null)?.name,
-      buy_in_id: buyIn.id,
-      buy_in_type: type,
-      fronted_by_name: (frontedBy as { name?: string } | null)?.name,
-    },
-  });
-  return buyIn;
+  if (error) throw error;
 }
 
 async function removeBuyInSupabase(buyInId: string): Promise<void> {
-  const { client } = await ensureSupabaseReady();
-  const { data: buyIn, error: lookupError } = await client
-    .from("buy_ins")
-    .select("*, player:players!buy_ins_player_id_fkey(name)")
-    .eq("id", buyInId)
-    .maybeSingle();
-  if (lookupError) throw lookupError;
-  if (buyIn) await requireSupabaseGameStatus(client, (buyIn as BuyIn).game_id, "active");
-  const { error } = await client.from("buy_ins").delete().eq("id", buyInId);
-  if (error) {
-    throw error;
-  }
-  if (buyIn) {
-    const row = buyIn as unknown as BuyIn & { player?: { name?: string } };
-    await addSupabaseEvent(client, {
-      gameId: row.game_id,
-      eventType: "buy_in_removed",
-      subjectPlayerId: row.player_id,
-      amount: Number(row.amount),
-      metadata: {
-        player_name: row.player?.name,
-        buy_in_id: row.id,
-        buy_in_type: row.type,
-      },
-    });
-  }
+  await applyHostBuyInActionSupabase(buyInId, "remove");
 }
 
 async function verifyBuyInSupabase(buyInId: string): Promise<void> {
-  const { client } = await ensureSupabaseReady();
-  const { data: existing, error: lookupError } = await client
-    .from("buy_ins")
-    .select("game_id")
-    .eq("id", buyInId)
-    .single();
-  if (lookupError) throw lookupError;
-  await requireSupabaseGameStatus(client, (existing as { game_id: string }).game_id, "active");
-  const { data, error } = await client
-    .from("buy_ins")
-    .update({ verified: true })
-    .eq("id", buyInId)
-    .select("*, player:players!buy_ins_player_id_fkey(name)")
-    .single();
-  if (error) {
-    throw error;
-  }
-  const row = data as unknown as BuyIn & { player?: { name?: string } };
-  await addSupabaseEvent(client, {
-    gameId: row.game_id,
-    eventType: "buy_in_verified",
-    subjectPlayerId: row.player_id,
-    amount: Number(row.amount),
-    metadata: {
-      player_name: row.player?.name,
-      buy_in_id: row.id,
-      buy_in_type: row.type,
-    },
-  });
+  await applyHostBuyInActionSupabase(buyInId, "verify");
 }
 
 async function updateBuyInSupabase(
@@ -1799,42 +1771,7 @@ async function updateBuyInSupabase(
 }
 
 async function markBuyInAdvanceRepaidSupabase(buyInId: string): Promise<void> {
-  const { client } = await ensureSupabaseReady();
-  const { data: existing, error: lookupError } = await client
-    .from("buy_ins")
-    .select("*, player:players!buy_ins_player_id_fkey(name), lender:players!buy_ins_fronted_by_player_id_fkey(name)")
-    .eq("id", buyInId)
-    .single();
-  if (lookupError) throw lookupError;
-  const row = existing as unknown as BuyIn & {
-    player?: { name?: string };
-    lender?: { name?: string };
-  };
-  if (!row.fronted_by_player_id) return;
-  await requireSupabaseGameStatus(client, row.game_id, "active");
-
-  const { data: updated, error } = await client
-    .from("buy_ins")
-    .update({ fronted_by_player_id: null })
-    .eq("id", buyInId)
-    .eq("fronted_by_player_id", row.fronted_by_player_id)
-    .select("id")
-    .maybeSingle();
-  if (error) throw error;
-  if (!updated) return;
-
-  await addSupabaseEvent(client, {
-    gameId: row.game_id,
-    eventType: "buy_in_advance_repaid",
-    subjectPlayerId: row.player_id,
-    amount: Number(row.amount),
-    metadata: {
-      player_name: row.player?.name,
-      buy_in_id: row.id,
-      buy_in_type: row.type,
-      fronted_by_name: row.lender?.name,
-    },
-  });
+  await applyHostBuyInActionSupabase(buyInId, "repay_advance");
 }
 
 async function removePlayerSupabase(playerId: string): Promise<void> {
@@ -2347,7 +2284,8 @@ export async function addHostPlayer(
   });
   if (error) {
     if (error.code === "PGRST202") throw new Error("Update this game database to enable host-added players.");
-    throw new Error(error.message);
+    throw new Error(error.code === "23505" && error.message.includes("name")
+      ? DUPLICATE_LOBBY_NAME_MESSAGE : error.message);
   }
   const player = Array.isArray(data) ? data[0] : data;
   if (!player) throw new Error("Could not add the player. Please try again.");

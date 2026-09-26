@@ -8,6 +8,13 @@ const USERNAME_PATTERN = /^[a-z0-9_]{3,24}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const US_PHONE_CHARACTERS_PATTERN = /^[0-9+().\-\s]+$/;
 
+/** Lobby names identify seats; spacing, case and Unicode width cannot distinguish two people. */
+export function lobbyNameKey(value: string): string {
+  return value.normalize("NFKC").replace(/\s+/gu, " ").trim().toLowerCase();
+}
+
+export const DUPLICATE_LOBBY_NAME_MESSAGE = "That name is already used at this table. Choose a different name. If the host already added you, ask them before creating another seat.";
+
 interface HumanNameOptions {
   label: "Game name" | "Player name" | "Display name";
   maxLength: number;

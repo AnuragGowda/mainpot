@@ -14,11 +14,17 @@ describe("player identity recovery", () => {
   it("prioritizes an existing account seat over another browser seat", () => {
     expect(resolveCurrentPlayer(players, "guest-browser", "account")?.id).toBe("host");
   });
-  it("recovers the guest seat after anonymous auth rotation", () => {
-    expect(resolveCurrentPlayer(players, "guest-browser", "rotated")?.id).toBe("guest");
+  it("does not impersonate a prior account after anonymous auth rotation", () => {
+    expect(resolveCurrentPlayer(players, "guest-browser", "rotated")).toBeNull();
   });
   it("never matches a host-managed null identity or an unrelated visitor", () => {
     expect(resolveCurrentPlayer(players, null, null)).toBeNull();
     expect(resolveCurrentPlayer(players, "new", "outsider")).toBeNull();
   });
+  it("uses a browser identity only for a local seat without an account owner", () => {
+    const local = [{ id: "local", user_id: null, session_id: "local-browser" }];
+    expect(resolveCurrentPlayer(local, "local-browser", null)?.id).toBe("local");
+    expect(resolveCurrentPlayer(players, "original-browser", null)).toBeNull();
+  });
+
 });

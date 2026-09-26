@@ -1,5 +1,6 @@
 "use client";
 
+import { withTimeout } from "./request-timeout";
 import { ensureCurrentUser } from "./auth-client";
 import { getSessionId } from "./session";
 import { getBrowserSupabase } from "./supabase-browser";
@@ -45,11 +46,11 @@ export async function mintHostManagedSeatClaim(
 ): Promise<MintedSeatClaim> {
   if (!await ensureCurrentUser()) throw new Error("Could not start a secure session.");
   const token = bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)));
-  const { data, error } = await requireSupabase().rpc("mint_host_managed_seat_claim", {
+  const { data, error } = await withTimeout(requireSupabase().rpc("mint_host_managed_seat_claim", {
     input_game_id: gameId,
     input_player_id: playerId,
     input_token_hash: await sha256Hex(token),
-  });
+  }), "Could not confirm the seat link. Retry to create a replacement link.");
   if (error || typeof data !== "string") throw new Error(error?.message ?? "Could not create a seat claim link.");
   return { token, expiresAt: data };
 }
@@ -57,11 +58,11 @@ export async function mintHostManagedSeatClaim(
 /** Claim a host-issued seat without name or browser-session matching. */
 export async function claimHostManagedSeat(gameId: string, token: string): Promise<ClaimedSeat> {
   if (!await ensureCurrentUser()) throw new Error("Could not start a secure session.");
-  const { data, error } = await requireSupabase().rpc("claim_host_managed_seat", {
+  const { data, error } = await withTimeout(requireSupabase().rpc("claim_host_managed_seat", {
     input_game_id: gameId,
     input_token: requireToken(token),
     input_session_id: getSessionId(),
-  });
+  }), "Could not confirm the seat claim. Reload this same link to safely retry.");
   if (error || !data || typeof data !== "object") throw new Error(error?.message ?? "Could not claim this seat.");
   const row = data as { game_id?: unknown; player_id?: unknown };
   if (typeof row.game_id !== "string" || typeof row.player_id !== "string") {
@@ -78,7 +79,8 @@ export function seatClaimUrl(gameCode: string, token: string): string {
 
 export function seatClaimFromFragment(): string | null {
   const token = new URLSearchParams(window.location.hash.slice(1)).get("seat");
-  return token && SEAT_TOKEN_PATTERN.test(token) ? token : null;
+  if (token !== null && !SEAT_TOKEN_PATTERN.test(token)) throw new Error("This seat claim link is invalid. Ask the host for a new link.");
+  return token;
 }
 
 /** Remove a capability from browser history only after the server confirms it. */

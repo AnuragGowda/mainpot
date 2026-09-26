@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSettlementPaymentStatuses, subscribeToPaymentChanges } from "./payments";
+import { withTimeout } from "./request-timeout";
 import { getBrowserSupabase } from "./supabase-browser";
 
 export type PaymentStatusReadPhase = "loading" | "known" | "unavailable" | "stale";
@@ -36,7 +37,7 @@ export function useSettlementPaymentStatus(
       setPhase("loading");
       setSettledKeys(EMPTY_KEYS);
     }
-    void getSettlementPaymentStatuses(gameId)
+    void withTimeout(getSettlementPaymentStatuses(gameId), "Payment status read timed out.", 12_000)
       .then((statuses) => {
         if (read !== latestRead.current) return;
         hasKnownStatus.current = true;

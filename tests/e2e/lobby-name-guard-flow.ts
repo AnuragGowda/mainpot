@@ -24,7 +24,7 @@ async function expectDuplicateJoin(page: Page, gameUrl: string, name: string) {
   await expect(input).toBeVisible({ timeout: 15_000 });
   await input.fill(name);
   await page.getByRole("button", { name: "Join", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText(/already in this game/i);
+  await expect(page.getByRole("dialog").getByRole("alert")).toContainText(/already used at this table/i);
   await expect(input).toBeVisible();
 }
 
@@ -61,10 +61,18 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
     await expect(playerList(host)).toHaveCount(2);
     await expect(pot(host)).toContainText("$40.00");
 
+    const guestSession = await firstGuest.evaluate(() => localStorage.getItem("ante_session_id"));
+    const hostSession = await host.evaluate(() => localStorage.getItem("ante_session_id"));
+    await firstGuest.evaluate(session => localStorage.setItem("ante_session_id", session!), hostSession);
+    await firstGuest.reload();
+    await expect(firstGuest.locator("#join-prompt-name")).toBeVisible();
+    await expect(firstGuest.getByRole("button", { name: "End game", exact: true })).toHaveCount(0);
+    await firstGuest.evaluate(session => localStorage.setItem("ante_session_id", session!), guestSession);
+
     await table.getByRole("button", { name: "Add player", exact: true }).click();
     await addPlayer.getByRole("textbox", { name: "Player name" }).fill("CASEY");
     await addPlayer.getByRole("button", { name: "Add player", exact: true }).click();
-    await expect(addPlayer.getByRole("alert")).toContainText(/already in this game/i);
+    await expect(addPlayer.getByRole("alert")).toContainText(/already used at this table/i);
     await expect(playerList(host)).toHaveCount(2);
     await expect(pot(host)).toContainText("$40.00");
     await host.screenshot({
@@ -100,7 +108,7 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
     ]);
     const winner = firstPromptCount === 0 ? firstGuest : secondGuest;
     const rejected = firstPromptCount === 0 ? secondGuest : firstGuest;
-    await expect(rejected.getByRole("alert")).toContainText(/already in this game/i);
+    await expect(rejected.getByRole("dialog").getByRole("alert")).toContainText(/already used at this table/i);
 
     const pending = host.getByRole("region", { name: "Needs approval" });
     await expect(pending.getByRole("listitem")).toHaveCount(1, { timeout: 15_000 });

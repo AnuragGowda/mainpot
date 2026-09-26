@@ -1,4 +1,4 @@
-import { expect, type Browser } from "@playwright/test";
+import { expect, test, type Browser } from "@playwright/test";
 
 /**
  * Checks the short-viewport direct-link join dialog and its safe exit paths
@@ -35,10 +35,13 @@ export async function runJoinDialogRecoveryFlow(browser: Browser, baseURL: strin
       expect(await dialog.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
       await dialog.evaluate((element) => element.scrollTo({ top: 0 }));
       await expect(page.getByRole("heading", { name: "Short-screen table" })).toBeInViewport();
-      await page.getByText("Buy-in", { exact: true }).scrollIntoViewIfNeeded();
+      await page.screenshot({ path: test.info().outputPath(`join-${viewport.width}x${viewport.height}-top.png`) });
+      await page.locator("#join-game-details").getByText("$20.00", { exact: true }).scrollIntoViewIfNeeded();
       await expect(page.getByText("$20.00", { exact: true })).toBeInViewport();
       await page.getByText("Joining records this opening buy-in for the host to review.").scrollIntoViewIfNeeded();
+      await page.getByRole("button", { name: "Join", exact: true }).scrollIntoViewIfNeeded();
       await expect(page.getByRole("button", { name: "Join", exact: true })).toBeInViewport();
+      await page.screenshot({ path: test.info().outputPath(`join-${viewport.width}x${viewport.height}-bottom.png`) });
 
       if (viewport.width === 568) {
         await page.keyboard.press("Escape");

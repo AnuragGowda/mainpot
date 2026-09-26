@@ -44,9 +44,14 @@ export async function getSettlementPaymentStatuses(gameId: string): Promise<Sett
   const supabase = getBrowserSupabase();
   if (!supabase) {
     try {
-      return JSON.parse(window.localStorage.getItem(localKey(gameId)) ?? "[]") as SettlementPaymentStatus[];
+      const rows: unknown = JSON.parse(window.localStorage.getItem(localKey(gameId)) ?? "[]");
+      if (!Array.isArray(rows) || rows.some(row => !row || typeof row !== "object"
+        || typeof row.key !== "string" || typeof row.settled !== "boolean")) {
+        throw new Error("Invalid payment records.");
+      }
+      return rows as SettlementPaymentStatus[];
     } catch {
-      return [];
+      throw new Error("Could not read payment status saved in this browser. Restore browser storage access and retry.");
     }
   }
   const { data, error } = await supabase

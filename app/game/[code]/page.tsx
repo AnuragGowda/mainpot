@@ -1,5 +1,7 @@
 "use client";
 
+import { claimHostManagedSeat, clearSeatClaimFragment, seatClaimFromFragment } from "@/lib/seat-claim";
+
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -212,7 +214,16 @@ export default function GameRoomPage() {
         setActiveGame(code);
         journeyId = game.id;
 
+        const seatToken = seatClaimFromFragment();
+        if (seatToken) {
+          await claimHostManagedSeat(game.id, seatToken);
+          if (cancelled) return;
+        }
         const gameSnapshot = await getGameSnapshot(game.id);
+        if (seatToken && !cancelled) {
+          clearSeatClaimFragment();
+          toast("Your recorded seat is ready.", "success");
+        }
         if (cancelled) {
           return;
         }
@@ -745,7 +756,7 @@ export default function GameRoomPage() {
         <div className="fixed inset-x-0 bottom-0 border-t border-gray-200 bg-gray-50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-center text-sm text-gray-500">
           {currentEarlyCashOut?.status === "locked"
             ? "You cashed out early. Your payment record is above."
-            : "You left this game."}
+            : `You left this game. Ask ${snapshot.game.host_name} to return your existing seat to the table.`}
         </div>
       ) : null}
 

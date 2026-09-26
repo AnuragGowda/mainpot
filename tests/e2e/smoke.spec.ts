@@ -1,3 +1,5 @@
+import { runLocalSaveRecoveryFlow } from "./local-save-recovery-flow";
+import { runJoinDialogRecoveryFlow } from "./join-dialog-recovery-flow";
 import { checkCalculatorValidation } from "./audit-fixes-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
 import { runSettlementUxFlow } from "./settlement-ux-flow";
@@ -177,8 +179,8 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByText(roomCode, { exact: true })).toHaveCount(0);
     await expect(page.getByText("Room code", { exact: true })).toHaveCount(0);
     await page.getByRole("button", { name: "Invite players" }).click();
-    const inviteDialog = page.getByRole("dialog", { name: /Scan to join/ });
-    await expect(inviteDialog.getByText(roomCode, { exact: true })).toBeVisible();
+    const inviteDialog = page.getByRole("dialog", { name: "This table stays in this browser" });
+    await expect(inviteDialog).toContainText("cannot open it on another device");
     await inviteDialog.getByRole("button", { name: "Close invite" }).click();
     await expect(page.getByText("Saved on this device · live sync is off")).toBeVisible();
 
@@ -447,19 +449,13 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByRole("button", { name: "Personal invite" })).toHaveCount(0);
 
     await invite.click();
-    const inviteDialog = page.getByRole("dialog", { name: /Scan to join/ });
+    const inviteDialog = page.getByRole("dialog", { name: "This table stays in this browser" });
     await expect(inviteDialog).toBeVisible();
     await expect(inviteDialog.getByRole("button", { name: "Close invite" })).toBeFocused();
-    await inviteDialog.getByRole("button", { name: "Copy code" }).click();
-    const toast = page.getByText("Copied!", { exact: true });
-    await expect(toast).toBeVisible();
+    await expect(inviteDialog).toContainText("add them from the player list on this device");
+    await expect(inviteDialog.getByRole("button", { name: "Copy code" })).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(invite).toBeFocused();
-    const toastBox = await toast.boundingBox();
-    const actionBox = await page.getByRole("button", { name: "Add a rebuy" }).boundingBox();
-    expect(toastBox).not.toBeNull();
-    expect(actionBox).not.toBeNull();
-    expect(toastBox!.y + toastBox!.height).toBeLessThanOrEqual(actionBox!.y);
 
     await page.getByRole("button", { name: "Add a rebuy" }).click();
     const rebuyDialog = page.getByRole("dialog", { name: "Add a rebuy" });
@@ -565,4 +561,12 @@ test("recovers the same game after a real PWA offline navigation", async ({ page
   test.skip(browserName !== "chromium", "Playwright does not expose WebKit service worker control; physical iOS PWA validation remains required.");
   test.slow();
   await checkPwaRecovery(page, `docs/audits/2026-09-26/evidence/${testInfo.project.name}-pwa`);
+});
+
+test("recovers direct join on short screens without adding seats", async ({ browser, baseURL }) => {
+  await runJoinDialogRecoveryFlow(browser, baseURL!);
+});
+
+test("rejects duplicate seats and failed local saves without changing the pot", async ({ page }) => {
+  await runLocalSaveRecoveryFlow(page);
 });

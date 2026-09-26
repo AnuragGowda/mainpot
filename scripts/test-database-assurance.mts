@@ -270,16 +270,15 @@ async function run() {
   const gameB = await createGame(otherHost, "Assurance game B");
   const playerASessionId = randomUUID();
   const playerA = await join(guestA, gameA.code, "Guest A", playerASessionId);
-  const resumedPlayerA = await join(
-    rotatedGuestA,
-    gameA.code,
-    "Guest A",
-    playerASessionId,
+  await expectError(
+    () => rotatedGuestA.rpc("join_game_guarded", {
+      input_code: gameA.code, input_player_name: "Guest A", input_session_id: playerASessionId,
+    }),
+    "a copied browser session cannot resume another authenticated player",
   );
-  assert(
-    resumedPlayerA.player_id === playerA.player_id,
-    "a stable browser session resumes the same player after auth rotation",
-  );
+  const resumedPlayerA = await join(guestA, gameA.code, "Guest A", randomUUID());
+  assert(resumedPlayerA.player_id === playerA.player_id,
+    "the authenticated owner resumes the same seat across browser sessions");
   const playerB = await join(guestB, gameA.code, "Guest B");
   const otherPlayer = await join(guestB, gameB.code, "Other player");
 

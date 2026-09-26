@@ -1,4 +1,4 @@
-import { expect, type Browser, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
 import { createDeviceContext } from "./device-context";
 
 const paymentStatusRead = "**/rest/v1/settlement_payments*";
@@ -73,6 +73,7 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     await expect(personal).toContainText("Last recorded payment status");
     await expect(ledger.locator(":scope > summary")).toContainText("2 of 2 payments marked sent · status needs refresh");
     await expect(payer.getByTitle(/Mark sent|Reopen payment/)).toHaveCount(0);
+    await payer.screenshot({ path: test.info().outputPath("payment-status-stale.png"), fullPage: true });
 
     // A reload has no in-memory last read. It must remain unknown, rather than
     // becoming a confidently unpaid $20 debt or a zero-sent ledger.
@@ -83,6 +84,7 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     await expect(ledger.locator(":scope > summary")).toContainText("Payment status unavailable");
     await expect(payer.getByTitle(/Mark sent|Reopen payment/)).toHaveCount(0);
 
+    await payer.screenshot({ path: test.info().outputPath("payment-status-unavailable.png"), fullPage: true });
     await payer.unroute(paymentStatusRead);
     await personal.getByRole("button", { name: "Retry payment status" }).click();
     await expect(personal.getByRole("heading")).toHaveText("All your payments are marked sent.");

@@ -1,3 +1,13 @@
+-- Keep the original host-add retry key when a managed seat gains an identity.
+-- An unclaimed managed seat cannot hold the host role. A claimed seat keeps
+-- its browser identity if account deletion later clears its nullable user FK.
+alter table public.players drop constraint host_managed_player_identity;
+alter table public.players add constraint host_managed_player_identity check (
+  host_add_operation_key is null
+  or (session_id is null and user_id is null and is_host = false)
+  or session_id is not null
+);
+
 -- A host can hand an already-recorded managed seat to the person who arrives
 -- later. The capability itself never reaches the database: only its SHA-256
 -- digest is retained in a private schema.
@@ -6,7 +16,7 @@ create table mainpot_private.host_managed_seat_claims (
   game_id uuid not null references public.games(id) on delete cascade,
   player_id uuid not null unique references public.players(id) on delete cascade,
   expires_at timestamptz not null,
-  claimed_by_user_id uuid references auth.users(id) on delete restrict,
+  claimed_by_user_id uuid references auth.users(id) on delete cascade,
   claimed_at timestamptz,
   claim_result jsonb,
   created_at timestamptz not null default now(),
@@ -91,7 +101,7 @@ begin
 
   -- Reissuing is intentional and invalidates the older opaque capability.
   delete from mainpot_private.host_managed_seat_claims
-  where player_id = input_player_id or expires_at <= now();
+  where player_id = input_player_id;
   insert into mainpot_private.host_managed_seat_claims(
     token_hash, game_id, player_id, expires_at
   ) values (
@@ -154,7 +164,7 @@ begin
   if not found then
     raise exception 'The seat claim link is invalid or expired';
   end if;
-  if claim_game_id <> input_game_id then
+  if claim_game_id is distinct from input_game_id then
     raise exception 'This seat claim link is for another game';
   end if;
 
