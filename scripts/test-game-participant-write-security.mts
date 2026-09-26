@@ -107,13 +107,34 @@ async function run() {
   assert(!visibleRead.error && visibleRead.data?.user_id === participant.id,
     "the existing authenticated participant read visibility remains unchanged");
 
+  // Use an active game with no derived result so this denial cannot be caused
+  // by the finalized game's (game_id, user_id) uniqueness constraint.
+  const insertProbeCreated = await participant.client.rpc("create_game_guarded", {
+    input_code: code(),
+    input_game_name: "Participant insert probe",
+    input_host_name: "Participant",
+    input_buy_in: 20,
+    input_session_id: randomUUID(),
+    input_host_is_playing: true,
+  });
+  if (insertProbeCreated.error) throw insertProbeCreated.error;
+  const insertProbe = (Array.isArray(insertProbeCreated.data) ? insertProbeCreated.data[0] : insertProbeCreated.data) as {
+    game_id: string; player_id: string;
+  } | null;
+  assert(insertProbe?.game_id && insertProbe.player_id, "active insert probe has an owned game and seat");
+  games.push(insertProbe.game_id);
+
   const forgedInsert = await participant.client.from("game_participants").insert({
-    game_id: game.game_id,
+    game_id: insertProbe.game_id,
     user_id: participant.id,
-    player_id: participantSeat.player_id,
+    player_id: insertProbe.player_id,
     net_result: 999,
   });
-  assert(forgedInsert.error, "participant cannot forge a direct result row");
+  assert(forgedInsert.error, "participant cannot forge a direct result row for an active owned seat");
+  const forgedInsertPersisted = await admin.from("game_participants")
+    .select("id").eq("game_id", insertProbe.game_id).eq("user_id", participant.id);
+  assert(!forgedInsertPersisted.error && forgedInsertPersisted.data?.length === 0,
+    "denied active-game insert stores no participant result");
   const forgedUpdate = await participant.client.from("game_participants")
     .update({ net_result: 999 }).eq("game_id", game.game_id).eq("user_id", participant.id);
   assert(forgedUpdate.error, "participant cannot change an earned result");
