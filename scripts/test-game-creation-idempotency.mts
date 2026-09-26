@@ -58,7 +58,7 @@ async function run() {
   ]);
   const firstRow = (Array.isArray(first.data) ? first.data[0] : first.data) as { game_id?: string; player_id?: string } | null;
   const replayRow = (Array.isArray(replay.data) ? replay.data[0] : replay.data) as { game_id?: string; player_id?: string } | null;
-  assert(!first.error && !replay.error && firstRow?.game_id && firstRow.player_id, "same create operation succeeds");
+  assert(!first.error && !replay.error && firstRow?.game_id && firstRow.player_id, `same create operation succeeds: ${first.error?.message ?? replay.error?.message ?? ""}`);
   assert(firstRow.game_id === replayRow?.game_id && firstRow.player_id === replayRow.player_id, "replay returns the original table and host seat");
   games.push(firstRow.game_id);
 
