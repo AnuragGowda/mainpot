@@ -8,4 +8,4 @@ drop policy if exists "game_participants delete own" on public.game_participants
 -- The end-game trigger and anonymous-account-transfer function are owned,
 -- SECURITY DEFINER database paths. service_role maintenance likewise retains
 -- its role privileges, while Data API clients cannot mutate derived history.
-revoke insert, update, delete on table public.game_participants from anon, authenticated;
+revoke insert, update, delete on table public.game_participants from public, anon, authenticated;

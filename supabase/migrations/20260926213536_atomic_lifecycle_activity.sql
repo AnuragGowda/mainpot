@@ -201,6 +201,15 @@ returns void language sql security invoker set search_path='' as $$ select mainp
 revoke all on function public.leave_game_guarded(uuid,uuid) from public,anon;
 grant execute on function public.leave_game_guarded(uuid,uuid) to authenticated;
 
+-- Keep the private SECURITY DEFINER implementations unavailable through
+-- PUBLIC, matching the explicit grants on their public invoker wrappers.
+revoke all on function mainpot_private.finalize_settlement_guarded(uuid, text, uuid) from public, anon;
+grant execute on function mainpot_private.finalize_settlement_guarded(uuid, text, uuid) to authenticated;
+revoke all on function mainpot_private.save_discrepancy_allocation_guarded(uuid, jsonb) from public, anon;
+grant execute on function mainpot_private.save_discrepancy_allocation_guarded(uuid, jsonb) to authenticated;
+revoke all on function mainpot_private.leave_game_guarded(uuid, uuid) from public, anon;
+grant execute on function mainpot_private.leave_game_guarded(uuid, uuid) to authenticated;
+
 -- Financial activity is emitted only by guarded writers. The one remaining
 -- client append is the host's non-financial return-to-create notice.
 drop policy if exists "events append by matching actor or host" on public.game_events;

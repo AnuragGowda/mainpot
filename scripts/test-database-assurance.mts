@@ -509,6 +509,13 @@ async function run() {
     && !retriedCashOutEventsError && retriedCashOutEvents?.length === 2,
   "a retried cash-out key returns the saved result without another activity event");
 
+  const concurrentRetryKey = randomUUID();
+  const concurrentRetryInput = { input_game_id: gameB.game_id, input_player_id: otherPlayer.player_id, input_amount: concurrentCashOutAmount, input_operation_key: concurrentRetryKey };
+  const concurrentRetries = await Promise.all([otherHost.rpc("save_cash_out", concurrentRetryInput), otherHost.rpc("save_cash_out", concurrentRetryInput)]);
+  assert(concurrentRetries.every(result => !result.error && result.data?.id === hostFirstCashOut.data.id), "simultaneous attempts with one cash-out key both return the canonical row");
+  const sameKeyEvents = await admin.from("game_events").select("id").eq("game_id", gameB.game_id).eq("event_type", "cash_out_updated").eq("subject_player_id", otherPlayer.player_id);
+  assert(!sameKeyEvents.error && sameKeyEvents.data?.length === 3, "one concurrent operation key appends exactly one event");
+
   const { data: appConfig, error: appConfigError } = await admin
     .from("app_config")
     .select("max_events_per_game")
@@ -576,10 +583,10 @@ async function run() {
   const hostSettlementCashOut = await otherHost.rpc("save_cash_out", {
     input_game_id: gameB.game_id,
     input_player_id: gameB.player_id,
-    input_amount: 19,
+    input_amount: 27,
     input_operation_key: randomUUID(),
   });
-  assert(!hostSettlementCashOut.error && Number(hostSettlementCashOut.data?.amount) === 19,
+  assert(!hostSettlementCashOut.error && Number(hostSettlementCashOut.data?.amount) === 27,
     "host can enter the remaining final stack before settlement lock");
   const otherGameEnded = await otherHost
     .from("games")

@@ -45,6 +45,8 @@ async function run() {
   const host = await user("host"), guest = await user("guest"), outsider = await user("outsider");
   // Start settlement: participant denied, activity failure rolls back active phase, retry writes exactly once.
   const start = await game(host.client, "Atomic start");
+  await join(guest.client, start.code, "Start guest");
+  const approved = await host.client.from("buy_ins").update({ verified: true }).eq("game_id", start.game_id); if (approved.error) throw approved.error;
   assert((await guest.client.rpc("start_settlement_guarded", { input_game_id: start.game_id })).error, "participant cannot start settlement");
   await rejectActivity(start.game_id, () => host.client.rpc("start_settlement_guarded", { input_game_id: start.game_id }), async () => {
     const r = await admin.from("games").select("status").eq("id", start.game_id).single(); assert(r.data?.status === "active" && await eventCount(start.game_id, "game_settling") === 0, "failed start leaves active game without event");
@@ -55,6 +57,8 @@ async function run() {
   const settle = await game(host.client, "Atomic settlement");
   assert(!(await host.client.rpc("start_settlement_guarded", { input_game_id: settle.game_id })).error, "fixture enters settlement");
   const allocation = { method: "proportional", amount: 0, player_ids: [], player_allocations: [] };
+  assert((await guest.client.rpc("save_discrepancy_allocation_guarded", { input_game_id: settle.game_id, input_allocation: allocation })).error, "non-host cannot allocate a discrepancy");
+  assert((await guest.client.rpc("finalize_settlement_guarded", { input_game_id: settle.game_id, input_mode: "min", input_bank_player_id: null })).error, "non-host cannot finalize settlement");
   await rejectActivity(settle.game_id, () => host.client.rpc("save_discrepancy_allocation_guarded", { input_game_id: settle.game_id, input_allocation: allocation }), async () => {
     const r = await admin.from("games").select("discrepancy_allocation").eq("id", settle.game_id).single(); assert(r.data?.discrepancy_allocation == null && await eventCount(settle.game_id, "discrepancy_allocated") === 0, "failed allocation is absent");
   });
@@ -81,11 +85,17 @@ async function run() {
 
   // A non-host leaves only their own active seat; rejected event leaves the seat active.
   const leave = await game(host.client, "Atomic leave"); const leaveSeat = await join(guest.client, leave.code, "Leaving guest");
+  assert((await host.client.rpc("leave_game_guarded", { input_game_id: leave.game_id, input_player_id: leave.player_id })).error, "host cannot leave without transfer");
+  assert((await host.client.rpc("save_discrepancy_allocation_guarded", { input_game_id: leave.game_id, input_allocation: allocation })).error, "active game cannot allocate settlement difference");
+  assert((await host.client.rpc("finalize_settlement_guarded", { input_game_id: leave.game_id, input_mode: "min", input_bank_player_id: null })).error, "active game cannot finalize directly");
   assert((await outsider.client.rpc("leave_game_guarded", { input_game_id: leave.game_id, input_player_id: leaveSeat })).error, "outsider cannot leave another seat");
   await rejectActivity(leave.game_id, () => guest.client.rpc("leave_game_guarded", { input_game_id: leave.game_id, input_player_id: leaveSeat }), async () => {
     const r = await admin.from("players").select("left_at").eq("id", leaveSeat).single(); assert(r.data?.left_at == null && await eventCount(leave.game_id, "player_left") === 0, "failed leave keeps seat active");
   });
   assert(!(await guest.client.rpc("leave_game_guarded", { input_game_id: leave.game_id, input_player_id: leaveSeat })).error && await eventCount(leave.game_id, "player_left") === 1, "leave retry marks seat and writes one event");
+  assert(!(await guest.client.rpc("leave_game_guarded", { input_game_id: leave.game_id, input_player_id: leaveSeat })).error && await eventCount(leave.game_id, "player_left") === 1, "successful leave replay does not append again");
+  assert((await host.client.rpc("remove_player_guarded", { input_game_id: settle.game_id, input_player_id: settle.player_id })).error, "ended game cannot remove seats");
+  assert((await host.client.rpc("start_settlement_guarded", { input_game_id: settle.game_id })).error, "ended game cannot reopen settlement");
   console.log("✓ lifecycle RPCs roll back on audit failure and enforce role, phase, target, and reservation semantics");
 }
 try { await run(); } finally { sql("drop trigger if exists test_reject_lifecycle_activity on public.game_events; drop function if exists public.test_reject_lifecycle_activity();"); for (const id of games) await admin.from("games").delete().eq("id", id); for (const id of users) await admin.auth.admin.deleteUser(id); }

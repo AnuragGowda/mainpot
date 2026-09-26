@@ -1,7 +1,5 @@
 -- A final stack belongs to exactly one player in one game. Do not merge or
--- silently rewrite legacy data: null or duplicate rows stop for manual
--- recovery, while an old mismatched player/game row stays intact under the
--- not-valid composite constraint below.
+-- silently rewrite legacy data: inconsistent rows stop for manual recovery.
 do $$
 declare
   mismatched_cash_out_count integer;
@@ -29,9 +27,7 @@ begin
     on player.id = cash_out.player_id and player.game_id = cash_out.game_id
   where player.id is null;
   if mismatched_cash_out_count > 0 then
-    -- Keep historical evidence intact. The not-valid constraint below protects
-    -- every new row without silently assigning an old cash-out to another game.
-    raise notice '% historical cash-out rows have a mismatched game/player; they remain for manual recovery', mismatched_cash_out_count;
+    raise exception '% historical cash-out rows have a mismatched game/player; repair them before adding cash-out integrity constraints', mismatched_cash_out_count;
   end if;
 end;
 $$;
@@ -42,11 +38,10 @@ alter table public.cash_outs
   add constraint cash_outs_game_player_key unique (game_id, player_id),
   add constraint cash_outs_player_game_fkey
     foreign key (player_id, game_id)
-    references public.players(id, game_id)
-    not valid;
+    references public.players(id, game_id) on delete cascade;
 
 -- Store an immutable operation receipt. A browser can lose a response after a
--- transaction commits, so the same key must return the exact saved row without
+-- transaction commits, so the same key must return the current saved row without
 -- writing another activity event.
 create table mainpot_private.cash_out_operations (
   operation_key uuid primary key,
@@ -90,6 +85,10 @@ begin
     or round(input_amount, 2) <> input_amount then
     raise exception 'Enter a cash-out between $0.00 and $99,999,999.99 with no more than two decimals.';
   end if;
+
+  -- Serialize retries before looking up their receipt, including two first
+  -- attempts with the same key that otherwise both observe an absent row.
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(input_operation_key::text, 0));
 
   -- A retry after its transaction committed must still succeed if another
   -- actor finalized the game before the response reached this browser.
