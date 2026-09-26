@@ -16,6 +16,7 @@ export async function runBankPlanFlow(browser: Browser, baseURL: string, evidenc
       await page.goto(host.url());
       await page.locator("#join-prompt-name").fill(name);
       await page.getByRole("button", { name: "Join", exact: true }).click();
+      await expect(page.locator("#join-prompt-name")).toHaveCount(0, { timeout: 15_000 });
       await expect(page.getByRole("heading", { name: "Shared bank regression" })).toBeVisible();
     }
     await host.getByRole("region", { name: "Needs approval" }).getByRole("button", { name: "Approve all" }).click();
