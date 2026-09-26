@@ -261,11 +261,12 @@ test.describe("public local-mode experience", () => {
     const reloadedBank = reloadedFullPlan.getByRole("combobox", { name: "Who is the bank?" });
     await expect(reloadedBank).toBeDisabled();
     await expect(reloadedBank).toHaveText("Casey");
+    await reloadedFullPlan.locator(":scope > summary").click();
     const feedbackPrompt = page.getByText("How did game night go?", { exact: true });
     await expect(feedbackPrompt).toBeVisible();
     const gameHeading = page.getByRole("heading", { name: "Friday test game" });
     expect(await feedbackPrompt.evaluate((prompt, heading) => Boolean(
-      prompt.compareDocumentPosition(heading as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
+      prompt.compareDocumentPosition(heading as Node) & Node.DOCUMENT_POSITION_PRECEDING,
     ), await gameHeading.elementHandle())).toBe(true);
     await feedbackPrompt.click();
     const feedbackRating = page.getByRole("radio", { name: "3 of 5", exact: true });
