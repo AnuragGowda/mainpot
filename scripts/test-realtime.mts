@@ -134,6 +134,7 @@ try {
       "test-early-cashout-phase-race.mts", "test-game-creation-idempotency.mts",
       "test-payment-plan-security.mts", "test-atomic-ledger-activity.mts",
       "test-lobby-name-security.mts", "test-seat-recovery-security.mts", "test-seat-claim-security.mts", "test-seat-write-security.mts",
+      "test-maintenance-privileges.mts",
     ];
     const focusedScripts = process.env.MAINPOT_DB_ASSURANCE_SCRIPTS?.split(",");
     if (focusedScripts?.some(script => !assuranceScripts.includes(script))) {
