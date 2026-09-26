@@ -1,0 +1,81 @@
+# Mainpot follow-up: security, recovery and operational evidence
+
+This pass follows the September 26 release. It uses fresh agent reviewers and new reproduction tests. It is an internal independent agent review, not an external security certification. Browser profiles simulate devices; physical iPhone/Android acceptance and uncoached game-night usability testing remain separate.
+
+## Findings and remediation
+
+| Finding | Impact | Change | Evidence boundary |
+| --- | --- | --- | --- |
+| Cross-game final-stack insertion | An authenticated outsider could attach their own seat to another settling game using separate game/player foreign keys. A write without RETURNING is the relevant attack; a failed SELECT does not prove the INSERT failed. | Composite game/player binding and guarded final-stack save; browser direct writes revoked. | Fresh API regression checks persisted absence with an admin read. |
+| Duplicate first final-stack saves | Host and player could both see no existing row and insert two cash-outs. Server settlement sums could then diverge from the UI's selected row. | Unique game/player constraint, atomic upsert, stable per-draft operation receipts and atomic activity. | Concurrent host/player first-save, lost-response retry, activity rollback and finalization tests. |
+| Host correction lock order | Correction took a buy-in row lock before the game lock; approval/removal took the reverse order. Two host operations could deadlock. | Correction takes game then buy-in, retaining authorization and finalized successful replay. | Deterministic two-connection lock regression. |
+| Server push destination validation | HTTPS alone allowed a crafted subscription to choose a server request destination. Raw table writes could bypass the API validation. | Shared browser-provider allowlist applied at registration and immediately before sending. | Unit tests cover trusted providers, credential/port tricks, loopback and malicious stored endpoints. No internal network attack was performed. |
+| Payment status convergence | A missed change while offline, backgrounded or foregrounded could leave a finalized payment screen outdated until another event or retry. | Refresh on online/foreground and subscription; reconcile every five seconds while visible and online. Preserve last known status as stale after failures and disable mutations until a successful read. Quiet successful polling avoids flickering controls. | Separate payer/recipient read failures, resume recovery and deliberate WebSocket payment-frame loss with subscription forwarding; final results below. |
+| Host-managed custom amount | One desktop Safari run recorded a second default $20 buy-in after a $5.50 edit; the expected total was $25.50 and observed total $40. | Submission reads the current amount input directly, and the journey asserts its entered value before submitting. | This is defensive hardening of an observed intermittent failure; a specific React closure race is not proven. Final five-profile journey results below. |
+| Non-atomic lifecycle activity | Starting or finalizing settlement, recording discrepancy allocation, and removing/leaving a seat could succeed while the separate activity write failed. | Guarded lifecycle RPCs perform the action and activity insert in one transaction. | Fault-injected activity rollback and role/phase checks; final results below. |
+| Forged derived statistics | Browser-owned result writes could fabricate net results or erase completed participation history. | Direct result writes restricted to trusted database/server paths. | Absent-row insert, update/delete persisted-value checks, finalization, account transfer and deletion compatibility. |
+| Unrelated-user result visibility | Any authenticated identity could query unrelated users’ per-game results directly. | History is visible to its owner and accepted friends, matching current dashboard consumers. | Own, unrelated, pending, accepted and removed-friend access checks. |
+| Confirmed-email session and callback origin | Next cookie merging dropped a zero expiry, leaving the guest cookie ahead of the permanent session. Callback redirects also used the internal localhost origin instead of the browser host, making host-only cookies unavailable. | Preserve explicit expired-cookie dates and validate the browser-facing Host for callbacks and same-origin API checks. | Actual confirmed-email journey passed with the service worker enabled; cookie-merge and origin regressions cover the two causes. Five-profile results below. |
+| User-editable subscription entitlements | Own-profile INSERT/UPDATE permissions included plan and supporter expiry; delete/recreate could also forge a paid entitlement. | Browser writes limited to personal profile/contact columns; trusted server entitlement writes retained. | Direct writes without RETURNING, persisted-value checks, recreation and service-role positive check. |
+
+Existing production cash-outs had zero duplicate game/player groups and zero cross-game rows before the integrity migration. No legacy ledger merges are part of this change.
+
+## Authentication
+
+The new confirmed-email suite runs in disposable Supabase with Mailpit and actual PKCE email callbacks, not automatic email confirmation. It exercises guest-host ownership preservation, confirmation, password sign-in, logout, email-link recovery, and invalid callbacks. One-time capabilities and test passwords must never enter committed evidence.
+
+Production's public auth settings were read: email, Google and anonymous sign-ins enabled; sign-up enabled; email confirmation required. These settings do not prove SMTP inbox delivery or the complete Google OAuth handoff.
+
+Supabase's security advisor reports leaked-password protection disabled. The organization is on Free and the feature requires Pro or above: [Supabase password security](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). No subscription upgrade was performed.
+
+## Operational checks
+
+- The latest completed local Product Ops-inclusive backup, `2026-09-25T081920Z`, passed all seven checksum entries.
+- The isolated Product Ops live-source restore passed: seven migrations, 13 tables, reported RPO zero seconds, dump one second, restore one second, total RTO five seconds. The temporary database had no network or published ports. This verifies a fresh logical dump, not a historical hosted Mainpot backup.
+- Prometheus and Alertmanager were ready; Prometheus had one active Alertmanager and no reported routing error. Nine rules validated and all 14 offline alert scenarios passed. No real notification or human acknowledgment was tested.
+- The September 26 local application backup failed with `tar: docker/data/grafana: file changed as we read it`. The timer being active did not mean the backup succeeded. This affects local application backup coverage including Product Ops, not Mainpot's hosted Supabase backups.
+- Product Ops container DNS returned `EAI_AGAIN` when calling Mainpot; the same host resolved Mainpot and `/api/health` returned 200. No infrastructure/DNS settings were changed.
+- The first authorized host-side Mainpot dependency canary returned 503 in 4,270 ms: database true, Realtime false. Subsequent hosted read-back found zero canary rows; the probe cleaned up. The table is published to Realtime and service-role read permissions exist. Hosted Realtime logs showed tenant/replication initialization around the probe, which is a clue rather than proof of the cause.
+- Two further serial host probes at 21:44:05 and 21:44:20 UTC returned 503 (database true, Realtime false; 5,178 ms) and 200 (both true; 1,223 ms). This is consistent with cold/warm subscription behavior but does not prove the cause. Hosted read-back after both found zero residual canary rows.
+- Alert click-through links use Grafana port 8445 while the documented/live Grafana endpoint uses 8446. No unrelated infrastructure deployment was performed.
+
+A fresh disposable restore passed with matching data, definitions, owners and privileges, including a future-function grant check. The subsequent cold local Realtime probe joined successfully and found an active replication slot, but still missed INSERT delivery within three seconds. Three later warm probes had passed. An active slot is insufficient readiness evidence; no causal fix or longer production delivery threshold is claimed.
+
+The app canary now reports subscription and cleanup separately so a delivery failure is distinguishable from subscription timeout and cleanup failure. A passing route health response alone never substitutes for the browser multiplayer flow.
+
+## Remaining acceptance outside this environment
+
+Physical iPhone/Android installs, backgrounding, push delivery and native payment-app handoff; real game nights with new hosts and players; production email inbox delivery and Google login using a controlled account; hosted Mainpot historical backup restoration; actual alert delivery and acknowledgment. A paid-plan decision is needed for leaked-password protection. The local backup failure and container DNS problem need an infrastructure change with explicit target/interruption scope.
+
+## Validation and release status
+
+Local verification completed:
+
+- Final ESLint, production build and diff whitespace checks passed.
+- 241 unit tests in 38 files passed. Dependency audit reported zero known vulnerabilities.
+- All 17 database/security suites passed against the current migration stack. The five-minute ledger churn completed 173 assurance cycles.
+- Confirmed-email authentication passed all 10 cases across five browser profiles, with service workers enabled.
+- The latest complete 135-case connected run passed 133 cases. Its two failures were the expired-token fixture being consumed by an unfinished dashboard read and a native WebKit resource error during rapid test navigation. The corrected expiry/name-guard journeys then passed all 10 cases across all five profiles. These are separate runs, not a claimed single clean 135-case local run. WebKit emits native fetch resource failures as JavaScript console errors, which Playwright can expose through its page-error stream; this does not by itself prove an uncaught application rejection. See [WebKit loader](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/loader/ThreadableLoader.cpp#L143-L168) and [Playwright WebKit reporting](https://github.com/microsoft/playwright/blob/main/packages/playwright-core/src/server/webkit/wkPage.ts#L538-L564). No broad error filtering was added.
+- Payment read failure, online/foreground recovery, deliberately dropped payment-table WebSocket frames, custom host-managed amounts, and zero-value cash-out retry passed across all five profiles in the broad run.
+- A fresh disposable Mainpot restore passed matching ledger/auth hashes, definitions, owners, grants, RLS and default privileges. Backup took 453 ms and recovery 1,414 ms for the synthetic fixture. The rolled-back guarded write, owner/outsider checks, and future-function privilege check passed; the source was unchanged.
+- The local canary passed after a current-container cluster-readiness gate waited 25,547 ms. Subscription and INSERT delivery retain separate three-second budgets. This local image-log prerequisite is not a production timeout change or proof of hosted Realtime remediation.
+
+The final source is independently exercised by CI, including the complete 135-case five-profile connected suite. Git, CI, hosted migrations, deployment identity and production browser verification are recorded separately in the release receipt accompanying this report.
+
+## Repeatable gates
+
+`npm run test:operations:isolated` creates and resets only the `mainpot-e2e` stack on port 55321. It runs 17 database/security suites, five minutes of ledger churn, a synthetic Mainpot logical backup/restore, and a database-to-Realtime canary. It stops the stack afterward. The restore compares ledger/auth hashes, function definitions and owners, relation/column/schema grants, RLS policies, and global/schema default privileges. It retains the initdb public-schema baseline and restores default ACL metadata from a separate archive. A guarded write, owner/outsider RLS and future-function privilege check run in a rolled-back transaction. Shared cluster roles, preinstalled extensions and excluded cron schedules limit this to a local logical recovery drill.
+
+`PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:auth -- --workers=2` exercises actual confirmed-email callbacks using local Mailpit across desktop Chromium, Android-sized Chromium, iPhone-sized WebKit, desktop WebKit and iPad-sized WebKit. It asserts the exact browser origin, preserved ownership and ledger, logout/password/email-link recovery, and safe invalid callbacks.
+
+`PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --workers=3` checks host/player multiplayer journeys across the same five profiles. The payment-read recovery case changes authoritative server state while the recipient's reads fail, then verifies online and foreground recovery. It also forwards the Realtime subscription while dropping actual payment-table change frames, proving foreground convergence through authoritative reads. Database and browser runners share a lock to prevent simultaneous resets.
+
+CI now has five jobs, including the full five-profile connected suite, confirmed-email mobile journeys and the operational gate. A successful local run, a terminal CI result, hosted migration read-back, and independent production verification are separate release facts.
+
+## Visual evidence
+
+The follow-up evidence folder preserves the new captures separately from the earlier audit. Reviewed captures include the iPhone unknown-payment notice, stale last-known records, desktop/mobile bank plans, account payment history and template editing. A failed payment read leaves a neutral notice and retry action, rather than a fabricated unpaid balance or enabled payment mutation.
+
+## Readiness assessment
+
+The work materially improves financial integrity, account continuity, privacy and regression coverage. Treat Mainpot as a controlled beta while hosted cold Realtime behavior and the external acceptance checks above remain unresolved. An 8+ assessment requires consistent production dependency probes, demonstrated real-device/game-night flows and recovery/alert evidence that matches the hosted service, rather than only successful synthetic local checks.
