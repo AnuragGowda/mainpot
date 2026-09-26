@@ -610,7 +610,7 @@ test("recovers the same created table after its committed response is lost", asy
       const response = await route.fetch();
       expect(response.ok()).toBe(true);
       const rows = await response.json();
-      committedCode = rows[0].code;
+      committedCode = (Array.isArray(rows) ? rows[0] : rows).code;
       await new Promise(resolve => setTimeout(resolve, 20_000));
       await route.abort().catch(() => undefined);
     };
