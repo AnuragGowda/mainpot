@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 const isRealtimeSuite = process.env.PLAYWRIGHT_REALTIME === "1";
 const isMobileSmokeSuite = process.env.PLAYWRIGHT_MOBILE === "1";
 const isExtendedSuite = process.env.PLAYWRIGHT_EXTENDED === "1";
+const isAllDeviceSuite = process.env.PLAYWRIGHT_ALL_DEVICES === "1";
 const port = Number(process.env.PLAYWRIGHT_PORT ?? "3100");
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new Error(`PLAYWRIGHT_PORT must be a valid TCP port, received: ${process.env.PLAYWRIGHT_PORT}`);
@@ -16,7 +17,7 @@ export default defineConfig({
     ? "**/realtime.spec.ts"
     : "**/smoke.spec.ts",
   fullyParallel: true,
-  timeout: isMobileSmokeSuite || isExtendedSuite ? 60_000 : 30_000,
+  timeout: isMobileSmokeSuite || isExtendedSuite || isAllDeviceSuite ? 60_000 : 30_000,
   workers: process.env.CI && isMobileSmokeSuite ? 2 : undefined,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
@@ -26,7 +27,15 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   projects: [
-    ...(isMobileSmokeSuite
+    ...(isAllDeviceSuite
+      ? [
+          { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+          { name: "mobile-chrome", use: { ...devices["Pixel 5"] } },
+          { name: "mobile-safari", use: { ...devices["iPhone 13"] } },
+          { name: "desktop-safari", use: { ...devices["Desktop Safari"], viewport: { width: 1440, height: 900 } } },
+          { name: "tablet-safari", use: { ...devices["iPad Mini"] } },
+        ]
+      : isMobileSmokeSuite
       ? [
           { name: "mobile-chrome", use: { ...devices["Pixel 5"] } },
           { name: "mobile-safari", use: { ...devices["iPhone 13"] } },
