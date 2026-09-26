@@ -635,3 +635,29 @@ test("recovers the same created table after its committed response is lost", asy
     await context.close();
   }
 });
+
+test("retries a temporary future-JWT rejection with the same creation request", async ({ browser, baseURL }) => {
+  const context = await createDeviceContext(browser, { baseURL });
+  const page = await context.newPage();
+  let attempts = 0;
+  let originalPayload: string | null = null;
+  try {
+    await page.route("**/rest/v1/rpc/create_game_idempotent", async route => {
+      attempts++;
+      if (attempts === 1) {
+        originalPayload = route.request().postData();
+        await route.fulfill({ status: 401, contentType: "application/json", body: JSON.stringify({ code: "PGRST303", message: "JWT issued at future" }) });
+      } else {
+        expect(route.request().postData()).toBe(originalPayload);
+        await route.continue();
+      }
+    });
+    await createGame(page, "Temporary auth rejection");
+    await expect(page.getByRole("button", { name: "End game", exact: true })).toBeEnabled();
+    expect(attempts).toBe(2);
+    await expect(page.getByRole("region", { name: "At the table" }).getByRole("listitem")).toHaveCount(1);
+    await expect(page.getByText("Pot", { exact: true }).locator("..")).toContainText("$20.00");
+  } finally {
+    await context.close();
+  }
+});

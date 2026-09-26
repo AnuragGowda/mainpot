@@ -1,5 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { fetchWithFutureJwtRetry } from "./supabase-fetch";
 import { isSupabaseConfigured } from "./supabase";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -16,7 +17,7 @@ export function createBrowserSupabase(): SupabaseClient | null {
   if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) {
     return null;
   }
-  return createBrowserClient(supabaseUrl, supabaseAnonKey);
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, { global: { fetch: fetchWithFutureJwtRetry } });
 }
 
 let cachedBrowserSupabase: SupabaseClient | null | undefined;
