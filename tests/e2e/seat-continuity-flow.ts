@@ -33,6 +33,9 @@ export async function runSeatContinuityFlow(browser: Browser, baseURL: string) {
   ]);
   const [host, guest] = await Promise.all(contexts.map((context) => context.newPage()));
 
+  const runtimeErrors: string[] = [];
+  for (const page of [host, guest]) page.on("pageerror", error => runtimeErrors.push(error.message));
+
   try {
     await createGame(host);
     const table = host.getByRole("region", { name: "At the table" });
@@ -79,8 +82,9 @@ export async function runSeatContinuityFlow(browser: Browser, baseURL: string) {
     await guest.getByRole("button", { name: "Cash out", exact: true }).click();
     const leaveDialog = guest.getByRole("alertdialog", { name: "Cash out & leave" });
     await leaveDialog.getByRole("button", { name: "Leave now and settle when the game ends", exact: true }).click();
-    await expect(leaveDialog).toHaveAccessibleName("Leave without cashing out?");
-    await leaveDialog.getByRole("button", { name: "Leave & settle later", exact: true }).click();
+    const settleLater = guest.getByRole("alertdialog", { name: "Leave without cashing out?" });
+    await expect(settleLater).toBeVisible();
+    await settleLater.getByRole("button", { name: "Leave & settle later", exact: true }).click();
     await expect(guest.getByText("You left this game. Ask Casey to return your existing seat to the table.", { exact: true })).toBeVisible({ timeout: 15_000 });
 
     await expect(jordanOnHost).toContainText("Left", { timeout: 15_000 });
@@ -101,6 +105,7 @@ export async function runSeatContinuityFlow(browser: Browser, baseURL: string) {
       path: test.info().outputPath("seat-continuity-restored.png"),
       fullPage: true,
     });
+    expect(runtimeErrors, "Independent devices must not leave uncaught browser errors").toEqual([]);
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }

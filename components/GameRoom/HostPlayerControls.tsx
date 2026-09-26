@@ -12,6 +12,8 @@ import { playerVerifiedInvested } from "@/lib/game";
 import { PLAYER_NAME_MAX_LENGTH } from "@/lib/name-validation";
 import { randomUUID } from "@/lib/session";
 import { calculateEarlyCashOutNet } from "@/lib/settlement";
+import HostManagedSeatClaimLink from "./HostManagedSeatClaimLink";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import { restorePlayerToTable } from "@/lib/seat-recovery";
 import type { GameSnapshot, Player } from "@/lib/types";
 
@@ -222,6 +224,7 @@ function ManagePlayerForm({ snapshot, player, onSaved, onClose }: { snapshot: Ga
         <p className="mt-2 text-xs leading-5 text-gray-500">This sends a review request. The separate Confirm &amp; lock step records the final obligation.</p>
       </div>
     ) : null}
+    {isSupabaseConfigured && !pendingCashOut && !locked ? <HostManagedSeatClaimLink gameId={snapshot.game.id} gameCode={snapshot.game.code} player={player} /> : null}
     {pendingCashOut ? <p className="text-xs text-gray-500">An early cash-out is already waiting for review.</p> : null}
   </PlayerSheet>;
 }

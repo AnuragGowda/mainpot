@@ -18,6 +18,7 @@ beforeEach(() => {
 describe("lobby seat name uniqueness", () => {
   it("normalizes Unicode width, composed characters, case and whitespace", () => {
     expect(lobbyNameKey(" ＪＯＲＤＡＮ ")).toBe("jordan");
+    expect(lobbyNameKey("Jor\u200bdan\ufe0f")).toBe("jordan");
     expect(lobbyNameKey("José  Doe")).toBe(lobbyNameKey("JOSE\u0301\u00a0Doe"));
   });
 
@@ -43,6 +44,16 @@ describe("lobby seat name uniqueness", () => {
     window.localStorage.setItem("ante_session_id", randomUUID());
     await expect(joinGame(game.code, "Jordan")).rejects.toThrow("already used");
     expect((await getGameSnapshot(game.gameId)).buyIns).toHaveLength(2);
+  });
+
+  it("does not resume an authenticated local seat with a copied browser session", async () => {
+    const hostUser = randomUUID();
+    const game = await createGame("Friday", "Casey", 20, hostUser);
+    await expect(joinGame(game.code, "Casey", randomUUID())).rejects.toThrow("already used");
+    window.localStorage.setItem("ante_session_id", randomUUID());
+    const resumed = await joinGame(game.code, "Casey", hostUser);
+    expect(resumed.playerId).toBe((await getGameSnapshot(game.gameId)).players[0].id);
+    expect((await getGameSnapshot(game.gameId)).buyIns).toHaveLength(1);
   });
 
   it("allows the same display name in a different game", async () => {

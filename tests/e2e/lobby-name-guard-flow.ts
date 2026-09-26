@@ -14,7 +14,7 @@ async function createGame(host: Page, gameName: string, hostName: string) {
   await host.locator("#create-name").fill(hostName);
   await host.locator("#create-game-name").fill(gameName);
   await host.locator("#create-buy-in").fill("20");
-  await host.getByRole("button", { name: "Create game", exact: true }).click();
+  await host.getByRole("button", { name: /^(Create game|Start another game)$/ }).click();
   await expect(host.getByRole("heading", { name: gameName })).toBeVisible({ timeout: 15_000 });
 }
 
@@ -40,6 +40,9 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
   ]);
   const [host, firstGuest, secondGuest] = await Promise.all(contexts.map((context) => context.newPage()));
 
+  const runtimeErrors: string[] = [];
+  for (const page of [host, firstGuest, secondGuest]) page.on("pageerror", error => runtimeErrors.push(error.message));
+
   try {
     await createGame(host, "Lobby name guards", "Casey");
     const guardedGameUrl = host.url();
@@ -58,6 +61,7 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
     await expect(playerList(host)).toHaveCount(2);
     await expect(pot(host)).toContainText("$40.00");
     await expectDuplicateJoin(firstGuest, guardedGameUrl, "Ｊｏｒｄａｎ");
+    await expectDuplicateJoin(firstGuest, guardedGameUrl, "Jor\u200bdan");
     await expect(playerList(host)).toHaveCount(2);
     await expect(pot(host)).toContainText("$40.00");
 
@@ -112,7 +116,7 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
 
     const pending = host.getByRole("region", { name: "Needs approval" });
     await expect(pending.getByRole("listitem")).toHaveCount(1, { timeout: 15_000 });
-    await expect(pending).toContainText("Casey");
+    await expect(pending).toContainText(/casey/i);
     await expect(playerList(host)).toHaveCount(2);
     await expect(pot(host)).toContainText("$20.00");
     await expect(pot(host)).toContainText("(+$20.00)");
@@ -120,12 +124,13 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
     await winner.reload();
     await expect(winner.locator("#join-prompt-name")).toHaveCount(0, { timeout: 15_000 });
     await expect(playerList(winner)).toHaveCount(2);
-    await expect(playerList(winner).filter({ hasText: "Casey" })).toContainText("1 entry");
+    await expect(playerList(winner).filter({ hasText: /casey/i })).toContainText("1 entry");
     await expect(pending.getByRole("listitem")).toHaveCount(1);
     await host.screenshot({
       path: test.info().outputPath("lobby-name-guard-race.png"),
       fullPage: true,
     });
+    expect(runtimeErrors, "Independent devices must not leave uncaught browser errors").toEqual([]);
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }

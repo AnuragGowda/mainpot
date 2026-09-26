@@ -1,3 +1,5 @@
+begin;
+
 -- A player name identifies one seat only inside its game. The key is kept
 -- separately from the financial player row so old duplicate beta rows can
 -- remain historically intact while every new write is rejected.
@@ -10,12 +12,18 @@ set search_path = ''
 as $$
   select lower(
     btrim(
-      regexp_replace(normalize(input_name, NFKC), '[[:space:]]+', ' ', 'g')
+      regexp_replace(
+        regexp_replace(normalize(input_name, NFKC), U&'[\00AD\034F\061C\180E\200B-\200F\202A-\202E\2060-\206F\FE00-\FE0F\FEFF]', '', 'g'),
+        '[[:space:]]+', ' ', 'g'
+      )
     )
   );
 $$;
 
 revoke all on function mainpot_private.player_lobby_name_key(text) from public;
+
+-- Keep legacy seeding and trigger installation indivisible to concurrent writers.
+lock table public.players in share row exclusive mode;
 
 create table mainpot_private.player_lobby_name_reservations (
   game_id uuid not null references public.games(id) on delete cascade,
@@ -104,6 +112,10 @@ begin
   if tg_op = 'UPDATE' and old.game_id is not distinct from new.game_id
     and old.name is not distinct from new.name then
     return new;
+  end if;
+
+  if target_name_key = '' then
+    raise exception 'Player name must include a visible character.';
   end if;
 
   -- This makes legacy-reservation reconciliation deterministic. The unique
@@ -357,3 +369,5 @@ $$;
 
 revoke all on function public.join_game_guarded(text, text, text) from public;
 grant execute on function public.join_game_guarded(text, text, text) to authenticated;
+
+commit;

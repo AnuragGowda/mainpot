@@ -135,6 +135,15 @@ async function run() {
   const replay = await player.client.rpc("create_buy_in_idempotent", args);
   assert(!replay.error && !replay.data[0].created && replay.data[0].id === buyInId, "lost-response retry reuses entry");
   assert(await countEvents("buy_in_added") === 1, "retry appends exactly one activity");
+  const canonical = await admin.from("game_events").select("actor_player_id,subject_player_id,amount,metadata")
+    .eq("game_id", game.game_id).eq("event_type", "buy_in_added").eq("amount", 7).single();
+  if (canonical.error) throw canonical.error;
+  const legacyEvent = { ...canonical.data, game_id: game.game_id, event_type: "buy_in_added" };
+  const legacyAppends = await Promise.all([player.client.from("game_events").insert(legacyEvent), player.client.from("game_events").insert(legacyEvent)]);
+  assert(legacyAppends.every(result => !result.error), "cached clients can append the same committed event without false failure");
+  assert(await countEvents("buy_in_added") === 1, "legacy appends do not duplicate the canonical activity");
+  const outsider = await permanent("atomic-outsider");
+  assert((await outsider.client.from("game_events").insert(legacyEvent)).error, "duplicate suppression does not bypass event authorization");
   const action = (client: SupabaseClient, value: string) => client.rpc("apply_host_buy_in_action", { input_buy_in_id: buyInId, input_action: value });
   assert((await action(player.client, "verify")).error, "participant cannot approve an entry");
   sql(`create function public.test_reject_activity() returns trigger language plpgsql as $$ begin if new.game_id = '${game.game_id}'::uuid then raise exception 'Injected audit write failure'; end if; return new; end $$;

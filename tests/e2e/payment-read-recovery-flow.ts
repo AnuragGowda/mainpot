@@ -29,6 +29,26 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     [0, 1, 2].map(() => createDeviceContext(browser, { baseURL, reducedMotion: "reduce" })),
   );
   const [host, payer, recipient] = await Promise.all(contexts.map((context) => context.newPage()));
+  const activeHandleReads = new Set<import("@playwright/test").Request>();
+  payer.on("request", request => { if (request.url().includes("/rpc/get_player_payment_handles")) activeHandleReads.add(request); });
+  payer.on("requestfinished", request => activeHandleReads.delete(request));
+  payer.on("requestfailed", request => activeHandleReads.delete(request));
+  const runtimeErrors: string[] = [];
+  for (const page of [host, payer, recipient]) page.on("pageerror", error => runtimeErrors.push(error.message));
+
+  const paymentReadFailure = (route: import("@playwright/test").Route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    return route.fulfill({
+      status: 400,
+      contentType: "application/json",
+      headers: {
+        "access-control-allow-origin": new URL(baseURL).origin,
+        "access-control-allow-credentials": "true",
+      },
+      body: JSON.stringify({ message: "Injected payment-status read failure" }),
+    });
+  };
+
   try {
     await createGame(host, "Payment status recovery");
     await joinGame(payer, host.url(), "Jordan");
@@ -60,11 +80,7 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     payer.on("request", (request) => {
       if (request.url().includes("/rest/v1/rpc/set_settlement_payment_status_guarded")) writesAfterFailure += 1;
     });
-    await payer.route(paymentStatusRead, (route) => route.fulfill({
-      status: 400,
-      contentType: "application/json",
-      body: JSON.stringify({ message: "Injected payment-status read failure" }),
-    }));
+    await payer.route(paymentStatusRead, paymentReadFailure);
 
     // A refresh failure after a confirmed response must keep the last record,
     // label it stale, and remove mutation controls.
@@ -77,6 +93,7 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
 
     // A reload has no in-memory last read. It must remain unknown, rather than
     // becoming a confidently unpaid $20 debt or a zero-sent ledger.
+    await expect.poll(() => activeHandleReads.size, { timeout: 15_000 }).toBe(0);
     await payer.reload();
     await expect(personal.getByRole("heading")).toHaveText("Payment status unavailable");
     await expect(personal).not.toContainText("You owe $20.00.");
@@ -94,17 +111,29 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     // Recipient-side refresh failures use the same neutral, non-actionable state.
     const recipientPersonal = recipient.locator('section[aria-labelledby="your-settlement-heading"]');
     await expect(recipientPersonal.getByRole("heading")).toHaveText("All payments to you are marked sent.");
-    await recipient.route(paymentStatusRead, (route) => route.fulfill({
-      status: 400,
-      contentType: "application/json",
-      body: JSON.stringify({ message: "Injected recipient payment-status read failure" }),
-    }));
+    await recipient.route(paymentStatusRead, paymentReadFailure);
     await recipient.evaluate(() => window.dispatchEvent(new StorageEvent("storage")));
     await expect(recipientPersonal.getByRole("heading")).toHaveText("Payment status needs refresh");
     await recipient.unroute(paymentStatusRead);
     await recipientPersonal.getByRole("button", { name: "Retry payment status" }).click();
     await expect(recipientPersonal.getByRole("heading")).toHaveText("All payments to you are marked sent.");
+    expect(runtimeErrors, "Independent devices must not leave uncaught browser errors").toEqual([]);
+  } catch (error) {
+    // Preserve the original assertion if browser teardown also fails.
+    console.error("Payment-read recovery failed before teardown:", error);
+    throw error;
   } finally {
-    await Promise.all(contexts.map((context) => context.close()));
+    await Promise.all([payer, recipient].map(page => page.unrouteAll({ behavior: "wait" })));
+    await Promise.all(contexts.map(async (context, index) => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([
+          context.close(),
+          new Promise<never>((_, reject) => {
+            timer = setTimeout(() => reject(new Error(`Payment-read context ${index} did not close within 10 seconds.`)), 10_000);
+          }),
+        ]);
+      } finally { if (timer) clearTimeout(timer); }
+    }));
   }
 }

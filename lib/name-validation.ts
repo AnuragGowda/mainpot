@@ -10,7 +10,9 @@ const US_PHONE_CHARACTERS_PATTERN = /^[0-9+().\-\s]+$/;
 
 /** Lobby names identify seats; spacing, case and Unicode width cannot distinguish two people. */
 export function lobbyNameKey(value: string): string {
-  return value.normalize("NFKC").replace(/\s+/gu, " ").trim().toLowerCase();
+  return value.normalize("NFKC")
+    .replace(/[\u00ad\u034f\u061c\u180e\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufe00-\ufe0f\ufeff]/gu, "")
+    .replace(/\s+/gu, " ").trim().toLowerCase();
 }
 
 export const DUPLICATE_LOBBY_NAME_MESSAGE = "That name is already used at this table. Choose a different name. If the host already added you, ask them before creating another seat.";
@@ -34,6 +36,7 @@ export function validateHumanName(
   if (!trimmed) {
     return optional ? null : (requiredMessage ?? `Enter a ${label.toLowerCase()}.`);
   }
+  if (!lobbyNameKey(trimmed)) return `${label} must include a visible character.`;
   if (DISALLOWED_NAME_CHARACTERS.test(value)) {
     return `${label} cannot contain line breaks or control characters.`;
   }

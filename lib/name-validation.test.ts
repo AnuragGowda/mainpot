@@ -11,6 +11,9 @@ import {
 } from "./name-validation";
 
 describe("human-facing name validation", () => {
+  it("rejects names made only of invisible formatting", () => {
+    expect(validatePlayerName("\u200b\ufe0f")).toBe("Player name must include a visible character.");
+  });
   it("accepts international names and ordinary punctuation", () => {
     expect(validatePlayerName("José O’Neill")).toBeNull();
     expect(validatePlayerName("李 小龍")).toBeNull();

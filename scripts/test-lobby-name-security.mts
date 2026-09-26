@@ -134,6 +134,12 @@ async function run() {
   });
   assert(fullWidthJordan.error, "NFKC full-width names collide with ASCII names");
 
+  const invisibleJordan = await join(collision.client, firstGame.code, "Jor\u200bdan\ufe0f");
+  assert(invisibleJordan.error, "invisible formatting cannot disguise an existing lobby name");
+
+  const invisibleOnly = await join(collision.client, firstGame.code, "\u200b\ufe0f");
+  assert(invisibleOnly.error, "an invisible-only name cannot create a seat");
+
   const accented = await join(unicode.client, firstGame.code, "José");
   const accentedRow = (Array.isArray(accented.data) ? accented.data[0] : accented.data) as { player_id?: string } | null;
   assert(!accented.error && accentedRow?.player_id, "composed Unicode name joins");

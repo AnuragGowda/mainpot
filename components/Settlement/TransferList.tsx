@@ -168,25 +168,27 @@ export default function TransferList({
   const [paymentHandles, setPaymentHandles] = useState<Map<string, PlayerPaymentHandles>>(new Map());
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
 
+  // Snapshot refreshes produce new transfer arrays; use recipient identity
+  // rather than that array reference so confirmed details are not re-fetched
+  // on every realtime or payment-status render.
+  const recipientKey = Array.from(new Set(transfers
+    .filter(transfer => isHost || transfer.fromPlayerId === currentPlayerId)
+    .map(transfer => transfer.toPlayerId)
+    .filter((id): id is string => Boolean(id)))).sort().join(",");
+  const canLoadPaymentHandles = actionsEnabled && activePaymentStatus.canMutate;
   useEffect(() => {
-    if (!actionsEnabled) {
+    if (!canLoadPaymentHandles) {
       setPaymentHandles(new Map());
       return;
     }
     let cancelled = false;
-    const recipientIds = transfers
-      .filter((transfer) => isHost || transfer.fromPlayerId === currentPlayerId)
-      .map((transfer) => transfer.toPlayerId)
-      .filter((id): id is string => Boolean(id));
-    void getPlayerPaymentHandles(recipientIds)
+    void getPlayerPaymentHandles(recipientKey ? recipientKey.split(",") : [])
       .then((handles) => {
         if (!cancelled) setPaymentHandles(handles);
       })
       .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [actionsEnabled, currentPlayerId, isHost, transfers]);
+    return () => { cancelled = true; };
+  }, [canLoadPaymentHandles, recipientKey]);
 
   if (!transfers.length) return <p className="text-sm text-gray-500">No transfers needed — everyone is square.</p>;
 

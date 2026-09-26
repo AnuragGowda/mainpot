@@ -125,7 +125,7 @@ try {
     throw new Error("Disposable Supabase stack did not report its expected local API configuration.");
   }
 
-  if (databaseAssuranceOnly) {
+  if (databaseAssuranceOnly || process.env.MAINPOT_DB_ASSURANCE_BEFORE_BROWSER === "1") {
     console.log("Running database assurance checks against the disposable migration stack…");
     const failures: unknown[] = [];
     const assuranceScripts = [
@@ -149,7 +149,8 @@ try {
       }
     }
     if (failures.length) throw new AggregateError(failures, "Database assurance scripts failed");
-  } else {
+  }
+  if (!databaseAssuranceOnly) {
     console.log("Checking locked payment plan security before browser flows…");
     run(process.execPath, [join(scriptDirectory, "test-payment-plan-security.mts")], {
       env: { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl },

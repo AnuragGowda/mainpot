@@ -68,13 +68,13 @@ export default function HostManagedSeatClaimLink({
   return (
     <section className="mt-4 border-t border-gray-200 pt-4" aria-label={`Seat link for ${player.name}`}>
       <p className="text-sm font-medium text-gray-900">Hand this seat to {player.name}</p>
-      <p className="mt-1 text-xs leading-5 text-gray-500">Creates one private link for this recorded seat. It does not match names or browser sessions.</p>
+      <p className="mt-1 text-xs leading-5 text-gray-500">Send this private link only to this player. It keeps their existing buy-ins and expires after 15 minutes.</p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button variant="secondary" size="sm" loading={busy} onClick={() => void createLink()}>
+        <Button type="button" variant="secondary" size="sm" loading={busy} onClick={() => void createLink()}>
           {link ? "Replace seat link" : "Create seat link"}
         </Button>
-        {link ? <Button variant="secondary" size="sm" disabled={busy} onClick={() => void copyLink()}>Copy seat link</Button> : null}
-        {link ? <Button variant="secondary" size="sm" disabled={busy} onClick={() => void shareLink()}>Share seat link</Button> : null}
+        {link ? <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => void copyLink()}>Copy seat link</Button> : null}
+        {link ? <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => void shareLink()}>Share seat link</Button> : null}
       </div>
       {link ? (
         <div className="mt-3 space-y-2">
@@ -85,7 +85,7 @@ export default function HostManagedSeatClaimLink({
             rows={3}
             value={link}
           />
-          <Button variant="secondary" size="sm" onClick={() => { setLink(null); setExpiresAt(null); setMessage(null); }}>
+          <Button type="button" variant="secondary" size="sm" onClick={() => { setLink(null); setExpiresAt(null); setMessage(null); }}>
             Close seat link
           </Button>
         </div>

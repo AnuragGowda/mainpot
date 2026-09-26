@@ -465,8 +465,8 @@ async function joinGameLocal(
     throw new Error("This game is no longer accepting players.");
   }
 
-  const existing = store.players.find(
-    (p) => p.game_id === game.id && p.session_id === sessionId
+  const existing = resolveCurrentPlayer(
+    store.players.filter(player => player.game_id === game.id), sessionId, userId ?? null,
   );
   if (existing) {
     return { gameId: game.id, playerId: existing.id };
