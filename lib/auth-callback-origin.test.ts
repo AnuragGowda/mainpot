@@ -1,3 +1,4 @@
+vi.mock("@/lib/request-origin", async () => import("./request-origin"));
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ createServerSupabase: vi.fn() }));
@@ -24,6 +25,12 @@ describe("authentication callback origin", () => {
   it("keeps failed callbacks on the browser's host", async () => {
     const response = await GET(request("next=%2Fdashboard"));
     expect(response.headers.get("location")).toBe("http://127.0.0.1:3110/signin?error=missing_code");
+  });
+
+  it("rejects malformed Host headers without issuing a redirect", async () => {
+    const response = await GET(new Request("http://localhost:3110/auth/callback?code=test-code", { headers: { host: "user@evil.example" } }));
+    expect(response.status).toBe(400);
+    expect(response.headers.get("location")).toBeNull();
   });
 
   it("rejects a next URL outside the browser's origin", async () => {

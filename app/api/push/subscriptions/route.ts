@@ -1,3 +1,4 @@
+import { requestIsSameOrigin } from "@/lib/request-origin";
 import { createServerSupabase } from "@/lib/supabase-server";
 import { pushIsConfigured } from "@/lib/push-server";
 import { isTrustedPushEndpoint } from "@/lib/push-endpoint";
@@ -5,11 +6,6 @@ import { isTrustedPushEndpoint } from "@/lib/push-endpoint";
 interface SubscriptionBody {
   endpoint?: unknown;
   keys?: { p256dh?: unknown; auth?: unknown };
-}
-
-function requestIsSameOrigin(request: Request): boolean {
-  const origin = request.headers.get("origin");
-  return !origin || origin === new URL(request.url).origin;
 }
 
 function validKey(value: unknown): value is string {

@@ -1,3 +1,4 @@
+vi.mock("@/lib/request-origin", async () => import("./request-origin"));
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -97,6 +98,20 @@ describe("Product Ops relay", () => {
     delete process.env.PRODUCT_OPS_ACTOR_SALT;
     delete process.env.PRODUCT_OPS_COLLECTOR_KEY;
     delete process.env.VERCEL_ENV;
+  });
+
+
+  it.each([
+    ["http://127.0.0.1:3110", true],
+    ["http://localhost:3110", false],
+    ["http://evil.example", false],
+  ] as const)("checks telemetry origin %s against the actual host", async (origin, accepted) => {
+    const original = request("44444444-4444-4444-8444-444444444444");
+    const response = await POST(new Request("http://localhost:3110/api/product-ops/events", {
+      method: "POST", headers: { "content-type": "application/json", host: "127.0.0.1:3110", origin }, body: await original.text(),
+    }));
+    expect(response.status).toBe(204);
+    expect(mocks.insert).toHaveBeenCalledTimes(accepted ? 1 : 0);
   });
 
   it("appends a pseudonymized, allowlisted event to the durable outbox", async () => {

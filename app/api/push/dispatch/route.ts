@@ -1,3 +1,4 @@
+import { requestIsSameOrigin } from "@/lib/request-origin";
 import { createServerSupabase } from "@/lib/supabase-server";
 import { getPushAdminClient, pushIsConfigured, sendWebPush } from "@/lib/push-server";
 import type { GamePushEvent } from "@/lib/push-client";
@@ -24,11 +25,6 @@ interface PushSubscriptionRow {
 function isUuid(value: unknown): value is string {
   return typeof value === "string"
     && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-}
-
-function requestIsSameOrigin(request: Request): boolean {
-  const origin = request.headers.get("origin");
-  return !origin || origin === new URL(request.url).origin;
 }
 
 export async function POST(request: Request) {

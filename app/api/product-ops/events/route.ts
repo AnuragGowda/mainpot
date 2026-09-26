@@ -1,3 +1,4 @@
+import { requestIsSameOrigin } from "@/lib/request-origin";
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
@@ -99,11 +100,6 @@ function lifecycleIdempotencyKey(event: string, journeyId: string | undefined, a
   ]);
   const scope = journeyId ?? actorId;
   return opaqueId("evt", lifecycleEvents.has(event) ? `${event}:${scope}` : `${event}:${clientKey}`);
-}
-
-function requestIsSameOrigin(request: Request): boolean {
-  const origin = request.headers.get("origin");
-  return !origin || origin === new URL(request.url).origin;
 }
 
 function collectorIsAuthorized(request: Request): boolean {

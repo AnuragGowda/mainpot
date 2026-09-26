@@ -1,3 +1,4 @@
+import { getRequestOrigin } from "@/lib/request-origin";
 import { withTimeout } from "@/lib/request-timeout";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
@@ -10,12 +11,11 @@ import { createServerSupabase, type ServerSupabaseCookie } from "@/lib/supabase-
  * On failure the user is sent to /signin with an error query param.
  */
 export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
-  // Next can expose its internal server hostname in request.url. Redirect to
-  // the host the browser requested so host-only session cookies remain usable.
-  const host = request.headers.get("host");
-  if (host) requestUrl.host = host;
-  const { searchParams, origin } = requestUrl;
+  const { searchParams } = new URL(request.url);
+  // Next can expose an internal hostname in request.url. Keep host-only
+  // session cookies on the origin the browser actually requested.
+  const origin = getRequestOrigin(request);
+  if (!origin) return new Response(null, { status: 400 });
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
   const cookieStore = await cookies();
