@@ -18,6 +18,9 @@ export function createDeviceContext(
     deviceScaleFactor,
     isMobile,
     hasTouch,
+    // Financial request interception must reach the page in WebKit too.
+    // Actual service-worker recovery is verified separately in pwa-flow.ts.
+    serviceWorkers: "block",
     ...explicitOptions,
   });
 }
