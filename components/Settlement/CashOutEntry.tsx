@@ -37,8 +37,9 @@ const SAVE_DEBOUNCE_MS = 400;
 
 /**
  * One player's cash-out input. Local state is seeded from the snapshot and
- * re-synced from props whenever the saved value changes — but never while the
- * user is focused/typing, so realtime updates don't clobber an in-progress edit.
+ * re-synced from a new saved value, but never while a local draft is focused,
+ * saving, or has failed. This keeps a rapid blur from letting a deferred React
+ * effect replace the draft with the stale snapshot it is about to save.
  */
 function CashOutRow({
   player,
@@ -56,32 +57,49 @@ function CashOutRow({
   const [remoteUpdateNotice, setRemoteUpdateNotice] = useState(false);
   const focusedRef = useRef(false);
   const valueAtFocusRef = useRef("");
+  const valueRef = useRef(propValue);
   const debounceRef = useRef<number | null>(null);
   const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const saveRequestRef = useRef(0);
   const pendingSaveCountRef = useRef(0);
+  const failedDraftRef = useRef(false);
+  const lastObservedPropValueRef = useRef(propValue);
   const mountedRef = useRef(true);
   const lastRequestedAmountRef = useRef<number | null>(currentAmount);
 
+  function setLocalValue(nextValue: string) {
+    valueRef.current = nextValue;
+    setValue(nextValue);
+  }
+
   useEffect(() => {
-    if (!focusedRef.current) {
-      setValue(propValue);
-      if (pendingSaveCountRef.current === 0) {
-        lastRequestedAmountRef.current = currentAmount;
-      }
+    const receivedNewSnapshotValue = lastObservedPropValueRef.current !== propValue;
+    lastObservedPropValueRef.current = propValue;
+    if (!receivedNewSnapshotValue) return;
+
+    // React runs effects after paint. A fast fill + blur can flip focusedRef
+    // before the effect scheduled by the local value change runs, so only a
+    // genuine new snapshot may reconcile the field.
+    if (pendingSaveCountRef.current > 0 || failedDraftRef.current) {
       return;
     }
 
     // A focused field that has not been edited locally is safe to reconcile.
     // Keeping it in sync avoids showing a row amount that disagrees with the
     // realtime totals while the user is simply reading the field.
-    if (value === valueAtFocusRef.current && value !== propValue) {
-      setValue(propValue);
-      valueAtFocusRef.current = propValue;
-      setSaveStatus("idle");
-      setRemoteUpdateNotice(true);
+    if (focusedRef.current) {
+      if (valueRef.current === valueAtFocusRef.current && valueRef.current !== propValue) {
+        setLocalValue(propValue);
+        valueAtFocusRef.current = propValue;
+        setSaveStatus("idle");
+        setRemoteUpdateNotice(true);
+      }
+      return;
     }
-  }, [currentAmount, propValue, value]);
+
+    setLocalValue(propValue);
+    lastRequestedAmountRef.current = currentAmount;
+  }, [currentAmount, propValue]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -129,13 +147,19 @@ function CashOutRow({
         }
         if (!mountedRef.current || requestId !== saveRequestRef.current) return;
 
-        if (!saved) lastRequestedAmountRef.current = null;
+        if (!saved) {
+          lastRequestedAmountRef.current = null;
+          failedDraftRef.current = true;
+        } else {
+          failedDraftRef.current = false;
+        }
         setSaveStatus(saved ? "saved" : "error");
       });
   }
 
   function handleChange(raw: string) {
-    setValue(raw);
+    setLocalValue(raw);
+    failedDraftRef.current = false;
     setRemoteUpdateNotice(false);
     if (debounceRef.current !== null) {
       window.clearTimeout(debounceRef.current);
@@ -146,7 +170,7 @@ function CashOutRow({
 
   function handleFocus() {
     focusedRef.current = true;
-    valueAtFocusRef.current = value;
+    valueAtFocusRef.current = valueRef.current;
     setRemoteUpdateNotice(false);
   }
 
@@ -156,10 +180,11 @@ function CashOutRow({
       window.clearTimeout(debounceRef.current);
       debounceRef.current = null;
     }
-    if (value !== valueAtFocusRef.current) {
-      void commit(value);
-    } else {
-      setValue(propValue);
+    const draft = valueRef.current;
+    if (draft !== valueAtFocusRef.current || failedDraftRef.current) {
+      void commit(draft);
+    } else if (pendingSaveCountRef.current === 0) {
+      setLocalValue(propValue);
     }
   }
 

@@ -419,6 +419,50 @@ test("releases a stalled host correction and keeps the amount ready to retry", a
   }
 });
 
+test("keeps a zero cash-out draft through a delayed failure and retries it", async ({ browser }) => {
+  const hostContext = await createDeviceContext(browser);
+  const host = await hostContext.newPage();
+  let releaseSave: (() => void) | undefined;
+  const saveReleased = new Promise<void>((resolve) => {
+    releaseSave = resolve;
+  });
+
+  const stallFirstCashOutSave = async (route: Route) => {
+    if (route.request().method() !== "POST") {
+      await route.continue();
+      return;
+    }
+    await saveReleased;
+    await route.abort();
+  };
+
+  try {
+    await createGame(host, "Realtime test game");
+    await host.getByRole("button", { name: "End game" }).click();
+    await host.getByRole("button", { name: "Start cash-outs" }).click();
+
+    await host.route("**/rest/v1/cash_outs*", stallFirstCashOutSave);
+    const cashOut = host.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
+    await cashOut.fill("0");
+    await cashOut.blur();
+
+    await expect(cashOut).toHaveValue("0");
+    await expect(host.getByText("Saving…", { exact: true })).toBeVisible();
+
+    releaseSave?.();
+    await expect(host.getByText("Could not save", { exact: true })).toBeVisible();
+    await expect(cashOut).toHaveValue("0");
+
+    await host.unroute("**/rest/v1/cash_outs*", stallFirstCashOutSave);
+    await cashOut.focus();
+    await cashOut.blur();
+    await expect(host.getByText("Saved", { exact: true })).toBeVisible({ timeout: 15_000 });
+    await expect(cashOut).toHaveValue("0");
+  } finally {
+    await hostContext.close();
+  }
+});
+
 test("holds a multi-user settlement until cash-outs reconcile", async ({ browser }) => {
   test.slow();
   const mobile = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
