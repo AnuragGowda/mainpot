@@ -7,7 +7,7 @@ import { expect, test, type Route } from "@playwright/test";
 
 // Local guest creation is deliberately rate-limited, so these database-backed
 // scenarios run one at a time while each scenario still uses separate users.
-test.describe.configure({ mode: "serial" });
+test.describe.configure({ mode: "default" });
 
 test("reviews payments before locking and keeps completion in sync", async ({ page }) => {
   test.slow();
