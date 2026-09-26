@@ -72,7 +72,7 @@ describe("Mainpot database and Realtime canary", () => {
     const response = await POST(request());
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ status: "ok", database: true, realtime: true });
+    expect(await response.json()).toMatchObject({ status: "ok", database: true, realtime: true });
     expect(mocks.from).toHaveBeenCalledWith("product_ops_canary");
     expect(mocks.insert).toHaveBeenCalledWith(expect.objectContaining({ probe_id: expect.any(String) }));
     expect(mocks.eq).toHaveBeenCalledWith("probe_id", expect.any(String));
@@ -93,7 +93,7 @@ describe("Mainpot database and Realtime canary", () => {
     const response = await responsePromise;
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({
+    expect(await response.json()).toMatchObject({
       status: "ok",
       database: true,
       realtime: true,

@@ -27,9 +27,9 @@ function authorized(request: Request): boolean {
     && crypto.timingSafeEqual(tokenBuffer, expectedBuffer);
 }
 
-function healthResponse(database: boolean, realtime: boolean, status: number): Response {
+function healthResponse(database: boolean, realtime: boolean, status: number, subscription: boolean, cleanup: boolean): Response {
   return Response.json(
-    { status: database && realtime ? "ok" : "degraded", database, realtime },
+    { status: database && realtime && cleanup ? "ok" : "degraded", database, realtime, subscription, cleanup },
     { status, headers: { "cache-control": "private, no-store" } }
   );
 }
@@ -77,7 +77,8 @@ export async function POST(request: Request) {
   const realtime = createClient(url, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
   const probeId = crypto.randomUUID();
   let acknowledgeChange: (() => void) | undefined;
-  let probeInserted = false;
+  let probeNeedsCleanup = false;
+  let subscribed = false;
   const channel = realtime
     .channel(`mainpot-canary-${probeId}`)
     .on(
@@ -89,23 +90,25 @@ export async function POST(request: Request) {
     );
 
   try {
-    const subscribed = await waitForSubscription(channel);
+    subscribed = await waitForSubscription(channel);
     const change = subscribed
       ? waitForChange((handler) => { acknowledgeChange = handler; })
       : Promise.resolve(false);
+    // A lost INSERT acknowledgment can still leave a committed probe row.
+    // Always attempt scoped cleanup once the write has been dispatched.
+    probeNeedsCleanup = true;
     const { error: insertError } = await database.from("product_ops_canary").insert({ probe_id: probeId });
-    if (insertError) return healthResponse(false, false, 503);
-    probeInserted = true;
+    if (insertError) return healthResponse(false, false, 503, subscribed, false);
 
     const realtimeHealthy = await change;
     const { error: deleteError } = await database.from("product_ops_canary").delete().eq("probe_id", probeId);
-    if (!deleteError) probeInserted = false;
-    if (deleteError) return healthResponse(true, Boolean(realtimeHealthy), 503);
-    return healthResponse(true, Boolean(realtimeHealthy), realtimeHealthy ? 200 : 503);
+    if (!deleteError) probeNeedsCleanup = false;
+    if (deleteError) return healthResponse(true, Boolean(realtimeHealthy), 503, subscribed, false);
+    return healthResponse(true, Boolean(realtimeHealthy), realtimeHealthy ? 200 : 503, subscribed, true);
   } catch {
-    return healthResponse(false, false, 503);
+    return healthResponse(false, false, 503, subscribed, false);
   } finally {
-    if (probeInserted) {
+    if (probeNeedsCleanup) {
       await database.from("product_ops_canary").delete().eq("probe_id", probeId);
     }
     await realtime.removeChannel(channel);
