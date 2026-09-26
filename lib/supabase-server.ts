@@ -34,12 +34,15 @@ export async function createServerSupabase(
         return cookieStore.getAll();
       },
       setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+        // Next reparses response cookies while merging Route Handler writes.
+        // Its parser can discard maxAge: 0, so an explicit past expiry must
+        // survive that merge to remove stale unchunked sessions and verifiers.
         const normalizedCookies = cookiesToSet.map(({ name, value, options }) => {
           const isExpiredAuthToken =
             /^sb-.+-auth-token$/.test(name) &&
             value.includes("refresh_token_not_found");
           return value === "" || isExpiredAuthToken
-            ? { name, value: "", options: { ...options, maxAge: 0 } }
+            ? { name, value: "", options: { ...options, maxAge: 0, expires: new Date(0) } }
             : { name, value, options };
         });
         try {
