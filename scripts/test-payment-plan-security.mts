@@ -286,6 +286,17 @@ async function run() {
   );
 
   const early = await createFixture(host, [{ label: "A", client: guestA }, { label: "B", client: guestB }], "early exit payment");
+  const earlyObserverAccess = await guestC.rpc("get_game_by_code", { input_code: early.code });
+  assert(!earlyObserverAccess.error, "a non-party can hold ordinary early-exit room access");
+  await expectRejected(
+    () => guestC.rpc("request_early_cash_out", {
+      input_game_id: early.gameId,
+      input_player_id: early.players.A.playerId,
+      input_cash_out_amount: 30,
+      input_session_id: early.players.A.sessionId,
+    }),
+    "a non-party cannot request an early exit with a copied player session",
+  );
   const requested = await guestA.rpc("request_early_cash_out", {
     input_game_id: early.gameId,
     input_player_id: early.players.A.playerId,
@@ -293,10 +304,15 @@ async function run() {
     input_session_id: early.players.A.sessionId,
   });
   assert(!requested.error && requested.data?.id, "early exit is requested");
+  await expectRejected(
+    () => guestC.rpc("cancel_early_cash_out", {
+      input_early_cash_out_id: requested.data.id,
+      input_session_id: early.players.A.sessionId,
+    }),
+    "a non-party cannot cancel an early exit with a copied player session",
+  );
   const locked = await host.rpc("approve_early_cash_out", { input_early_cash_out_id: requested.data.id });
   assert(!locked.error && locked.data?.status === "locked", "early exit is locked");
-  const earlyObserverAccess = await guestC.rpc("get_game_by_code", { input_code: early.code });
-  assert(!earlyObserverAccess.error, "a non-party can hold ordinary early-exit room access");
   await expectRejected(
     () => guestC.rpc("set_early_cash_out_payment_status", {
       input_early_cash_out_id: requested.data.id,
