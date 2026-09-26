@@ -48,6 +48,7 @@ export default function CreateGamePage() {
   const [preferredRoster, setPreferredRoster] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  const [creationError, setCreationError] = useState<string | null>(null);
   const [resumeGames, setResumeGames] = useState<ResumableGame[]>([]);
 
   useEffect(() => {
@@ -118,6 +119,7 @@ export default function CreateGamePage() {
     }
 
     creationInFlight.current = true;
+    setCreationError(null);
     setLoading(true);
     try {
       setPlayerName(trimmedName);
@@ -158,10 +160,13 @@ export default function CreateGamePage() {
       const failureMessage =
         err instanceof Error
           ? err.message
-          : "Something went wrong. Please try again.";
+          : err && typeof err === "object" && "message" in err && typeof err.message === "string"
+            ? err.message
+            : "Something went wrong. Please try again.";
       const message = failureMessage === "Finish your active guest game before starting another."
         ? "Guest accounts can keep two unfinished tables. Resume or finish one before starting another."
         : failureMessage;
+      setCreationError(message);
       toast(message, "error");
       setLoading(false);
       creationInFlight.current = false;
@@ -187,6 +192,7 @@ export default function CreateGamePage() {
         <p className="text-sm leading-6 text-gray-600">
           Guests can keep two unfinished tables open. Resume or finish one before starting another, or sign in for more history.
         </p>
+        {creationError ? <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{creationError}</p> : null}
         <form aria-label="Game details" onSubmit={handleSubmit} noValidate className="space-y-5">
             {templates.length ? (
               <label htmlFor="create-template" className="block text-sm font-medium text-gray-700">
