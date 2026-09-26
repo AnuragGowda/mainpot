@@ -95,16 +95,6 @@ begin
     public.is_game_host(input_game_id)
     or public.owns_player(input_from_player_id)
     or public.owns_player(input_to_player_id)
-    or exists (
-      select 1 from public.games
-      where id = input_game_id and host_session_id = input_session_id
-    )
-    or exists (
-      select 1 from public.players
-      where id in (input_from_player_id, input_to_player_id)
-        and game_id = input_game_id
-        and session_id = input_session_id
-    )
   into caller_can_manage;
   if not caller_can_manage then
     raise exception 'Only the sender, recipient, or host can update this payment';
@@ -350,6 +340,69 @@ grant execute on function public.set_settlement_payment_status_guarded(
   uuid, uuid, uuid, numeric, text, boolean, text
 ) to authenticated;
 
+
+-- Browser session IDs identify a local client but are readable room data, so they
+-- must never act as bearer credentials for payment acknowledgements. Keep the
+-- public signature for callers, while ownership comes only from auth.uid().
+create or replace function mainpot_private.set_early_cash_out_payment_status(
+  input_early_cash_out_id uuid,
+  input_settled boolean,
+  input_session_id text
+) returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  early_exit public.early_cash_outs%rowtype;
+  departing public.players%rowtype;
+  bank public.players%rowtype;
+  from_id uuid;
+  to_id uuid;
+  payment_amount numeric(10,2);
+begin
+  if auth.uid() is null then raise exception 'Authentication required'; end if;
+  if input_session_id is null or char_length(input_session_id) not between 8 and 128 then raise exception 'Invalid browser session'; end if;
+
+  select * into early_exit from public.early_cash_outs where id = input_early_cash_out_id;
+  if not found or early_exit.status <> 'locked' then raise exception 'Early cash-out is not locked'; end if;
+  if abs(coalesce(early_exit.net_amount, 0)) <= 0.005 then raise exception 'No payment is needed'; end if;
+  if not public.has_game_access(early_exit.game_id) then raise exception 'You no longer have access to this game'; end if;
+
+  select * into departing from public.players where id = early_exit.player_id;
+  select * into bank from public.players where id = early_exit.bank_player_id;
+  if not public.is_game_host(early_exit.game_id)
+    and departing.user_id is distinct from auth.uid()
+    and bank.user_id is distinct from auth.uid() then
+    raise exception 'Only the payer, recipient, or host can update this payment';
+  end if;
+
+  if early_exit.net_amount > 0 then
+    from_id := bank.id;
+    to_id := departing.id;
+  else
+    from_id := departing.id;
+    to_id := bank.id;
+  end if;
+  payment_amount := round(abs(early_exit.net_amount), 2);
+
+  insert into public.settlement_payments (
+    game_id, from_player_id, to_player_id, amount, mode,
+    settled, settled_at, updated_at
+  ) values (
+    early_exit.game_id, from_id, to_id, payment_amount, 'early_exit',
+    input_settled, case when input_settled then now() else null end, now()
+  )
+  on conflict (game_id, from_player_id, to_player_id, amount, mode)
+  do update set
+    settled = excluded.settled,
+    settled_at = excluded.settled_at,
+    updated_at = excluded.updated_at;
+end;
+$$;
+
+revoke all on function mainpot_private.set_early_cash_out_payment_status(uuid, boolean, text) from public;
+grant execute on function mainpot_private.set_early_cash_out_payment_status(uuid, boolean, text) to authenticated;
 
 -- Final payment writes go through the guarded RPC. Both that function and the
 -- independent locked early-exit function are SECURITY DEFINER functions, so

@@ -154,6 +154,12 @@ async function run() {
   ]);
   const validMin = await setFinalPayment(guestA, min, min.players.A.playerId, min.hostPlayerId, 20, "min", min.players.A.sessionId);
   assert(!validMin.error, "an exact minimum-plan payment is accepted");
+  const minObserverAccess = await guestC.rpc("get_game_by_code", { input_code: min.code });
+  assert(!minObserverAccess.error, "a non-party can hold ordinary room access");
+  await expectRejected(
+    () => setFinalPayment(guestC, min, min.players.A.playerId, min.hostPlayerId, 20, "min", min.hostSessionId),
+    "a non-party cannot use a copied host session to change a final payment",
+  );
   await expectRejected(
     () => guestA.from("settlement_payments").insert({
       game_id: min.gameId,
@@ -276,6 +282,16 @@ async function run() {
   assert(!requested.error && requested.data?.id, "early exit is requested");
   const locked = await host.rpc("approve_early_cash_out", { input_early_cash_out_id: requested.data.id });
   assert(!locked.error && locked.data?.status === "locked", "early exit is locked");
+  const earlyObserverAccess = await guestC.rpc("get_game_by_code", { input_code: early.code });
+  assert(!earlyObserverAccess.error, "a non-party can hold ordinary early-exit room access");
+  await expectRejected(
+    () => guestC.rpc("set_early_cash_out_payment_status", {
+      input_early_cash_out_id: requested.data.id,
+      input_settled: true,
+      input_session_id: early.hostSessionId,
+    }),
+    "a non-party cannot use a copied host session to change an early payment",
+  );
   const earlyPayment = await guestA.rpc("set_early_cash_out_payment_status", {
     input_early_cash_out_id: requested.data.id,
     input_settled: true,
