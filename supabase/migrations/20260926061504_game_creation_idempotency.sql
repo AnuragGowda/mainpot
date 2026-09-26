@@ -74,7 +74,7 @@ begin
     if host_player_id is null then
       raise exception 'The original game could not be recovered.';
     end if;
-    return query select game.code, game.id, host_player_id
+    return query select game.code::text, game.id, host_player_id
     from public.games as game
     where game.id = request.game_id and game.host_user_id = auth.uid();
     if found then return; end if;
