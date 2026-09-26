@@ -487,7 +487,9 @@ test("keeps a zero cash-out draft through a delayed failure and retries it", asy
     await cashOut.blur();
     await expect(cashOut).toHaveValue("0");
     releaseSnapshotRead?.();
-    await host.unroute("**/rest/v1/cash_outs*", holdSnapshotAfterSuccessfulSave);
+    // Let held handlers finish before unregistering them; otherwise unroute
+    // can handle a released request before its own continuation resumes.
+    await host.unrouteAll({ behavior: "wait" });
   } finally {
     await hostContext.close();
   }
