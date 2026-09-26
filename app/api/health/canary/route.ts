@@ -36,15 +36,34 @@ function healthResponse(database: boolean, realtime: boolean, status: number, su
 
 function waitForSubscription(channel: ReturnType<ReturnType<typeof createClient>["channel"]>): Promise<boolean> {
   return new Promise((resolve) => {
-    const timeout = setTimeout(() => resolve(false), CANARY_TIMEOUT_MS);
+    let joined = false;
+    let postgresReady = false;
+    let settled = false;
+    const finish = (ready: boolean) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      resolve(ready);
+    };
+    const timeout = setTimeout(() => finish(false), CANARY_TIMEOUT_MS);
+    // SUBSCRIBED acknowledges the channel join. The server separately confirms
+    // that this channel's PostgreSQL subscription is ready to receive changes.
+    channel.on("system", {}, (payload) => {
+      if (payload.extension !== "postgres_changes") return;
+      if (payload.status === "ok") {
+        postgresReady = true;
+        if (joined) finish(true);
+      } else if (payload.status === "error" || payload.status === "timeout") {
+        finish(false);
+      }
+    });
     channel.subscribe((status) => {
       if (status === "SUBSCRIBED") {
-        clearTimeout(timeout);
-        resolve(true);
+        joined = true;
+        if (postgresReady) finish(true);
       }
       if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
-        clearTimeout(timeout);
-        resolve(false);
+        finish(false);
       }
     });
   });
@@ -91,9 +110,8 @@ export async function POST(request: Request) {
 
   try {
     subscribed = await waitForSubscription(channel);
-    const change = subscribed
-      ? waitForChange((handler) => { acknowledgeChange = handler; })
-      : Promise.resolve(false);
+    if (!subscribed) return healthResponse(false, false, 503, false, true);
+    const change = waitForChange((handler) => { acknowledgeChange = handler; });
     // A lost INSERT acknowledgment can still leave a committed probe row.
     // Always attempt scoped cleanup once the write has been dispatched.
     probeNeedsCleanup = true;

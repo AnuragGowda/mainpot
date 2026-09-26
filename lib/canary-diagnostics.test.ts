@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-const state = vi.hoisted(() => ({ subscribed: true, deliver: true, deleteError: false, insertError: false, inserted: "", deleted: [] as string[], change: undefined as undefined | ((payload: { new: { probe_id: string } }) => void) }));
+const state = vi.hoisted(() => ({ subscribed: true, deliver: true, deleteError: false, insertError: false, inserted: "", deleted: [] as string[], system: undefined as undefined | ((payload: { extension: string; status: string }) => void), change: undefined as undefined | ((payload: { new: { probe_id: string } }) => void) }));
 vi.mock("@supabase/supabase-js", () => ({ createClient: () => ({
   from: () => ({
     insert: async ({ probe_id }: { probe_id: string }) => {
@@ -14,8 +14,12 @@ vi.mock("@supabase/supabase-js", () => ({ createClient: () => ({
   }),
   channel: () => {
     const channel = {
-      on: (_kind: string, _filter: unknown, handler: typeof state.change) => { state.change = handler; return channel; },
-      subscribe: (handler: (status: string) => void) => { if (state.subscribed) handler("SUBSCRIBED"); return channel; },
+      on: (kind: string, _filter: unknown, handler: typeof state.change | typeof state.system) => {
+        if (kind === "postgres_changes") state.change = handler as typeof state.change;
+        if (kind === "system") state.system = handler as typeof state.system;
+        return channel;
+      },
+      subscribe: (handler: (status: string) => void) => { if (state.subscribed) { handler("SUBSCRIBED"); state.system?.({ extension: "postgres_changes", status: "ok" }); } return channel; },
     };
     return channel;
   },
@@ -29,7 +33,7 @@ describe("production dependency probe diagnostics", () => {
     vi.stubEnv("MAINPOT_CANARY_KEY", "test-canary-key-".padEnd(40, "x"));
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://supabase.test");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "test-only-key");
-    Object.assign(state, { subscribed: true, deliver: true, deleteError: false, insertError: false, inserted: "", deleted: [], change: undefined });
+    Object.assign(state, { subscribed: true, deliver: true, deleteError: false, insertError: false, inserted: "", deleted: [], change: undefined, system: undefined });
   });
   afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); });
   it("returns healthy only after matching change delivery and scoped cleanup", async () => {
@@ -42,8 +46,9 @@ describe("production dependency probe diagnostics", () => {
     state.subscribed = false; state.deliver = false;
     const response = POST(request());
     await vi.advanceTimersByTimeAsync(3001);
-    expect(await (await response).json()).toEqual({ status: "degraded", database: true, realtime: false, subscription: false, cleanup: true });
-    expect(state.deleted).toEqual([state.inserted]);
+    expect(await (await response).json()).toEqual({ status: "degraded", database: false, realtime: false, subscription: false, cleanup: true });
+    expect(state.inserted).toBe("");
+    expect(state.deleted).toEqual([]);
   });
   it("reports delivery timeout while retaining successful subscription and cleanup", async () => {
     state.deliver = false;

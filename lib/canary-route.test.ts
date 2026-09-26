@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   insert: vi.fn(),
   delete: vi.fn(),
   eq: vi.fn(),
+  system: undefined as undefined | ((payload: { extension: string; status: string }) => void),
   change: undefined as undefined | ((payload: { new: { probe_id: string } }) => void),
 }));
 
@@ -31,13 +32,16 @@ describe("Mainpot database and Realtime canary", () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://mainpot.supabase.co";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "server-only-key";
     process.env.MAINPOT_CANARY_KEY = canaryKey;
-    mocks.channel.mockReturnValue({ on: mocks.on, subscribe: mocks.subscribe });
-    mocks.on.mockImplementation((_event, _filter, callback) => {
-      mocks.change = callback as (payload: { new: { probe_id: string } }) => void;
-      return { subscribe: mocks.subscribe };
+    const channel = { on: mocks.on, subscribe: mocks.subscribe };
+    mocks.channel.mockReturnValue(channel);
+    mocks.on.mockImplementation((event, _filter, callback) => {
+      if (event === "postgres_changes") mocks.change = callback;
+      if (event === "system") mocks.system = callback;
+      return channel;
     });
     mocks.subscribe.mockImplementation((callback) => {
       callback("SUBSCRIBED");
+      mocks.system?.({ extension: "postgres_changes", status: "ok" });
       return {};
     });
     mocks.from.mockReturnValue({ insert: mocks.insert, delete: mocks.delete });
@@ -56,6 +60,7 @@ describe("Mainpot database and Realtime canary", () => {
     vi.useRealTimers();
     vi.clearAllMocks();
     mocks.change = undefined;
+    mocks.system = undefined;
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     delete process.env.MAINPOT_CANARY_KEY;
@@ -99,4 +104,103 @@ describe("Mainpot database and Realtime canary", () => {
       realtime: true,
     });
   });
+
+  it("does not insert when the SDK joins without PostgreSQL readiness", async () => {
+    vi.useFakeTimers();
+    mocks.subscribe.mockImplementationOnce((callback) => { callback("SUBSCRIBED"); });
+    const pending = POST(request());
+    await vi.advanceTimersByTimeAsync(2_999);
+    expect(mocks.insert).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    const response = await pending;
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ subscription: false, database: false, realtime: false, cleanup: true });
+    expect(mocks.insert).not.toHaveBeenCalled();
+    expect(mocks.delete).not.toHaveBeenCalled();
+    expect(mocks.removeChannel).toHaveBeenCalled();
+  });
+
+  it("accepts PostgreSQL readiness before the SDK join acknowledgment", async () => {
+    mocks.subscribe.mockImplementationOnce((callback) => {
+      expect(mocks.system).toBeTypeOf("function");
+      mocks.system?.({ extension: "postgres_changes", status: "ok" });
+      expect(mocks.insert).not.toHaveBeenCalled();
+      callback("SUBSCRIBED");
+    });
+    expect((await POST(request())).status).toBe(200);
+  });
+
+  it("fails PostgreSQL subscription errors without inserting, even if a later join succeeds", async () => {
+    mocks.subscribe.mockImplementationOnce((callback) => {
+      mocks.system?.({ extension: "postgres_changes", status: "error" });
+      callback("SUBSCRIBED");
+      mocks.system?.({ extension: "postgres_changes", status: "ok" });
+    });
+    const response = await POST(request());
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ subscription: false, cleanup: true });
+    expect(mocks.insert).not.toHaveBeenCalled();
+    expect(mocks.removeChannel).toHaveBeenCalled();
+  });
+
+  it("does not treat broadcast replication readiness as PostgreSQL readiness", async () => {
+    vi.useFakeTimers();
+    mocks.subscribe.mockImplementationOnce((callback) => {
+      callback("SUBSCRIBED");
+      mocks.system?.({ extension: "system", status: "ok" });
+    });
+    const pending = POST(request());
+    await vi.advanceTimersByTimeAsync(3_000);
+    expect((await pending).status).toBe(503);
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("uses a single three-second budget for both subscription acknowledgments", async () => {
+    vi.useFakeTimers();
+    mocks.subscribe.mockImplementationOnce((callback) => {
+      setTimeout(() => callback("SUBSCRIBED"), 2_500);
+      setTimeout(() => mocks.system?.({ extension: "postgres_changes", status: "ok" }), 3_001);
+    });
+    const pending = POST(request());
+    await vi.advanceTimersByTimeAsync(3_000);
+    const response = await pending;
+    expect(response.status).toBe(503);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("requires the SDK acknowledgment even when PostgreSQL is ready", async () => {
+    vi.useFakeTimers();
+    mocks.subscribe.mockImplementationOnce(() => {
+      mocks.system?.({ extension: "postgres_changes", status: "ok" });
+    });
+    const pending = POST(request());
+    await vi.advanceTimersByTimeAsync(3_000);
+    expect((await pending).status).toBe(503);
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+
+  it("keeps HTTP insert latency within the existing delivery deadline", async () => {
+    vi.useFakeTimers();
+    mocks.insert.mockImplementationOnce(async (row) => {
+      await new Promise((resolve) => setTimeout(resolve, 2_500));
+      setTimeout(() => mocks.change?.({ new: { probe_id: row.probe_id } }), 501);
+      return { error: null };
+    });
+    const pending = POST(request());
+    await vi.advanceTimersByTimeAsync(3_000);
+    const response = await pending;
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ database: true, subscription: true, realtime: false, cleanup: true });
+    expect(mocks.eq).toHaveBeenCalledWith("probe_id", expect.any(String));
+  });
+
+  it("cleans up the exact probe after a lost insert acknowledgment", async () => {
+    mocks.insert.mockRejectedValueOnce(new Error("Connection lost after dispatch"));
+    const response = await POST(request());
+    expect(response.status).toBe(503);
+    expect(mocks.eq).toHaveBeenCalledWith("probe_id", expect.any(String));
+    expect(mocks.removeChannel).toHaveBeenCalled();
+  });
+
 });
