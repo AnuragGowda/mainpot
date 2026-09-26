@@ -126,6 +126,7 @@ rollback;
     output.includes(playerId) && output.includes("legacy-self-delete-cascades-ledger"),
     "the replaced self-or-host policy lets a guest cascade their verified ledger",
   );
+  console.log("✓ legacy guest self-delete cascaded the verified ledger in a probe that was rolled back");
 }
 
 async function run() {

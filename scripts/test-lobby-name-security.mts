@@ -188,15 +188,17 @@ async function run() {
   const directA = await account("direct-a");
   const directB = await account("direct-b");
   const directGame = firstGame;
+  // Authenticated inserts are denied entirely. Trusted maintenance still
+  // exercises the trigger so constraints protect every write path.
   const directRows = await Promise.all([
-    directA.client.from("players").insert({
+    admin.from("players").insert({
       game_id: directGame.game_id, session_id: randomUUID(), name: "Concurrent Direct", user_id: directA.id, is_host: false,
     }).select("id"),
-    directB.client.from("players").insert({
+    admin.from("players").insert({
       game_id: directGame.game_id, session_id: randomUUID(), name: " concurrent   direct ", user_id: directB.id, is_host: false,
     }).select("id"),
   ]);
-  assert(directRows.filter((result) => !result.error).length === 1, "concurrent direct inserts admit exactly one normalized name");
+  assert(directRows.filter((result) => !result.error).length === 1, "concurrent trusted direct inserts admit exactly one normalized name");
 
   const mixedGuest = await account("mixed-guest");
   const mixedGame = firstGame;
