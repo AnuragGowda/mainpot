@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { UserPlus } from "lucide-react";
+import { RotateCcw, UserPlus } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { addBuyIn, addHostPlayer, requestEarlyCashOut } from "@/lib/data";
@@ -12,6 +12,7 @@ import { playerVerifiedInvested } from "@/lib/game";
 import { PLAYER_NAME_MAX_LENGTH } from "@/lib/name-validation";
 import { randomUUID } from "@/lib/session";
 import { calculateEarlyCashOutNet } from "@/lib/settlement";
+import { restorePlayerToTable } from "@/lib/seat-recovery";
 import type { GameSnapshot, Player } from "@/lib/types";
 
 function numericAmount(value: string) {
@@ -108,7 +109,7 @@ function AddPlayerForm({ snapshot, onSaved, onClose }: { snapshot: GameSnapshot;
 
 export function HostPlayerActions({ snapshot, player, onSaved }: { snapshot: GameSnapshot; player: Player; onSaved: () => Promise<void> }) {
   const [open, setOpen] = useState(false);
-  if (player.left_at) return null;
+  if (player.left_at) return <ReturnToTableButton snapshot={snapshot} player={player} onSaved={onSaved} />;
   return <>
     <button type="button" aria-label={`Manage ${player.name}`} aria-haspopup="dialog" aria-expanded={open}
       onClick={() => setOpen(true)} className="inline-flex min-h-11 shrink-0 items-center rounded-lg px-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
@@ -116,6 +117,46 @@ export function HostPlayerActions({ snapshot, player, onSaved }: { snapshot: Gam
     </button>
     {open ? <ManagePlayerForm snapshot={snapshot} player={player} onSaved={onSaved} onClose={() => setOpen(false)} /> : null}
   </>;
+}
+
+export function ReturnToTableButton({ snapshot, player, onSaved }: { snapshot: GameSnapshot; player: Player; onSaved: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const inFlight = useRef(false);
+  const hasUnresolvedEarlyExit = snapshot.earlyCashOuts.some(
+    (item) => item.player_id === player.id && (item.status === "requested" || item.status === "locked"),
+  );
+
+  if (
+    !player.left_at
+    || player.is_host
+    || snapshot.game.status !== "active"
+    || hasUnresolvedEarlyExit
+  ) return null;
+
+  async function restore() {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      await restorePlayerToTable(snapshot.game.id, player.id);
+      await onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not return this player to the table.");
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
+    }
+  }
+
+  return <div className="flex shrink-0 flex-col items-end gap-1">
+    <Button type="button" variant="secondary" size="sm" loading={busy} onClick={restore}
+      aria-label={`Return ${player.name} to table`} className="whitespace-nowrap">
+      <RotateCcw aria-hidden="true" className="mr-1.5 h-4 w-4" />Return to table
+    </Button>
+    {error ? <p role="alert" className="max-w-44 text-right text-xs leading-4 text-red-700">{error}</p> : null}
+  </div>;
 }
 
 function ManagePlayerForm({ snapshot, player, onSaved, onClose }: { snapshot: GameSnapshot; player: Player; onSaved: () => Promise<void>; onClose: () => void }) {
