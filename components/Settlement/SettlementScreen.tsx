@@ -28,6 +28,7 @@ import {
   rollForwardEarlyCashOuts,
 } from "@/lib/settlement";
 import type { DiscrepancyAllocationMethod } from "@/lib/settlement";
+import type { SettlementPaymentTransfer } from "@/lib/settlement";
 import type { GameSnapshot, GameStatus } from "@/lib/types";
 import CashOutEntry from "./CashOutEntry";
 import DiscrepancyImpact from "./DiscrepancyImpact";
@@ -248,11 +249,6 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     const discrepancyAdjustment = before && after ? after.net - before.net : 0;
     return { ...player, net: round2(player.net + discrepancyAdjustment) };
   });
-  const currentPlayerEarlyCashOut = currentPlayerId
-    ? snapshot.earlyCashOuts.find(
-        (item) => item.player_id === currentPlayerId && item.status === "locked"
-      ) ?? null
-    : null;
   const currentPlayerNetBeforeDiscrepancy = nets.find(
     (player) => player.playerId === currentPlayerId
   )?.net;
@@ -298,6 +294,14 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const recapTransfers = earlyCashOutPayments
     .map(({ transfer }) => transfer)
     .concat(activeTabTransfers);
+  const personalPayments: SettlementPaymentTransfer[] = [
+    ...earlyCashOutPayments.map(({ earlyCashOut, transfer }) => ({
+      mode: "early_exit" as const,
+      transfer,
+      earlyCashOut,
+    })),
+    ...activeTabTransfers.map((transfer) => ({ mode: displayedTab, transfer })),
+  ];
   const settledPlanPaymentCount = activeTabTransfers.filter((transfer) =>
     settledMinPaymentKeys.has(settlementPaymentKey(displayedTab, transfer))
   ).length;
@@ -344,6 +348,15 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
       if (channel && supabase) void supabase.removeChannel(channel);
     };
   }, [snapshot.game.id, snapshot.game.status]);
+
+  useEffect(() => {
+    if (snapshot.game.status !== "ended" || window.location.hash !== "#payment-ledger") return;
+    const ledger = document.getElementById("payment-ledger") as HTMLDetailsElement | null;
+    if (ledger) {
+      ledger.open = true;
+      setPaymentLedgerOpen(true);
+    }
+  }, [snapshot.game.status]);
 
   async function handleSaveCashOut(playerId: string, amount: number): Promise<boolean> {
     try {
@@ -618,8 +631,8 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
           {isHost && snapshot.game.status === "settling" ? (
             <section aria-labelledby="proposed-payments-heading" className="space-y-3">
               <div>
-                <h2 id="proposed-payments-heading" className="text-lg font-semibold text-gray-950">Review the payments</h2>
-                <p className="mt-1 text-sm leading-6 text-gray-600">Check who pays whom before locking the settlement. No money moves in Mainpot.</p>
+                <h2 id="proposed-payments-heading" className="text-lg font-semibold text-gray-950">Review the net settlement</h2>
+                <p className="mt-1 text-sm leading-6 text-gray-600">Check who owes whom before locking. Mainpot records payment instructions; it does not hold or move money.</p>
               </div>
               <fieldset className="rounded-xl border border-gray-200 bg-white p-4">
                 <legend className="px-1 text-sm font-semibold text-gray-900">Payment method</legend>
@@ -630,12 +643,12 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   </label>
                   <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 p-3 has-[:checked]:border-gray-950 has-[:checked]:bg-gray-50">
                     <input type="radio" name="settlement-method" checked={tab === "bank"} onChange={() => setTab("bank")} className="mt-0.5 h-4 w-4 accent-gray-950" />
-                    <span><span className="block text-sm font-semibold text-gray-900">Table bank</span><span className="mt-1 block text-xs leading-5 text-gray-600">One active player pays and collects every final payment.</span></span>
+                    <span><span className="block text-sm font-semibold text-gray-900">Route net settlement through a player</span><span className="mt-1 block text-xs leading-5 text-gray-600">One active player routes end-of-night net debts. It supports deferred settlement, not a cashier-held pot or gross payouts.</span></span>
                   </label>
                 </div>
                 {tab === "bank" ? (
                   <div className="mt-4 max-w-sm">
-                    <label htmlFor="final-bank-player-select" className="mb-1 block text-sm font-medium text-gray-700">Who is the bank?</label>
+                    <label htmlFor="final-bank-player-select" className="mb-1 block text-sm font-medium text-gray-700">Who routes the net settlement?</label>
                     <Select value={bankPlayerId} onValueChange={setBankPlayerId}>
                       <SelectTrigger id="final-bank-player-select"><SelectValue placeholder="Choose a player" /></SelectTrigger>
                       <SelectContent>
@@ -644,7 +657,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="mt-2 text-xs leading-5 text-gray-500">The host can bank even when they only observe the game.</p>
+                    <p className="mt-2 text-xs leading-5 text-gray-500">Use this only when players settle net at the end. The host can route payments even when they only observe.</p>
                   </div>
                 ) : null}
               </fieldset>
@@ -663,7 +676,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               <div>
                 <h2 id="finalization-heading" className="text-lg font-semibold text-gray-950">Ready to settle?</h2>
                 <p role="status" className="mt-1 text-sm leading-6 text-gray-700">
-                  Locking fixes the cash-outs and opens payment tracking.
+                  Locking fixes the cash-outs and opens payment tracking. It records net debts only; settle actual funds separately.
                 </p>
                 <dl className="mt-4 grid grid-cols-3 gap-4 text-sm">
                   <div><dt className="text-xs text-gray-500">Players</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{players.length}</dd></div>
@@ -700,11 +713,10 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
             </section>
           ) : null}
 
-          {currentPlayerId && !currentPlayerEarlyCashOut && (!isHost || snapshot.game.status === "ended") ? (
+          {currentPlayerId && (!isHost || snapshot.game.status === "ended") ? (
             <PlayerSettlementSummary
-              transfers={activeTabTransfers}
+              payments={personalPayments}
               gameId={snapshot.game.id}
-              mode={displayedTab}
               currentPlayerId={currentPlayerId}
               beforeDiscrepancyNet={currentPlayerNetBeforeDiscrepancy}
               finalNet={currentPlayerFinalNet}
@@ -713,25 +725,8 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
           ) : null}
 
           {snapshot.game.status === "ended" ? (
-            <SettlementSummary
-              snapshot={snapshot}
-              game={snapshot.game}
-              transfers={recapTransfers}
-              nets={recapNets}
-              mode={displayedTab}
-              bankName={bankPlayer?.name}
-              totalBoughtIn={totalBoughtIn}
-              isHost={isHost}
-              finalized
-              featuredPlayerId={currentPlayerId ?? undefined}
-              discrepancyAllocation={allocation}
-              discrepancyAmount={balanced ? 0 : Math.abs(difference)}
-              beforeDiscrepancyNets={rawNets}
-            />
-          ) : null}
-
-          {snapshot.game.status === "ended" ? (
             <details
+              id="payment-ledger"
               data-testid="payment-ledger"
               onToggle={(event) => setPaymentLedgerOpen(event.currentTarget.open)}
               className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(16,24,16,0.04)]"
@@ -778,6 +773,24 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 </div>
               </div>
             </details>
+          ) : null}
+
+          {snapshot.game.status === "ended" ? (
+            <SettlementSummary
+              snapshot={snapshot}
+              game={snapshot.game}
+              transfers={recapTransfers}
+              nets={recapNets}
+              mode={displayedTab}
+              bankName={bankPlayer?.name}
+              totalBoughtIn={totalBoughtIn}
+              isHost={isHost}
+              finalized
+              featuredPlayerId={currentPlayerId ?? undefined}
+              discrepancyAllocation={allocation}
+              discrepancyAmount={balanced ? 0 : Math.abs(difference)}
+              beforeDiscrepancyNets={rawNets}
+            />
           ) : null}
 
           {isHost ? <details
@@ -908,7 +921,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   htmlFor="bank-player-select"
                   className="mb-1 block text-sm font-medium text-gray-700"
                 >
-                  Who is the bank?
+                  Who routes the net settlement?
                 </label>
                 <Select
                   value={selectedBankPlayerId}
@@ -931,7 +944,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   id="transfers-bank-heading"
                   className="mb-2 text-sm font-medium uppercase tracking-widest text-gray-500"
                 >
-                  Bank settlements
+                  Net payments through this player
                 </h2>
                 <TransferList
                   transfers={bankTransfers}

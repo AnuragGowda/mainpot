@@ -8,8 +8,10 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { addBuyIn, addHostPlayer, requestEarlyCashOut } from "@/lib/data";
 import { formatCurrency, round2 } from "@/lib/format";
+import { playerVerifiedInvested } from "@/lib/game";
 import { PLAYER_NAME_MAX_LENGTH } from "@/lib/name-validation";
 import { randomUUID } from "@/lib/session";
+import { calculateEarlyCashOutNet } from "@/lib/settlement";
 import type { GameSnapshot, Player } from "@/lib/types";
 
 function numericAmount(value: string) {
@@ -100,7 +102,7 @@ function AddPlayerForm({ snapshot, onSaved, onClose }: { snapshot: GameSnapshot;
     busy={busy} error={error} submitLabel="Add player" onSubmit={submit} onClose={onClose}>
     <Input label="Player name" value={name} onChange={(event) => setName(event.target.value)} maxLength={PLAYER_NAME_MAX_LENGTH} autoComplete="off" disabled={busy} />
     <Input label="Opening buy-in" prefix="$" inputMode="decimal" value={amount} onChange={(event) => setAmount(numericAmount(event.target.value))} disabled={busy} />
-    <p className="text-xs leading-5 text-gray-500">Recorded as verified. Enter 0 if they haven’t bought in yet.</p>
+    <p className="text-xs leading-5 text-gray-500">Recorded as host-confirmed. Enter 0 if they haven’t bought in yet.</p>
   </PlayerSheet>;
 }
 
@@ -126,6 +128,15 @@ function ManagePlayerForm({ snapshot, player, onSaved, onClose }: { snapshot: Ga
   const pendingCashOut = snapshot.earlyCashOuts.some((item) => item.player_id === player.id && item.status === "requested");
   const locked = snapshot.earlyCashOuts.some((item) => item.player_id === player.id && item.status === "locked");
   const hasBuyIn = snapshot.buyIns.some((item) => item.player_id === player.id);
+  const previewFinalStack = Number(amount);
+  const hasCashOutPreview = mode === "cash-out"
+    && amount.trim() !== ""
+    && Number.isFinite(previewFinalStack)
+    && previewFinalStack >= 0;
+  const verifiedInvested = playerVerifiedInvested(snapshot, player.id);
+  const previewNet = hasCashOutPreview
+    ? calculateEarlyCashOutNet(snapshot.buyIns, player.id, round2(previewFinalStack))
+    : null;
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (inFlight.current) return;
@@ -151,7 +162,7 @@ function ManagePlayerForm({ snapshot, player, onSaved, onClose }: { snapshot: Ga
     } catch (err) { setError(err instanceof Error ? err.message : "Could not save this entry. Try again."); }
     finally { inFlight.current = false; setBusy(false); }
   }
-  return <PlayerSheet title={`Manage ${player.name}`} description={mode === "buy-in" ? "Record their buy-in on their behalf. It’s verified immediately." : "Enter their final stack, then review and confirm the early cash-out at the table."}
+  return <PlayerSheet title={`Manage ${player.name}`} description={mode === "buy-in" ? "Record their buy-in on their behalf. It’s host-confirmed immediately." : "Enter their final stack, then review and confirm the early cash-out at the table."}
     busy={busy} error={error} submitLabel={mode === "buy-in" ? "Record buy-in" : "Review cash-out"} onSubmit={submit} onClose={onClose}>
     <div className="grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1" role="group" aria-label="Entry type">
       {(["buy-in", "cash-out"] as const).map((value) => <button key={value} type="button" aria-pressed={mode === value} disabled={busy || (value === "cash-out" && pendingCashOut)}
@@ -162,6 +173,14 @@ function ManagePlayerForm({ snapshot, player, onSaved, onClose }: { snapshot: Ga
     </div>
     <Input label={mode === "buy-in" ? "Buy-in amount" : "Final stack"} prefix="$" inputMode="decimal" value={amount} onChange={(event) => setAmount(numericAmount(event.target.value))} disabled={busy} />
     {mode === "buy-in" ? <p className="text-xs text-gray-500">Table buy-in: {formatCurrency(snapshot.game.buy_in_amount)}</p> : null}
+    {mode === "cash-out" ? (
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm">
+        <div className="flex justify-between gap-4 text-gray-600"><span>Host-confirmed invested</span><span className="font-medium tabular-nums text-gray-900">{formatCurrency(verifiedInvested)}</span></div>
+        <div className="mt-2 flex justify-between gap-4"><span className="text-gray-600">Final chips</span><span className="font-medium tabular-nums text-gray-900">{hasCashOutPreview ? formatCurrency(round2(previewFinalStack)) : "Enter final chips"}</span></div>
+        {previewNet != null ? <div className="mt-2 flex justify-between gap-4 border-t border-gray-200 pt-2"><span className="font-medium text-gray-900">Expected net</span><span className="font-semibold tabular-nums text-gray-950">{previewNet > 0 ? "+" : previewNet < 0 ? "−" : ""}{formatCurrency(Math.abs(previewNet))}</span></div> : null}
+        <p className="mt-2 text-xs leading-5 text-gray-500">This sends a review request. The separate Confirm &amp; lock step records the final obligation.</p>
+      </div>
+    ) : null}
     {pendingCashOut ? <p className="text-xs text-gray-500">An early cash-out is already waiting for review.</p> : null}
   </PlayerSheet>;
 }

@@ -5,6 +5,7 @@ import {
   calculateBankSettlement,
   calculateMinTransfers,
   getPlayerNetChanges,
+  getPlayerPaymentTransfers,
   getPlayerTransfers,
   calculateEarlyCashOutNet,
   getEarlyCashOutTransfer,
@@ -101,6 +102,20 @@ describe("player settlement views", () => {
     expect(isPlayerInTransfer(transfers[0], "B")).toBe(true);
     expect(isPlayerInTransfer(transfers[0], "C")).toBe(false);
     expect(isPlayerInTransfer(transfers[0], null)).toBe(false);
+  });
+
+  it("keeps final-plan and locked early-exit obligations distinct for a player", () => {
+    const earlyExit = { transfer: transfers[0], mode: "early_exit" as const };
+    const finalPlan = { transfer: transfers[0], mode: "min" as const };
+
+    expect(getPlayerPaymentTransfers([earlyExit, finalPlan], "A")).toEqual({
+      outgoing: [earlyExit, finalPlan],
+      incoming: [],
+    });
+    expect(getPlayerPaymentTransfers([earlyExit, finalPlan], "B")).toEqual({
+      outgoing: [],
+      incoming: [earlyExit, finalPlan],
+    });
   });
 });
 

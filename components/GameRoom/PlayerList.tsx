@@ -46,7 +46,7 @@ export default function PlayerList({ players, snapshot, currentPlayerId, onHostP
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
         <h2 id="table-heading" className="text-base font-semibold text-gray-950">At the table</h2>
-        <p className="text-sm text-gray-500">Verified buy-ins by player.</p>
+        <p className="text-sm text-gray-500">Host-confirmed entries by player.</p>
         </div>
         {canManage && onHostPlayerSaved ? <AddHostPlayerButton snapshot={snapshot} onSaved={onHostPlayerSaved} /> : null}
       </div>
@@ -89,7 +89,7 @@ export default function PlayerList({ players, snapshot, currentPlayerId, onHostP
                   </div>
                   <p className="mt-0.5 text-xs text-gray-500">
                     {buyIns.length} {buyIns.length === 1 ? "entry" : "entries"}
-                    {pending > 0 ? ` · ${formatCurrency(pending)} pending` : ""}
+                    {pending > 0 ? ` · ${formatCurrency(pending)} awaiting host confirmation` : ""}
                     {player.session_id === null ? " · Host-managed" : ""}
                   </p>
                   {advances.map((advance) => (

@@ -3,42 +3,87 @@
 import { CheckCircle2, Trophy } from "lucide-react";
 import Card from "@/components/ui/Card";
 import { formatCurrency, formatSignedNet, round2 } from "@/lib/format";
-import { getPlayerTransfers } from "@/lib/settlement";
-import type { Transfer } from "@/lib/settlement";
-import type { SettlementMode } from "@/lib/payments";
+import { getPlayerPaymentTransfers } from "@/lib/settlement";
+import type { SettlementPaymentTransfer } from "@/lib/settlement";
 import { settlementPaymentKey } from "@/lib/payments";
 import TransferList from "./TransferList";
 
 export interface PlayerSettlementSummaryProps {
-  transfers: Transfer[];
+  payments: SettlementPaymentTransfer[];
   gameId: string;
-  mode: SettlementMode;
   currentPlayerId: string;
   beforeDiscrepancyNet?: number;
   finalNet?: number;
   settledPaymentKeys: ReadonlySet<string>;
 }
 
-function totalAmount(transfers: Transfer[]): number {
-  return transfers.reduce((sum, transfer) => sum + transfer.amount, 0);
+function totalAmount(payments: SettlementPaymentTransfer[]): number {
+  return payments.reduce((sum, { transfer }) => sum + transfer.amount, 0);
 }
 
-/** Player-first settlement instructions; the full table plan lives separately. */
+function paymentLabel(payment: SettlementPaymentTransfer): string {
+  return payment.mode === "early_exit" ? "Early cash-out" : "Final settlement";
+}
+
+function PaymentGroups({ payments, gameId, currentPlayerId, direction }: {
+  payments: SettlementPaymentTransfer[];
+  gameId: string;
+  currentPlayerId: string;
+  direction: "outgoing" | "incoming";
+}) {
+  const grouped = [
+    ...payments
+      .filter((payment) => payment.mode === "early_exit")
+      .map((payment, index) => ({
+        key: `early-exit-${payment.earlyCashOut?.id ?? index}`,
+        mode: "early_exit" as const,
+        payments: [payment],
+      })),
+    ...(["min", "bank"] as const)
+      .map((mode) => ({
+        key: mode,
+        mode,
+        payments: payments.filter((payment) => payment.mode === mode),
+      }))
+      .filter(({ payments: items }) => items.length > 0),
+  ];
+  const showLabels = grouped.length > 1 || grouped[0]?.mode === "early_exit";
+
+  return grouped.map(({ key, mode, payments: items }) => (
+    <div key={key} className="mt-3 first:mt-0">
+      {showLabels ? (
+        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">
+          {paymentLabel(items[0])}
+        </p>
+      ) : null}
+      <TransferList
+        transfers={items.map(({ transfer }) => transfer)}
+        gameId={gameId}
+        mode={mode}
+        currentPlayerId={currentPlayerId}
+        actionsEnabled
+        personalOutgoing={direction === "outgoing"}
+        personalIncoming={direction === "incoming"}
+        earlyCashOut={items[0].earlyCashOut}
+      />
+    </div>
+  ));
+}
+
+/** Player-first instructions across both final settlement and early exits. */
 export default function PlayerSettlementSummary({
-  transfers,
+  payments,
   gameId,
-  mode,
   currentPlayerId,
   beforeDiscrepancyNet,
   finalNet,
   settledPaymentKeys,
 }: PlayerSettlementSummaryProps) {
-  const { outgoing, incoming } = getPlayerTransfers(transfers, currentPlayerId);
-  const outstandingOutgoing = outgoing.filter((transfer) => !settledPaymentKeys.has(settlementPaymentKey(mode, transfer)));
-  const outstandingIncoming = incoming.filter((transfer) => !settledPaymentKeys.has(settlementPaymentKey(mode, transfer)));
+  const { outgoing, incoming } = getPlayerPaymentTransfers(payments, currentPlayerId);
+  const outstandingOutgoing = outgoing.filter(({ mode, transfer }) => !settledPaymentKeys.has(settlementPaymentKey(mode, transfer)));
+  const outstandingIncoming = incoming.filter(({ mode, transfer }) => !settledPaymentKeys.has(settlementPaymentKey(mode, transfer)));
   const outgoingTotal = totalAmount(outstandingOutgoing);
   const incomingTotal = totalAmount(outstandingIncoming);
-
   const owesPayment = outgoing.length > 0;
   const hasIncoming = incoming.length > 0;
   const handlesBothDirections = owesPayment && hasIncoming;
@@ -51,10 +96,7 @@ export default function PlayerSettlementSummary({
 
   return (
     <section aria-labelledby="your-settlement-heading" className="space-y-4">
-      <Card
-        padding="sm"
-        className="border-gray-300 bg-gray-50/60"
-      >
+      <Card padding="sm" className="border-gray-300 bg-gray-50/60">
         <div aria-live="polite" aria-atomic="true">
           {allMarkedSent ? (
             <div className="flex items-start gap-2.5">
@@ -106,37 +148,10 @@ export default function PlayerSettlementSummary({
             </div>
           )}
         </div>
-        {typeof finalNet === "number" ? (
-          <p className="mt-2 text-sm text-gray-600">Your net result: <span className="font-semibold tabular-nums text-gray-950">{formatSignedNet(finalNet)}</span></p>
-        ) : null}
-        {showDiscrepancyAdjustment ? (
-          <p className="mt-2 border-t border-gray-200 pt-2 text-sm text-gray-500">
-            <span className="font-semibold tabular-nums text-gray-950">{formatSignedNet(discrepancyAdjustment)}</span>
-            {" discrepancy adjustment · was "}
-            <span className="tabular-nums text-gray-700">{formatSignedNet(resultBeforeDiscrepancy)}</span>
-          </p>
-        ) : null}
-        {owesPayment ? <div className="mt-4">
-          <TransferList
-            transfers={outgoing}
-            gameId={gameId}
-            mode={mode}
-            currentPlayerId={currentPlayerId}
-            actionsEnabled
-            personalOutgoing
-          />
-        </div> : null}
-        {hasIncoming ? <div className="mt-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">{allMarkedSent ? "Payment record" : "Payments coming to you"}</p>
-          <TransferList
-            personalIncoming
-            transfers={incoming}
-            gameId={gameId}
-            mode={mode}
-            currentPlayerId={currentPlayerId}
-            actionsEnabled
-          />
-        </div> : null}
+        {typeof finalNet === "number" ? <p className="mt-2 text-sm text-gray-600">Your net result: <span className="font-semibold tabular-nums text-gray-950">{formatSignedNet(finalNet)}</span></p> : null}
+        {showDiscrepancyAdjustment ? <p className="mt-2 border-t border-gray-200 pt-2 text-sm text-gray-500"><span className="font-semibold tabular-nums text-gray-950">{formatSignedNet(discrepancyAdjustment)}</span>{" discrepancy adjustment · was "}<span className="tabular-nums text-gray-700">{formatSignedNet(resultBeforeDiscrepancy)}</span></p> : null}
+        {owesPayment ? <div className="mt-4"><PaymentGroups payments={outgoing} gameId={gameId} currentPlayerId={currentPlayerId} direction="outgoing" /></div> : null}
+        {hasIncoming ? <div className="mt-4"><p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">{allMarkedSent ? "Payment record" : "Payments coming to you"}</p><PaymentGroups payments={incoming} gameId={gameId} currentPlayerId={currentPlayerId} direction="incoming" /></div> : null}
       </Card>
     </section>
   );

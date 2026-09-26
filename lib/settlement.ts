@@ -1,4 +1,5 @@
 import type { BuyIn, EarlyCashOut, Player } from "./types";
+import type { SettlementMode } from "./payments";
 
 export interface Transfer {
   from: string;
@@ -11,6 +12,19 @@ export interface Transfer {
 export interface PlayerTransfers {
   outgoing: Transfer[];
   incoming: Transfer[];
+}
+
+/** A payment paired with the ledger mode that identifies its completion state. */
+export interface SettlementPaymentTransfer {
+  transfer: Transfer;
+  mode: SettlementMode;
+  /** Needed to update the immutable early-exit payment record. */
+  earlyCashOut?: EarlyCashOut;
+}
+
+export interface PlayerPaymentTransfers {
+  outgoing: SettlementPaymentTransfer[];
+  incoming: SettlementPaymentTransfer[];
 }
 
 export interface PlayerNet {
@@ -138,6 +152,22 @@ export function getPlayerTransfers(
   return {
     outgoing: transfers.filter((transfer) => transfer.fromPlayerId === playerId),
     incoming: transfers.filter((transfer) => transfer.toPlayerId === playerId),
+  };
+}
+
+/**
+ * Returns a player's obligations across the final plan and locked early exits.
+ * Keeping the mode with each transfer prevents an early-exit acknowledgement
+ * from being confused with the final settlement payment that happens to have
+ * the same parties and amount.
+ */
+export function getPlayerPaymentTransfers(
+  payments: SettlementPaymentTransfer[],
+  playerId: string
+): PlayerPaymentTransfers {
+  return {
+    outgoing: payments.filter(({ transfer }) => transfer.fromPlayerId === playerId),
+    incoming: payments.filter(({ transfer }) => transfer.toPlayerId === playerId),
   };
 }
 

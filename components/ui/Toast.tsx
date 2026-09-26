@@ -35,6 +35,11 @@ export function useToast(): ToastContextValue {
 
 const TOAST_DURATION_MS = 3000;
 
+/** Routine refresh feedback should not cover controls during rapid table updates. */
+function isCoalescableToast(message: string, type: ToastType): boolean {
+  return message === "Table updated" && type === "success";
+}
+
 const accentClasses: Record<ToastType, string> = {
   success: "bg-emerald-500",
   error: "bg-red-500",
@@ -78,7 +83,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (message: string, type: ToastType = "info") => {
       nextId.current += 1;
       const id = nextId.current;
-      setToasts((current) => [...current, { id, message, type }]);
+      setToasts((current) => {
+        if (isCoalescableToast(message, type) && current.some((item) => item.message === message && item.type === type)) {
+          return current;
+        }
+        return [...current, { id, message, type }];
+      });
       window.setTimeout(() => dismiss(id), TOAST_DURATION_MS);
     },
     [dismiss]

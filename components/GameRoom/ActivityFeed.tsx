@@ -68,7 +68,7 @@ function eventText(event: GameEvent, actorName: string | null): string {
     case "player_joined":
       return event.metadata.added_by_host ? `${actor} added ${playerName} to the table` : `${playerName} joined`;
     case "buy_in_added":
-      return `${playerName} ${event.metadata.buy_in_type === "rebuy" ? "rebought" : "bought in"} for ${amount}${event.metadata.fronted_by_name ? ` — ${event.metadata.fronted_by_name} advanced the cash and is still owed` : ""}`;
+      return `${playerName} recorded a ${event.metadata.buy_in_type === "rebuy" ? "rebuy" : "buy-in"} for ${amount}${event.metadata.fronted_by_name ? ` — ${event.metadata.fronted_by_name} advanced the cash and is still owed` : ""}`;
     case "buy_in_advance_repaid":
       return `${actor} marked ${playerName}’s ${amount} advance from ${event.metadata.fronted_by_name ?? "another player"} repaid`;
     case "buy_in_updated":
