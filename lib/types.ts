@@ -1,4 +1,5 @@
 export type GameStatus = 'active' | 'settling' | 'ended';
+export type FinalSettlementMode = 'min' | 'bank';
 
 export interface Game {
   id: string;
@@ -13,6 +14,10 @@ export interface Game {
   expires_at: string | null;
   created_at: string;
   ended_at: string | null;
+  /** The immutable payment plan selected when the settlement was locked. */
+  settlement_mode?: FinalSettlementMode | null;
+  /** The active player who acts as the bank for a locked bank settlement. */
+  settlement_bank_player_id?: string | null;
   acquisition_source?: AcquisitionSource | null;
   discrepancy_allocation?: DiscrepancyAllocationRecord | null;
 }

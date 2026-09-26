@@ -59,8 +59,9 @@ const statusMeta: Record<
 };
 
 function defaultBankId(players: GameSnapshot["players"]): string {
-  const host = players.find((player) => player.is_host);
-  return (host ?? players[0])?.id ?? "";
+  const eligiblePlayers = players.filter((player) => !player.left_at);
+  const host = eligiblePlayers.find((player) => player.is_host);
+  return (host ?? eligiblePlayers[0])?.id ?? "";
 }
 
 function tabClass(selected: boolean): string {
@@ -156,7 +157,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   // Keep the selected bank valid when the player list changes.
   useEffect(() => {
     setBankPlayerId((current) => {
-      if (current && snapshot.players.some((player) => player.id === current)) {
+      if (current && snapshot.players.some((player) => player.id === current && !player.left_at)) {
         return current;
       }
       return defaultBankId(snapshot.players);
@@ -266,11 +267,22 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
       ? selectedPlayerIds.length > 0 && selectedCapacity + 0.005 >= Math.abs(difference)
       : customAllocationValid);
   const minTransfers = calculateMinTransfers(allocatedNets);
+  const eligibleBankPlayers = players.filter((player) => !player.left_at);
+  // A pre-plan game predates this feature and therefore has the legacy
+  // fewest-payments plan. Do not let a local tab choice rewrite an ended game.
+  const finalizedMode: ResultsTab = snapshot.game.settlement_mode === "bank"
+    && Boolean(snapshot.game.settlement_bank_player_id)
+    ? "bank"
+    : "min";
+  const displayedTab: ResultsTab = snapshot.game.status === "ended" ? finalizedMode : tab;
+  const selectedBankPlayerId = snapshot.game.status === "ended"
+    ? snapshot.game.settlement_bank_player_id ?? ""
+    : bankPlayerId;
   const bankPlayer =
-    players.find((player) => player.id === bankPlayerId) ?? null;
-  const bankTransfers = calculateBankSettlement(allocatedNets, bankPlayerId);
-  // A finalized game has one stable, canonical plan rather than a view choice.
-  const displayedTab: ResultsTab = snapshot.game.status === "ended" ? "min" : tab;
+    players.find((player) => player.id === selectedBankPlayerId) ?? null;
+  const bankTransfers = selectedBankPlayerId
+    ? calculateBankSettlement(allocatedNets, selectedBankPlayerId)
+    : [];
   const activeTabTransfers = displayedTab === "min" ? minTransfers : bankTransfers;
   const lockedEarlyCashOuts = snapshot.earlyCashOuts.filter(
     (earlyCashOut) => earlyCashOut.status === "locked"
@@ -282,15 +294,16 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   const recapTransfers = earlyCashOutPayments
     .map(({ transfer }) => transfer)
     .concat(activeTabTransfers);
-  const settledMinPaymentCount = minTransfers.filter((transfer) =>
-    settledMinPaymentKeys.has(settlementPaymentKey("min", transfer))
+  const settledPlanPaymentCount = activeTabTransfers.filter((transfer) =>
+    settledMinPaymentKeys.has(settlementPaymentKey(displayedTab, transfer))
   ).length;
   const settledEarlyCashOutPaymentCount = earlyCashOutPayments.filter(({ transfer }) =>
     settledMinPaymentKeys.has(settlementPaymentKey("early_exit", transfer))
   ).length;
-  const paymentCount = minTransfers.length + earlyCashOutPayments.length;
-  const settledPaymentCount = settledMinPaymentCount + settledEarlyCashOutPaymentCount;
-  const settlementPlanReadOnly = snapshot.game.status !== "ended";
+  const paymentCount = activeTabTransfers.length + earlyCashOutPayments.length;
+  const settledPaymentCount = settledPlanPaymentCount + settledEarlyCashOutPaymentCount;
+  const canEditSettlementPlan = isHost && snapshot.game.status === "settling";
+  const settlementPlanReadOnly = !canEditSettlementPlan;
   const status = statusMeta[snapshot.game.status];
 
   useEffect(() => {
@@ -342,9 +355,16 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
   }
 
   async function handleFinalize() {
+    if (tab === "bank" && !eligibleBankPlayers.some((player) => player.id === bankPlayerId)) {
+      toast("Choose an active player to act as the bank.", "error");
+      return;
+    }
     setFinalizing(true);
     try {
-      await markEnded(snapshot.game.id);
+      await markEnded(snapshot.game.id, {
+        mode: tab,
+        bankPlayerId: tab === "bank" ? bankPlayerId : null,
+      });
       toast("Game finalized", "success");
     } catch (err) {
       toast(
@@ -634,10 +654,37 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 <h2 id="proposed-payments-heading" className="text-lg font-semibold text-gray-950">Review the payments</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">Check who pays whom before locking the settlement. No money moves in Mainpot.</p>
               </div>
+              <fieldset className="rounded-xl border border-gray-200 bg-white p-4">
+                <legend className="px-1 text-sm font-semibold text-gray-900">Payment method</legend>
+                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                  <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 p-3 has-[:checked]:border-gray-950 has-[:checked]:bg-gray-50">
+                    <input type="radio" name="settlement-method" checked={tab === "min"} onChange={() => setTab("min")} className="mt-0.5 h-4 w-4 accent-gray-950" />
+                    <span><span className="block text-sm font-semibold text-gray-900">Fewest payments</span><span className="mt-1 block text-xs leading-5 text-gray-600">Match players directly to minimize transfers.</span></span>
+                  </label>
+                  <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 p-3 has-[:checked]:border-gray-950 has-[:checked]:bg-gray-50">
+                    <input type="radio" name="settlement-method" checked={tab === "bank"} onChange={() => setTab("bank")} className="mt-0.5 h-4 w-4 accent-gray-950" />
+                    <span><span className="block text-sm font-semibold text-gray-900">Table bank</span><span className="mt-1 block text-xs leading-5 text-gray-600">One active player pays and collects every final payment.</span></span>
+                  </label>
+                </div>
+                {tab === "bank" ? (
+                  <div className="mt-4 max-w-sm">
+                    <label htmlFor="final-bank-player-select" className="mb-1 block text-sm font-medium text-gray-700">Who is the bank?</label>
+                    <Select value={bankPlayerId} onValueChange={setBankPlayerId}>
+                      <SelectTrigger id="final-bank-player-select"><SelectValue placeholder="Choose a player" /></SelectTrigger>
+                      <SelectContent>
+                        {eligibleBankPlayers.map((player) => (
+                          <SelectItem key={player.id} value={player.id}>{player.name}{player.is_host ? " (Host)" : ""}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-2 text-xs leading-5 text-gray-500">The host can bank even when they only observe the game.</p>
+                  </div>
+                ) : null}
+              </fieldset>
               <TransferList
-                transfers={minTransfers}
+                transfers={activeTabTransfers}
                 gameId={snapshot.game.id}
-                mode="min"
+                mode={displayedTab}
                 currentPlayerId={currentPlayerId}
                 isHost
                 actionsEnabled={false}
@@ -654,7 +701,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 <dl className="mt-4 grid grid-cols-3 gap-4 text-sm">
                   <div><dt className="text-xs text-gray-500">Players</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{players.length}</dd></div>
                   <div><dt className="text-xs text-gray-500">Bought in</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{formatCurrency(totalBoughtIn)}</dd></div>
-                  <div><dt className="text-xs text-gray-500">Payments left</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{minTransfers.length}</dd></div>
+                  <div><dt className="text-xs text-gray-500">Payments left</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{activeTabTransfers.length}</dd></div>
                 </dl>
                 {allocation ? (
                   <DiscrepancyImpact
@@ -688,9 +735,9 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
 
           {currentPlayerId && !currentPlayerEarlyCashOut && (!isHost || snapshot.game.status === "ended") ? (
             <PlayerSettlementSummary
-              transfers={minTransfers}
+              transfers={activeTabTransfers}
               gameId={snapshot.game.id}
-              mode="min"
+              mode={displayedTab}
               currentPlayerId={currentPlayerId}
               beforeDiscrepancyNet={currentPlayerNetBeforeDiscrepancy}
               finalNet={currentPlayerFinalNet}
@@ -753,9 +800,9 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                       </h2>
                     ) : null}
                     <TransferList
-                      transfers={minTransfers}
+                      transfers={activeTabTransfers}
                       gameId={snapshot.game.id}
-                      mode="min"
+                      mode={displayedTab}
                       currentPlayerId={currentPlayerId}
                       isHost={isHost}
                       actionsEnabled
@@ -897,13 +944,13 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                   Who is the bank?
                 </label>
                 <Select
-                  value={bankPlayerId}
+                  value={selectedBankPlayerId}
                   onValueChange={setBankPlayerId}
                   disabled={settlementPlanReadOnly}
                 >
                   <SelectTrigger id="bank-player-select"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {players.map((player) => (
+                    {eligibleBankPlayers.map((player) => (
                     <SelectItem key={player.id} value={player.id}>
                       {player.name}
                     </SelectItem>
@@ -938,7 +985,7 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 </h2>
                 <NetList
                   nets={allocatedNets}
-                  bankPlayerId={bankPlayerId}
+                  bankPlayerId={selectedBankPlayerId}
                   bankResidual={0}
                 />
               </section>

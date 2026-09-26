@@ -18,6 +18,7 @@ import type {
   AcquisitionSource,
   GameSnapshot,
   Player,
+  FinalSettlementMode,
 } from "./types";
 import { calculateEarlyCashOutNet, getPlayerFundingAdjustment } from "./settlement";
 import { generateRoomCode, normalizeRoomCode } from "./roomcode";
@@ -76,7 +77,23 @@ function toGame(row: Game): Game {
     ...row,
     buy_in_amount: Number(row.buy_in_amount),
     discrepancy_allocation: row.discrepancy_allocation ?? null,
+    // Games finalized before settlement plans were introduced used the
+    // minimum-transfer plan. Keep their reload behavior stable.
+    settlement_mode: row.settlement_mode === "bank" ? "bank" : "min",
+    settlement_bank_player_id: row.settlement_bank_player_id ?? null,
   };
+}
+
+export interface FinalSettlementPlan {
+  mode: FinalSettlementMode;
+  bankPlayerId?: string | null;
+}
+
+function normalizedSettlementPlan(plan?: FinalSettlementPlan): Required<FinalSettlementPlan> {
+  if (plan?.mode === "bank") {
+    return { mode: "bank", bankPlayerId: plan.bankPlayerId ?? null };
+  }
+  return { mode: "min", bankPlayerId: null };
 }
 
 function toPlayer(row: Player): Player {
@@ -311,6 +328,8 @@ async function createGameLocal(
     expires_at: userId == null ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null,
     created_at: now,
     ended_at: null,
+    settlement_mode: "min",
+    settlement_bank_player_id: null,
     acquisition_source: acquisitionSource ?? null,
   };
 
@@ -1129,14 +1148,28 @@ async function endGameLocal(gameId: string): Promise<void> {
   emitSnapshot(gameId, store);
 }
 
-async function markEndedLocal(gameId: string): Promise<void> {
+async function markEndedLocal(gameId: string, plan?: FinalSettlementPlan): Promise<void> {
   const store = loadStore();
   const game = requireLocalGameStatus(store, gameId, "settling");
+  const actorPlayerId = currentLocalPlayerId(store, gameId);
+  const actor = store.players.find((player) => player.id === actorPlayerId);
+  if (!actor?.is_host) throw new Error("Only the host can lock the settlement.");
+  const normalizedPlan = normalizedSettlementPlan(plan);
+  if (normalizedPlan.mode === "bank") {
+    const banker = store.players.find(
+      (player) => player.id === normalizedPlan.bankPlayerId
+        && player.game_id === gameId
+        && !player.left_at,
+    );
+    if (!banker) throw new Error("Choose an active player to act as the bank.");
+  }
+  game.settlement_mode = normalizedPlan.mode;
+  game.settlement_bank_player_id = normalizedPlan.bankPlayerId;
   game.status = "ended";
   addLocalEvent(store, {
     gameId,
     eventType: "game_finalized",
-    actorPlayerId: currentLocalPlayerId(store, gameId),
+    actorPlayerId,
   });
   persistStore(store);
   emitSnapshot(gameId, store);
@@ -1945,16 +1978,29 @@ async function endGameSupabase(gameId: string): Promise<void> {
   await addSupabaseEvent(client, { gameId, eventType: "game_settling" });
 }
 
-async function markEndedSupabase(gameId: string): Promise<void> {
+async function markEndedSupabase(gameId: string, plan?: FinalSettlementPlan): Promise<void> {
   const { client } = await ensureSupabaseReady();
+  const normalizedPlan = normalizedSettlementPlan(plan);
   const { data, error } = await client
     .from("games")
-    .update({ status: "ended" })
+    .update({
+      status: "ended",
+      settlement_mode: normalizedPlan.mode,
+      settlement_bank_player_id: normalizedPlan.bankPlayerId,
+    })
     .eq("id", gameId)
     .eq("status", "settling")
     .select("id")
     .maybeSingle();
   if (error) {
+    if (
+      error.code === "42703"
+      || error.code === "PGRST204"
+      || error.message.includes("settlement_mode")
+      || error.message.includes("settlement_bank_player_id")
+    ) {
+      throw new Error("This game database needs the settlement-plan migration before it can lock this game.");
+    }
     throw error;
   }
   if (!data) throw new Error("Finalized games are read-only.");
@@ -2346,9 +2392,9 @@ export async function endGame(gameId: string): Promise<void> {
   if (!localStorageMode) dispatchGamePush(gameId, "game_settling");
 }
 
-export async function markEnded(gameId: string): Promise<void> {
+export async function markEnded(gameId: string, plan?: FinalSettlementPlan): Promise<void> {
   const localStorageMode = usingLocalStorage();
-  await (localStorageMode ? markEndedLocal(gameId) : markEndedSupabase(gameId));
+  await (localStorageMode ? markEndedLocal(gameId, plan) : markEndedSupabase(gameId, plan));
   trackProductOpsEvent("game.finalized", { storage_mode: localStorageMode ? "local_storage" : "supabase" }, gameId);
   if (!localStorageMode) dispatchGamePush(gameId, "game_finalized");
 }

@@ -65,6 +65,17 @@ describe("calculateBankSettlement", () => {
       { from: "C", to: "Bank", amount: 15, fromPlayerId: "C", toPlayerId: "A" },
     ]);
   });
+
+  it("allows a zero-net host observer to be the bank", () => {
+    const transfers = calculateBankSettlement(
+      [player("host", 0), player("A", -30), player("B", 30)],
+      "host"
+    );
+    expect(transfers).toEqual([
+      { from: "A", to: "Bank", amount: 30, fromPlayerId: "A", toPlayerId: "host" },
+      { from: "Bank", to: "B", amount: 30, fromPlayerId: "host", toPlayerId: "B" },
+    ]);
+  });
 });
 
 describe("player settlement views", () => {
