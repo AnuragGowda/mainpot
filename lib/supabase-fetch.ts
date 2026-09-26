@@ -7,8 +7,15 @@
 export const fetchWithFutureJwtRetry: typeof fetch = async (input, init) => {
   const url = input instanceof Request ? input.url : String(input);
   const isDataRequest = /\/rest\/v1(?:\/|\?|$)/.test(url);
+  const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+  // PostgREST does not supply cache validators for these browser reads. A
+  // cached snapshot can therefore move a live ledger backwards after another
+  // device has written it. Financial reads must always observe the server.
+  const requestInit = isDataRequest && (method === "GET" || method === "HEAD")
+    ? { ...init, cache: "no-store" as RequestCache }
+    : init;
   const replayInput = isDataRequest && input instanceof Request ? input.clone() : input;
-  const response = await fetch(input, init);
+  const response = await fetch(input, requestInit);
   if (!isDataRequest || response.status !== 401) return response;
   const error = await response.clone().json().catch(() => null) as { code?: string; message?: string } | null;
   if (error?.code !== "PGRST303" || error.message !== "JWT issued at future") return response;
@@ -21,5 +28,5 @@ export const fetchWithFutureJwtRetry: typeof fetch = async (input, init) => {
     signal?.addEventListener("abort", onAbort, { once: true });
     if (signal?.aborted) onAbort();
   });
-  return fetch(replayInput, init);
+  return fetch(replayInput, requestInit);
 };

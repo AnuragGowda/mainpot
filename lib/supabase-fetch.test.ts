@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchWithFutureJwtRetry } from "./supabase-fetch";
 const endpoint = "https://example.test/rest/v1/rpc/create_game_idempotent";
+const snapshotEndpoint = "https://example.test/rest/v1/cash_outs?select=*&game_id=eq.game-1";
 const rejection = () => new Response(JSON.stringify({ code: "PGRST303", message: "JWT issued at future" }), { status: 401 });
 
 describe("temporary JWT rejection", () => {
@@ -39,5 +40,41 @@ describe("temporary JWT rejection", () => {
     controller.abort();
     await check;
     expect(mock).toHaveBeenCalledOnce();
+  });
+});
+
+describe("live PostgREST reads", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it.each(["GET", "HEAD"] as const)("uses no-store for a %s snapshot read", async (method) => {
+    const mock = vi.fn().mockResolvedValue(new Response("ok"));
+    vi.stubGlobal("fetch", mock);
+    const init = { method, headers: { "x-test": "read" } };
+
+    await fetchWithFutureJwtRetry(snapshotEndpoint, init);
+
+    expect(mock).toHaveBeenCalledWith(snapshotEndpoint, { ...init, cache: "no-store" });
+  });
+
+  it("uses the explicit init method when a Request has a different method", async () => {
+    const mock = vi.fn().mockResolvedValue(new Response("ok"));
+    vi.stubGlobal("fetch", mock);
+    const request = new Request(snapshotEndpoint, { method: "POST" });
+    const init = { method: "GET", headers: { "x-test": "override" } };
+
+    await fetchWithFutureJwtRetry(request, init);
+
+    expect(mock).toHaveBeenCalledWith(request, { ...init, cache: "no-store" });
+  });
+
+  it("does not alter a write supplied through init", async () => {
+    const mock = vi.fn().mockResolvedValue(new Response("ok"));
+    vi.stubGlobal("fetch", mock);
+    const request = new Request(snapshotEndpoint, { method: "GET" });
+    const init = { method: "POST", body: "{}" };
+
+    await fetchWithFutureJwtRetry(request, init);
+
+    expect(mock).toHaveBeenCalledWith(request, init);
   });
 });
