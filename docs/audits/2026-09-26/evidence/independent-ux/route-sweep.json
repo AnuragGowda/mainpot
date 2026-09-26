@@ -1,0 +1,236 @@
+[
+  {
+    "viewport": 1440,
+    "requested": "/",
+    "finalPath": "/",
+    "status": 200,
+    "overflow": false,
+    "heading": "Keep the game friendly. Keep the money exact.",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/create",
+    "finalPath": "/create",
+    "status": 200,
+    "overflow": false,
+    "heading": "Start a game.",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/join",
+    "finalPath": "/join",
+    "status": 200,
+    "overflow": false,
+    "heading": "Join your table.",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/poker-settlement-calculator",
+    "finalPath": "/poker-settlement-calculator",
+    "status": 200,
+    "overflow": false,
+    "heading": "Poker settlement calculator",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/signin",
+    "finalPath": "/signin",
+    "status": 200,
+    "overflow": false,
+    "heading": "Accounts are off in local mode",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/dashboard",
+    "finalPath": "/signin",
+    "status": 200,
+    "overflow": false,
+    "heading": "Accounts are off in local mode",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/friends",
+    "finalPath": "/signin",
+    "status": 200,
+    "overflow": false,
+    "heading": "Accounts are off in local mode",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/feedback",
+    "finalPath": "/feedback",
+    "status": 200,
+    "overflow": false,
+    "heading": "Send us feedback.",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/self-host",
+    "finalPath": "/self-host",
+    "status": 200,
+    "overflow": false,
+    "heading": "Your game. Your server. Your data.",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/recap-lab",
+    "finalPath": "/recap-lab",
+    "status": 200,
+    "overflow": false,
+    "heading": "The Felt Society.",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/privacy",
+    "finalPath": "/privacy",
+    "status": 200,
+    "overflow": false,
+    "heading": "Privacy policy",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/terms",
+    "finalPath": "/terms",
+    "status": 200,
+    "overflow": false,
+    "heading": "Terms of use",
+    "errors": []
+  },
+  {
+    "viewport": 1440,
+    "requested": "/game/ZZZZZZ",
+    "finalPath": "/game/ZZZZZZ",
+    "status": 200,
+    "overflow": false,
+    "heading": "Game not found",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/",
+    "finalPath": "/",
+    "status": 200,
+    "overflow": false,
+    "heading": "Keep the game friendly. Keep the money exact.",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/create",
+    "finalPath": "/create",
+    "status": 200,
+    "overflow": false,
+    "heading": "Start a game.",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/join",
+    "finalPath": "/join",
+    "status": 200,
+    "overflow": false,
+    "heading": "Join your table.",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/poker-settlement-calculator",
+    "finalPath": "/poker-settlement-calculator",
+    "status": 200,
+    "overflow": false,
+    "heading": "Poker settlement calculator",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/signin",
+    "finalPath": "/signin",
+    "status": 200,
+    "overflow": false,
+    "heading": "Accounts are off in local mode",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/dashboard",
+    "finalPath": "/signin",
+    "status": 200,
+    "overflow": false,
+    "heading": "Accounts are off in local mode",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/friends",
+    "finalPath": "/signin",
+    "status": 200,
+    "overflow": false,
+    "heading": "Accounts are off in local mode",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/feedback",
+    "finalPath": "/feedback",
+    "status": 200,
+    "overflow": false,
+    "heading": "Send us feedback.",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/self-host",
+    "finalPath": "/self-host",
+    "status": 200,
+    "overflow": false,
+    "heading": "Your game. Your server. Your data.",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/recap-lab",
+    "finalPath": "/recap-lab",
+    "status": 200,
+    "overflow": false,
+    "heading": "The Felt Society.",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/privacy",
+    "finalPath": "/privacy",
+    "status": 200,
+    "overflow": false,
+    "heading": "Privacy policy",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/terms",
+    "finalPath": "/terms",
+    "status": 200,
+    "overflow": false,
+    "heading": "Terms of use",
+    "errors": []
+  },
+  {
+    "viewport": 390,
+    "requested": "/game/ZZZZZZ",
+    "finalPath": "/game/ZZZZZZ",
+    "status": 200,
+    "overflow": false,
+    "heading": "Game not found",
+    "errors": []
+  }
+]

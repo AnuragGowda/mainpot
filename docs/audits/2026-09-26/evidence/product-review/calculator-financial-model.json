@@ -1,0 +1,15 @@
+{
+  "base": "http://127.0.0.1:3125",
+  "inputs": {
+    "Alice": {
+      "moneyIn": 20,
+      "finalStack": 40
+    },
+    "Bob": {
+      "moneyIn": 20,
+      "finalStack": "blank"
+    }
+  },
+  "observed": "Skip to content\nMainpot\nStart game\nPoker settlement calculator\n\nEnter buy-ins and final stacks to see who pays whom. No account needed.\n\nHow settlement works ↓\nWho owes whom?\nSettlement worksheet\n\nUpdates as you type. Blank amounts count as $0. Nothing is saved.\n\nAdd player\n2 players\nView payments ↓\nPlayer 1\nMONEY IN\nFINAL STACK\nPlayer 2\nMONEY IN\nFINAL STACK\n\nMONEY IN\n\n$40.00\n\nFINAL STACKS\n\n$40.00\n\nBank balanced\n\nThe payment list uses the recorded results as entered.\n\nPAYMENT LIST\n\n1 payment\nBobAlice\n$20.00\nTrack the next game in Mainpot\nOn this page\n+\n",
+  "inference": "Net transfers assume deferred/netted funding, not gross payouts from an already funded cash pot. Blank final stack counts as zero in the standalone calculator."
+}

@@ -1,0 +1,1312 @@
+[
+  {
+    "width": 1440,
+    "route": "/",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/",
+    "headings": [
+      "Keep the game friendly. Keep the money exact.",
+      "The Basement Game",
+      "How a game works.",
+      "Before you deal.",
+      "Free and open source.",
+      "Ready for your next poker night?"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Start a cash game",
+        "href": "/create"
+      },
+      {
+        "text": "Join a table",
+        "href": "/join"
+      },
+      {
+        "text": "Try the settlement calculator →",
+        "href": "/poker-settlement-calculator"
+      },
+      {
+        "text": "Explore self-hosting",
+        "href": "/self-host"
+      },
+      {
+        "text": "View source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      },
+      {
+        "text": "Start a game →",
+        "href": "/create"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nStart a game\nFOR HOME POKER CASH GAMES\nKeep the game friendly. Keep the money exact.\n\nTrack buy-ins, count the final stacks, and see who owes whom. One record for the whole table.\n\nStart a cash game\nJoin a table\nNo app or player account\nSyncs across devices\nTry the settlement calculator →\n\nFRIDAY NIGHT\n\nThe Basement Game\nLive\n\nBANK\n\n$360\n\nBUY-IN\n\n$40\n\nPLAYERS\n\n4\n\nAP\nAlex\n$80\nVerified\nMK\nMorgan\n$120\nVerified\nSR\nSam\n$80\nVerified\nJT\nJordan\n$80\nVerified\n\nENTER CASH-OUTS\n\n4 of 4 entered\nAP\nAlex\n$40\nMK\nMorgan\n$160\nSR\nSam\n$120\nJT\nJordan\n$40\n✓\n\nALL STACKS ENTERED\n\nBank balanced. Preparing payments.\n\nFINAL SETTLEMENT\n\nTwo payments. All chips accounted for.\n\nA\nAlex\nM\nMorgan\n$40\nJ\nJordan\nS\nSam\n$40\n\nRoom code\n\nRIVER7\n\nHow a game works.\n01\nStart a table\n\nSet the buy-in and invite everyone with a code or QR link.\n\n02\nRecord the buy-ins\n\nLog each buy-in and rebuy. Everyone can follow the totals.\n\n03\nSettle up\n\nCount the final stacks, resolve any difference, and see who owes whom.\n\nBefore you deal.\nDo I need to create an account?\n\nNo. Start or join as a guest. An optional account keeps your game history and helps you find regular players.\n\nWho can change the ledger?\nWhat if the bank does not balance?\nFree and open source.\n\nPlay here, or run Mainpot on your own server.\n\nExplore self-hosting\nView source\nReady for your next poker night?\nStart a game\n→\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  },
+  {
+    "width": 1440,
+    "route": "/create",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/create",
+    "headings": [
+      "Start a game."
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Join a gameJoin",
+        "href": "/join"
+      },
+      {
+        "text": "Create game",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nJoin a game\n\nHOST A TABLE\n\nStart a game.\n\nSet the buy-in, then invite your table with a code.\n\nYour name\nGame name\nBuy-in amount\n$\nAdd my opening buy-in\n\nYour opening buy-in will be recorded when you create the game.\n\nCreate game"
+  },
+  {
+    "width": 1440,
+    "route": "/join",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/join",
+    "headings": [
+      "Join your table."
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Join game",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nStart a game\n\nJOIN THE TABLE\n\nJoin your table.\n\nEnter the host’s six-character code or paste an invite link.\n\nYour name\nRoom code\nJoin game\n\nCodes never use 0, 1, I, or O."
+  },
+  {
+    "width": 1440,
+    "route": "/signin",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/signin",
+    "headings": [
+      "Keep every settled game in one place.",
+      "Welcome back"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Continue with Google",
+        "href": null
+      },
+      {
+        "text": "Sign in",
+        "href": null
+      },
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "href": null
+      },
+      {
+        "text": "Create an account",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nStart a game\n\nKEEP YOUR HISTORY\n\nKeep every settled game in one place.\n\nCreate an account or sign in to save results, find regular players, and track your record over time.\n\nWelcome back\n\nView your saved games and results.\n\nContinue with Google\nOR\nEmail\nPassword\nSign in\nForgot your password? Get a sign-in link\n\nNew to Mainpot? Create an account"
+  },
+  {
+    "width": 1440,
+    "route": "/dashboard",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/signin?next=/dashboard",
+    "headings": [
+      "Keep every settled game in one place.",
+      "Welcome back"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Continue with Google",
+        "href": null
+      },
+      {
+        "text": "Sign in",
+        "href": null
+      },
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "href": null
+      },
+      {
+        "text": "Create an account",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nStart a game\n\nKEEP YOUR HISTORY\n\nKeep every settled game in one place.\n\nCreate an account or sign in to save results, find regular players, and track your record over time.\n\nWelcome back\n\nView your saved games and results.\n\nContinue with Google\nOR\nEmail\nPassword\nSign in\nForgot your password? Get a sign-in link\n\nNew to Mainpot? Create an account"
+  },
+  {
+    "width": 1440,
+    "route": "/friends",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/signin?next=/friends",
+    "headings": [
+      "Keep every settled game in one place.",
+      "Welcome back"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Continue with Google",
+        "href": null
+      },
+      {
+        "text": "Sign in",
+        "href": null
+      },
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "href": null
+      },
+      {
+        "text": "Create an account",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nStart a game\n\nKEEP YOUR HISTORY\n\nKeep every settled game in one place.\n\nCreate an account or sign in to save results, find regular players, and track your record over time.\n\nWelcome back\n\nView your saved games and results.\n\nContinue with Google\nOR\nEmail\nPassword\nSign in\nForgot your password? Get a sign-in link\n\nNew to Mainpot? Create an account"
+  },
+  {
+    "width": 1440,
+    "route": "/poker-settlement-calculator",
+    "status": 200,
+    "errors": [],
+    "title": "Poker Settlement Calculator for Home Games | Mainpot",
+    "url": "https://mainpot.app/poker-settlement-calculator",
+    "headings": [
+      "Poker settlement calculator",
+      "Who owes whom?",
+      "Balance the bank before settling.",
+      "See the ledger move from input to settlement.",
+      "A missing add-on creates a $10.00 mismatch.",
+      "Calculate each player's net result.",
+      "Turn those balances into payments.",
+      "Special cases",
+      "Poker settlement questions.",
+      "Record the game once. Settle from facts."
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "How settlement works ↓",
+        "href": "#overview"
+      },
+      {
+        "text": "Add player",
+        "href": null
+      },
+      {
+        "text": "Clear example",
+        "href": null
+      },
+      {
+        "text": "View payments ↓",
+        "href": "#calculator-results"
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "Track the next game in Mainpot",
+        "href": "/create"
+      },
+      {
+        "text": "01The problem",
+        "href": "#overview"
+      },
+      {
+        "text": "02Animated walkthrough",
+        "href": "#walkthrough"
+      },
+      {
+        "text": "03Five-player example",
+        "href": "#example"
+      },
+      {
+        "text": "04Calculate each result",
+        "href": "#net-results"
+      },
+      {
+        "text": "05Build the payment list",
+        "href": "#payments"
+      },
+      {
+        "text": "06Special cases",
+        "href": "#edge-cases"
+      },
+      {
+        "text": "07Questions",
+        "href": "#faq"
+      },
+      {
+        "text": "Pause",
+        "href": null
+      },
+      {
+        "text": "01Record",
+        "href": null
+      },
+      {
+        "text": "02Cash out",
+        "href": null
+      },
+      {
+        "text": "03Reconcile",
+        "href": null
+      },
+      {
+        "text": "04Settle",
+        "href": null
+      },
+      {
+        "text": "Start a game",
+        "href": "/create"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nStart a game\nPoker settlement calculator\n\nEnter buy-ins and final stacks to see who pays whom. No account needed.\n\nHow settlement works ↓\nWho owes whom?\nSettlement worksheet\n\nExample game · change any value to try it.\n\nAdd player\nClear example\nView payments ↓\nPLAYER\nMONEY IN\nFINAL STACK\nREMOVE PLAYER\nPlayer 1\nMONEY IN\nFINAL STACK\nPlayer 2\nMONEY IN\nFINAL STACK\nPlayer 3\nMONEY IN\nFINAL STACK\nPlayer 4\nMONEY IN\nFINAL STACK\nPlayer 5\nMONEY IN\nFINAL STACK\n\nMONEY IN\n\n$310.00\n\nFINAL STACKS\n\n$310.00\n\nBank balanced\n\nThe payment list uses the recorded results as entered.\n\nPAYMENT LIST\n\n4 payments\nAlexMorgan\n$61.25\nCaseyMorgan\n$31.00\nSamJordan\n$21.50\nCaseyJordan\n$19.00\nTrack the next game in Mainpot\n\nON THIS PAGE\n\n01\nThe problem\n02\nAnimated walkthrough\n03\nFive-player example\n04\nCalculate each result\n05\nBuild the payment list\n06\nSpecial cases\n07\nQuestions\nBalance the bank before settling.\n\nThe bank needs two numbers per player: money in and final cash-out. Their difference is the player's result.\n\nCheck every rebuy and cash-out before money moves. Mainpot keeps those entries with the game so the table can resolve a mismatch first.\n\n1. Balance the bank. Total money in must equal total final stacks.\n2. Calculate results. Cash-out minus money in gives each player’s net.\n3. Route payments. Players who owe pay those who are owed.\nSee the ledger move from input to settlement.\n\nThis five-player example starts with purchases, finds the mismatch, and ends with a corrected settlement.\n\nThe Basement Game\n\nFriday · settlement review\n\nPause\nSTAKES\n$0.25 / $0.50\nBUY-IN\n$40.00\nPLAYERS\n5\n01Record\n02Cash out\n03Reconcile\n04Settle\n\nLIVE LEDGER\n\nEvery chip purchase creates an entry.\n\nThe opening buy-ins, rebuys, and add-ons stay attached to the players who received the chips. Before cash-out, the approved ledger shows $300.00 in the bank.\n\nRecorded bank\n$300.00\nSeven approved purchases\nLEDGER ENTRY\nAMOUNT\nAlex\n$80.00 in\nMorgan\n$40.00 in\nSam\n$80.00 in\nJordan\n$60.00 in\nCasey\n$40.00 in\nStep 1 of 4\nCash out\nA missing add-on creates a $10.00 mismatch.\n\nIn this $0.25/$0.50 game, Alex and Sam rebuy, Jordan adds $20, and Casey adds $10. Casey's add-on is missing, so the ledger shows $300.00 while $310.00 is in play.\n\nThe five final stacks total $310.00. The $10.00 gap is an incomplete entry, not a rounding problem.\n\nThe calculator should stop here.\n\nRecorded buy-ins are $300.00. Final stacks are $310.00. The table needs to find the missing $10.00 before calculating payments.\n\nMoney in\n\n$300.00\n\nStacks out\n\n$310.00\n\nDifference\n\n−$10.00\n\nCORRECTION\n\nAdd Casey’s missing $10.00 purchase.\n\nAdd the omitted $10 to Casey’s buy-ins. Both table totals become $310, and Casey’s net result becomes −$50.\n\nCorrected game ledger\nCorrected game ledger: buy-ins, cash-outs, and net results\nPLAYER\tPURCHASES\tTOTAL IN\tCASH-OUT\tNET\nAlex\t$40 + $40\t$80.00\t$18.75\t−$61.25\nMorgan\t$40\t$40.00\t$132.25\t+$92.25\nSam\t$40 + $40\t$80.00\t$58.50\t−$21.50\nJordan\t$40 + $20\t$60.00\t$100.50\t+$40.50\nCasey\t$40 + $10\t$50.00\t$0.00\t−$50.00\nTotals\tBalanced\t$310.00\t$310.00\t$0.00\nCalculate each player's net result.\n\nThe basic calculation is the same for every player. A positive result means the player should receive money. A negative result means the player owes money. A zero means the player is already square.\n\nSETTLEMENT FORMULA\n\nplayer net = final cash-out − total money in\n\nMorgan\n\n$132.25 − $40.00 = +$92.25\n\nCasey\n\n$0.00 − $50.00 = −$50.00\n\nMorgan and Jordan receive $132.75 total. Alex, Sam, and Casey owe the same $132.75. All player results therefore add up to zero.\n\nWithout Casey's missing add-on, the losses total only $122.75 and cannot fund the winners' $132.75.\n\nTurn those balances into payments.\n\nSettlement uses final net positions, not individual hands. Players who owe fund players who should receive until every balance reaches zero.\n\nFour payments settle this example: Casey splits the remaining $50.00 between Morgan and Jordan.\n\n01\n\nAlex\nMorgan\n\nAlex’s full loss\n\n$61.25\n02\n\nSam\nMorgan\n\nSam’s full loss\n\n$21.50\n03\n\nCasey\nMorgan\n\nFinishes Morgan’s $92.25 win\n\n$9.50\n04\n\nCasey\nJordan\n\nFinishes Jordan’s $40.50 win\n\n$40.50\n\nAfter these four payments, all five balances are zero.\n\nSpecial cases\nA buy-in was advanced\n\nRecord the player receiving the bank chips and, only while repayment is outstanding, the player who advanced the cash. Mark it repaid if they settle during the game.\n\nOne cash-out is missing\n\nDo not treat a blank as zero unless the player actually busted. A missing final stack keeps the table from proving that the bank balances.\n\nThe host acts as the bank\n\nA bank-style settlement can route every payment through one person. It is easier to coordinate, but may create more transfers than direct netting.\n\nThe totals differ by cents\n\nUse the same currency precision for purchases, cash-outs, and payments. Fix the source entry instead of hiding a rounding difference in the final list.\n\nPoker settlement questions.\nWhat does a poker settlement calculator calculate?\n+\n\nIt subtracts each player’s total money in from their final cash-out, then matches players who owe with players who should receive.\n\nWhy do total buy-ins have to equal total cash-outs?\n+\nDo rebuys and add-ons count as buy-ins?\n+\nWhat if one player fronts a rebuy for someone else?\n+\nDoes Mainpot hold or send the money?\n+\nCan a game be settled when the bank is still off?\n+\n\nREADY FOR THE NEXT TABLE\n\nRecord the game once. Settle from facts.\n\nCreate a room, share the code, and let the table keep one ledger from the opening buy-in through the final payment.\n\nStart a game\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  },
+  {
+    "width": 1440,
+    "route": "/self-host",
+    "status": 200,
+    "errors": [],
+    "title": "Self-Host Mainpot | Mainpot",
+    "url": "https://mainpot.app/self-host",
+    "headings": [
+      "Your game. Your server. Your data.",
+      "Start with the amount of infrastructure you actually need.",
+      "A small stack with clear boundaries.",
+      "Clone, install, run.",
+      "Control comes with operational work.",
+      "Self-hosting, without the fine print hidden.",
+      "The source and full deployment guide are public."
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "View the source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      },
+      {
+        "text": "Technical setup guide",
+        "href": "https://github.com/AnuragGowda/mainpot/blob/main/SETUP.md"
+      },
+      {
+        "text": "Deployment options",
+        "href": "#deployment-options"
+      },
+      {
+        "text": "Quick start",
+        "href": "#quick-start"
+      },
+      {
+        "text": "Common questions",
+        "href": "#hosting-faq"
+      },
+      {
+        "text": "Open the setup guide",
+        "href": "https://github.com/AnuragGowda/mainpot/blob/main/SETUP.md"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nStart a game\n\nOPEN SOURCE · MIT LICENSED\n\nYour game. Your server. Your data.\n\nMainpot can run privately in one browser, as a complete local stack, or as a shared deployment connected to infrastructure you control.\n\nSelf-hosting gives you control over where the application and game records live. It also makes you responsible for security, availability, backups, and upgrades when other people depend on the instance.\n\nView the source\nTechnical setup guide\n\nMAINPOT STACK\n\nOne application, three deployment models\n\nMIT\nWeb application\nNext.js 16 · Node.js 22+\nShared data\nPostgreSQL · Supabase Realtime\nIdentity\nSupabase Auth · anonymous rooms supported\nPayments\nCalculated only · never processed\nDeployment options\nQuick start\nCommon questions\n\nCHOOSE A MODEL\n\nStart with the amount of infrastructure you actually need.\n\nAll three options use the same Mainpot interface. The difference is where data is stored and whether the game can synchronize across devices.\n\n01\n\nSIMPLEST\n\nSingle-browser mode\n\nRun only the web app with no Supabase variables. Games stay in that browser’s local storage, so there is no account system or cross-device sync.\n\nRequires\nNode.js 22+\nStart with\nnpm run dev:app\n02\n\nFULLY LOCAL\n\nLocal full stack\n\nRun Mainpot with the bundled Supabase development stack for PostgreSQL, authentication, Realtime, and a local email inbox.\n\nRequires\nNode.js 22+ and Docker\nStart with\nnpm run dev\n03\n\nSHARED INSTANCE\n\nYour own deployment\n\nHost the Next.js application and connect it to a Supabase project you control for accounts, shared rooms, and live multi-device updates.\n\nRequires\nA Node host and Supabase\nStart with\nFollow the production guide\n\nWHAT RUNS WHERE\n\nA small stack with clear boundaries.\n\nMainpot’s web layer renders the room and settlement workflow. Supabase provides shared persistence, identity, authorization, and live updates. Payment transfers stay outside the application.\n\nIn single-browser mode, local storage replaces the shared data layer. That is useful for a private test or one-device game, but it is not a server deployment.\n\nPlayers\n\nPhones and browsers\n\nMainpot\n\nNext.js web application\n\nData layer\n\nSupabase or local storage\n\n$\n\nMainpot calculates who should pay whom. The actual payment happens separately using whatever method the table chooses.\n\nLOCAL QUICK START\n\nClone, install, run.\n\nThe default development command starts both the application and its local Supabase services. The first run downloads the required container images and applies the database migrations.\n\ngit clone https://github.com/AnuragGowda/mainpot.git\ncd mainpot\nnpm install\nnpm run dev\n\nOn macOS, the project uses OrbStack. Other platforms can use a compatible Docker runtime. No hosted Supabase account is required for the local stack.\n\nPRODUCTION REALITY\n\nControl comes with operational work.\n\nUse a production Supabase project or a hardened PostgreSQL and Supabase deployment.\n\nLink the production Supabase project, run `npx supabase db push`, then verify row-level security policies.\n\nServe the application over HTTPS and configure authentication redirects for its real domain.\n\nBack up the database, monitor the health endpoint, and plan how updates will be applied.\n\nKeep service-role credentials out of the browser and separate production from development.\n\nDo not expose the bundled local Supabase development stack directly to the public internet.\n\nQUESTIONS\n\nSelf-hosting, without the fine print hidden.\nIs Mainpot free and open source?\n+\n\nYes. Mainpot is published under the MIT License. You can inspect, run, modify, and deploy the source subject to that license.\n\nCan Mainpot run without Supabase?\n+\nIs Docker required to self-host Mainpot?\n+\nCan I run Mainpot on a home server?\n+\nDoes a self-hosted instance process poker payments?\n+\nIs the bundled local stack ready to expose to the internet?\n+\n\nREADY TO INSPECT THE STACK?\n\nThe source and full deployment guide are public.\n\nReview the code, license, database migrations, and production checklist before deciding how you want to run Mainpot.\n\nOpen the setup guide\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  },
+  {
+    "width": 1440,
+    "route": "/privacy",
+    "status": 200,
+    "errors": [],
+    "title": "Privacy policy | Mainpot",
+    "url": "https://mainpot.app/privacy",
+    "headings": [
+      "Privacy policy",
+      "Information we handle",
+      "How we use information",
+      "Guest and local use",
+      "Service providers and sharing",
+      "Retention, choices, and deletion",
+      "Security and age",
+      "Changes and contact"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "support@mainpot.app",
+        "href": "mailto:support@mainpot.app"
+      },
+      {
+        "text": "repository security page",
+        "href": "https://github.com/AnuragGowda/mainpot/security"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nStart a game\n\nLEGAL\n\nPrivacy policy\n\nMainpot collects only the information needed to keep a shared poker-night ledger working. It does not process payments or sell personal information.\n\nEffective August 30, 2026\n\nInformation we handle\n\nGame data can include display names, room details, buy-ins, rebuys, cash-outs, activity history, settlement transfers, and payment status. Optional profiles can include a username, bio, avatar, and payment handles.\n\nIf you create an account or use Google sign-in, we receive basic account information such as your email address, name, avatar, and an authentication identifier. We do not receive your Google password.\n\nIf you turn on game alerts, we store a device-specific push subscription and basic browser information needed to deliver and troubleshoot those alerts. Mainpot does not use that subscription for advertising.\n\nHow we use information\n\nWe use this information to authenticate you, synchronize games across devices, show the ledger to invited players, calculate settlements, prevent abuse, and improve reliability.\n\nGuest and local use\n\nGuest sessions use an anonymous identifier so participants can share a live game without creating an account. Hosted guest games are temporary: they expire within 48 hours after settlement and no later than seven days after creation. They are not attached to an account dashboard or permanent history.\n\nIn self-hosted local mode, game information can remain in that browser's storage instead of being synchronized to a hosted database.\n\nService providers and sharing\n\nMainpot uses Supabase for database, synchronization, and authentication services. Your browser or operating system's push service delivers optional game alerts. Google processes information when you choose Google sign-in. GitHub processes information you submit through public feedback or issue forms.\n\nGame information is shared with people who have access to that game. We do not sell personal information or use game data for targeted advertising.\n\nYour optional bio is visible to Mainpot members who find you and to your friends. It is not shown in game rooms or included in payment instructions.\n\nRetention, choices, and deletion\n\nAccount game history is retained while needed to provide the service. Temporary request counters are retained briefly to prevent abuse, and unused anonymous authentication records are periodically removed. You can avoid optional profile fields and use guest mode where available.\n\nGame alerts are optional. You can turn them off from the game room at any time; expired browser subscriptions are removed automatically.\n\nPermanent-account holders can export their data or request deletion from the Dashboard. For help, contact support@mainpot.app privately rather than posting personal information in a public issue.\n\nSecurity and age\n\nWe use reasonable safeguards and access controls, but no online service can guarantee absolute security. Mainpot is not intended for children under 18.\n\nChanges and contact\n\nWe may update this policy as features or providers change. Questions can be raised through the repository security page.\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  },
+  {
+    "width": 1440,
+    "route": "/terms",
+    "status": 200,
+    "errors": [],
+    "title": "Terms of use | Mainpot",
+    "url": "https://mainpot.app/terms",
+    "headings": [
+      "Terms of use",
+      "Using Mainpot",
+      "A ledger, not a payment service",
+      "Your games and invite links",
+      "Accounts and acceptable use",
+      "Open-source software",
+      "Availability and liability",
+      "Changes and contact"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "Sign in",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "public project repository",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nSign in\nStart a game\n\nLEGAL\n\nTerms of use\n\nMainpot is a shared record for friendly home poker games. These terms explain what the service does—and what it does not do.\n\nEffective August 30, 2026\n\nUsing Mainpot\n\nBy using Mainpot, you agree to these terms. You must be legally able to enter this agreement and use the service only in ways permitted where you live.\n\nMainpot is intended for adults organizing lawful, private games. It is not designed for real-money online gambling, wagering with strangers, or commercial casino operations.\n\nA ledger, not a payment service\n\nMainpot records buy-ins, cash-outs, and suggested settlement transfers. It does not hold funds, process payments, extend credit, determine winners, or guarantee that anyone pays. Payment handles are optional notes shared with people in a game.\n\nYour games and invite links\n\nYou are responsible for the accuracy of information you enter and for deciding who can access a game. Anyone with a room code or invite link may be able to join or view game details, so share them only with people you trust.\n\nHosts can manage participants and ledger entries. Players can enter their own cash-out amount, while hosts can correct any player's amount so the table reconciles.\n\nAccounts and acceptable use\n\nYou may use guest mode or create an account where available. Do not interfere with the service, access another person's account or game without permission, upload unlawful content, or use Mainpot to facilitate illegal activity.\n\nDuring the public beta, features are free subject to fair-use limits that protect the shared service. We may limit excessive room creation, automated requests, player counts, or ledger activity.\n\nOpen-source software\n\nThe Mainpot source code is available under the MIT License. That license governs your use of the code; these terms govern your use of the hosted service.\n\nAvailability and liability\n\nThe service is provided “as is” and may change, become unavailable, or contain errors. To the extent permitted by law, Mainpot's contributors are not liable for losses arising from incorrect entries, settlements, payments, game activity, or use of the service.\n\nChanges and contact\n\nWe may update these terms as the product evolves. Material changes will be reflected by a new effective date. Questions can be raised through the public project repository.\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  },
+  {
+    "width": 390,
+    "route": "/",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/",
+    "headings": [
+      "Keep the game friendly. Keep the money exact.",
+      "The Basement Game",
+      "How a game works.",
+      "Before you deal.",
+      "Free and open source.",
+      "Ready for your next poker night?"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Start a cash game",
+        "href": "/create"
+      },
+      {
+        "text": "Join a table",
+        "href": "/join"
+      },
+      {
+        "text": "Try the settlement calculator →",
+        "href": "/poker-settlement-calculator"
+      },
+      {
+        "text": "Explore self-hosting",
+        "href": "/self-host"
+      },
+      {
+        "text": "View source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      },
+      {
+        "text": "Start a game →",
+        "href": "/create"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nStart game\nFOR HOME POKER CASH GAMES\nKeep the game friendly. Keep the money exact.\n\nTrack buy-ins, count the final stacks, and see who owes whom. One record for the whole table.\n\nStart a cash game\nJoin a table\nNo app or player account\nSyncs across devices\nTry the settlement calculator →\n\nFRIDAY NIGHT\n\nThe Basement Game\nLive\n\nBANK\n\n$360\n\nBUY-IN\n\n$40\n\nPLAYERS\n\n4\n\nAP\nAlex\n$80\nVerified\nMK\nMorgan\n$120\nVerified\nSR\nSam\n$80\nVerified\nJT\nJordan\n$80\nVerified\n\nENTER CASH-OUTS\n\n4 of 4 entered\nAP\nAlex\n$40\nMK\nMorgan\n$160\nSR\nSam\n$120\nJT\nJordan\n$40\n✓\n\nALL STACKS ENTERED\n\nBank balanced. Preparing payments.\n\nFINAL SETTLEMENT\n\nTwo payments. All chips accounted for.\n\nA\nAlex\nM\nMorgan\n$40\nJ\nJordan\nS\nSam\n$40\n\nRoom code\n\nRIVER7\n\nHow a game works.\n01\nStart a table\n\nSet the buy-in and invite everyone with a code or QR link.\n\n02\nRecord the buy-ins\n\nLog each buy-in and rebuy. Everyone can follow the totals.\n\n03\nSettle up\n\nCount the final stacks, resolve any difference, and see who owes whom.\n\nBefore you deal.\nDo I need to create an account?\n\nNo. Start or join as a guest. An optional account keeps your game history and helps you find regular players.\n\nWho can change the ledger?\nWhat if the bank does not balance?\nFree and open source.\n\nPlay here, or run Mainpot on your own server.\n\nExplore self-hosting\nView source\nReady for your next poker night?\nStart a game\n→\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  },
+  {
+    "width": 390,
+    "route": "/create",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/create",
+    "headings": [
+      "Start a game."
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Join a gameJoin",
+        "href": "/join"
+      },
+      {
+        "text": "Create game",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nJoin\n\nHOST A TABLE\n\nStart a game.\n\nSet the buy-in, then invite your table with a code.\n\nYour name\nGame name\nBuy-in amount\n$\nAdd my opening buy-in\n\nYour opening buy-in will be recorded when you create the game.\n\nCreate game"
+  },
+  {
+    "width": 390,
+    "route": "/join",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/join",
+    "headings": [
+      "Join your table."
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Join game",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nStart game\n\nJOIN THE TABLE\n\nJoin your table.\n\nEnter the host’s six-character code or paste an invite link.\n\nYour name\nRoom code\nJoin game\n\nCodes never use 0, 1, I, or O."
+  },
+  {
+    "width": 390,
+    "route": "/signin",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/signin",
+    "headings": [
+      "Keep every settled game in one place.",
+      "Welcome back"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Continue with Google",
+        "href": null
+      },
+      {
+        "text": "Sign in",
+        "href": null
+      },
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "href": null
+      },
+      {
+        "text": "Create an account",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nStart game\nWelcome back\n\nView your saved games and results.\n\nContinue with Google\nOR\nEmail\nPassword\nSign in\nForgot your password? Get a sign-in link\n\nNew to Mainpot? Create an account"
+  },
+  {
+    "width": 390,
+    "route": "/dashboard",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/signin?next=/dashboard",
+    "headings": [
+      "Keep every settled game in one place.",
+      "Welcome back"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Continue with Google",
+        "href": null
+      },
+      {
+        "text": "Sign in",
+        "href": null
+      },
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "href": null
+      },
+      {
+        "text": "Create an account",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nStart game\nWelcome back\n\nView your saved games and results.\n\nContinue with Google\nOR\nEmail\nPassword\nSign in\nForgot your password? Get a sign-in link\n\nNew to Mainpot? Create an account"
+  },
+  {
+    "width": 390,
+    "route": "/friends",
+    "status": 200,
+    "errors": [],
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "url": "https://mainpot.app/signin?next=/friends",
+    "headings": [
+      "Keep every settled game in one place.",
+      "Welcome back"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "Continue with Google",
+        "href": null
+      },
+      {
+        "text": "Sign in",
+        "href": null
+      },
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "href": null
+      },
+      {
+        "text": "Create an account",
+        "href": null
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nStart game\nWelcome back\n\nView your saved games and results.\n\nContinue with Google\nOR\nEmail\nPassword\nSign in\nForgot your password? Get a sign-in link\n\nNew to Mainpot? Create an account"
+  },
+  {
+    "width": 390,
+    "route": "/poker-settlement-calculator",
+    "status": 200,
+    "errors": [],
+    "title": "Poker Settlement Calculator for Home Games | Mainpot",
+    "url": "https://mainpot.app/poker-settlement-calculator",
+    "headings": [
+      "Poker settlement calculator",
+      "Who owes whom?",
+      "Balance the bank before settling.",
+      "See the ledger move from input to settlement.",
+      "A missing add-on creates a $10.00 mismatch.",
+      "Calculate each player's net result.",
+      "Turn those balances into payments.",
+      "Special cases",
+      "Poker settlement questions.",
+      "Record the game once. Settle from facts."
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "How settlement works ↓",
+        "href": "#overview"
+      },
+      {
+        "text": "Add player",
+        "href": null
+      },
+      {
+        "text": "Clear example",
+        "href": null
+      },
+      {
+        "text": "View payments ↓",
+        "href": "#calculator-results"
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "",
+        "href": null
+      },
+      {
+        "text": "Track the next game in Mainpot",
+        "href": "/create"
+      },
+      {
+        "text": "The problem",
+        "href": "#overview"
+      },
+      {
+        "text": "Animated walkthrough",
+        "href": "#walkthrough"
+      },
+      {
+        "text": "Five-player example",
+        "href": "#example"
+      },
+      {
+        "text": "Calculate each result",
+        "href": "#net-results"
+      },
+      {
+        "text": "Build the payment list",
+        "href": "#payments"
+      },
+      {
+        "text": "Special cases",
+        "href": "#edge-cases"
+      },
+      {
+        "text": "Questions",
+        "href": "#faq"
+      },
+      {
+        "text": "Pause",
+        "href": null
+      },
+      {
+        "text": "01Record",
+        "href": null
+      },
+      {
+        "text": "02Cash out",
+        "href": null
+      },
+      {
+        "text": "03Reconcile",
+        "href": null
+      },
+      {
+        "text": "04Settle",
+        "href": null
+      },
+      {
+        "text": "Start a game",
+        "href": "/create"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nStart game\nPoker settlement calculator\n\nEnter buy-ins and final stacks to see who pays whom. No account needed.\n\nHow settlement works ↓\nWho owes whom?\nSettlement worksheet\n\nExample game · change any value to try it.\n\nAdd player\nClear example\nView payments ↓\nPlayer 1\nMONEY IN\nFINAL STACK\nPlayer 2\nMONEY IN\nFINAL STACK\nPlayer 3\nMONEY IN\nFINAL STACK\nPlayer 4\nMONEY IN\nFINAL STACK\nPlayer 5\nMONEY IN\nFINAL STACK\n\nMONEY IN\n\n$310.00\n\nFINAL STACKS\n\n$310.00\n\nBank balanced\n\nThe payment list uses the recorded results as entered.\n\nPAYMENT LIST\n\n4 payments\nAlexMorgan\n$61.25\nCaseyMorgan\n$31.00\nSamJordan\n$21.50\nCaseyJordan\n$19.00\nTrack the next game in Mainpot\nOn this page\n+\nBalance the bank before settling.\n\nThe bank needs two numbers per player: money in and final cash-out. Their difference is the player's result.\n\nCheck every rebuy and cash-out before money moves. Mainpot keeps those entries with the game so the table can resolve a mismatch first.\n\n1. Balance the bank. Total money in must equal total final stacks.\n2. Calculate results. Cash-out minus money in gives each player’s net.\n3. Route payments. Players who owe pay those who are owed.\nSee the ledger move from input to settlement.\n\nThis five-player example starts with purchases, finds the mismatch, and ends with a corrected settlement.\n\nThe Basement Game\n\nFriday · settlement review\n\nSTAKES\n$0.25 / $0.50\nBUY-IN\n$40.00\nPLAYERS\n5\nRecord\nCash out\nReconcile\nSettle\n\nLIVE LEDGER\n\nEvery chip purchase creates an entry.\n\nThe opening buy-ins, rebuys, and add-ons stay attached to the players who received the chips. Before cash-out, the approved ledger shows $300.00 in the bank.\n\nRecorded bank\n$300.00\nSeven approved purchases\nLEDGER ENTRY\nAMOUNT\nAlex\n$80.00 in\nMorgan\n$40.00 in\nSam\n$80.00 in\nJordan\n$60.00 in\nCasey\n$40.00 in\nStep 1 of 4\nCash out\nA missing add-on creates a $10.00 mismatch.\n\nIn this $0.25/$0.50 game, Alex and Sam rebuy, Jordan adds $20, and Casey adds $10. Casey's add-on is missing, so the ledger shows $300.00 while $310.00 is in play.\n\nThe five final stacks total $310.00. The $10.00 gap is an incomplete entry, not a rounding problem.\n\nThe calculator should stop here.\n\nRecorded buy-ins are $300.00. Final stacks are $310.00. The table needs to find the missing $10.00 before calculating payments.\n\nMoney in\n\n$300.00\n\nStacks out\n\n$310.00\n\nDifference\n\n−$10.00\n\nCORRECTION\n\nAdd Casey’s missing $10.00 purchase.\n\nAdd the omitted $10 to Casey’s buy-ins. Both table totals become $310, and Casey’s net result becomes −$50.\n\nCorrected game ledger\n\nScroll sideways to see cash-outs and net results →\n\nCorrected game ledger: buy-ins, cash-outs, and net results\nPLAYER\tPURCHASES\tTOTAL IN\tCASH-OUT\tNET\nAlex\t$40 + $40\t$80.00\t$18.75\t−$61.25\nMorgan\t$40\t$40.00\t$132.25\t+$92.25\nSam\t$40 + $40\t$80.00\t$58.50\t−$21.50\nJordan\t$40 + $20\t$60.00\t$100.50\t+$40.50\nCasey\t$40 + $10\t$50.00\t$0.00\t−$50.00\nTotals\tBalanced\t$310.00\t$310.00\t$0.00\nCalculate each player's net result.\n\nThe basic calculation is the same for every player. A positive result means the player should receive money. A negative result means the player owes money. A zero means the player is already square.\n\nSETTLEMENT FORMULA\n\nplayer net = final cash-out − total money in\n\nMorgan\n\n$132.25 − $40.00 = +$92.25\n\nCasey\n\n$0.00 − $50.00 = −$50.00\n\nMorgan and Jordan receive $132.75 total. Alex, Sam, and Casey owe the same $132.75. All player results therefore add up to zero.\n\nWithout Casey's missing add-on, the losses total only $122.75 and cannot fund the winners' $132.75.\n\nTurn those balances into payments.\n\nSettlement uses final net positions, not individual hands. Players who owe fund players who should receive until every balance reaches zero.\n\nFour payments settle this example: Casey splits the remaining $50.00 between Morgan and Jordan.\n\n01\n\nAlex\nMorgan\n\nAlex’s full loss\n\n$61.25\n02\n\nSam\nMorgan\n\nSam’s full loss\n\n$21.50\n03\n\nCasey\nMorgan\n\nFinishes Morgan’s $92.25 win\n\n$9.50\n04\n\nCasey\nJordan\n\nFinishes Jordan’s $40.50 win\n\n$40.50\n\nAfter these four payments, all five balances are zero.\n\nSpecial cases\nA buy-in was advanced\n\nRecord the player receiving the bank chips and, only while repayment is outstanding, the player who advanced the cash. Mark it repaid if they settle during the game.\n\nOne cash-out is missing\n\nDo not treat a blank as zero unless the player actually busted. A missing final stack keeps the table from proving that the bank balances.\n\nThe host acts as the bank\n\nA bank-style settlement can route every payment through one person. It is easier to coordinate, but may create more transfers than direct netting.\n\nThe totals differ by cents\n\nUse the same currency precision for purchases, cash-outs, and payments. Fix the source entry instead of hiding a rounding difference in the final list.\n\nPoker settlement questions.\nWhat does a poker settlement calculator calculate?\n+\n\nIt subtracts each player’s total money in from their final cash-out, then matches players who owe with players who should receive.\n\nWhy do total buy-ins have to equal total cash-outs?\n+\nDo rebuys and add-ons count as buy-ins?\n+\nWhat if one player fronts a rebuy for someone else?\n+\nDoes Mainpot hold or send the money?\n+\nCan a game be settled when the bank is still off?\n+\n\nREADY FOR THE NEXT TABLE\n\nRecord the game once. Settle from facts.\n\nCreate a room, share the code, and let the table keep one ledger from the opening buy-in through the final payment.\n\nStart a game\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  },
+  {
+    "width": 390,
+    "route": "/self-host",
+    "status": 200,
+    "errors": [],
+    "title": "Self-Host Mainpot | Mainpot",
+    "url": "https://mainpot.app/self-host",
+    "headings": [
+      "Your game. Your server. Your data.",
+      "Start with the amount of infrastructure you actually need.",
+      "A small stack with clear boundaries.",
+      "Clone, install, run.",
+      "Control comes with operational work.",
+      "Self-hosting, without the fine print hidden.",
+      "The source and full deployment guide are public."
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "View the source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      },
+      {
+        "text": "Technical setup guide",
+        "href": "https://github.com/AnuragGowda/mainpot/blob/main/SETUP.md"
+      },
+      {
+        "text": "Deployment options",
+        "href": "#deployment-options"
+      },
+      {
+        "text": "Quick start",
+        "href": "#quick-start"
+      },
+      {
+        "text": "Common questions",
+        "href": "#hosting-faq"
+      },
+      {
+        "text": "Open the setup guide",
+        "href": "https://github.com/AnuragGowda/mainpot/blob/main/SETUP.md"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nStart game\n\nOPEN SOURCE · MIT LICENSED\n\nYour game. Your server. Your data.\n\nMainpot can run privately in one browser, as a complete local stack, or as a shared deployment connected to infrastructure you control.\n\nSelf-hosting gives you control over where the application and game records live. It also makes you responsible for security, availability, backups, and upgrades when other people depend on the instance.\n\nView the source\nTechnical setup guide\n\nMAINPOT STACK\n\nOne application, three deployment models\n\nMIT\nWeb application\nNext.js 16 · Node.js 22+\nShared data\nPostgreSQL · Supabase Realtime\nIdentity\nSupabase Auth · anonymous rooms supported\nPayments\nCalculated only · never processed\nDeployment options\nQuick start\nCommon questions\n\nCHOOSE A MODEL\n\nStart with the amount of infrastructure you actually need.\n\nAll three options use the same Mainpot interface. The difference is where data is stored and whether the game can synchronize across devices.\n\n01\n\nSIMPLEST\n\nSingle-browser mode\n\nRun only the web app with no Supabase variables. Games stay in that browser’s local storage, so there is no account system or cross-device sync.\n\nRequires\nNode.js 22+\nStart with\nnpm run dev:app\n02\n\nFULLY LOCAL\n\nLocal full stack\n\nRun Mainpot with the bundled Supabase development stack for PostgreSQL, authentication, Realtime, and a local email inbox.\n\nRequires\nNode.js 22+ and Docker\nStart with\nnpm run dev\n03\n\nSHARED INSTANCE\n\nYour own deployment\n\nHost the Next.js application and connect it to a Supabase project you control for accounts, shared rooms, and live multi-device updates.\n\nRequires\nA Node host and Supabase\nStart with\nFollow the production guide\n\nWHAT RUNS WHERE\n\nA small stack with clear boundaries.\n\nMainpot’s web layer renders the room and settlement workflow. Supabase provides shared persistence, identity, authorization, and live updates. Payment transfers stay outside the application.\n\nIn single-browser mode, local storage replaces the shared data layer. That is useful for a private test or one-device game, but it is not a server deployment.\n\nPlayers\n\nPhones and browsers\n\nMainpot\n\nNext.js web application\n\nData layer\n\nSupabase or local storage\n\n$\n\nMainpot calculates who should pay whom. The actual payment happens separately using whatever method the table chooses.\n\nLOCAL QUICK START\n\nClone, install, run.\n\nThe default development command starts both the application and its local Supabase services. The first run downloads the required container images and applies the database migrations.\n\ngit clone https://github.com/AnuragGowda/mainpot.git\ncd mainpot\nnpm install\nnpm run dev\n\nOn macOS, the project uses OrbStack. Other platforms can use a compatible Docker runtime. No hosted Supabase account is required for the local stack.\n\nPRODUCTION REALITY\n\nControl comes with operational work.\n\nUse a production Supabase project or a hardened PostgreSQL and Supabase deployment.\n\nLink the production Supabase project, run `npx supabase db push`, then verify row-level security policies.\n\nServe the application over HTTPS and configure authentication redirects for its real domain.\n\nBack up the database, monitor the health endpoint, and plan how updates will be applied.\n\nKeep service-role credentials out of the browser and separate production from development.\n\nDo not expose the bundled local Supabase development stack directly to the public internet.\n\nQUESTIONS\n\nSelf-hosting, without the fine print hidden.\nIs Mainpot free and open source?\n+\n\nYes. Mainpot is published under the MIT License. You can inspect, run, modify, and deploy the source subject to that license.\n\nCan Mainpot run without Supabase?\n+\nIs Docker required to self-host Mainpot?\n+\nCan I run Mainpot on a home server?\n+\nDoes a self-hosted instance process poker payments?\n+\nIs the bundled local stack ready to expose to the internet?\n+\n\nREADY TO INSPECT THE STACK?\n\nThe source and full deployment guide are public.\n\nReview the code, license, database migrations, and production checklist before deciding how you want to run Mainpot.\n\nOpen the setup guide\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  },
+  {
+    "width": 390,
+    "route": "/privacy",
+    "status": 200,
+    "errors": [],
+    "title": "Privacy policy | Mainpot",
+    "url": "https://mainpot.app/privacy",
+    "headings": [
+      "Privacy policy",
+      "Information we handle",
+      "How we use information",
+      "Guest and local use",
+      "Service providers and sharing",
+      "Retention, choices, and deletion",
+      "Security and age",
+      "Changes and contact"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "support@mainpot.app",
+        "href": "mailto:support@mainpot.app"
+      },
+      {
+        "text": "repository security page",
+        "href": "https://github.com/AnuragGowda/mainpot/security"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nStart game\n\nLEGAL\n\nPrivacy policy\n\nMainpot collects only the information needed to keep a shared poker-night ledger working. It does not process payments or sell personal information.\n\nEffective August 30, 2026\n\nInformation we handle\n\nGame data can include display names, room details, buy-ins, rebuys, cash-outs, activity history, settlement transfers, and payment status. Optional profiles can include a username, bio, avatar, and payment handles.\n\nIf you create an account or use Google sign-in, we receive basic account information such as your email address, name, avatar, and an authentication identifier. We do not receive your Google password.\n\nIf you turn on game alerts, we store a device-specific push subscription and basic browser information needed to deliver and troubleshoot those alerts. Mainpot does not use that subscription for advertising.\n\nHow we use information\n\nWe use this information to authenticate you, synchronize games across devices, show the ledger to invited players, calculate settlements, prevent abuse, and improve reliability.\n\nGuest and local use\n\nGuest sessions use an anonymous identifier so participants can share a live game without creating an account. Hosted guest games are temporary: they expire within 48 hours after settlement and no later than seven days after creation. They are not attached to an account dashboard or permanent history.\n\nIn self-hosted local mode, game information can remain in that browser's storage instead of being synchronized to a hosted database.\n\nService providers and sharing\n\nMainpot uses Supabase for database, synchronization, and authentication services. Your browser or operating system's push service delivers optional game alerts. Google processes information when you choose Google sign-in. GitHub processes information you submit through public feedback or issue forms.\n\nGame information is shared with people who have access to that game. We do not sell personal information or use game data for targeted advertising.\n\nYour optional bio is visible to Mainpot members who find you and to your friends. It is not shown in game rooms or included in payment instructions.\n\nRetention, choices, and deletion\n\nAccount game history is retained while needed to provide the service. Temporary request counters are retained briefly to prevent abuse, and unused anonymous authentication records are periodically removed. You can avoid optional profile fields and use guest mode where available.\n\nGame alerts are optional. You can turn them off from the game room at any time; expired browser subscriptions are removed automatically.\n\nPermanent-account holders can export their data or request deletion from the Dashboard. For help, contact support@mainpot.app privately rather than posting personal information in a public issue.\n\nSecurity and age\n\nWe use reasonable safeguards and access controls, but no online service can guarantee absolute security. Mainpot is not intended for children under 18.\n\nChanges and contact\n\nWe may update this policy as features or providers change. Questions can be raised through the repository security page.\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  },
+  {
+    "width": 390,
+    "route": "/terms",
+    "status": 200,
+    "errors": [],
+    "title": "Terms of use | Mainpot",
+    "url": "https://mainpot.app/terms",
+    "headings": [
+      "Terms of use",
+      "Using Mainpot",
+      "A ledger, not a payment service",
+      "Your games and invite links",
+      "Accounts and acceptable use",
+      "Open-source software",
+      "Availability and liability",
+      "Changes and contact"
+    ],
+    "actions": [
+      {
+        "text": "Skip to content",
+        "href": "#main-content"
+      },
+      {
+        "text": "Mainpot",
+        "href": "/"
+      },
+      {
+        "text": "",
+        "href": "/signin"
+      },
+      {
+        "text": "Start a gameStart game",
+        "href": "/create"
+      },
+      {
+        "text": "public project repository",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      },
+      {
+        "text": "Self-host",
+        "href": "/self-host"
+      },
+      {
+        "text": "Feedback",
+        "href": "/feedback"
+      },
+      {
+        "text": "Terms",
+        "href": "/terms"
+      },
+      {
+        "text": "Privacy",
+        "href": "/privacy"
+      },
+      {
+        "text": "Open source",
+        "href": "https://github.com/AnuragGowda/mainpot"
+      }
+    ],
+    "overflow": false,
+    "body": "Skip to content\nMainpot\nStart game\n\nLEGAL\n\nTerms of use\n\nMainpot is a shared record for friendly home poker games. These terms explain what the service does—and what it does not do.\n\nEffective August 30, 2026\n\nUsing Mainpot\n\nBy using Mainpot, you agree to these terms. You must be legally able to enter this agreement and use the service only in ways permitted where you live.\n\nMainpot is intended for adults organizing lawful, private games. It is not designed for real-money online gambling, wagering with strangers, or commercial casino operations.\n\nA ledger, not a payment service\n\nMainpot records buy-ins, cash-outs, and suggested settlement transfers. It does not hold funds, process payments, extend credit, determine winners, or guarantee that anyone pays. Payment handles are optional notes shared with people in a game.\n\nYour games and invite links\n\nYou are responsible for the accuracy of information you enter and for deciding who can access a game. Anyone with a room code or invite link may be able to join or view game details, so share them only with people you trust.\n\nHosts can manage participants and ledger entries. Players can enter their own cash-out amount, while hosts can correct any player's amount so the table reconciles.\n\nAccounts and acceptable use\n\nYou may use guest mode or create an account where available. Do not interfere with the service, access another person's account or game without permission, upload unlawful content, or use Mainpot to facilitate illegal activity.\n\nDuring the public beta, features are free subject to fair-use limits that protect the shared service. We may limit excessive room creation, automated requests, player counts, or ledger activity.\n\nOpen-source software\n\nThe Mainpot source code is available under the MIT License. That license governs your use of the code; these terms govern your use of the hosted service.\n\nAvailability and liability\n\nThe service is provided “as is” and may change, become unavailable, or contain errors. To the extent permitted by law, Mainpot's contributors are not liable for losses arising from incorrect entries, settlements, payments, game activity, or use of the service.\n\nChanges and contact\n\nWe may update these terms as the product evolves. Material changes will be reflected by a new effective date. Questions can be raised through the public project repository.\n\nBuilt for home games.\n\n© 2026 Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.\n\nSelf-host\nFeedback\nTerms\nPrivacy\nOpen source"
+  }
+]
