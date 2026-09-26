@@ -24,7 +24,9 @@
     "test:db:assurance:isolated": "node scripts/test-realtime.mts --database-assurance-only",
     "test:product-ops:canary": "node scripts/test-product-ops-canary.mts",
     "test:db:soak": "node scripts/test-database-soak.mts",
-    "push:generate-keys": "web-push generate-vapid-keys"
+    "push:generate-keys": "web-push generate-vapid-keys",
+    "test:e2e:auth": "node scripts/test-realtime.mts --auth-email",
+    "test:operations:isolated": "node scripts/test-realtime.mts --operational-assurance"
   },
   "engines": {
     "node": ">=22.0.0"

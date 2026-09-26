@@ -44,7 +44,7 @@ jobs:
   database-assurance:
     name: Database migrations and RLS assurance
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -52,7 +52,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run test:db:assurance:isolated
+      - run: npm run test:operations:isolated
 
   mobile-smoke:
     name: Mobile browser smoke tests
@@ -67,3 +67,17 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e:mobile
+
+  auth-email:
+    name: Confirmed-email authentication and recovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: PLAYWRIGHT_MOBILE=1 npm run test:e2e:auth -- --workers=2

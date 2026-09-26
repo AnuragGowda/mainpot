@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,7 +14,9 @@ const testDistDirectory = ".next-e2e";
 const testConfig = join(repositoryRoot, "tests", "supabase", "config.toml");
 const sourceMigrations = join(repositoryRoot, "supabase", "migrations");
 const stackLockDirectory = join(tmpdir(), "mainpot-e2e-supabase.lock");
-const databaseAssuranceOnly = process.argv.includes("--database-assurance-only");
+const operationalAssurance = process.argv.includes("--operational-assurance");
+const databaseAssuranceOnly = process.argv.includes("--database-assurance-only") || operationalAssurance;
+const authEmailOnly = process.argv.includes("--auth-email");
 
 type RunOptions = {
   capture?: boolean;
@@ -56,7 +58,11 @@ function createTestWorkdir() {
   const workdir = mkdtempSync(join(tmpdir(), "mainpot-e2e-supabase-"));
   const supabaseDirectory = join(workdir, "supabase");
   mkdirSync(supabaseDirectory);
-  cpSync(testConfig, join(supabaseDirectory, "config.toml"));
+  const configPath = join(supabaseDirectory, "config.toml");
+  cpSync(testConfig, configPath);
+  if (authEmailOnly) {
+    writeFileSync(configPath, readFileSync(configPath, "utf8").replace("enable_confirmations = false", "enable_confirmations = true"));
+  }
   symlinkSync(sourceMigrations, join(supabaseDirectory, "migrations"), "dir");
   return workdir;
 }
@@ -134,7 +140,7 @@ try {
       "test-early-cashout-phase-race.mts", "test-game-creation-idempotency.mts",
       "test-payment-plan-security.mts", "test-atomic-ledger-activity.mts",
       "test-lobby-name-security.mts", "test-seat-recovery-security.mts", "test-seat-claim-security.mts", "test-seat-write-security.mts",
-      "test-maintenance-privileges.mts",
+      "test-maintenance-privileges.mts", "test-correction-lock-order.mts", "test-profile-entitlement-security.mts", "test-game-participant-write-security.mts", "test-atomic-lifecycle-activity.mts",
     ];
     const focusedScripts = process.env.MAINPOT_DB_ASSURANCE_SCRIPTS?.split(",");
     if (focusedScripts?.some(script => !assuranceScripts.includes(script))) {
@@ -151,6 +157,12 @@ try {
     }
     if (failures.length) throw new AggregateError(failures, "Database assurance scripts failed");
   }
+  if (operationalAssurance) {
+    const operationalEnv = { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl };
+    run(process.execPath, [join(scriptDirectory, "test-database-soak.mts")], { env: { ...operationalEnv, SOAK_DURATION_MS: process.env.SOAK_DURATION_MS ?? "300000" } });
+    run(process.execPath, [join(scriptDirectory, "test-local-recovery.mts")], { env: operationalEnv });
+    run(process.execPath, [join(scriptDirectory, "test-product-ops-canary.mts")], { env: operationalEnv });
+  }
   if (!databaseAssuranceOnly) {
     console.log("Checking locked payment plan security before browser flows…");
     run(process.execPath, [join(scriptDirectory, "test-payment-plan-security.mts")], {
@@ -159,7 +171,7 @@ try {
     console.log("Running realtime browser tests…");
     const result = spawnSync(
       "npx",
-      ["playwright", "test", "tests/e2e/realtime.spec.ts", ...process.argv.slice(2)],
+      ["playwright", "test", authEmailOnly ? "tests/e2e/auth-email.spec.ts" : "tests/e2e/realtime.spec.ts", ...process.argv.slice(2).filter(arg => arg !== "--auth-email")],
       {
         stdio: "inherit",
         env: {
@@ -171,6 +183,7 @@ try {
           NEXT_E2E_DIST_DIR: testDistDirectory,
           PLAYWRIGHT_PORT: testAppPort,
           PLAYWRIGHT_REALTIME: "1",
+          PLAYWRIGHT_AUTH_EMAIL: authEmailOnly ? "1" : "0",
         },
       },
     );

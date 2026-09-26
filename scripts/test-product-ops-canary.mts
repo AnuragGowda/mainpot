@@ -6,7 +6,8 @@ const supabaseCommand = process.platform === "win32" ? "supabase.cmd" : "supabas
 const timeoutMs = 3_000;
 
 function localStatus() {
-  const status = JSON.parse(execFileSync(supabaseCommand, ["status", "--output", "json"], { encoding: "utf8" }));
+  const status = JSON.parse(execFileSync(supabaseCommand, [...(process.env.SUPABASE_WORKDIR ? ["--workdir", process.env.SUPABASE_WORKDIR] : []), "status", "--output", "json"], { encoding: "utf8" }));
+  if (process.env.SUPABASE_EXPECTED_API_URL && status.API_URL !== process.env.SUPABASE_EXPECTED_API_URL) throw new Error("Canary API did not match the disposable stack.");
   if (!/^https?:\/\/(127\.0\.0\.1|localhost)(:|$)/.test(status.API_URL ?? "")) {
     throw new Error(`Refusing to run against non-local Supabase URL: ${status.API_URL}`);
   }

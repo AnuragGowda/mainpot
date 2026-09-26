@@ -13,7 +13,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? localBaseURL;
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: isRealtimeSuite
+  testMatch: process.env.PLAYWRIGHT_AUTH_EMAIL === "1" ? "**/auth-email.spec.ts" : isRealtimeSuite
     ? "**/realtime.spec.ts"
     : ["**/smoke.spec.ts", "**/entry-ux.spec.ts"],
   fullyParallel: true,
