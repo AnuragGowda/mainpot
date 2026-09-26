@@ -251,12 +251,16 @@ test.describe("public local-mode experience", () => {
     await expect(page.getByRole("tab", { name: "Bank" })).toHaveCount(0);
     await fullPlanSummary.click();
     await expect(fullPlan.getByRole("heading", { name: "Bank settlements" })).toBeVisible();
-    await expect(fullPlan.getByText("Settlements (bank: Casey):", { exact: true })).toBeVisible();
+    const finalizedBank = fullPlan.getByRole("combobox", { name: "Who is the bank?" });
+    await expect(finalizedBank).toBeDisabled();
+    await expect(finalizedBank).toHaveText("Casey");
     await page.reload();
     const reloadedFullPlan = page.locator('[data-testid="full-settlement-plan"]');
     await reloadedFullPlan.locator(":scope > summary").click();
     await expect(reloadedFullPlan.getByRole("heading", { name: "Bank settlements" })).toBeVisible();
-    await expect(reloadedFullPlan.getByText("Settlements (bank: Casey):", { exact: true })).toBeVisible();
+    const reloadedBank = reloadedFullPlan.getByRole("combobox", { name: "Who is the bank?" });
+    await expect(reloadedBank).toBeDisabled();
+    await expect(reloadedBank).toHaveText("Casey");
     const feedbackPrompt = page.getByText("How did game night go?", { exact: true });
     await expect(feedbackPrompt).toBeVisible();
     const gameHeading = page.getByRole("heading", { name: "Friday test game" });
