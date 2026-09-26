@@ -454,10 +454,40 @@ test("keeps a zero cash-out draft through a delayed failure and retries it", asy
     await expect(cashOut).toHaveValue("0");
 
     await host.unroute("**/rest/v1/cash_outs*", stallFirstCashOutSave);
+    let releaseSnapshotRead: (() => void) | undefined;
+    const snapshotReadReleased = new Promise<void>((resolve) => {
+      releaseSnapshotRead = resolve;
+    });
+    let markSnapshotReadHeld: (() => void) | undefined;
+    const snapshotReadHeld = new Promise<void>((resolve) => {
+      markSnapshotReadHeld = resolve;
+    });
+    let successfulSaveStarted = false;
+    const holdSnapshotAfterSuccessfulSave = async (route: Route) => {
+      if (route.request().method() === "POST") {
+        successfulSaveStarted = true;
+        await route.continue();
+        return;
+      }
+      if (route.request().method() === "GET" && successfulSaveStarted) {
+        markSnapshotReadHeld?.();
+        await snapshotReadReleased;
+      }
+      await route.continue();
+    };
+    await host.route("**/rest/v1/cash_outs*", holdSnapshotAfterSuccessfulSave);
     await cashOut.focus();
     await cashOut.blur();
     await expect(host.getByText("Saved", { exact: true })).toBeVisible({ timeout: 15_000 });
     await expect(cashOut).toHaveValue("0");
+    await snapshotReadHeld;
+    // The acknowledged write can precede the snapshot update. A no-edit blur
+    // must retain the acknowledged draft while that read is still delayed.
+    await cashOut.focus();
+    await cashOut.blur();
+    await expect(cashOut).toHaveValue("0");
+    releaseSnapshotRead?.();
+    await host.unroute("**/rest/v1/cash_outs*", holdSnapshotAfterSuccessfulSave);
   } finally {
     await hostContext.close();
   }

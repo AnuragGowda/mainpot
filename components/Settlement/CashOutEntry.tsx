@@ -183,8 +183,6 @@ function CashOutRow({
     const draft = valueRef.current;
     if (draft !== valueAtFocusRef.current || failedDraftRef.current) {
       void commit(draft);
-    } else if (pendingSaveCountRef.current === 0) {
-      setLocalValue(propValue);
     }
   }
 
