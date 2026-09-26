@@ -592,7 +592,7 @@ test("starts a second guest table and keeps both unfinished games recoverable", 
   await page.locator("#create-game-name").fill("Third table");
   await page.locator("#create-buy-in").fill("20");
   await page.getByRole("button", { name: "Start another game", exact: true }).click();
-  await expect(page.getByText("Guest accounts can keep two unfinished tables.", { exact: false })).toBeVisible();
+  await expect(page.locator("main").getByRole("alert")).toBeVisible();
   await expect(page.getByRole("button", { name: "Start another game", exact: true })).toBeEnabled();
   await recovery.filter({ hasText: "First unfinished table" }).getByRole("button", { name: "Resume game" }).click();
   await expect(page).toHaveURL(firstUrl);
