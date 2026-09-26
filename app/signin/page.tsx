@@ -9,7 +9,11 @@ import GoogleMark from "@/components/GoogleMark";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
-import { linkSessionToUser } from "@/lib/accounts";
+import {
+  accountTransferCallbackUrl,
+  claimAnonymousAccountTransfer,
+  prepareAnonymousAccountTransfer,
+} from "@/lib/accounts";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { getBrowserSupabase } from "@/lib/supabase-browser";
 import { PLAYER_NAME_MAX_LENGTH, validateDisplayName } from "@/lib/name-validation";
@@ -39,8 +43,11 @@ export default function SignInPage() {
     if (authError) setAuthError("Sign-in could not be completed. Please try again.");
   }, []);
 
-  const callbackUrl = () =>
-    `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+  const callbackUrl = (transferToken: string | null) =>
+    accountTransferCallbackUrl(
+      `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      transferToken,
+    );
 
   async function handlePasswordAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,18 +68,19 @@ export default function SignInPage() {
     setAuthError(null);
     setAuthStatus(null);
     try {
+      const transferToken = await prepareAnonymousAccountTransfer();
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
             data: { display_name: displayName.trim() || email.split("@")[0] },
-            emailRedirectTo: callbackUrl(),
+            emailRedirectTo: callbackUrl(transferToken),
           },
         });
         if (error) throw error;
         if (data.user && data.session) {
-          await linkSessionToUser(data.user.id);
+          await claimAnonymousAccountTransfer(transferToken);
           router.push(next);
         } else {
           setEmailLinkSent("signup");
@@ -83,7 +91,7 @@ export default function SignInPage() {
           password,
         });
         if (error) throw error;
-        await linkSessionToUser(data.user.id);
+        await claimAnonymousAccountTransfer(transferToken);
         router.push(next);
       }
       router.refresh();
@@ -104,9 +112,10 @@ export default function SignInPage() {
     setAuthError(null);
     setAuthStatus(null);
     try {
+      const transferToken = await prepareAnonymousAccountTransfer();
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        options: { emailRedirectTo: callbackUrl() },
+        options: { emailRedirectTo: callbackUrl(transferToken) },
       });
       if (error) throw error;
       setEmailLinkSent("signin");
@@ -124,9 +133,10 @@ export default function SignInPage() {
     setAuthError(null);
     setAuthStatus("Opening Google…");
     try {
+      const transferToken = await prepareAnonymousAccountTransfer();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: callbackUrl() },
+        options: { redirectTo: callbackUrl(transferToken) },
       });
       if (error) throw error;
     } catch (error) {

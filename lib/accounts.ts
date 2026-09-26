@@ -1,100 +1,75 @@
 import { getBrowserSupabase } from "./supabase-browser";
-import { getSessionId } from "./session";
-import { round2 } from "./format";
+import { ACCOUNT_TRANSFER_COOKIE } from "./account-transfer";
 
-interface AnonymousPlayerRow {
-  id: string;
-  game_id: string;
+const accountTransferStorageKey = "mainpot_account_transfer";
+
+function writeTransferToken(token: string): void {
+  window.sessionStorage.setItem(accountTransferStorageKey, token);
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${ACCOUNT_TRANSFER_COOKIE}=${encodeURIComponent(token)}; Path=/; Max-Age=600; SameSite=Lax${secure}`;
+}
+
+function clearTransferToken(): void {
+  window.sessionStorage.removeItem(accountTransferStorageKey);
+  document.cookie = `${ACCOUNT_TRANSFER_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+}
+
+function storedTransferToken(): string | null {
+  return window.sessionStorage.getItem(accountTransferStorageKey);
 }
 
 /**
- * Links the current browser session's anonymous players to an authenticated
- * user. For each player (session_id match, user_id null):
- *   1. sets the player's user_id,
- *   2. if that player's game has ended, computes their net result
- *      (sum of cash-outs minus sum of buy-ins) and upserts it into
- *      game_participants.
- *
- * No-op when Supabase is unconfigured.
+ * Mints a ten-minute, single-use capability while the browser still holds its
+ * anonymous Auth identity. The token is the only recovery proof carried over
+ * a sign-in that replaces that anonymous UID; a browser session ID is never
+ * used to claim players.
  */
-export async function linkSessionToUser(userId: string): Promise<void> {
+export async function prepareAnonymousAccountTransfer(): Promise<string | null> {
   const supabase = getBrowserSupabase();
-  if (!supabase) {
-    return;
+  if (!supabase) return null;
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) throw new Error(`Could not prepare guest games: ${userError.message}`);
+  if (!user?.is_anonymous) return null;
+
+  const { data, error } = await supabase.rpc("issue_anonymous_account_transfer");
+  if (error) throw new Error(`Could not prepare guest games: ${error.message}`);
+  if (typeof data !== "string" || !/^[0-9a-f]{64}$/.test(data)) {
+    throw new Error("Could not prepare guest games.");
   }
+  writeTransferToken(data);
+  return data;
+}
 
-  const sessionId = getSessionId();
+/** Claims the prepared guest identity after Auth has switched to a permanent user. */
+export async function claimAnonymousAccountTransfer(token = storedTransferToken()): Promise<void> {
+  if (!token) return;
+  const supabase = getBrowserSupabase();
+  if (!supabase) return;
 
-  const { data: players, error: playersError } = await supabase
-    .from("players")
-    .select("id, game_id, session_id, user_id")
-    .eq("session_id", sessionId)
-    .is("user_id", null);
-  if (playersError) {
-    throw new Error(`Failed to load anonymous players: ${playersError.message}`);
-  }
+  const { error } = await supabase.rpc("claim_anonymous_account_transfer", {
+    input_token: token,
+  });
+  if (error) throw new Error(`Could not recover guest games: ${error.message}`);
+  clearTransferToken();
+}
 
-  for (const player of (players ?? []) as AnonymousPlayerRow[]) {
-    const { error: updateError } = await supabase
-      .from("players")
-      .update({ user_id: userId })
-      .eq("id", player.id);
-    if (updateError) {
-      throw new Error(`Failed to link player to account: ${updateError.message}`);
-    }
+/**
+ * Compatibility entry point for account surfaces that load after Auth. It no
+ * longer reads or claims a browser session ID; it can only consume the
+ * prepared capability bound to the just-authenticated account.
+ */
+export async function linkSessionToUser(_userId: string): Promise<void> {
+  // Recovery is completed in the explicit sign-in or callback flow, while it
+  // still has the one-time token. This intentionally does not infer ownership
+  // from a persistent browser identifier.
+  void _userId;
+}
 
-    const { data: game, error: gameError } = await supabase
-      .from("games")
-      .select("id, status")
-      .eq("id", player.game_id)
-      .maybeSingle();
-    if (gameError) {
-      throw new Error(`Failed to load game for player: ${gameError.message}`);
-    }
-    if (!game || game.status !== "ended") {
-      continue;
-    }
-
-    const [buyInsResult, cashOutsResult] = await Promise.all([
-      supabase.from("buy_ins").select("amount").eq("player_id", player.id),
-      supabase.from("cash_outs").select("amount").eq("player_id", player.id),
-    ]);
-    if (buyInsResult.error) {
-      throw new Error(
-        `Failed to load buy-ins for player: ${buyInsResult.error.message}`
-      );
-    }
-    if (cashOutsResult.error) {
-      throw new Error(
-        `Failed to load cash-outs for player: ${cashOutsResult.error.message}`
-      );
-    }
-
-    const buyInTotal = (buyInsResult.data ?? []).reduce(
-      (sum, row) => sum + Number((row as { amount: number | string }).amount),
-      0
-    );
-    const cashOutTotal = (cashOutsResult.data ?? []).reduce(
-      (sum, row) => sum + Number((row as { amount: number | string }).amount),
-      0
-    );
-    const netResult = round2(cashOutTotal - buyInTotal);
-
-    const { error: upsertError } = await supabase
-      .from("game_participants")
-      .upsert(
-        {
-          game_id: player.game_id,
-          user_id: userId,
-          player_id: player.id,
-          net_result: netResult,
-        },
-        { onConflict: "game_id,user_id" }
-      );
-    if (upsertError) {
-      throw new Error(
-        `Failed to record game result: ${upsertError.message}`
-      );
-    }
-  }
+/** Adds the opaque, single-use handoff token to an Auth callback URL. */
+export function accountTransferCallbackUrl(baseUrl: string, token: string | null): string {
+  if (!token) return baseUrl;
+  const url = new URL(baseUrl);
+  url.searchParams.set("transfer", token);
+  return url.toString();
 }
