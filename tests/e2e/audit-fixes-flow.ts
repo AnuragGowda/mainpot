@@ -86,6 +86,7 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     await resumed.getByText("Account data and deletion", { exact: true }).click();
     await resumed.getByRole("button", { name: "Request account deletion", exact: true }).click();
     await resumed.getByRole("alertdialog").getByRole("button", { name: "Request deletion", exact: true }).click();
+    await expect(resumed.getByText(/Your deletion request is/)).toContainText("pending");
     await resumed.reload();
     await resumed.getByText("Account data and deletion", { exact: true }).click();
     await expect(resumed.getByText(/Your deletion request is/)).toContainText("pending");
