@@ -437,43 +437,6 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
 
   return (
     <main id="main-content" tabIndex={-1} className={`mx-auto w-full max-w-5xl px-4 pt-6 focus:outline-none sm:px-6 md:pt-10 ${isHost && mode === "entry" ? "pb-36" : "pb-16"}`}>
-      {snapshot.game.status === "ended" && !feedbackSent && !feedbackDismissed ? (
-        <section aria-labelledby="feedback-heading" className="mb-6 rounded-xl border border-dashed border-gray-300 bg-gray-50/60 p-1">
-          <div className="flex items-start gap-2">
-            <details className="min-w-0 flex-1">
-              <summary className="cursor-pointer list-none px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
-                <span id="feedback-heading" className="block text-sm font-semibold text-gray-950">How did game night go?</span>
-                <span className="mt-0.5 block text-xs text-gray-500">Optional · about 30 seconds</span>
-              </summary>
-              <form onSubmit={handleFeedbackSubmit} className="space-y-4 border-t border-dashed border-gray-300 px-4 pb-4 pt-3">
-                <fieldset>
-                  <legend className="text-sm font-medium text-gray-700">How easy was Mainpot to use?</legend>
-                  <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Ease of use score">
-                    {[1, 2, 3, 4, 5].map((score) => (
-                      <label key={score} className="relative cursor-pointer">
-                        <input type="radio" name="feedback-score" value={score} checked={feedbackScore === score}
-                          aria-label={`${score} of 5${score === 1 ? ": difficult" : score === 5 ? ": easy" : ""}`}
-                          onChange={() => setFeedbackScore(score)} className="peer sr-only" />
-                        <span className="grid h-11 w-11 place-items-center rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 peer-checked:border-gray-950 peer-checked:bg-gray-950 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-gray-950 peer-focus-visible:ring-offset-2">{score}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <p className="mt-2 text-xs text-gray-500">1 = difficult · 5 = easy</p>
-                </fieldset>
-                <label className="block text-sm font-medium text-gray-700" htmlFor="feedback-confusing">
-                  What was confusing? <span className="font-normal text-gray-400">(optional)</span>
-                  <textarea id="feedback-confusing" value={confusing} onChange={(event) => setConfusing(event.target.value)} maxLength={1000} rows={3}
-                    className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" />
-                </label>
-                <Button type="submit" size="md" disabled={feedbackScore == null} loading={feedbackSaving}>Send feedback</Button>
-              </form>
-            </details>
-            <button type="button" onClick={dismissFeedback} aria-label="Dismiss feedback prompt" className="mr-1 mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
-              <X aria-hidden size={18} />
-            </button>
-          </div>
-        </section>
-      ) : null}
       <header>
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -1032,6 +995,43 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
 
         </div>
       )}
+      {snapshot.game.status === "ended" && !feedbackSent && !feedbackDismissed ? (
+        <section aria-labelledby="feedback-heading" className="mt-6 rounded-xl border border-dashed border-gray-300 bg-gray-50/60 p-1">
+          <div className="flex items-start gap-2">
+            <details className="min-w-0 flex-1">
+              <summary className="cursor-pointer list-none px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
+                <span id="feedback-heading" className="block text-sm font-semibold text-gray-950">How did game night go?</span>
+                <span className="mt-0.5 block text-xs text-gray-500">Optional · about 30 seconds</span>
+              </summary>
+              <form onSubmit={handleFeedbackSubmit} className="space-y-4 border-t border-dashed border-gray-300 px-4 pb-4 pt-3">
+                <fieldset>
+                  <legend className="text-sm font-medium text-gray-700">How easy was Mainpot to use?</legend>
+                  <div className="mt-2 flex gap-2" role="radiogroup" aria-label="Ease of use score">
+                    {[1, 2, 3, 4, 5].map((score) => (
+                      <label key={score} className="relative cursor-pointer">
+                        <input type="radio" name="feedback-score" value={score} checked={feedbackScore === score}
+                          aria-label={`${score} of 5${score === 1 ? ": difficult" : score === 5 ? ": easy" : ""}`}
+                          onChange={() => setFeedbackScore(score)} className="peer sr-only" />
+                        <span className="grid h-11 w-11 place-items-center rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 peer-checked:border-gray-950 peer-checked:bg-gray-950 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-gray-950 peer-focus-visible:ring-offset-2">{score}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">1 = difficult · 5 = easy</p>
+                </fieldset>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="feedback-confusing">
+                  What was confusing? <span className="font-normal text-gray-400">(optional)</span>
+                  <textarea id="feedback-confusing" value={confusing} onChange={(event) => setConfusing(event.target.value)} maxLength={1000} rows={3}
+                    className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-normal text-gray-900 focus:border-gray-950 focus:outline-none focus:ring-2 focus:ring-gray-950/10" />
+                </label>
+                <Button type="submit" size="md" disabled={feedbackScore == null} loading={feedbackSaving}>Send feedback</Button>
+              </form>
+            </details>
+            <button type="button" onClick={dismissFeedback} aria-label="Dismiss feedback prompt" className="mr-1 mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
+              <X aria-hidden size={18} />
+            </button>
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }
