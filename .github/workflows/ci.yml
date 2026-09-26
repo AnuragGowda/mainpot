@@ -28,7 +28,7 @@ jobs:
       - run: npm run test:e2e
 
   realtime:
-    name: Realtime browser tests across five profiles
+    name: Realtime browser tests
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
