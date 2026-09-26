@@ -13,8 +13,11 @@ export async function getCurrentUser(): Promise<User | null> {
     return null;
   }
   const {
-    data: { user },
+    data: { user }, error,
   } = await supabase.auth.getUser();
+  if (error && error.name !== "AuthSessionMissingError") {
+    throw new Error("Could not check your secure session. Check your connection and retry.");
+  }
   return user ?? null;
 }
 

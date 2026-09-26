@@ -21,6 +21,7 @@ type Friend = { profile: Profile; friendship: Friendship };
 export default function FriendInviteList({ gameId, isHost }: FriendInviteListProps) {
   const { toast } = useToast();
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [accountReady, setAccountReady] = useState<boolean | null>(null);
   const [sent, setSent] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState<string | null>(null);
@@ -41,11 +42,13 @@ export default function FriendInviteList({ gameId, isHost }: FriendInviteListPro
           if (!cancelled) setFriends([]);
         }
       }
-    })();
+    })().catch(() => { if (!cancelled) setLoadFailed(true); });
     return () => { cancelled = true; };
   }, [isHost]);
 
-  if (!isHost || accountReady === null) return null;
+  if (!isHost) return null;
+  if (loadFailed) return <p className="mt-4 text-center text-sm text-gray-600">Saved friends could not load. Close and reopen Invite to retry.</p>;
+  if (accountReady === null) return null;
   if (!accountReady) {
     return (
       <p className="mt-4 text-center text-xs text-gray-500">

@@ -599,3 +599,39 @@ test("starts a second guest table and keeps both unfinished games recoverable", 
   await expect(page.getByRole("button", { name: "End game", exact: true })).toBeEnabled();
   await expect(page.getByText("Pot", { exact: true }).locator("..")).toContainText("$20.00");
 });
+
+test("recovers the same created table after its committed response is lost", async ({ browser, baseURL }) => {
+  test.slow();
+  const context = await createDeviceContext(browser, { baseURL });
+  const page = await context.newPage();
+  let committedCode: string | undefined;
+  try {
+    const loseResponse = async (route: Route) => {
+      const response = await route.fetch();
+      expect(response.ok()).toBe(true);
+      const rows = await response.json();
+      committedCode = rows[0].code;
+      await new Promise(resolve => setTimeout(resolve, 20_000));
+      await route.abort().catch(() => undefined);
+    };
+    await page.route("**/rest/v1/rpc/create_game_idempotent", loseResponse);
+    await page.goto("/create");
+    await page.locator("#create-name").fill("Casey");
+    await page.locator("#create-game-name").fill("Lost creation response");
+    await page.locator("#create-buy-in").fill("20");
+    await page.getByRole("button", { name: "Create game", exact: true }).click();
+    await expect(page.locator("main").getByRole("alert")).toContainText("couldn't confirm whether your game was created", { timeout: 18_000 });
+    expect(committedCode).toBeTruthy();
+    await expect(page.getByRole("button", { name: "Create game", exact: true })).toBeEnabled();
+    await page.unroute("**/rest/v1/rpc/create_game_idempotent", loseResponse);
+    await page.getByRole("button", { name: "Create game", exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/game/${committedCode}$`), { timeout: 15_000 });
+    await expect(page.getByRole("region", { name: "At the table" }).getByRole("listitem")).toHaveCount(1);
+    await expect(page.getByText("Pot", { exact: true }).locator("..")).toContainText("$20.00");
+    await page.goto("/create");
+    await expect(page.getByRole("region", { name: "Resume active game" })).toHaveCount(1);
+    await expect(page.getByRole("region", { name: "Resume active game" })).toContainText("Lost creation response");
+  } finally {
+    await context.close();
+  }
+});

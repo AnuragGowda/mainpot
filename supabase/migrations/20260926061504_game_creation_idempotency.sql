@@ -57,11 +57,11 @@ begin
   if request.owner_user_id <> auth.uid() then
     raise exception 'This game creation request belongs to another account.';
   end if;
-  if request.session_id <> input_session_id
-    or request.code <> upper(btrim(input_code))
-    or request.game_name <> btrim(input_game_name)
-    or request.host_name <> btrim(input_host_name)
-    or request.buy_in_amount <> round(input_buy_in, 2)
+  if request.session_id is distinct from input_session_id
+    or request.code is distinct from upper(btrim(input_code))
+    or request.game_name is distinct from btrim(input_game_name)
+    or request.host_name is distinct from btrim(input_host_name)
+    or request.buy_in_amount is distinct from input_buy_in
     or request.host_is_playing is distinct from input_host_is_playing then
     raise exception 'This game creation key belongs to different game details.';
   end if;
