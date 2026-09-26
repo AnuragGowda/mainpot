@@ -432,7 +432,7 @@ test.describe("public local-mode experience", () => {
     await expect(invite).toBeInViewport();
     const acquisition = page.getByRole("region", { name: "How did you hear about Mainpot?" });
     expect(await acquisition.evaluate((survey, button) => Boolean(
-      survey.compareDocumentPosition(button as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
+      survey.compareDocumentPosition(button as Node) & Node.DOCUMENT_POSITION_PRECEDING,
     ), await invite.elementHandle())).toBe(true);
     await expect(page.getByRole("button", { name: "Personal invite" })).toHaveCount(0);
 
