@@ -23,6 +23,7 @@ import {
   validatePlayerName,
 } from "@/lib/name-validation";
 
+import { withTimeout } from "@/lib/request-timeout";
 import { validateCurrencyAmount } from "@/lib/currency-input";
 
 interface FormErrors {
@@ -65,7 +66,7 @@ export default function CreateGamePage() {
           }
           if (window.sessionStorage.getItem(`returned:${code}`)) return null;
           window.sessionStorage.setItem(`returned:${code}`, "1");
-          const userId = await getCurrentUserId();
+          const userId = await withTimeout(getCurrentUserId(), "Could not confirm your session. Check your connection and try again.");
           const isHost = game.host_user_id
             ? game.host_user_id === userId
             : game.host_session_id === getSessionId();
@@ -123,7 +124,7 @@ export default function CreateGamePage() {
     setLoading(true);
     try {
       setPlayerName(trimmedName);
-      const userId = await getCurrentUserId();
+      const userId = await withTimeout(getCurrentUserId(), "Could not confirm your session. Check your connection and try again.");
       const { code } = await createGame(
         trimmedGameName,
         trimmedName,
@@ -134,13 +135,13 @@ export default function CreateGamePage() {
       );
       if (saveTemplate && canSaveTemplate && userId) {
         try {
-          await saveGameTemplate({
+          await withTimeout(saveGameTemplate({
             userId,
             name: templateName.trim() || trimmedGameName,
             gameName: trimmedGameName,
             buyInAmount: parsedBuyIn,
             preferredRoster: preferredRoster.split(","),
-          });
+          }), "The table was created, but its recurring template could not be confirmed.");
         } catch {
           toast("Game created, but the recurring template could not be saved.", "error");
         }
