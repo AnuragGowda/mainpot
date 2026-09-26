@@ -29,9 +29,13 @@ export default function PwaRegistration() {
     let registration: ServiceWorkerRegistration | null = null;
 
     const checkForUpdate = () => {
-      if (!disposed) {
-        void registration?.update();
-      }
+      if (disposed || !registration) return;
+
+      void registration.update().catch((error: unknown) => {
+        if (!disposed) {
+          console.warn("Mainpot could not check for a service worker update.", error);
+        }
+      });
     };
 
     const rememberInstallPrompt = (event: Event) => {

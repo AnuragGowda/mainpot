@@ -51,7 +51,22 @@
       <div class="mark" aria-hidden="true">♠</div>
       <h1>You’re offline</h1>
       <p>Mainpot needs a connection to sync the table. Reconnect, then try again.</p>
-      <a href="/">Try again</a>
+      <a id="retry-link" href="/">Try again</a>
     </main>
+    <script>
+      // A service worker can return this page for a failed navigation while
+      // the address bar still holds the route the user tried to open.
+      // Reuse that same-origin path so retrying a game link returns to the room.
+      const retryUrl = new URL(window.location.href);
+      if (retryUrl.pathname === "/offline.html") retryUrl.pathname = "/";
+      const sameOriginRetry = new URL(
+        `${retryUrl.pathname}${retryUrl.search}${retryUrl.hash}`,
+        window.location.origin,
+      );
+      if (sameOriginRetry.origin === window.location.origin) {
+        document.getElementById("retry-link").href =
+          `${sameOriginRetry.pathname}${sameOriginRetry.search}${sameOriginRetry.hash}`;
+      }
+    </script>
   </body>
 </html>
