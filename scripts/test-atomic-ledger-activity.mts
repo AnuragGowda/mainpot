@@ -166,6 +166,22 @@ async function run() {
   assert(!(await host.client.rpc("apply_host_buy_in_action", repayArgs)).error, "host marks advance repaid");
   assert(!(await host.client.rpc("apply_host_buy_in_action", repayArgs)).error, "repayment replay succeeds");
   assert(await countEvents("buy_in_advance_repaid") === 1, "repayment activity is once only");
+  // An authorized receipt remains readable after the target leaves; mismatched
+  // payloads and another account never turn the receipt into an oracle.
+  assert(!(await player.client.rpc("leave_game_guarded", { input_game_id: game.game_id, input_player_id: seat.player_id })).error, "player leaves through guarded lifecycle RPC");
+  const departedReplay = await player.client.rpc("create_buy_in_idempotent", args);
+  assert(!departedReplay.error && !departedReplay.data[0].created && departedReplay.data[0].id === buyInId, "departed target replays its exact committed receipt");
+  assert((await player.client.rpc("create_buy_in_idempotent", { ...args, input_amount: 8 })).error, "mismatched replay payload is denied");
+  assert((await outsider.client.rpc("create_buy_in_idempotent", args)).error, "unauthorized caller cannot replay another player's receipt");
+
+  const settled = await createGame(host.client, "Atomic replay settlement");
+  const settledArgs = { input_game_id: settled.game_id, input_player_id: settled.player_id, input_amount: 7, input_type: "rebuy", input_fronted_by_player_id: null, input_operation_key: randomUUID() };
+  const settledInsert = await host.client.rpc("create_buy_in_idempotent", settledArgs);
+  if (settledInsert.error) throw settledInsert.error;
+  assert(!(await host.client.rpc("start_settlement_guarded", { input_game_id: settled.game_id })).error, "fixture enters settlement after committed buy-in");
+  const settledReplay = await host.client.rpc("create_buy_in_idempotent", settledArgs);
+  assert(!settledReplay.error && !settledReplay.data[0].created && settledReplay.data[0].id === settledInsert.data[0].id, "settling game replays exact committed receipt");
+
   assert(!(await action(host.client, "remove")).error, "host removes");
   assert(!(await action(host.client, "remove")).error, "removal replay succeeds");
   assert(await countEvents("buy_in_removed") === 1, "removal activity is once only");
