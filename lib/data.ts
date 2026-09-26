@@ -1332,6 +1332,58 @@ async function addSupabaseEvent(
   }
 }
 
+const GAME_CREATION_REQUEST_KEY = "ante_game_creation_request";
+
+interface StoredGameCreationRequest {
+  operationKey: string;
+  code: string;
+  signature: string;
+}
+
+function gameCreationSignature(input: {
+  name: string;
+  hostName: string;
+  buyInAmount: number;
+  sessionId: string;
+  userId: string;
+  hostIsPlaying: boolean;
+}): string {
+  return JSON.stringify(input);
+}
+
+function getGameCreationRequest(signature: string): StoredGameCreationRequest {
+  try {
+    const raw = window.localStorage.getItem(GAME_CREATION_REQUEST_KEY);
+    const stored = raw ? JSON.parse(raw) as Partial<StoredGameCreationRequest> : null;
+    if (
+      stored?.signature === signature
+      && typeof stored.operationKey === "string"
+      && typeof stored.code === "string"
+      && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stored.operationKey)
+      && /^[A-HJ-NP-Z2-9]{6}$/.test(stored.code)
+    ) {
+      return stored as StoredGameCreationRequest;
+    }
+  } catch {
+    // Replace a malformed recovery record with a fresh request below.
+  }
+  const request = { operationKey: randomUUID(), code: generateRoomCode(), signature };
+  window.localStorage.setItem(GAME_CREATION_REQUEST_KEY, JSON.stringify(request));
+  return request;
+}
+
+function clearGameCreationRequest(operationKey: string): void {
+  try {
+    const raw = window.localStorage.getItem(GAME_CREATION_REQUEST_KEY);
+    const stored = raw ? JSON.parse(raw) as Partial<StoredGameCreationRequest> : null;
+    if (stored?.operationKey === operationKey) {
+      window.localStorage.removeItem(GAME_CREATION_REQUEST_KEY);
+    }
+  } catch {
+    window.localStorage.removeItem(GAME_CREATION_REQUEST_KEY);
+  }
+}
+
 async function createGameSupabase(
   name: string,
   hostName: string,
@@ -1340,35 +1392,55 @@ async function createGameSupabase(
   acquisitionSource?: AcquisitionSource | null,
   hostIsPlaying = true,
 ): Promise<{ code: string; gameId: string }> {
-  const { client } = await ensureSupabaseReady();
+  const { client, userId } = await ensureSupabaseReady();
   const sessionId = getSessionId();
+  const signature = gameCreationSignature({
+    name,
+    hostName,
+    buyInAmount,
+    sessionId,
+    userId,
+    hostIsPlaying,
+  });
+  let request = getGameCreationRequest(signature);
 
   for (let attempt = 0; attempt < 10; attempt++) {
-    const code = generateRoomCode();
-    const { data, error } = await client
-      .rpc("create_game_guarded", {
-        input_code: code,
+    const { data, error } = await awaitAbortableMutation((signal) => client
+      .rpc("create_game_idempotent", {
+        input_code: request.code,
         input_game_name: name,
         input_host_name: hostName,
         input_buy_in: buyInAmount,
         input_session_id: sessionId,
         input_host_is_playing: hostIsPlaying,
+        input_operation_key: request.operationKey,
       })
-      .single();
+      .abortSignal(signal)
+      .single(), "We couldn't confirm whether your game was created. Retry to safely continue.");
 
     if (!error && data) {
       const row = data as { code: string; game_id: string };
+      clearGameCreationRequest(request.operationKey);
       if (acquisitionSource) {
-        const { error: sourceError } = await client
+        // The ledger has committed. Reporting the optional acquisition source
+        // must never turn that success into a false creation failure.
+        void Promise.resolve(client
           .from("games")
           .update({ acquisition_source: acquisitionSource })
-          .eq("id", row.game_id);
-        if (sourceError) throw sourceError;
+          .eq("id", row.game_id))
+          .catch(() => undefined);
       }
       return { code: row.code, gameId: row.game_id };
     }
     if (error?.code === "23505") {
+      // A room-code collision is known not to have committed this request, so
+      // a new operation/code is safe. All unknown outcomes retain their key.
+      clearGameCreationRequest(request.operationKey);
+      request = getGameCreationRequest(signature);
       continue;
+    }
+    if (error?.code === "PGRST202") {
+      throw new Error("Update this game database to enable safe game creation retries.");
     }
     throw error ?? new Error("Could not create the game.");
   }
