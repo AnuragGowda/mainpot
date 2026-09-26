@@ -447,9 +447,8 @@ async function run() {
     .update({ verified: true })
     .eq("game_id", gameB.game_id)
     .eq("player_id", otherPlayer.player_id)
-    .select("id, verified")
-    .single();
-  assert(!otherOpeningApproval.error && otherOpeningApproval.data?.verified, "other game opening buy-in is approved before settlement");
+    .select("id, verified");
+  assert(!otherOpeningApproval.error && otherOpeningApproval.data?.length && otherOpeningApproval.data.every((entry) => entry.verified), "other game opening buy-in is approved before settlement");
   const otherGameSettling = await otherHost
     .from("games")
     .update({ status: "settling", ended_at: new Date().toISOString() })
