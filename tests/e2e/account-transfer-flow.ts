@@ -61,11 +61,14 @@ export async function runExpiredGuestRecoveryWindowFlow(browser: Browser, baseUR
     await expect(page).toHaveURL(/dashboard/);
 
     await page.evaluate(() => window.sessionStorage.setItem("mainpot_account_transfer", "0".repeat(64)));
-    await page.goto("/signin?next=%2Fdashboard&account_recovery=expired");
+    await page.goto("/signin?next=%2Fdashboard&account_recovery=failed");
+    await expect(page.getByText("Retry recovery from the same browser where you played as a guest.")).toBeVisible();
+    await page.getByRole("button", { name: "Retry guest recovery" }).click();
     await expect(page.getByRole("heading", { name: "You're signed in" })).toBeVisible();
-    await expect(page.getByRole("alert")).toContainText("Your guest-game recovery window expired.");
+    await expect(page.getByRole("alert").filter({ hasText: "Your guest-game recovery window expired." })).toContainText("Your guest-game recovery window expired.");
     await expect(page.getByText("Guest games can only be recovered within one hour after requesting the confirmation email, from the same browser.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Retry guest recovery" })).toHaveCount(0);
+    await expect(page.getByText("Retry recovery from the same browser where you played as a guest.")).toHaveCount(0);
     await expect.poll(() => page.evaluate(() => window.sessionStorage.getItem("mainpot_account_transfer"))).toBeNull();
     await page.getByRole("button", { name: "Continue to your account" }).click();
     await expect(page).toHaveURL(/dashboard/);

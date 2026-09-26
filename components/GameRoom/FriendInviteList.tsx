@@ -23,6 +23,7 @@ export default function FriendInviteList({ gameId, isHost }: FriendInviteListPro
   const { toast } = useToast();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [friendsLoading, setFriendsLoading] = useState(true);
   const [accountReady, setAccountReady] = useState<boolean | null>(null);
   const [sent, setSent] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export default function FriendInviteList({ gameId, isHost }: FriendInviteListPro
     if (!isHost) return;
     let cancelled = false;
     setLoadFailed(false);
+    setFriendsLoading(true);
     void (async () => {
       const user = await withTimeout(getCurrentUser(), "Could not check your account.");
       const ready = Boolean(user && !user.is_anonymous);
@@ -45,12 +47,14 @@ export default function FriendInviteList({ gameId, isHost }: FriendInviteListPro
           if (!cancelled) setLoadFailed(true);
         }
       }
-    })().catch(() => { if (!cancelled) setLoadFailed(true); });
+    })().catch(() => { if (!cancelled) setLoadFailed(true); })
+      .finally(() => { if (!cancelled) setFriendsLoading(false); });
     return () => { cancelled = true; };
   }, [isHost, reload]);
 
   if (!isHost) return null;
   if (loadFailed) return <div className="mt-4 text-center"><p role="alert" className="text-sm text-gray-600">Saved friends could not load.</p><Button className="mt-2" size="sm" variant="secondary" onClick={() => setReload((value) => value + 1)}>Retry friends</Button></div>;
+  if (friendsLoading) return <p role="status" className="mt-4 text-center text-sm text-gray-600">Loading saved friends…</p>;
   if (accountReady === null) return null;
   if (!accountReady) {
     return (

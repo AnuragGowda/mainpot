@@ -1,3 +1,4 @@
+import { runAccountPolishFlow } from "./account-polish-flow";
 import { runExpiredGuestRecoveryWindowFlow, runGuestAccountTransfer } from "./account-transfer-flow";
 import { runBankPlanFlow } from "./bank-flow";
 import { checkAccountRecovery, checkSavedFriendInvitation } from "./audit-fixes-flow";
@@ -9,6 +10,11 @@ import { createDeviceContext } from "./device-context";
 // Local guest creation is deliberately rate-limited, so these database-backed
 // scenarios run one at a time while each scenario still uses separate users.
 test.describe.configure({ mode: "default" });
+
+test("keeps account templates, payment history, and deletion cancellation recoverable", async ({ browser, baseURL }) => {
+  test.slow();
+  await runAccountPolishFlow(browser, baseURL!);
+});
 
 test("reviews payments before locking and keeps completion in sync", async ({ page }) => {
   test.slow();
@@ -142,6 +148,8 @@ test("locks an early cash-out against the host and carries it out of final settl
     await expect(guestEarlyCashOuts).toContainText("$10.00");
     await guestEarlyCashOuts.getByTitle("Mark sent").click();
     await expect(guest.getByText("Payment marked sent", { exact: true })).toBeVisible();
+    await guestEarlyCashOuts.getByTitle("Reopen payment").click();
+    await expect(guestEarlyCashOuts.getByTitle("Mark sent")).toBeVisible();
 
     await host.getByRole("button", { name: "End game" }).click();
     await host.getByRole("button", { name: "Start cash-outs" }).click();
@@ -166,6 +174,12 @@ test("locks an early cash-out against the host and carries it out of final settl
     await host.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
 
     const paymentLedger = host.locator('[data-testid="payment-ledger"]');
+    await expect(paymentLedger.locator(":scope > summary")).toContainText("0 of 1 payment marked sent · includes early cash-outs");
+    const personal = host.locator('section[aria-labelledby="your-settlement-heading"]');
+    await expect(personal.getByRole("heading")).toHaveText("You owe $10.00.");
+    await expect(personal).toContainText("Your net result: $0.00");
+    await personal.getByTitle("Mark sent").click();
+    await expect(personal.getByRole("heading")).toHaveText("All your payments are marked sent.");
     await expect(paymentLedger.locator(":scope > summary")).toContainText("1 of 1 payment marked sent · includes early cash-outs");
     await expect(paymentLedger.getByRole("region", { name: "Early cash-outs" })).toBeHidden();
     await paymentLedger.locator(":scope > summary").click();

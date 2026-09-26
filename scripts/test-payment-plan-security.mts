@@ -42,6 +42,19 @@ async function createGuest(label: string) {
   return client;
 }
 
+async function createRegisteredHost() {
+  const client = createClient(url, anonKey, { auth: { autoRefreshToken: false, persistSession: false } });
+  const email = `plan-host-${randomUUID()}@example.com`;
+  const password = `Plan-${randomUUID()}`;
+  const created = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  if (created.error || !created.data.user) throw created.error ?? new Error("Fixture account creation failed");
+  users.push(created.data.user.id);
+  clients.push(client);
+  const signedIn = await client.auth.signInWithPassword({ email, password });
+  if (signedIn.error) throw signedIn.error;
+  return client;
+}
+
 async function expectRejected(operation: () => PromiseLike<{ error: unknown }>, label: string) {
   const result = await operation();
   assert(Boolean(result.error), label);
@@ -140,7 +153,7 @@ async function setFinalPayment(
 }
 
 async function run() {
-  const host = await createGuest("plan host");
+  const host = await createRegisteredHost();
   const guestA = await createGuest("plan guest A");
   const guestB = await createGuest("plan guest B");
   const guestC = await createGuest("plan guest C");
@@ -272,7 +285,7 @@ async function run() {
     "a re-sorted greedy tuple is rejected",
   );
 
-  const early = await createFixture(host, [{ label: "A", client: guestA }], "early exit payment");
+  const early = await createFixture(host, [{ label: "A", client: guestA }, { label: "B", client: guestB }], "early exit payment");
   const requested = await guestA.rpc("request_early_cash_out", {
     input_game_id: early.gameId,
     input_player_id: early.players.A.playerId,
@@ -298,6 +311,16 @@ async function run() {
     input_session_id: early.players.A.sessionId,
   });
   assert(!earlyPayment.error, "the independent locked early-exit payment remains accepted");
+  await lockFixture(early, [
+    { playerId: early.hostPlayerId, amount: 0 },
+    { playerId: early.players.B.playerId, amount: 30 },
+  ]);
+  const afterExitPayment = await setFinalPayment(host, early, early.hostPlayerId, early.players.B.playerId, 10, "min", early.hostSessionId);
+  assert(!afterExitPayment.error, "locked early exits roll forward into the exact remaining final obligation");
+  await expectRejected(
+    () => setFinalPayment(host, early, early.hostPlayerId, early.players.A.playerId, 10, "min", early.hostSessionId),
+    "an early-exit obligation cannot be duplicated as a final payment",
+  );
 
   console.log("✓ final payment tracking accepts only exact locked min/bank/funded/discrepancy plans and preserves early-exit payments");
 }

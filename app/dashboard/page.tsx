@@ -454,7 +454,7 @@ export default function DashboardPage() {
                         {game.gameName}
                       </Link>
                       <p className="mt-0.5 text-xs text-gray-500">
-                        {game.date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} · {game.playerCount} players · {formatCurrency(game.buyInAmount)} buy-in
+                        {game.date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} · {game.playerCount} {game.playerCount === 1 ? "player" : "players"} · {formatCurrency(game.buyInAmount)} buy-in
                       </p>
                       <Link href={`/game/${game.gameCode}#payment-ledger`} className="mt-1 inline-block text-xs font-medium text-gray-700 underline underline-offset-2">
                         {game.paymentProgress == null ? "Payment progress unavailable · open game" : game.paymentProgress.total === 0 ? "No transfers required" : `${game.paymentProgress.markedSent}/${game.paymentProgress.total} payments marked sent${game.paymentProgress.markedSent < game.paymentProgress.total ? " · review payments" : ""}`}

@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test";
+import { createDeviceContext } from "./device-context";
 
 test.describe("entry and calculator safeguards", () => {
   test.use({ serviceWorkers: "block" });
 
-  test("keeps local-only failures actionable without discarding a typed join request", async ({ browser }) => {
-    const hostContext = await browser.newContext({ serviceWorkers: "block" });
-    const guestContext = await browser.newContext({ serviceWorkers: "block" });
+  test("keeps local-only failures actionable without discarding a typed join request", async ({ browser, baseURL }) => {
+    const hostContext = await createDeviceContext(browser, { baseURL });
+    const guestContext = await createDeviceContext(browser, { baseURL });
     const host = await hostContext.newPage();
     const guest = await guestContext.newPage();
     try {
@@ -14,6 +15,7 @@ test.describe("entry and calculator safeguards", () => {
       await host.locator("#create-game-name").fill("Host browser only");
       await host.locator("#create-buy-in").fill("20");
       await host.getByRole("button", { name: "Create game" }).click();
+      await expect(host).toHaveURL(/\/game\/[A-Z0-9]+$/);
       const code = host.url().split("/").at(-1)!;
 
       await guest.goto("/join");
@@ -21,7 +23,7 @@ test.describe("entry and calculator safeguards", () => {
       await guest.locator("#join-code").fill(code);
       await expect(guest.getByText("Local-only tables are saved only in the host's browser.")).toBeVisible();
       await guest.getByRole("button", { name: "Continue to table details" }).click();
-      await expect(guest.getByRole("alert")).toContainText("Game not found. Check the code and try again.");
+      await expect(guest.getByRole("alert").filter({ hasText: "Game not found" })).toContainText("Game not found. Check the code and try again.");
       await expect(guest.locator("#join-name")).toHaveValue("Jordan");
       await expect(guest.locator("#join-code")).toHaveValue(code);
     } finally {
@@ -36,6 +38,7 @@ test.describe("entry and calculator safeguards", () => {
     await page.locator("#create-game-name").fill("Preview required");
     await page.locator("#create-buy-in").fill("37");
     await page.getByRole("button", { name: "Create game" }).click();
+    await expect(page).toHaveURL(/\/game\/[A-Z0-9]+$/);
     const code = page.url().split("/").at(-1)!;
 
     await page.evaluate(() => localStorage.setItem("ante_session_id", crypto.randomUUID()));
@@ -51,6 +54,7 @@ test.describe("entry and calculator safeguards", () => {
     await expect(preview).toContainText("$37.00");
     await expect(preview).toContainText("pending host approval");
     await expect(page).toHaveURL(/\/join$/);
+    await page.screenshot({ path: `docs/audits/2026-09-26/evidence/join-preview-${test.info().project.name}.png`, fullPage: true });
 
     await page.locator("#join-code").fill("DEF234");
     await expect(preview).toHaveCount(0);
@@ -60,9 +64,9 @@ test.describe("entry and calculator safeguards", () => {
     await page.getByRole("button", { name: "Continue to table details" }).click();
     await page.getByRole("button", { name: "Join and record $37.00 buy-in" }).click();
     await expect(page).toHaveURL(new RegExp(`/game/${code}$`));
-    const pending = page.getByRole("region", { name: "Needs approval" });
+    const pending = page.getByRole("region", { name: "At the table" }).getByRole("listitem").filter({ hasText: "Jordan" });
     await expect(pending).toContainText("Jordan");
-    await expect(pending).toContainText("$37.00");
+    await expect(pending).toContainText("$37.00 awaiting host confirmation");
   });
 
   test("does not create payment-ready results until every amount is explicit", async ({ page }) => {
@@ -76,6 +80,7 @@ test.describe("entry and calculator safeguards", () => {
     await expect(results).toContainText("Enter money in and a final stack for every player.");
     await expect(results).not.toContainText("Bank balanced");
     await expect(results).not.toContainText("Payment list");
+    await page.screenshot({ path: `docs/audits/2026-09-26/evidence/calculator-incomplete-${test.info().project.name}.png`, fullPage: true });
 
     await page.getByLabel("Final stack for player 2", { exact: true }).fill("0");
     await expect(results).toContainText("Bank balanced");

@@ -132,6 +132,7 @@ try {
       "test-database-assurance.mts", "test-audit-security.mts",
       "test-settlement-allocation-guard.mts", "test-account-transfer-security.mts",
       "test-early-cashout-phase-race.mts", "test-game-creation-idempotency.mts",
+      "test-payment-plan-security.mts",
     ]) {
       try {
         run(process.execPath, [join(scriptDirectory, script)], {
@@ -143,6 +144,10 @@ try {
     }
     if (failures.length) throw new AggregateError(failures, "Database assurance scripts failed");
   } else {
+    console.log("Checking locked payment plan security before browser flows…");
+    run(process.execPath, [join(scriptDirectory, "test-payment-plan-security.mts")], {
+      env: { ...process.env, SUPABASE_WORKDIR: workdir, SUPABASE_EXPECTED_API_URL: apiUrl },
+    });
     console.log("Running realtime browser tests…");
     const result = spawnSync(
       "npx",

@@ -1,3 +1,6 @@
+// @ts-expect-error Node executes this TypeScript script directly and requires the extension.
+import { applyFundingAdjustments, applyDiscrepancyAllocation, calculateMinTransfers } from "../lib/settlement.ts";
+import type { BuyIn } from "../lib/types.ts";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
@@ -819,8 +822,8 @@ async function run() {
   const cashOutFixture = await host
     .from("cash_outs")
     .insert([
-      { game_id: gameA.game_id, player_id: gameA.player_id, amount: 40 },
-      { game_id: gameA.game_id, player_id: playerA.player_id, amount: 50 },
+      { game_id: gameA.game_id, player_id: gameA.player_id, amount: 50 },
+      { game_id: gameA.game_id, player_id: playerA.player_id, amount: 40 },
       { game_id: gameA.game_id, player_id: playerB.player_id, amount: 20 },
     ])
     .select("id");
@@ -889,21 +892,36 @@ async function run() {
     .select("id");
   assert(!gameAEnded.error && gameAEnded.data?.[0]?.id, "host can lock settlement");
 
-  const finalizedInsert = await guestA
-    .from("settlement_payments")
-    .insert(draftPayment)
-    .select("id")
-    .single();
-  assert(!finalizedInsert.error && finalizedInsert.data?.id, "payment party can create payment state after game lock");
-  const finalizedUpdate = await guestB
-    .from("settlement_payments")
-    .update({ settled: true, settled_at: new Date().toISOString() })
-    .eq("id", adminDraft.data.id)
-    .select("id, settled")
-    .single();
-  assert(!finalizedUpdate.error && finalizedUpdate.data?.settled === true, "payment party can update payment state after game lock");
+  await expectError(
+    () => guestA.from("settlement_payments").insert(draftPayment).select("id"),
+    "direct payment insert cannot bypass locked-plan validation",
+  );
+  await expectError(
+    () => guestB.from("settlement_payments").update({ settled: true })
+      .eq("id", adminDraft.data.id).select("id"),
+    "direct payment update cannot bypass locked-plan validation",
+  );
+  const [planPlayers, planBuyIns, planCashOuts] = await Promise.all([
+    admin.from("players").select("id,name").eq("game_id", gameA.game_id).order("joined_at").order("id"),
+    admin.from("buy_ins").select("*").eq("game_id", gameA.game_id),
+    admin.from("cash_outs").select("player_id,amount").eq("game_id", gameA.game_id),
+  ]);
+  assert(!planPlayers.error && !planBuyIns.error && !planCashOuts.error, "locked plan fixture is readable");
+  const buys = (planBuyIns.data ?? []).map(row => ({ ...row, amount: Number(row.amount) })) as BuyIn[];
+  const cashOuts = planCashOuts.data ?? [];
+  const rawNets = applyFundingAdjustments((planPlayers.data ?? []).map(player => ({
+    playerId: player.id, name: player.name,
+    net: Number(cashOuts.find(row => row.player_id === player.id)?.amount ?? 0)
+      - buys.filter(row => row.player_id === player.id).reduce((sum, row) => sum + row.amount, 0),
+  })), buys);
+  const difference = Math.round((buys.reduce((sum, row) => sum + row.amount, 0)
+    - cashOuts.reduce((sum, row) => sum + Number(row.amount), 0)) * 100) / 100;
+  const expectedPayment = calculateMinTransfers(applyDiscrepancyAllocation(rawNets, difference, {
+    method: "proportional", playerIds: allocation.player_ids,
+  }))[0];
+  assert(expectedPayment?.fromPlayerId && expectedPayment.toPlayerId, "locked fixture has a real payment to test authenticated ownership");
 
-  const resumedPayment = { ...draftPayment, amount: 3.45, settled: true };
+  const resumedPayment = { ...draftPayment, from_player_id: expectedPayment.fromPlayerId, to_player_id: expectedPayment.toPlayerId, amount: expectedPayment.amount, settled: true };
   await expectError(
     () => rotatedGuestA
       .from("settlement_payments")
@@ -917,23 +935,30 @@ async function run() {
     "set_settlement_payment_status_guarded",
     {
       input_game_id: gameA.game_id,
-      input_from_player_id: playerA.player_id,
-      input_to_player_id: playerB.player_id,
+      input_from_player_id: resumedPayment.from_player_id,
+      input_to_player_id: resumedPayment.to_player_id,
       input_amount: resumedPayment.amount,
       input_mode: resumedPayment.mode,
       input_settled: resumedPayment.settled,
       input_session_id: playerASessionId,
     },
   );
-  assert(
-    !guardedResumedPayment.error,
-    "the guarded payment update accepts the resumed browser session",
-  );
+  assert(guardedResumedPayment.error, "a replaced anonymous identity cannot use a visible session ID as payment authority");
+  const originalOwnerPayment = await host.rpc("set_settlement_payment_status_guarded", {
+    input_game_id: gameA.game_id,
+    input_from_player_id: resumedPayment.from_player_id,
+    input_to_player_id: resumedPayment.to_player_id,
+    input_amount: resumedPayment.amount,
+    input_mode: resumedPayment.mode,
+    input_settled: true,
+    input_session_id: playerASessionId,
+  });
+  assert(!originalOwnerPayment.error, "the authenticated host can acknowledge the real locked-plan payment");
   await expectError(
     () => outsider.rpc("set_settlement_payment_status_guarded", {
       input_game_id: gameA.game_id,
-      input_from_player_id: playerA.player_id,
-      input_to_player_id: playerB.player_id,
+      input_from_player_id: resumedPayment.from_player_id,
+      input_to_player_id: resumedPayment.to_player_id,
       input_amount: resumedPayment.amount,
       input_mode: resumedPayment.mode,
       input_settled: false,
@@ -942,7 +967,7 @@ async function run() {
     "outsider guarded payment update with another browser session",
   );
   console.log("✓ settlement payment writes become available after game lock");
-  console.log("✓ resumed browser sessions can update their payments after auth rotation");
+  console.log("✓ payment authority follows authenticated ownership rather than disclosed browser session IDs");
 }
 
 try {

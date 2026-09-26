@@ -2145,7 +2145,8 @@ async function getGameSnapshotSupabase(gameId: string): Promise<GameSnapshot> {
         .from("players")
         .select("*")
         .eq("game_id", gameId)
-        .order("joined_at", { ascending: true }),
+        .order("joined_at", { ascending: true })
+        .order("id", { ascending: true }),
       client
         .from("buy_ins")
         .select("*")

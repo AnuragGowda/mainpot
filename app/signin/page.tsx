@@ -243,7 +243,7 @@ export default function SignInPage() {
             <div className="py-8 text-center">
               <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-800" aria-hidden="true">✓</span>
               <h1 className="mt-5 text-2xl font-semibold text-gray-950">You&apos;re signed in</h1>
-              <p className="mt-2 text-sm leading-6 text-gray-600">Your account is ready. We could not finish recovering the guest games yet. Retry from the browser where you played as a guest.</p>
+              <p aria-live="polite" className="mt-2 text-sm leading-6 text-gray-600">{authStatus ?? "Your account is ready. You can continue to your saved games."}</p>
               {authError ? <p role="alert" className="mt-4 text-sm font-medium text-red-700">{authError}</p> : null}
               <div className="mt-6 grid gap-3">
                 {recoveryCanRetry ? <Button fullWidth loading={loading} onClick={retryRecovery}>Retry guest recovery</Button> : null}

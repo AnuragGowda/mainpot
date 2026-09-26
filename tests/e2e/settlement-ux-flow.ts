@@ -24,7 +24,7 @@ export async function runSettlementUxFlow(page: Page) {
   }
   await expect(page.getByText("Bank reconciled", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Review settlement" }).click();
-  const preview = page.getByRole("region", { name: "Review the payments" });
+  const preview = page.getByRole("region", { name: "Review the net settlement" });
   await expect(preview).toContainText("Casey → Jordan");
   await expect(preview).toContainText("Casey → Taylor");
   await expect(preview.getByText("$10.00", { exact: true })).toHaveCount(2);

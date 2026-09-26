@@ -1,4 +1,4 @@
-import { expect, type Browser } from "@playwright/test";
+import { expect, test, type Browser } from "@playwright/test";
 import { createDeviceContext } from "./device-context";
 
 /**
@@ -46,10 +46,10 @@ export async function runAccountPolishFlow(browser: Browser, baseURL: string) {
     await expect(page.locator('[data-testid="payment-ledger"]')).toBeVisible({ timeout: 15_000 });
 
     await page.goto("/dashboard");
-    const recentGames = page.getByText("Recent games", { exact: true }).locator("..");
-    await expect(recentGames).toContainText("Account polish game");
+    await expect(page.getByRole("link", { name: "Account polish game", exact: true })).toBeVisible();
     const noTransfers = page.getByRole("link", { name: /No transfers required/ });
     await expect(noTransfers).toBeVisible();
+    await page.screenshot({ path: `docs/audits/2026-09-26/evidence/account-payments-${test.info().project.name}.png`, fullPage: true });
     await noTransfers.click();
     await expect(page).toHaveURL(/#payment-ledger$/);
     await expect(page.locator('#payment-ledger[open]')).toBeVisible();
@@ -81,8 +81,10 @@ export async function runAccountPolishFlow(browser: Browser, baseURL: string) {
     await page.getByLabel("Saved game name", { exact: true }).fill("Saturday account game");
     await page.getByLabel("Saved buy-in", { exact: true }).fill("25");
     await page.getByLabel("Roster reminder", { exact: true }).fill("Alex, Jordan, Sam");
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: `docs/audits/2026-09-26/evidence/template-edit-${test.info().project.name}.png`, fullPage: true });
     await page.getByRole("button", { name: "Save template", exact: true }).click();
-    await expect(page.getByText(updatedTemplateName, { exact: true })).toBeVisible();
+    await expect(page.getByText(updatedTemplateName, { exact: true }).last()).toBeVisible();
 
     await page.reload();
     await expect(page.locator("#create-template")).toBeVisible();

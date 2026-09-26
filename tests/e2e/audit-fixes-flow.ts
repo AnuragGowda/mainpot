@@ -76,7 +76,7 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     await resumed.reload();
     await expect(resumed.getByText("Some dashboard sections are unavailable")).toBeVisible();
     await expect(resumed.getByRole("heading", { name: "Casey", exact: true })).toBeVisible();
-    await expect(resumed.getByText("No settled games yet", { exact: true })).toHaveCount(0);
+    await expect(resumed.getByText("No final results yet", { exact: true })).toHaveCount(0);
     await expect(resumed.getByRole("button", { name: "Request account deletion", exact: true })).toHaveCount(0);
     await resumed.unroute("**/rest/v1/account_deletion_requests**");
     await resumed.getByRole("button", { name: "Retry dashboard" }).click();
@@ -127,8 +127,22 @@ export async function checkSavedFriendInvitation(browser: Browser, baseURL: stri
     await host.locator("#create-game-name").fill("Invited game regression");
     await host.locator("#create-buy-in").fill("20");
     await host.getByRole("button", { name: "Create game", exact: true }).click();
+    let releaseFriends!: () => void;
+    const friendsGate = new Promise<void>((resolve) => { releaseFriends = resolve; });
+    await host.route("**/rest/v1/friendships**", async route => {
+      await friendsGate;
+      await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ message: "Injected friend-list failure" }) });
+    });
     await host.getByRole("button", { name: "Invite players", exact: true }).click();
-    await host.getByRole("dialog").getByRole("button", { name: "Invite", exact: true }).click();
+    const inviteDialog = host.getByRole("dialog");
+    try {
+      await expect(inviteDialog.getByRole("status")).toContainText("Loading saved friends");
+      await expect(inviteDialog.getByText("Add friends", { exact: true })).toHaveCount(0);
+    } finally { releaseFriends(); }
+    await expect(inviteDialog.getByRole("alert")).toContainText("Saved friends could not load.");
+    await host.unroute("**/rest/v1/friendships**");
+    await inviteDialog.getByRole("button", { name: "Retry friends", exact: true }).click();
+    await inviteDialog.getByRole("button", { name: "Invite", exact: true }).click();
     await expect(host.getByRole("dialog").getByRole("button", { name: "Invited", exact: true })).toBeVisible();
     await friend.goto("/dashboard");
     const invitation = friend.getByRole("region", { name: "Game invitations" });

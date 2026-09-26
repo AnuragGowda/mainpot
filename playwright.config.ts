@@ -15,7 +15,7 @@ export default defineConfig({
   testDir: "./tests/e2e",
   testMatch: isRealtimeSuite
     ? "**/realtime.spec.ts"
-    : "**/smoke.spec.ts",
+    : ["**/smoke.spec.ts", "**/entry-ux.spec.ts"],
   fullyParallel: true,
   timeout: isMobileSmokeSuite || isExtendedSuite || isAllDeviceSuite ? 60_000 : 30_000,
   workers: process.env.CI && isMobileSmokeSuite ? 2 : undefined,

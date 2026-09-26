@@ -35,7 +35,7 @@ export async function runBankPlanFlow(browser: Browser, baseURL: string, evidenc
     }
     await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
     await host.getByRole("button", { name: "Review settlement" }).click();
-    await host.getByRole("radio", { name: /Table bank/ }).check();
+    await host.getByRole("radio", { name: /Route net settlement through a player/ }).check();
     await host.locator("#final-bank-player-select").click();
     await host.getByRole("option", { name: "Taylor", exact: true }).click();
     await host.getByRole("button", { name: "Lock settlement", exact: true }).click();
