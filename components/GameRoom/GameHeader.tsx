@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { QrCode, X } from "lucide-react";
+import { Info, QrCode, X } from "lucide-react";
 import type { Game, GameStatus } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import { useToast } from "@/components/ui/Toast";
@@ -147,7 +147,7 @@ export default function GameHeader({
               onClick={() => setInviteOpen(true)}
               aria-label="Invite players"
               className="flex-1 sm:flex-none"
-              leftIcon={<QrCode aria-hidden size={18} />}
+              leftIcon={isLocalMode ? <Info aria-hidden size={18} /> : <QrCode aria-hidden size={18} />}
             >
               Invite
             </Button>
@@ -229,7 +229,7 @@ export default function GameHeader({
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Invite players</p>
                 <h2 id="invite-dialog-title" className="mt-1 text-xl font-semibold tracking-tight text-gray-950">
-                  Scan to join {game.name}
+                  {isLocalMode ? "This table stays in this browser" : `Scan to join ${game.name}`}
                 </h2>
               </div>
               <button
@@ -242,42 +242,57 @@ export default function GameHeader({
               </button>
             </div>
 
-            <div className="mx-auto mt-6 w-fit rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
-              {inviteUrl ? (
-                <QRCodeSVG
-                  value={inviteUrl}
-                  title={`QR code to join ${game.name}`}
-                  size={196}
-                  level="H"
-                  marginSize={2}
-                  bgColor="#ffffff"
-                  fgColor="#111512"
-                  imageSettings={{
-                    src: "/icon.svg",
-                    height: 36,
-                    width: 36,
-                    excavate: true,
-                  }}
-                />
-              ) : (
-                <div className="h-[196px] w-[196px] animate-pulse rounded-lg bg-gray-100" />
-              )}
-            </div>
+            {isLocalMode ? (
+              <div className="mt-6 space-y-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-gray-800">
+                <p>
+                  This table is saved only in this browser. A QR code or shared link cannot open it on another device.
+                </p>
+                {isHost ? (
+                  <p className="font-medium text-gray-950">
+                    To include someone, add them from the player list on this device.
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <>
+                <div className="mx-auto mt-6 w-fit rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
+                  {inviteUrl ? (
+                    <QRCodeSVG
+                      value={inviteUrl}
+                      title={`QR code to join ${game.name}`}
+                      size={196}
+                      level="H"
+                      marginSize={2}
+                      bgColor="#ffffff"
+                      fgColor="#111512"
+                      imageSettings={{
+                        src: "/icon.svg",
+                        height: 36,
+                        width: 36,
+                        excavate: true,
+                      }}
+                    />
+                  ) : (
+                    <div className="h-[196px] w-[196px] animate-pulse rounded-lg bg-gray-100" />
+                  )}
+                </div>
 
-            <div className="mt-5 rounded-xl bg-gray-50 px-4 py-3 text-center">
-              <p className="text-xs uppercase tracking-widest text-gray-500">Room code</p>
-              <p className="mt-1 font-mono text-xl font-semibold tracking-[0.24em] text-gray-950">{game.code}</p>
-            </div>
+                <div className="mt-5 rounded-xl bg-gray-50 px-4 py-3 text-center">
+                  <p className="text-xs uppercase tracking-widest text-gray-500">Room code</p>
+                  <p className="mt-1 font-mono text-xl font-semibold tracking-[0.24em] text-gray-950">{game.code}</p>
+                </div>
 
-            <p className="mt-3 text-center text-xs text-gray-500">
-              Scan with your camera · no account required
-            </p>
+                <p className="mt-3 text-center text-xs text-gray-500">
+                  Scan with your camera · no account required
+                </p>
 
-            <FriendInviteList gameId={game.id} isHost={isHost} />
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <button type="button" onClick={handleCopy} className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-medium text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">Copy code</button>
-              <button type="button" onClick={handleShare} className="rounded-lg bg-gray-950 px-3 py-2.5 text-sm font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">Share invite</button>
-            </div>
+                <FriendInviteList gameId={game.id} isHost={isHost} />
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <button type="button" onClick={handleCopy} className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-medium text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">Copy code</button>
+                  <button type="button" onClick={handleShare} className="rounded-lg bg-gray-950 px-3 py-2.5 text-sm font-medium text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">Share invite</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       ) : null}

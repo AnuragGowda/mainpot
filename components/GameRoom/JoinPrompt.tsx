@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
@@ -23,15 +25,19 @@ export default function JoinPrompt({
   game,
   onJoined,
 }: JoinPromptProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const dialogRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const nameRef = useRef("");
 
   useEffect(() => {
-    setName(getPlayerName() ?? "");
+    const savedName = getPlayerName() ?? "";
+    nameRef.current = savedName;
+    setName(savedName);
   }, []);
 
   useEffect(() => {
@@ -43,6 +49,12 @@ export default function JoinPrompt({
     const frame = window.requestAnimationFrame(focusName);
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        if (nameRef.current.trim()) setPlayerName(nameRef.current.trim());
+        router.push("/join");
+        return;
+      }
       if (event.key !== "Tab") return;
       const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
         'button:not([disabled]), input:not([disabled]), [href], select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
@@ -69,7 +81,11 @@ export default function JoinPrompt({
       document.removeEventListener("keydown", handleKeyDown);
       previousFocus?.focus();
     };
-  }, []);
+  }, [router]);
+
+  function leaveJoinPrompt() {
+    if (name.trim()) setPlayerName(name.trim());
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -114,16 +130,16 @@ export default function JoinPrompt({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto overscroll-contain bg-black/40 pt-[env(safe-area-inset-top)] sm:items-center sm:p-4">
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="join-game-title"
         aria-describedby="join-game-details"
-        className="w-full sm:max-w-sm"
+        className="max-h-[calc(100dvh-env(safe-area-inset-top))] w-full overflow-y-auto overscroll-contain sm:max-h-[calc(100dvh-2rem)] sm:max-w-sm"
       >
-        <Card padding="lg" className="w-full rounded-b-none sm:rounded-xl">
+        <Card padding="lg" className="w-full rounded-b-none pb-[calc(2rem+env(safe-area-inset-bottom))] sm:rounded-xl sm:pb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
             Join the table
           </p>
@@ -166,7 +182,10 @@ export default function JoinPrompt({
               ref={nameInputRef}
               label="Your name"
               value={name}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => {
+                nameRef.current = event.target.value;
+                setName(event.target.value);
+              }}
               placeholder="Mike"
               autoComplete="name"
               maxLength={PLAYER_NAME_MAX_LENGTH}
@@ -176,6 +195,22 @@ export default function JoinPrompt({
               Join
             </Button>
           </form>
+          <nav aria-label="Join options" className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-gray-200 pt-4 text-sm">
+            <Link
+              href="/join"
+              onClick={leaveJoinPrompt}
+              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-950 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
+            >
+              Back to join
+            </Link>
+            <Link
+              href={`/signin?next=${encodeURIComponent(`/game/${game.code}`)}`}
+              onClick={leaveJoinPrompt}
+              className="font-medium text-gray-700 underline-offset-4 hover:text-gray-950 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
+            >
+              Sign in to an existing account
+            </Link>
+          </nav>
         </Card>
       </div>
     </div>

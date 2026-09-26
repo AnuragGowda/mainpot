@@ -280,7 +280,7 @@ export default function SignInPage() {
                   <Button fullWidth variant="secondary" className="mt-6" loading={loading} onClick={handleGoogle} leftIcon={<GoogleMark className="h-4 w-4" />}>
                     Continue with Google
                   </Button>
-                  <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-gray-400">
+                  <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-gray-600">
                     <span className="h-px flex-1 bg-gray-200" />or<span className="h-px flex-1 bg-gray-200" />
                   </div>
                 </>
