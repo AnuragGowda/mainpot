@@ -1,6 +1,25 @@
 import { getBrowserSupabase } from "./supabase-browser";
 import { round2 } from "./format";
-import type { FriendStats, GameHistory, UserStats } from "./types";
+import type { FriendStats, GameHistory, Game, UserStats } from "./types";
+
+/** Account-wide recovery works even when this browser has no saved room code. */
+export async function getUnfinishedGames(userId: string): Promise<Game[]> {
+  const supabase = getBrowserSupabase();
+  if (!supabase) return [];
+  const [hosted, seats] = await Promise.all([
+    supabase.from("games").select("*").eq("host_user_id", userId).in("status", ["active", "settling"]),
+    supabase.from("players").select("games!inner(*)").eq("user_id", userId).is("left_at", null)
+      .in("games.status", ["active", "settling"]),
+  ]);
+  if (hosted.error) throw new Error(`Could not load hosted tables: ${hosted.error.message}`);
+  if (seats.error) throw new Error(`Could not load joined tables: ${seats.error.message}`);
+  const joined = (seats.data ?? []) as unknown as Array<{ games: Game }>;
+  const games = [...(hosted.data ?? []) as Game[], ...joined.map((seat) => seat.games)];
+  return [...new Map(games.map((game) => [game.id, game])).values()]
+    .filter((game) => !game.expires_at || new Date(game.expires_at).getTime() > Date.now())
+    .map((game) => ({ ...game, buy_in_amount: Number(game.buy_in_amount) }))
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
 
 // ---------------------------------------------------------------------------
 // Pure stats computation

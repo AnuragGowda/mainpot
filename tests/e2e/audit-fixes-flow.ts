@@ -45,7 +45,12 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     await resumed.getByLabel("Password", { exact: true }).fill(password);
     await resumed.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(resumed).toHaveURL(/dashboard/);
-    await resumed.goto(gameUrl);
+    const unfinished = resumed.getByRole("region", { name: "Your unfinished games" });
+    await expect(unfinished).toContainText("Recovery regression");
+    expect(await resumed.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(resumed.viewportSize()!.width);
+    await resumed.screenshot({ path: `docs/audits/2026-09-26/evidence/dashboard-resume-${resumed.viewportSize()!.width}.png`, fullPage: true });
+    await unfinished.getByRole("button", { name: "Resume game" }).click();
+    await expect(resumed).toHaveURL(gameUrl);
     await expect(resumed.getByRole("button", { name: "End game", exact: true })).toBeVisible();
     await expect(resumed.locator("#join-prompt-name")).toHaveCount(0);
     // The recovered host can mutate and remains the same seat in the first browser.
@@ -60,6 +65,19 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     await resumed.getByRole("alertdialog").getByRole("button", { name: "Lock settlement" }).click();
     await expect(resumed.getByRole("heading", { name: "You're even.", exact: true })).toBeVisible();
     await resumed.goto("/dashboard");
+    await expect(resumed.getByRole("region", { name: "Your unfinished games" })).toHaveCount(0);
+    // An optional endpoint failure must not hide history or the user's profile.
+    await resumed.route("**/rest/v1/account_deletion_requests**", route => route.fulfill({
+      status: 400, contentType: "application/json", body: JSON.stringify({ message: "Injected optional section failure" }),
+    }));
+    await resumed.reload();
+    await expect(resumed.getByText("Some dashboard sections are unavailable")).toBeVisible();
+    await expect(resumed.getByRole("heading", { name: "Casey", exact: true })).toBeVisible();
+    await expect(resumed.getByText("No settled games yet", { exact: true })).toHaveCount(0);
+    await expect(resumed.getByRole("button", { name: "Request account deletion", exact: true })).toHaveCount(0);
+    await resumed.unroute("**/rest/v1/account_deletion_requests**");
+    await resumed.getByRole("button", { name: "Retry dashboard" }).click();
+    await expect(resumed.getByText("Some dashboard sections are unavailable")).toHaveCount(0);
     await resumed.getByRole("link", { name: "Recovery regression", exact: true }).click();
     await expect(resumed.getByRole("heading", { name: "You're even.", exact: true })).toBeVisible();
     await expect(resumed.getByRole("button", { name: "End game", exact: true })).toHaveCount(0);

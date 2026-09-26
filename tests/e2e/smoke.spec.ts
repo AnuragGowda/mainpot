@@ -2,6 +2,7 @@ import { checkCalculatorValidation } from "./audit-fixes-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
 import { runSettlementUxFlow } from "./settlement-ux-flow";
 import { expect, test } from "@playwright/test";
+import { checkPwaRecovery } from "./pwa-flow";
 
 test.describe("public local-mode experience", () => {
   // Keep network mocks deterministic in WebKit; a registered service worker
@@ -527,4 +528,10 @@ test.describe("public local-mode experience", () => {
 
 test("does not show a settlement for invalid calculator amounts", async ({ page }) => {
   await checkCalculatorValidation(page);
+});
+
+test("recovers the same game after a real PWA offline navigation", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium", "Playwright does not expose WebKit service worker control; physical iOS PWA validation remains required.");
+  test.slow();
+  await checkPwaRecovery(page, `docs/audits/2026-09-26/evidence/${testInfo.project.name}-pwa`);
 });

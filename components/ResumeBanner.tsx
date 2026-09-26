@@ -28,7 +28,7 @@ export function ResumeGameCard({ game }: { game: ResumableGame }) {
           </p>
           <p className="mt-0.5 truncate text-sm font-semibold text-gray-950">{game.name}</p>
           <p className="mt-0.5 text-xs leading-5 text-gray-500">
-            {isSettling ? "Cash-outs and payments still need a final review." : "Your table is still in progress on this device."}
+            {isSettling ? "Cash-outs and payments still need a final review." : "Your table is still in progress."}
           </p>
         </div>
       </div>
