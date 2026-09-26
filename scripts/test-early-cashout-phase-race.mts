@@ -8,12 +8,12 @@ const status = JSON.parse(spawnSync(supabaseCommand, [
   ...(workdir ? ["--workdir", workdir] : []), "status", "--output", "json",
 ], { encoding: "utf8" }).stdout);
 const url = status.API_URL as string | undefined;
-const dbUrl = status.DB_URL as string | undefined;
+const databaseContainer = "supabase_db_mainpot-e2e";
+const psqlArgs = ["exec", "-i", databaseContainer, "psql", "-U", "postgres", "-d", "postgres", "-X", "-v", "ON_ERROR_STOP=1", "-At"];
 const anonKey = (status.PUBLISHABLE_KEY ?? status.ANON_KEY) as string | undefined;
 const serviceKey = status.SERVICE_ROLE_KEY as string | undefined;
-if (!/^https?:\/\/(127\.0\.0\.1|localhost)(:|$)/.test(url ?? "")
-  || !/^postgres(ql)?:\/\/(127\.0\.0\.1|localhost)(:|$)/.test(dbUrl ?? "")) {
-  throw new Error("Refusing to run the phase race test against a non-local Supabase stack.");
+if (url !== "http://127.0.0.1:55321" || process.env.SUPABASE_EXPECTED_API_URL !== url) {
+  throw new Error("The race regression requires the disposable mainpot-e2e stack.");
 }
 if (!anonKey || !serviceKey) throw new Error("Local Supabase credentials are incomplete.");
 
@@ -36,7 +36,7 @@ async function guest(label: string) {
 }
 
 function runPsql(sql: string) {
-  const result = spawnSync("psql", [dbUrl!, "-X", "-v", "ON_ERROR_STOP=1", "-At", "-c", sql], { encoding: "utf8" });
+  const result = spawnSync("docker", [...psqlArgs, "-c", sql], { encoding: "utf8" });
   if (result.status !== 0) throw new Error(result.stderr || "psql failed");
   return result.stdout.trim();
 }
@@ -96,7 +96,7 @@ async function run() {
   const approval = await host.client.from("buy_ins").update({ verified: true }).eq("player_id", joinedPlayer.player_id);
   if (approval.error) throw approval.error;
 
-  const locker = spawn("psql", [dbUrl!, "-X", "-v", "ON_ERROR_STOP=1", "-At"], { stdio: ["pipe", "pipe", "pipe"] });
+  const locker = spawn("docker", psqlArgs, { stdio: ["pipe", "pipe", "pipe"] });
   try {
     const ready = waitForLine(locker, "__GAME_LOCKED__");
     locker.stdin!.write(`begin; select id from public.games where id = '${game.game_id}' for update; \\echo __GAME_LOCKED__\n`);
@@ -107,7 +107,7 @@ async function run() {
       input_player_id: joinedPlayer.player_id,
       input_cash_out_amount: 20,
       input_session_id: randomUUID(),
-    });
+    }).then((response) => response);
     await waitForBlockedRequest();
 
     locker.stdin!.write(`update public.games set status = 'settling' where id = '${game.game_id}'; commit;\n`);

@@ -131,6 +131,7 @@ try {
     for (const script of [
       "test-database-assurance.mts", "test-audit-security.mts",
       "test-settlement-allocation-guard.mts", "test-account-transfer-security.mts",
+      "test-early-cashout-phase-race.mts",
     ]) {
       try {
         run(process.execPath, [join(scriptDirectory, script)], {
