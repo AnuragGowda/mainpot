@@ -1,4 +1,5 @@
 import { expect, type Page, type Browser } from "@playwright/test";
+import { createDeviceContext } from "./device-context";
 
 export async function checkCalculatorValidation(page: Page) {
   await page.goto("/poker-settlement-calculator");
@@ -19,8 +20,8 @@ export async function checkCalculatorValidation(page: Page) {
 }
 
 export async function checkAccountRecovery(browser: Browser, baseURL: string) {
-  const first = await browser.newContext({ baseURL, reducedMotion: "reduce" });
-  const second = await browser.newContext({ baseURL, reducedMotion: "reduce" });
+  const first = await createDeviceContext(browser, { baseURL, reducedMotion: "reduce" });
+  const second = await createDeviceContext(browser, { baseURL, reducedMotion: "reduce" });
   const host = await first.newPage();
   const resumed = await second.newPage();
   const email = `recovery-${crypto.randomUUID()}@example.com`;
@@ -97,7 +98,7 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
 }
 
 export async function checkSavedFriendInvitation(browser: Browser, baseURL: string) {
-  const contexts = await Promise.all([browser.newContext({ baseURL }), browser.newContext({ baseURL })]);
+  const contexts = await Promise.all([createDeviceContext(browser, { baseURL }), createDeviceContext(browser, { baseURL })]);
   const [host, friend] = await Promise.all(contexts.map(context => context.newPage()));
   const names = [`Host ${Date.now()}`, `Friend ${Date.now()}`];
   try {

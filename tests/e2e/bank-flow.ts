@@ -1,8 +1,9 @@
 import { expect, type Browser } from "@playwright/test";
+import { createDeviceContext } from "./device-context";
 
 /** A non-host bank must see both collection and payout instructions. */
 export async function runBankPlanFlow(browser: Browser, baseURL: string, evidencePrefix: string) {
-  const contexts = await Promise.all([0, 1, 2].map(() => browser.newContext({ baseURL, reducedMotion: "reduce" })));
+  const contexts = await Promise.all([0, 1, 2].map(() => createDeviceContext(browser, { baseURL, reducedMotion: "reduce" })));
   const [host, winner, banker] = await Promise.all(contexts.map(context => context.newPage()));
   try {
     await host.goto("/create");

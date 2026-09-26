@@ -4,6 +4,7 @@ import { checkAccountRecovery, checkSavedFriendInvitation } from "./audit-fixes-
 import { runHostPlayerFlow } from "./host-player-flow";
 import { runSettlementUxFlow } from "./settlement-ux-flow";
 import { expect, test, type Route } from "@playwright/test";
+import { createDeviceContext } from "./device-context";
 
 // Local guest creation is deliberately rate-limited, so these database-backed
 // scenarios run one at a time while each scenario still uses separate users.
@@ -37,8 +38,8 @@ async function expectAutomaticOpeningBuyIn(page: import("@playwright/test").Page
 }
 
 test("requires visitors to join before viewing an active game", async ({ browser }) => {
-  const hostContext = await browser.newContext();
-  const guestContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const guestContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const guest = await guestContext.newPage();
 
@@ -76,9 +77,9 @@ function playerCard(page: import("@playwright/test").Page, name: string) {
 }
 
 test("syncs two guests' independent ledger entries and host approval", async ({ browser }) => {
-  const hostContext = await browser.newContext();
-  const jordanContext = await browser.newContext();
-  const taylorContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const jordanContext = await createDeviceContext(browser);
+  const taylorContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const jordan = await jordanContext.newPage();
   const taylor = await taylorContext.newPage();
@@ -111,8 +112,8 @@ test("syncs two guests' independent ledger entries and host approval", async ({ 
 test("locks an early cash-out against the host and carries it out of final settlement", async ({ browser }) => {
   test.slow();
   const mobile = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
-  const hostContext = await browser.newContext(mobile);
-  const guestContext = await browser.newContext(mobile);
+  const hostContext = await createDeviceContext(browser, mobile);
+  const guestContext = await createDeviceContext(browser, mobile);
   const host = await hostContext.newPage();
   const guest = await guestContext.newPage();
 
@@ -177,8 +178,8 @@ test("locks an early cash-out against the host and carries it out of final settl
 });
 
 test("auto-approves host rebuys while keeping player entries pending", async ({ browser }) => {
-  const hostContext = await browser.newContext();
-  const guestContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const guestContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const guest = await guestContext.newPage();
 
@@ -207,8 +208,8 @@ test("auto-approves host rebuys while keeping player entries pending", async ({ 
 });
 
 test("records one pending opening buy-in when a guest joins and does not duplicate it on reload", async ({ browser }) => {
-  const hostContext = await browser.newContext();
-  const guestContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const guestContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const guest = await guestContext.newPage();
 
@@ -237,8 +238,8 @@ test("records one pending opening buy-in when a guest joins and does not duplica
 });
 
 test("records a player's rebuy in the shared ledger", async ({ browser }) => {
-  const hostContext = await browser.newContext();
-  const guestContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const guestContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const guest = await guestContext.newPage();
 
@@ -272,8 +273,8 @@ test("records a player's rebuy in the shared ledger", async ({ browser }) => {
 });
 
 test("transfers host authority when the host leaves", async ({ browser }) => {
-  const hostContext = await browser.newContext();
-  const jordanContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const jordanContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const jordan = await jordanContext.newPage();
 
@@ -307,8 +308,8 @@ test("transfers host authority when the host leaves", async ({ browser }) => {
 });
 
 test("recovers a disconnected guest after the host starts settlement", async ({ browser }) => {
-  const hostContext = await browser.newContext();
-  const jordanContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const jordanContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const jordan = await jordanContext.newPage();
 
@@ -343,9 +344,9 @@ test("recovers a disconnected guest after the host starts settlement", async ({ 
 });
 
 test("keeps host correction and approval decisions auditable", async ({ browser }) => {
-  const hostContext = await browser.newContext();
-  const jordanContext = await browser.newContext();
-  const taylorContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const jordanContext = await createDeviceContext(browser);
+  const taylorContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const jordan = await jordanContext.newPage();
   const taylor = await taylorContext.newPage();
@@ -382,8 +383,8 @@ test("keeps host correction and approval decisions auditable", async ({ browser 
 
 test("releases a stalled host correction and keeps the amount ready to retry", async ({ browser }) => {
   test.slow();
-  const hostContext = await browser.newContext();
-  const guestContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const guestContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const guest = await guestContext.newPage();
 
@@ -421,8 +422,8 @@ test("releases a stalled host correction and keeps the amount ready to retry", a
 test("holds a multi-user settlement until cash-outs reconcile", async ({ browser }) => {
   test.slow();
   const mobile = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
-  const hostContext = await browser.newContext(mobile);
-  const guestContext = await browser.newContext(mobile);
+  const hostContext = await createDeviceContext(browser, mobile);
+  const guestContext = await createDeviceContext(browser, mobile);
   const host = await hostContext.newPage();
   const guest = await guestContext.newPage();
 
@@ -521,8 +522,8 @@ test("runs a whole table with host-added players", async ({ page }) => {
 });
 
 test("syncs host-added players to guests without exposing host controls", async ({ browser }) => {
-  const hostContext = await browser.newContext();
-  const guestContext = await browser.newContext();
+  const hostContext = await createDeviceContext(browser);
+  const guestContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
   const guest = await guestContext.newPage();
   try {

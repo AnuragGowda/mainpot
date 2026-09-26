@@ -1,9 +1,10 @@
 import { expect, type Browser } from "@playwright/test";
+import { createDeviceContext } from "./device-context";
 
 /** Preserve an authenticated guest host's table when creating an account. */
 export async function runGuestAccountTransfer(browser: Browser, baseURL: string) {
-  const original = await browser.newContext({ baseURL });
-  const fresh = await browser.newContext({ baseURL });
+  const original = await createDeviceContext(browser, { baseURL });
+  const fresh = await createDeviceContext(browser, { baseURL });
   const host = await original.newPage();
   const resumed = await fresh.newPage();
   const email = `guest-transfer-${crypto.randomUUID()}@example.com`;
