@@ -3,7 +3,7 @@
 -- unbound OAuth capability remains limited to ten minutes.
 alter table public.account_transfer_tokens
   add constraint account_transfer_tokens_max_lifetime_check
-    check (expires_at <= created_at + interval '24 hours'),
+    check (expires_at <= created_at + interval '1 hour'),
   add constraint account_transfer_tokens_unbound_lifetime_check
     check (destination_email is not null or expires_at <= created_at + interval '10 minutes');
 

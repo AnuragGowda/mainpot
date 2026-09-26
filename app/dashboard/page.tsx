@@ -16,7 +16,7 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import { useToast } from "@/components/ui/Toast";
 import { linkSessionToUser } from "@/lib/accounts";
-import { exportMyAccountData, getAccountDeletionRequest, requestAccountDeletion } from "@/lib/account-data";
+import { cancelAccountDeletion, exportMyAccountData, getAccountDeletionRequest, requestAccountDeletion } from "@/lib/account-data";
 import { getCurrentUser } from "@/lib/auth-client";
 import { formatCurrency, formatSignedNet } from "@/lib/format";
 import { getProfileById, isUsernameTaken, updateProfile } from "@/lib/friends";
@@ -438,7 +438,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
               <div>
                 <h2 className="font-semibold text-gray-950">Recent games</h2>
-                <p className="text-sm text-gray-500">Your settled results</p>
+                <p className="text-sm text-gray-500">Final results · payment status is tracked separately</p>
               </div>
               {!sectionErrors.Statistics ? <span className="text-xs text-gray-600">Best win {formatCurrency(stats.biggestWin)}</span> : null}
             </div>
@@ -456,6 +456,9 @@ export default function DashboardPage() {
                       <p className="mt-0.5 text-xs text-gray-500">
                         {game.date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })} · {game.playerCount} players · {formatCurrency(game.buyInAmount)} buy-in
                       </p>
+                      <Link href={`/game/${game.gameCode}#payment-ledger`} className="mt-1 inline-block text-xs font-medium text-gray-700 underline underline-offset-2">
+                        {game.paymentProgress == null ? "Payment progress unavailable · open game" : game.paymentProgress.total === 0 ? "No transfers required" : `${game.paymentProgress.markedSent}/${game.paymentProgress.total} payments marked sent${game.paymentProgress.markedSent < game.paymentProgress.total ? " · review payments" : ""}`}
+                      </Link>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
                       <p className={`font-semibold tabular-nums ${resultClass(game.netResult)}`}>
@@ -474,7 +477,7 @@ export default function DashboardPage() {
               </ul>
             ) : (
               <div className="px-6 py-14 text-center">
-                <p className="text-sm font-medium text-gray-700">No settled games yet</p>
+                <p className="text-sm font-medium text-gray-700">No final results yet</p>
                 <p className="mt-1 text-sm text-gray-500">Finish your first game and the result appears here.</p>
                 <Link href="/create" className="mt-5 inline-block text-sm font-semibold text-gray-900">Create a game →</Link>
               </div>
@@ -515,9 +518,15 @@ export default function DashboardPage() {
 
         <details className="mt-6 rounded-xl border border-gray-200 bg-white px-5 py-4">
           <summary className="cursor-pointer font-semibold text-gray-950">Account data and deletion</summary>
-          <p className="mt-3 text-sm leading-6 text-gray-600">Download the information tied to your account, or submit a deletion request for the support team to fulfill.</p>
+          <p className="mt-3 text-sm leading-6 text-gray-600">Export your account summary: profile, templates, hosted game details, final results, friendships, invitations, and feedback. Detailed buy-in, cash-out, and payment ledgers are not included. You can also request deletion for support to fulfill; deletion is not immediate.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="secondary" onClick={exportData} loading={exporting}>Export my data</Button>
+            {deletionRequest?.status === "pending" ? <Button variant="secondary" loading={deleting} onClick={async () => {
+              setDeleting(true);
+              try { await cancelAccountDeletion(); setDeletionRequest(await getAccountDeletionRequest()); toast("Deletion request cancelled"); }
+              catch (error) { toast(error instanceof Error ? error.message : "Could not cancel deletion.", "error"); }
+              finally { setDeleting(false); }
+            }}>Cancel deletion request</Button> : null}
             {!sectionErrors["Deletion status"] && (!deletionRequest || deletionRequest.status === "cancelled") ? (
               <ConfirmButton
                 loading={deleting}

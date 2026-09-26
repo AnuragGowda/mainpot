@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 import GameSetupShell from "@/components/GameSetupShell";
+import TemplateManager from "@/components/TemplateManager";
 import { useToast } from "@/components/ui/Toast";
 import { createGame, getGame, recordGameEvent, usingLocalStorage } from "@/lib/data";
 import { getGameTemplates, saveGameTemplate, type GameTemplate } from "@/lib/account-data";
@@ -216,6 +217,7 @@ export default function CreateGamePage() {
                 </Select>
               </label>
             ) : null}
+            {preferredRoster.trim() && !saveTemplate ? <aside className="rounded-lg border border-gray-200 bg-gray-50 p-3.5"><p className="text-sm font-semibold text-gray-800">Roster reminder</p><p className="mt-1 text-sm text-gray-600">{preferredRoster}</p><p className="mt-1 text-xs text-gray-500">For your setup only. These names do not create seats; invite or add each player at the table.</p></aside> : null}
             <Input
               disabled={!ready}
               id="create-name"
@@ -252,6 +254,7 @@ export default function CreateGamePage() {
               placeholder="20"
               error={errors.buyIn}
             />
+            <p className="text-xs leading-5 text-gray-600">This game settles wins and losses at the end. If buy-ins have already been paid into a cash pot, its payouts are different from these net payments.</p>
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
               <label className="flex cursor-pointer items-start gap-2.5 text-sm font-medium text-gray-800">
                 <input
@@ -286,6 +289,7 @@ export default function CreateGamePage() {
               {resumeGames.length ? "Start another game" : "Create game"}
             </Button>
         </form>
+        {canSaveTemplate ? <TemplateManager templates={templates} onChanged={setTemplates} /> : null}
       </div>
     </GameSetupShell>
   );

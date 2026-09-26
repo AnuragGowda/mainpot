@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+import { withTimeout } from "@/lib/request-timeout";
 import { getCurrentUser } from "@/lib/auth-client";
 import { getFriends } from "@/lib/friends";
 import { friendLabel, inviteFriendToGame } from "@/lib/invites";
@@ -25,29 +26,31 @@ export default function FriendInviteList({ gameId, isHost }: FriendInviteListPro
   const [accountReady, setAccountReady] = useState<boolean | null>(null);
   const [sent, setSent] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState<string | null>(null);
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     if (!isHost) return;
     let cancelled = false;
+    setLoadFailed(false);
     void (async () => {
-      const user = await getCurrentUser();
+      const user = await withTimeout(getCurrentUser(), "Could not check your account.");
       const ready = Boolean(user && !user.is_anonymous);
       if (cancelled) return;
       setAccountReady(ready);
       if (ready && user) {
         try {
-          const next = await getFriends(user.id);
+          const next = await withTimeout(getFriends(user.id), "Saved friends could not load.");
           if (!cancelled) setFriends(next);
         } catch {
-          if (!cancelled) setFriends([]);
+          if (!cancelled) setLoadFailed(true);
         }
       }
     })().catch(() => { if (!cancelled) setLoadFailed(true); });
     return () => { cancelled = true; };
-  }, [isHost]);
+  }, [isHost, reload]);
 
   if (!isHost) return null;
-  if (loadFailed) return <p className="mt-4 text-center text-sm text-gray-600">Saved friends could not load. Close and reopen Invite to retry.</p>;
+  if (loadFailed) return <div className="mt-4 text-center"><p role="alert" className="text-sm text-gray-600">Saved friends could not load.</p><Button className="mt-2" size="sm" variant="secondary" onClick={() => setReload((value) => value + 1)}>Retry friends</Button></div>;
   if (accountReady === null) return null;
   if (!accountReady) {
     return (

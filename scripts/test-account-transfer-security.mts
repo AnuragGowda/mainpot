@@ -108,9 +108,9 @@ async function run() {
     const createdAt = Date.parse(longLivedTokenRow.data.created_at);
     const beyondMaximum = await admin
       .from("account_transfer_tokens")
-      .update({ expires_at: new Date(createdAt + (24 * 60 * 60 * 1000) + 1).toISOString() })
+      .update({ expires_at: new Date(createdAt + (60 * 60 * 1000) + 1).toISOString() })
       .eq("source_user_id", longLivedGuest.id);
-    assert(beyondMaximum.error, "an email-bound transfer cannot exceed the 24-hour maximum");
+    assert(beyondMaximum.error, "an email-bound transfer cannot exceed the one-hour maximum");
     const now = Date.now();
     const ageBeyondUnbound = await admin
       .from("account_transfer_tokens")
@@ -129,7 +129,7 @@ async function run() {
       .from("account_transfer_tokens")
       .update({
         created_at: new Date(now - (11 * 60 * 1000)).toISOString(),
-        expires_at: new Date(now - 1000).toISOString(),
+        expires_at: new Date(now - (60 * 1000)).toISOString(),
       })
       .eq("source_user_id", guest.id);
     if (expiredUnbound.error) throw expiredUnbound.error;

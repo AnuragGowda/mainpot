@@ -216,7 +216,7 @@ export default function FriendsPage() {
                 </li>
               ))}
             </ul>
-          ) : submittedQuery && !searching ? <p className="mt-5 border-t border-gray-100 pt-5 text-sm text-gray-500">No matching players yet.</p> : null}
+          ) : submittedQuery && !searching ? <div className="mt-5 border-t border-gray-100 pt-5 text-sm text-gray-500"><p>No matching saved accounts. Your guests can still join without an account.</p><Link href="/create" className="mt-2 inline-block font-semibold text-gray-900 underline underline-offset-2">Start a table and share its private invite link</Link></div> : null}
         </Card>
 
         {incoming.length ? (

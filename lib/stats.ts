@@ -1,5 +1,9 @@
 import { getBrowserSupabase } from "./supabase-browser";
 import { round2 } from "./format";
+import { getGameSnapshot } from "./data";
+import { getSettlementPaymentStatuses } from "./payments";
+import { getPaymentProgress } from "./payment-progress";
+import { withTimeout } from "./request-timeout";
 import type { FriendStats, GameHistory, Game, UserStats } from "./types";
 
 /** Account-wide recovery works even when this browser has no saved room code. */
@@ -169,7 +173,16 @@ export async function getUserGames(
   }
 
   history.sort((a, b) => b.date.getTime() - a.date.getTime());
-  return history.slice(offset, offset + limit);
+  return Promise.all(history.slice(offset, offset + limit).map(async (game) => {
+    try {
+      const [snapshot, statuses] = await withTimeout(Promise.all([
+        getGameSnapshot(game.gameId), getSettlementPaymentStatuses(game.gameId),
+      ]), "Payment progress could not load.", 6_000);
+      return { ...game, paymentProgress: getPaymentProgress(snapshot, statuses) };
+    } catch {
+      return { ...game, paymentProgress: null };
+    }
+  }));
 }
 
 /**

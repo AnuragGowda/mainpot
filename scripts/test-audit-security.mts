@@ -310,6 +310,22 @@ async function run() {
   await expectDenied(() => hostA.client.from("games").update({ settlement_mode: "min", settlement_bank_player_id: null }).eq("id", bankGame.game_id).select("id"), "ended bank plan is immutable");
   console.log("✓ settlement bank selection is host-only, game-scoped, shared, and immutable after lock");
 
+  const requested = await hostA.client.rpc("request_account_deletion");
+  assert(!requested.error && requested.data?.status === "pending", "account holder requests deletion");
+  const foreignCancellation = await outsider.client.rpc("cancel_account_deletion");
+  assert(foreignCancellation.error, "outsider cannot cancel another account's request");
+  const cancelledDeletion = await hostA.client.rpc("cancel_account_deletion");
+  assert(!cancelledDeletion.error && cancelledDeletion.data?.status === "cancelled", "owner cancels a pending request");
+  const replayCancellation = await hostA.client.rpc("cancel_account_deletion");
+  assert(!replayCancellation.error && replayCancellation.data?.status === "cancelled", "cancellation safely replays a lost response");
+  const rerequested = await hostA.client.rpc("request_account_deletion");
+  assert(!rerequested.error && rerequested.data?.status === "pending", "cancelled request can be resubmitted");
+  const processing = await admin.from("account_deletion_requests").update({ status: "processing" }).eq("user_id", hostA.id);
+  assert(!processing.error, "staff begins processing fixture");
+  assert((await hostA.client.rpc("cancel_account_deletion")).error, "owner cannot cancel once staff processing begins");
+  assert((await hostA.client.rpc("request_account_deletion")).error, "owner cannot reset processing by submitting again");
+  console.log("✓ deletion cancellation is owner-only, pending-only, and idempotent");
+
 }
 
 try {

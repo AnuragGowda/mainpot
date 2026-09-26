@@ -193,6 +193,8 @@ export interface GameHistory {
   netResult: number;
   buyInAmount: number;
   playerCount: number;
+  /** Null means payment progress could not be read, never a confirmed zero. */
+  paymentProgress?: { total: number; markedSent: number } | null;
 }
 
 export interface UserStats {

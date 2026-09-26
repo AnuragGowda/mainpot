@@ -95,7 +95,10 @@ export default function SignInPage() {
       router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Could not recover guest games.";
-      if (message === GUEST_RECOVERY_WINDOW_EXPIRED) setRecoveryCanRetry(false);
+      if (message === GUEST_RECOVERY_WINDOW_EXPIRED) {
+        setRecoveryCanRetry(false);
+        setAuthStatus("Guest games can only be recovered within one hour after requesting the confirmation email, from the same browser.");
+      }
       setAuthError(message);
     } finally {
       setLoading(false);
