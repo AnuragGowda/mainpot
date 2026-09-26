@@ -38,8 +38,12 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     await expect(host).toHaveURL(/dashboard/);
     await host.goto("/create");
     await host.locator("#create-name").fill("Casey");
+    await expect(host.locator("#create-name")).toHaveValue("Casey");
     await host.locator("#create-game-name").fill("Recovery regression");
+    await expect(host.locator("#create-game-name")).toHaveValue("Recovery regression");
     await host.locator("#create-buy-in").fill("20");
+    await expect(host.locator("#create-buy-in")).toHaveValue("20");
+    await expect(host.locator("#create-game-name")).toHaveValue("Recovery regression");
     await host.getByRole("button", { name: "Create game", exact: true }).click();
     await expect(host.getByRole("button", { name: "End game", exact: true })).toBeVisible();
     const gameUrl = host.url();
