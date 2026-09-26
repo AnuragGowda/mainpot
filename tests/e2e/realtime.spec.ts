@@ -570,3 +570,32 @@ test("keeps guest-host ownership after account signup across devices", async ({ 
   test.slow();
   await runGuestAccountTransfer(browser, baseURL!);
 });
+
+test("starts a second guest table and keeps both unfinished games recoverable", async ({ page }) => {
+  await createGame(page, "First unfinished table");
+  const firstUrl = page.url();
+  await page.goto("/create");
+  await expect(page.getByRole("region", { name: "Resume active game" })).toContainText("First unfinished table");
+  await page.locator("#create-name").fill("Casey");
+  await page.locator("#create-game-name").fill("Second unfinished table");
+  await page.locator("#create-buy-in").fill("20");
+  await page.getByRole("button", { name: "Start another game", exact: true }).click();
+  await expect(page).toHaveURL(/\/game\/[A-HJ-NP-Z2-9]{6}$/, { timeout: 15_000 });
+  const secondUrl = page.url();
+  expect(secondUrl).not.toBe(firstUrl);
+  await page.goto("/create");
+  const recovery = page.getByRole("region", { name: "Resume active game" });
+  await expect(recovery).toHaveCount(2);
+  await expect(recovery.filter({ hasText: "First unfinished table" })).toBeVisible();
+  await expect(recovery.filter({ hasText: "Second unfinished table" })).toBeVisible();
+  await page.locator("#create-name").fill("Casey");
+  await page.locator("#create-game-name").fill("Third table");
+  await page.locator("#create-buy-in").fill("20");
+  await page.getByRole("button", { name: "Start another game", exact: true }).click();
+  await expect(page.getByText("Guest accounts can keep two unfinished tables.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start another game", exact: true })).toBeEnabled();
+  await recovery.filter({ hasText: "First unfinished table" }).getByRole("button", { name: "Resume game" }).click();
+  await expect(page).toHaveURL(firstUrl);
+  await expect(page.getByRole("button", { name: "End game", exact: true })).toBeEnabled();
+  await expect(page.getByText("Pot", { exact: true }).locator("..")).toContainText("$20.00");
+});
