@@ -50,6 +50,7 @@ order by
 create or replace function mainpot_private.guard_player_lobby_name()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 declare
@@ -62,6 +63,39 @@ begin
   -- A player outside a game has no lobby namespace. Existing rows are kept
   -- compatible with the older nullable foreign-key shape.
   if new.game_id is null then
+    if tg_op = 'UPDATE' and old.game_id is not null then
+      target_name_key := mainpot_private.player_lobby_name_key(old.name);
+      perform pg_advisory_xact_lock(hashtextextended(old.game_id::text, 0));
+
+      select reservation.player_id into reservation_player_id
+      from mainpot_private.player_lobby_name_reservations as reservation
+      where reservation.game_id = old.game_id
+        and reservation.normalized_name = target_name_key
+      for update;
+
+      if reservation_player_id = old.id then
+        select player.id into replacement_player_id
+        from public.players as player
+        where player.game_id = old.game_id
+          and player.id <> new.id
+          and mainpot_private.player_lobby_name_key(player.name) = target_name_key
+        order by player.joined_at, player.id
+        limit 1;
+
+        if replacement_player_id is null then
+          delete from mainpot_private.player_lobby_name_reservations as reservation
+          where reservation.game_id = old.game_id
+            and reservation.normalized_name = target_name_key
+            and reservation.player_id = old.id;
+        else
+          update mainpot_private.player_lobby_name_reservations as reservation
+          set player_id = replacement_player_id
+          where reservation.game_id = old.game_id
+            and reservation.normalized_name = target_name_key
+            and reservation.player_id = old.id;
+        end if;
+      end if;
+    end if;
     return new;
   end if;
 
@@ -163,11 +197,13 @@ begin
 end;
 $$;
 
+alter function mainpot_private.guard_player_lobby_name() owner to postgres;
 revoke all on function mainpot_private.guard_player_lobby_name() from public;
 
 create or replace function mainpot_private.release_player_lobby_name()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 declare
@@ -206,6 +242,7 @@ begin
 end;
 $$;
 
+alter function mainpot_private.release_player_lobby_name() owner to postgres;
 revoke all on function mainpot_private.release_player_lobby_name() from public;
 
 drop trigger if exists guard_player_lobby_name on public.players;
