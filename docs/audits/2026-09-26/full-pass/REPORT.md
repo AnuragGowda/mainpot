@@ -1,5 +1,7 @@
 # Mainpot — full application and multi-device audit
 
+**Production follow-up:** [26 September release and live verification](../../../releases/2026-09-26.md). The release record supersedes the earlier release boundary below.
+
 **Follow-up:** [Implemented fixes and verification](fixes/REMEDIATION.md). The observations below describe the original audit; they do not imply the fixes have been deployed.
 
 Audit date: September 26, 2026. Local application revision: `d3283e716a6fc421f5917182c52e96ab0595018f`. Production public target: `https://mainpot.app`. This is a fresh audit of the current checkout, with earlier reports used only to select regression scenarios. No application fixes, release, or production-data writes were performed.

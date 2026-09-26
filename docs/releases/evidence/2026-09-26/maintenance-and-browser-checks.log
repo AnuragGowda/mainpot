@@ -1,0 +1,150 @@
+
+> mainpot@0.1.0 test:e2e:realtime
+> node scripts/test-realtime.mts --grep syncs two guests|same host-managed seat --workers=1 --output=test-results/release-maintenance-final
+
+Starting disposable Supabase test stack…
+Resetting disposable Supabase test database…
+Reading disposable Supabase test configuration…
+Running database assurance checks against the disposable migration stack…
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+(node:37765) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anurag/Documents/ChatGPT/Mainpot/lib/settlement.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/anurag/Documents/ChatGPT/Mainpot/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ payment authority follows authenticated ownership rather than disclosed browser session IDs
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ audit events reject cross-game references and remain append-only
+✓ only friendship recipients can resolve pending requests
+✓ invitation inbox is scoped, acceptance grants access, and declined invitations can be re-sent
+✓ settlement bank selection is host-only, game-scoped, shared, and immutable after lock
+✓ deletion cancellation is owner-only, pending-only, and idempotent
+Audit security regression checks passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ settlement allocation guards reject malformed capacity/participants and finalized games cannot reopen
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ anonymous account transfer is capability-bound, conflict-safe, single-use, and preserves finalized history
+Early cash-out phase race passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ idempotent game creation replays one table/seat/buy-in and rejects cross-account or changed payloads
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ final payment tracking accepts only exact locked min/bank/funded/discrepancy plans and preserves early-exit payments
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ financial writes roll back on activity failure and retries append activity once
+NOTICE:  trigger "test_reject_activity" for relation "public.game_events" does not exist, skipping
+NOTICE:  function public.test_reject_activity() does not exist, skipping
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ lobby name reservations reject normalized duplicates across joins, direct writes, host-managed seats, departures, and concurrent paths without rewriting legacy rows
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+Running isolated seat-recovery database assurance…
+✓ host return restores one original seat and audit event without changing its ledger
+✓ self-service, unrelated, cash-out, and closed-ledger seat returns are rejected
+Seat-recovery assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ host-managed seat claims are hashed, host-authorized, single-use, conflict-safe, and preserve the recorded seat
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ legacy guest self-delete cascaded the verified ledger in a probe that was rolled back
+✓ guarded seat creation remains available while raw inserts and destructive self-deletes are denied
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ hosted default and explicit grants cannot expose maintenance; guarded user RPCs and the service role retain access
+Checking locked payment plan security before browser flows…
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ final payment tracking accepts only exact locked min/bank/funded/discrepancy plans and preserves early-exit payments
+Running realtime browser tests…
+[WebServer] (node:38334) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38334) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38343) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38368) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38369) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38362) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38366) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38363) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38364) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38370) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38367) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38365) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:38413) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 10 tests using 1 worker
+
+(node:38429) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/realtime.spec.ts:93:5 › syncs two guests' independent ledger entries and host approval (3.5s)
+  ✓   2 [chromium] › tests/e2e/realtime.spec.ts:779:5 › claims and restores the same host-managed seat without another buy-in (2.9s)
+(node:38455) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   3 [mobile-chrome] › tests/e2e/realtime.spec.ts:93:5 › syncs two guests' independent ledger entries and host approval (2.1s)
+  ✓   4 [mobile-chrome] › tests/e2e/realtime.spec.ts:779:5 › claims and restores the same host-managed seat without another buy-in (2.8s)
+(node:38479) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [mobile-safari] › tests/e2e/realtime.spec.ts:93:5 › syncs two guests' independent ledger entries and host approval (2.8s)
+  ✓   6 [mobile-safari] › tests/e2e/realtime.spec.ts:779:5 › claims and restores the same host-managed seat without another buy-in (3.2s)
+(node:38533) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [desktop-safari] › tests/e2e/realtime.spec.ts:93:5 › syncs two guests' independent ledger entries and host approval (2.4s)
+  ✓   8 [desktop-safari] › tests/e2e/realtime.spec.ts:779:5 › claims and restores the same host-managed seat without another buy-in (3.1s)
+(node:38575) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   9 [tablet-safari] › tests/e2e/realtime.spec.ts:93:5 › syncs two guests' independent ledger entries and host approval (2.6s)
+  ✓  10 [tablet-safari] › tests/e2e/realtime.spec.ts:779:5 › claims and restores the same host-managed seat without another buy-in (3.1s)
+
+  10 passed (36.6s)
+Stopping disposable Supabase test stack…

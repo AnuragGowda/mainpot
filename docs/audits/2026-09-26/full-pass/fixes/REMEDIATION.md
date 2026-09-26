@@ -1,5 +1,7 @@
 # Mainpot audit remediation — 26 September 2026
 
+**Production follow-up:** [26 September release and live verification](../../../../releases/2026-09-26.md). The release record supersedes the earlier release boundary below.
+
 This follows the [full application audit](../REPORT.md). Changes are implemented in the local checkout; production deployment and production migrations are separate release work. Existing records are preserved.
 
 ## Changes and acceptance criteria
