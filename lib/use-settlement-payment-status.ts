@@ -36,11 +36,12 @@ export function useSettlementPaymentStatus(
   const latestRead = useRef(0);
   const readInFlight = useRef<{ gameId: string; read: number } | null>(null);
   const refreshQueuedFor = useRef<string | null>(null);
+  const latestRefresh = useRef<((force?: boolean) => void) | null>(null);
   const hasKnownStatus = useRef(false);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback((force = false) => {
     if (!enabled || !canReadPaymentStatuses()) return;
-    if (readInFlight.current?.gameId === gameId) {
+    if (!force && readInFlight.current?.gameId === gameId) {
       // Collapse bursts into one trailing reconciliation after the current read.
       refreshQueuedFor.current = gameId;
       return;
@@ -70,13 +71,15 @@ export function useSettlementPaymentStatus(
         readInFlight.current = null;
         if (refreshQueuedFor.current !== gameId) return;
         refreshQueuedFor.current = null;
-        refresh();
+        latestRefresh.current?.();
       });
   }, [enabled, gameId]);
 
   useEffect(() => {
     latestRead.current += 1;
     hasKnownStatus.current = false;
+    latestRefresh.current = refresh;
+    refreshQueuedFor.current = null;
     setSettledKeys(EMPTY_KEYS);
     setPhase("loading");
     if (!enabled) return;
@@ -101,7 +104,7 @@ export function useSettlementPaymentStatus(
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "settlement_payments", filter: `game_id=eq.${gameId}` },
-        refresh,
+        () => refresh(),
       )
       .subscribe((channelStatus) => {
         // Reconcile after subscription so a write during channel setup is not missed.
@@ -110,6 +113,8 @@ export function useSettlementPaymentStatus(
 
     return () => {
       latestRead.current += 1;
+      if (latestRefresh.current === refresh) latestRefresh.current = null;
+      refreshQueuedFor.current = null;
       unsubscribe();
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
@@ -122,6 +127,6 @@ export function useSettlementPaymentStatus(
     phase,
     settledKeys,
     canMutate: phase === "known",
-    retry: refresh,
+    retry: () => refresh(true),
   };
 }
