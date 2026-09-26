@@ -1,5 +1,7 @@
 # Mainpot account and return-use UX review
 
+> Follow-up: [UX fixes and verification](ux-fix-verification.md) records the subsequent implementation, checks, and remaining release/device boundaries. This assessment describes the earlier inspected revision.
+
 September 26, 2026; source revision `19fae9e`. A separate independent reviewer inspected the account-only journeys. Root checked the highest-impact source findings. This is **source-based evidence**, not a fresh signed-in browser run. The local UI inspection used single-browser mode, and the production browser inspection used signed-out public pages. No account was created, no account profile was modified, and no private account data was exported.
 
 The [earlier reliability report](report.md) contains specific disposable-backend regression results for account recovery and dashboard failures. Those results do not prove every usability concern below is closed, nor do they establish current production account behavior.

@@ -1,5 +1,7 @@
 # Mainpot: product quality, usability, and whether to continue
 
+> Follow-up: [UX fixes and verification](ux-fix-verification.md) records the subsequent implementation, checks, and remaining release/device boundaries. This assessment describes the earlier inspected revision.
+
 Assessment date: September 26, 2026. Local revision inspected: `19fae9e`. This is a fresh product assessment, separate from the earlier reliability fix report. Independent reviewers were asked to question the experience rather than accept passing tests as proof of usability. No product implementation changes were made, and no production game or account data was written during this assessment.
 
 ## Recommendation

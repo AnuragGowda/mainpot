@@ -1,5 +1,7 @@
 # Independent Mainpot UX inspection — 2026-09-26
 
+> Follow-up: [UX fixes and verification](ux-fix-verification.md) records the subsequent implementation, checks, and remaining release/device boundaries. This assessment describes the earlier inspected revision.
+
 ## Scope and evidence boundary
 
 This is a read-only, independent usability inspection of `19fae9e`, not a repeat of the main release report. I used a fresh, isolated production build at `127.0.0.1:3125` with both public Supabase variables empty. That intentionally activated Mainpot's single-browser local-storage mode; no accounts, hosted game rows, invitations, or payment data were created.
