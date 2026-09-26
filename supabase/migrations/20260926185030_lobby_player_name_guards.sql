@@ -13,7 +13,7 @@ as $$
   select lower(
     btrim(
       regexp_replace(
-        regexp_replace(normalize(input_name, NFKC), U&'[\00AD\034F\061C\180E\200B-\200F\202A-\202E\2060-\206F\FE00-\FE0F\FEFF]', '', 'g'),
+        normalize(regexp_replace(normalize(input_name, NFKC), U&'[\00AD\034F\061C\180E\200B-\200F\202A-\202E\2060-\206F\FE00-\FE0F\FEFF]', '', 'g'), NFKC),
         '[[:space:]]+', ' ', 'g'
       )
     )

@@ -12,6 +12,7 @@ const US_PHONE_CHARACTERS_PATTERN = /^[0-9+().\-\s]+$/;
 export function lobbyNameKey(value: string): string {
   return value.normalize("NFKC")
     .replace(/[\u00ad\u034f\u061c\u180e\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufe00-\ufe0f\ufeff]/gu, "")
+    .normalize("NFKC")
     .replace(/\s+/gu, " ").trim().toLowerCase();
 }
 

@@ -149,6 +149,8 @@ async function run() {
     input_session_id: randomUUID(),
   });
   assert(decomposed.error, "NFKC composed and decomposed accents collide");
+  const separatedAccent = await join(collision.client, firstGame.code, "Jose\u200b\u0301");
+  assert(separatedAccent.error, "invisible formatting between a letter and accent cannot evade name uniqueness");
 
   const departedJoin = await join(departed.client, firstGame.code, "Departed Seat");
   const departedRow = (Array.isArray(departedJoin.data) ? departedJoin.data[0] : departedJoin.data) as { player_id?: string } | null;

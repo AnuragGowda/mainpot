@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   GAME_NAME_MAX_LENGTH,
   PLAYER_NAME_MAX_LENGTH,
+  lobbyNameKey,
   validateDisplayName,
   validateGameName,
   validatePlayerName,
@@ -11,6 +12,9 @@ import {
 } from "./name-validation";
 
 describe("human-facing name validation", () => {
+  it("composes accents after removing invisible name formatting", () => {
+    expect(lobbyNameKey("Jose\u200b\u0301")).toBe(lobbyNameKey("José"));
+  });
   it("rejects names made only of invisible formatting", () => {
     expect(validatePlayerName("\u200b\ufe0f")).toBe("Player name must include a visible character.");
   });
