@@ -207,7 +207,7 @@ export default function EarlyCashOutButton({
                       Your buy-ins stay in the ledger. You cannot add more, and the host must enter your final chips when the game ends.
                     </p>
                     <div className="mt-6 grid gap-2 sm:grid-cols-2">
-                      <Button fullWidth variant="danger" loading={leaving} onClick={onLeaveWithoutCashOut} className="sm:order-2">
+                      <Button fullWidth variant="danger" loading={leaving} onClick={() => onLeaveWithoutCashOut()} className="sm:order-2">
                         Leave &amp; settle later
                       </Button>
                       <Button ref={cancelRef} fullWidth variant="secondary" disabled={leaving} onClick={() => setMode("cash-out")} className="sm:order-1">
