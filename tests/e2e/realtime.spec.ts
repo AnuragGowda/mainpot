@@ -28,7 +28,8 @@ async function joinGame(page: import("@playwright/test").Page, gameUrl: string, 
   await expect(page.getByRole("dialog", { name: "Realtime test game" })).toBeVisible({ timeout: 15_000 });
   await page.locator("#join-prompt-name").fill(name);
   await page.getByRole("button", { name: "Join", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Realtime test game" })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("dialog", { name: "Realtime test game" })).toHaveCount(0, { timeout: 15_000 });
+  await expect(playerCard(page, name)).toBeVisible({ timeout: 15_000 });
 }
 
 async function expectAutomaticOpeningBuyIn(page: import("@playwright/test").Page) {
@@ -315,6 +316,8 @@ test("recovers a disconnected guest after the host starts settlement", async ({ 
     await createGame(host, "Realtime test game");
     await joinGame(jordan, host.url(), "Jordan");
     await expectAutomaticOpeningBuyIn(jordan);
+    await host.getByRole("button", { name: "Approve", exact: true }).click();
+    await expect(host.getByRole("region", { name: "Needs approval" })).toHaveCount(0);
 
     await jordanContext.setOffline(true);
     // Chromium's network emulation does not consistently dispatch the browser
@@ -366,8 +369,7 @@ test("keeps host correction and approval decisions auditable", async ({ browser 
     await expect(host.getByText("Buy-in updated", { exact: true })).toBeVisible();
     await taylorPending.getByRole("button", { name: "Approve", exact: true }).click();
 
-    await expect(pending.getByRole("listitem")).toHaveCount(1);
-    await expect(pending.getByRole("listitem").filter({ hasText: "Jordan" })).toContainText("$25.00");
+    await expect(host.getByRole("region", { name: "Needs approval" })).toHaveCount(0);
     await expect(playerCard(host, "Taylor").getByText("1 entry", { exact: true })).toBeVisible();
     await expect(playerCard(host, "Jordan")).toContainText("$25.00");
     await expect(host.getByText("edited Jordan’s buy-in", { exact: false })).toBeVisible();
