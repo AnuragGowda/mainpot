@@ -155,11 +155,16 @@ async function run() {
     const settling = await guest.client.from("games").update({ status: "settling" }).eq("id", created.game_id);
     assert(!settling.error, "guest table enters cash-outs");
     const joinedSeat = Array.isArray(joined.data) ? joined.data[0] : joined.data;
-    const cashOut = await guest.client.from("cash_outs").insert([
-      { game_id: created.game_id, player_id: created.player_id, amount: 25 },
-      { game_id: created.game_id, player_id: joinedSeat.player_id, amount: 15 },
-    ]);
-    if (cashOut.error) throw cashOut.error;
+    const cashOuts = await Promise.all([
+      [created.player_id, 25],
+      [joinedSeat.player_id, 15],
+    ].map(([playerId, amount]) => guest.client.rpc("save_cash_out", {
+      input_game_id: created.game_id,
+      input_player_id: playerId,
+      input_amount: amount,
+      input_operation_key: randomUUID(),
+    })));
+    if (cashOuts.some((cashOut) => cashOut.error)) throw cashOuts.find((cashOut) => cashOut.error)?.error;
     const finalized = await guest.client.from("games").update({ status: "ended" }).eq("id", created.game_id);
     if (finalized.error) throw finalized.error;
 

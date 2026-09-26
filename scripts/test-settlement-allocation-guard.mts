@@ -84,12 +84,17 @@ async function run() {
   assert(!approval.error && approval.data?.length === 2, "host approves automatic opening entries");
   const settling = await host.from("games").update({ status: "settling" }).eq("id", gameId).select("id");
   assert(!settling.error && settling.data?.length === 1, "game enters settlement");
-  const cashOuts = await host.from("cash_outs").insert([
-    { game_id: gameId, player_id: hostPlayerId, amount: 10 },
-    { game_id: gameId, player_id: playerA, amount: 20 },
-    { game_id: gameId, player_id: playerB, amount: 20 },
-  ]).select("id");
-  assert(!cashOuts.error && cashOuts.data?.length === 3, "cash-outs establish a $10 shortage borne only by host");
+  const cashOuts = await Promise.all([
+    [hostPlayerId, 10],
+    [playerA, 20],
+    [playerB, 20],
+  ].map(([playerId, amount]) => host.rpc("save_cash_out", {
+    input_game_id: gameId,
+    input_player_id: playerId,
+    input_amount: amount,
+    input_operation_key: randomUUID(),
+  })));
+  assert(cashOuts.every((cashOut) => !cashOut.error && cashOut.data), "cash-outs establish a $10 shortage borne only by host");
 
   async function setAllocation(allocation: Record<string, unknown>) {
     const saved = await host.from("games").update({ discrepancy_allocation: allocation }).eq("id", gameId).select("id");

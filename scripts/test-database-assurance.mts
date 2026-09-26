@@ -457,12 +457,160 @@ async function run() {
     .eq("id", gameB.game_id)
     .select("id");
   assert(!otherGameSettling.error && otherGameSettling.data?.[0]?.id, "other game enters settlement for its cash-out fixture");
-  const otherGameCashOut = await otherHost.from("cash_outs").insert({
-    game_id: gameB.game_id,
-    player_id: otherPlayer.player_id,
-    amount: 12,
-  }).select("id");
-  assert(!otherGameCashOut.error && otherGameCashOut.data?.[0]?.id, "other game cash-out fixture is created");
+  const concurrentCashOutAmount = 12;
+  const hostCashOutOperationKey = randomUUID();
+  const playerCashOutOperationKey = randomUUID();
+  const [hostFirstCashOut, playerFirstCashOut] = await Promise.all([
+    otherHost.rpc("save_cash_out", {
+      input_game_id: gameB.game_id,
+      input_player_id: otherPlayer.player_id,
+      input_amount: concurrentCashOutAmount,
+      input_operation_key: hostCashOutOperationKey,
+    }),
+    guestB.rpc("save_cash_out", {
+      input_game_id: gameB.game_id,
+      input_player_id: otherPlayer.player_id,
+      input_amount: concurrentCashOutAmount,
+      input_operation_key: playerCashOutOperationKey,
+    }),
+  ]);
+  assert(!hostFirstCashOut.error && !playerFirstCashOut.error
+    && hostFirstCashOut.data?.id && playerFirstCashOut.data?.id,
+  "host and player can concurrently save the first final stack");
+  const { data: concurrentCashOutRows, error: concurrentCashOutError } = await admin
+    .from("cash_outs")
+    .select("id, amount")
+    .eq("game_id", gameB.game_id)
+    .eq("player_id", otherPlayer.player_id);
+  assert(!concurrentCashOutError && concurrentCashOutRows?.length === 1
+    && Number(concurrentCashOutRows[0].amount) === concurrentCashOutAmount,
+  "concurrent first cash-out saves leave one canonical row");
+  const { data: firstCashOutEvents, error: firstCashOutEventsError } = await admin
+    .from("game_events")
+    .select("id")
+    .eq("game_id", gameB.game_id)
+    .eq("event_type", "cash_out_updated")
+    .eq("subject_player_id", otherPlayer.player_id);
+  assert(!firstCashOutEventsError && firstCashOutEvents?.length === 2,
+    "the two independently authorized first-save operations are both audited");
+  const hostCashOutRetry = await otherHost.rpc("save_cash_out", {
+    input_game_id: gameB.game_id,
+    input_player_id: otherPlayer.player_id,
+    input_amount: concurrentCashOutAmount,
+    input_operation_key: hostCashOutOperationKey,
+  });
+  const { data: retriedCashOutEvents, error: retriedCashOutEventsError } = await admin
+    .from("game_events")
+    .select("id")
+    .eq("game_id", gameB.game_id)
+    .eq("event_type", "cash_out_updated")
+    .eq("subject_player_id", otherPlayer.player_id);
+  assert(!hostCashOutRetry.error && hostCashOutRetry.data?.id === hostFirstCashOut.data.id
+    && !retriedCashOutEventsError && retriedCashOutEvents?.length === 2,
+  "a retried cash-out key returns the saved result without another activity event");
+
+  const { data: appConfig, error: appConfigError } = await admin
+    .from("app_config")
+    .select("max_events_per_game")
+    .eq("id", true)
+    .single();
+  assert(!appConfigError && typeof appConfig?.max_events_per_game === "number",
+    "database assurance can restore the activity-limit fixture");
+  const { count: existingGameBEventCount, error: existingGameBEventCountError } = await admin
+    .from("game_events")
+    .select("id", { count: "exact", head: true })
+    .eq("game_id", gameB.game_id);
+  assert(!existingGameBEventCountError && typeof existingGameBEventCount === "number",
+    "activity-limit fixture can count existing game events");
+  const eventLimitFloor = 25;
+  const paddingCount = Math.max(0, eventLimitFloor - existingGameBEventCount);
+  if (paddingCount > 0) {
+    const paddingEvents = await admin.from("game_events").insert(Array.from({ length: paddingCount }, (_, index) => ({
+      game_id: gameB.game_id,
+      event_type: "cash_out_updated",
+      actor_player_id: gameB.player_id,
+      subject_player_id: otherPlayer.player_id,
+      amount: 0,
+      metadata: { fixture: "cash-out-activity-limit", index },
+    })));
+    assert(!paddingEvents.error, "activity-limit fixture reaches the minimum supported event limit");
+  }
+  const eventCountBeforeFailedCashOut = existingGameBEventCount + paddingCount;
+  const failedCashOutOperationKey = randomUUID();
+  try {
+    const limitUpdate = await admin
+      .from("app_config")
+      .update({ max_events_per_game: eventCountBeforeFailedCashOut })
+      .eq("id", true);
+    assert(!limitUpdate.error, "activity-limit fixture is applied");
+    const failedCashOut = await otherHost.rpc("save_cash_out", {
+      input_game_id: gameB.game_id,
+      input_player_id: otherPlayer.player_id,
+      input_amount: 13,
+      input_operation_key: failedCashOutOperationKey,
+    });
+    assert(failedCashOut.error, "a rejected activity insert rejects the cash-out transaction");
+  } finally {
+    const restoreLimit = await admin
+      .from("app_config")
+      .update({ max_events_per_game: appConfig.max_events_per_game })
+      .eq("id", true);
+    assert(!restoreLimit.error, "activity-limit fixture is restored");
+  }
+  const { data: rolledBackCashOut, error: rolledBackCashOutError } = await admin
+    .from("cash_outs")
+    .select("amount")
+    .eq("game_id", gameB.game_id)
+    .eq("player_id", otherPlayer.player_id)
+    .single();
+  assert(!rolledBackCashOutError && Number(rolledBackCashOut?.amount) === concurrentCashOutAmount,
+    "a failed activity write rolls back the cash-out value");
+  const recoveredCashOut = await otherHost.rpc("save_cash_out", {
+    input_game_id: gameB.game_id,
+    input_player_id: otherPlayer.player_id,
+    input_amount: 13,
+    input_operation_key: failedCashOutOperationKey,
+  });
+  assert(!recoveredCashOut.error && Number(recoveredCashOut.data?.amount) === 13,
+    "the same operation key can safely retry after the rolled-back activity failure");
+  const hostSettlementCashOut = await otherHost.rpc("save_cash_out", {
+    input_game_id: gameB.game_id,
+    input_player_id: gameB.player_id,
+    input_amount: 19,
+    input_operation_key: randomUUID(),
+  });
+  assert(!hostSettlementCashOut.error && Number(hostSettlementCashOut.data?.amount) === 19,
+    "host can enter the remaining final stack before settlement lock");
+  const otherGameEnded = await otherHost
+    .from("games")
+    .update({ status: "ended" })
+    .eq("id", gameB.game_id)
+    .eq("status", "settling")
+    .select("id");
+  assert(!otherGameEnded.error && otherGameEnded.data?.length === 1,
+    "the complete cash-out fixture locks its settlement");
+  const endedPhaseSave = await otherHost.rpc("save_cash_out", {
+    input_game_id: gameB.game_id,
+    input_player_id: otherPlayer.player_id,
+    input_amount: 14,
+    input_operation_key: randomUUID(),
+  });
+  assert(endedPhaseSave.error, "a new final stack is rejected after settlement locks");
+  const endedPhaseRetry = await otherHost.rpc("save_cash_out", {
+    input_game_id: gameB.game_id,
+    input_player_id: otherPlayer.player_id,
+    input_amount: 13,
+    input_operation_key: failedCashOutOperationKey,
+  });
+  assert(!endedPhaseRetry.error && Number(endedPhaseRetry.data?.amount) === 13,
+    "a committed cash-out retry still returns its receipt after settlement locks");
+  const { data: otherGameCashOut, error: otherGameCashOutError } = await admin
+    .from("cash_outs")
+    .select("id")
+    .eq("game_id", gameB.game_id)
+    .eq("player_id", otherPlayer.player_id)
+    .single();
+  assert(!otherGameCashOutError && otherGameCashOut?.id, "other game cash-out fixture is created");
 
   const operationKey = randomUUID();
   const first = await guestA.rpc("create_buy_in_idempotent", {
@@ -565,16 +713,28 @@ async function run() {
     () => guestA.from("buy_ins").insert({ game_id: gameB.game_id, player_id: otherPlayer.player_id, amount: 12, type: "buy_in" }),
     "cross-game buy-in insert",
   );
-  await expectError(
-    () => guestA.from("cash_outs").insert({ game_id: gameB.game_id, player_id: otherPlayer.player_id, amount: 12 }),
-    "cross-game cash-out insert",
-  );
+  // Do not select/return from this write: PostgREST can otherwise hide a
+  // successful RLS mutation behind an empty result. Verify both the explicit
+  // rejection and the canonical absence independently as the service role.
+  const crossGameCashOutInsert = await guestA.from("cash_outs").insert({
+    game_id: gameB.game_id,
+    player_id: playerA.player_id,
+    amount: 12,
+  });
+  assert(crossGameCashOutInsert.error, "cross-game cash-out insert without RETURNING is rejected");
+  const { data: crossGameCashOutRows, error: crossGameCashOutReadError } = await admin
+    .from("cash_outs")
+    .select("id")
+    .eq("game_id", gameB.game_id)
+    .eq("player_id", playerA.player_id);
+  assert(!crossGameCashOutReadError && crossGameCashOutRows?.length === 0,
+    "cross-game cash-out insert creates no canonical row");
   await expectError(
     () => guestA.from("buy_ins").update({ amount: 99 }).eq("id", otherGameBuyInId).select("id"),
     "cross-game buy-in update",
   );
   await expectError(
-    () => guestA.from("cash_outs").update({ amount: 99 }).eq("id", otherGameCashOut.data[0].id).select("id"),
+    () => guestA.from("cash_outs").update({ amount: 99 }).eq("id", otherGameCashOut.id).select("id"),
     "cross-game cash-out update",
   );
   const hidden = await guestA.from("buy_ins").select("id").eq("game_id", gameB.game_id);
@@ -641,7 +801,7 @@ async function run() {
     "outsider buy-in update",
   );
   await expectError(
-    () => outsider.from("cash_outs").update({ amount: 99 }).eq("id", otherGameCashOut.data[0].id).select("id"),
+    () => outsider.from("cash_outs").update({ amount: 99 }).eq("id", otherGameCashOut.id).select("id"),
     "outsider cash-out update",
   );
   await expectError(
@@ -818,15 +978,18 @@ async function run() {
     .select("id");
   assert(!gameASettling.error && gameASettling.data?.[0]?.id, "host can enter settlement");
 
-  const cashOutFixture = await host
-    .from("cash_outs")
-    .insert([
-      { game_id: gameA.game_id, player_id: gameA.player_id, amount: 50 },
-      { game_id: gameA.game_id, player_id: playerA.player_id, amount: 40 },
-      { game_id: gameA.game_id, player_id: playerB.player_id, amount: 20 },
-    ])
-    .select("id");
-  assert(cashOutFixture.data?.length === 3 && !cashOutFixture.error, "every player has a current cash-out before settlement lock");
+  const cashOutFixture = await Promise.all([
+    [gameA.player_id, 50],
+    [playerA.player_id, 40],
+    [playerB.player_id, 20],
+  ].map(([playerId, amount]) => host.rpc("save_cash_out", {
+    input_game_id: gameA.game_id,
+    input_player_id: playerId,
+    input_amount: amount,
+    input_operation_key: randomUUID(),
+  })));
+  assert(cashOutFixture.every((result) => !result.error && result.data?.id),
+    "every player has a current cash-out before settlement lock");
 
   const allocation = {
     method: "proportional",

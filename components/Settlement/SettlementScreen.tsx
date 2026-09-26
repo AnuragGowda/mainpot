@@ -327,9 +327,13 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
     }
   }, [snapshot.game.status]);
 
-  async function handleSaveCashOut(playerId: string, amount: number): Promise<boolean> {
+  async function handleSaveCashOut(
+    playerId: string,
+    amount: number,
+    operationKey: string,
+  ): Promise<boolean> {
     try {
-      await addCashOut(snapshot.game.id, playerId, amount);
+      await addCashOut(snapshot.game.id, playerId, amount, operationKey);
       return true;
     } catch (err) {
       toast(

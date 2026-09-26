@@ -1898,103 +1898,44 @@ async function transferHostSupabase(gameId: string, targetPlayerId: string): Pro
   if (error) throw error;
 }
 
-async function addCashOutSupabase(
+async function saveCashOutSupabase(
   gameId: string,
   playerId: string,
-  amount: number
+  amount: number,
+  operationKey: string,
 ): Promise<CashOut> {
   const { client } = await ensureSupabaseReady();
-  await requireSupabaseGameStatus(client, gameId, "settling");
-
-  const { data: existing, error: lookupError } = await client
-    .from("cash_outs")
-    .select("*")
-    .eq("game_id", gameId)
-    .eq("player_id", playerId)
-    .maybeSingle();
-  if (lookupError) {
-    throw lookupError;
+  const { data, error } = await awaitAbortableMutation((signal) => client
+    .rpc("save_cash_out", {
+      input_game_id: gameId,
+      input_player_id: playerId,
+      input_amount: amount,
+      input_operation_key: operationKey,
+    })
+    .abortSignal(signal)
+    .single(), "We couldn't confirm whether the cash-out was saved. Retry to safely continue.");
+  if (error?.code === "PGRST202") {
+    throw new Error("Update this game database to enable safe, retryable cash-outs.");
   }
-
-  if (existing) {
-    const { data, error } = await client
-      .from("cash_outs")
-      .update({ amount })
-      .eq("id", (existing as CashOut).id)
-      .select()
-      .single();
-    if (error) {
-      throw error;
-    }
-    const cashOut = toCashOut(data as CashOut);
-    const { data: player } = await client
-      .from("players")
-      .select("name")
-      .eq("id", playerId)
-      .maybeSingle();
-    await addSupabaseEvent(client, {
-      gameId,
-      eventType: "cash_out_updated",
-      subjectPlayerId: playerId,
-      amount: cashOut.amount,
-      metadata: { player_name: (player as { name?: string } | null)?.name },
-    });
-    return cashOut;
-  }
-
-  const { data, error } = await client
-    .from("cash_outs")
-    .insert({ game_id: gameId, player_id: playerId, amount })
-    .select()
-    .single();
-  if (error) {
-    throw error;
-  }
-  const cashOut = toCashOut(data as CashOut);
-  const { data: player } = await client
-    .from("players")
-    .select("name")
-    .eq("id", playerId)
-    .maybeSingle();
-  await addSupabaseEvent(client, {
-    gameId,
-    eventType: "cash_out_updated",
-    subjectPlayerId: playerId,
-    amount: cashOut.amount,
-    metadata: { player_name: (player as { name?: string } | null)?.name },
-  });
-  return cashOut;
+  if (error) throw error;
+  if (!data) throw new Error("Could not save the cash-out.");
+  return toCashOut(data as CashOut);
 }
 
 async function updateCashOutSupabase(
   cashOutId: string,
-  amount: number
+  amount: number,
+  operationKey: string,
 ): Promise<void> {
   const { client } = await ensureSupabaseReady();
   const { data: existing, error: lookupError } = await client
     .from("cash_outs")
-    .select("game_id")
+    .select("game_id,player_id")
     .eq("id", cashOutId)
     .single();
   if (lookupError) throw lookupError;
-  await requireSupabaseGameStatus(client, (existing as { game_id: string }).game_id, "settling");
-  const { data, error } = await client
-    .from("cash_outs")
-    .update({ amount })
-    .eq("id", cashOutId)
-    .select("*, players(name)")
-    .single();
-  if (error) {
-    throw error;
-  }
-  const row = data as unknown as CashOut & { players?: { name?: string } };
-  await addSupabaseEvent(client, {
-    gameId: row.game_id,
-    eventType: "cash_out_updated",
-    subjectPlayerId: row.player_id,
-    amount,
-    metadata: { player_name: row.players?.name },
-  });
+  const row = existing as { game_id: string; player_id: string };
+  await saveCashOutSupabase(row.game_id, row.player_id, amount, operationKey);
 }
 
 async function endGameSupabase(gameId: string): Promise<void> {
@@ -2409,24 +2350,32 @@ export async function transferHostAndLeave(
 export async function addCashOut(
   gameId: string,
   playerId: string,
-  amount: number
+  amount: number,
+  operationKey = randomUUID(),
 ): Promise<CashOut> {
   const amountError = validateCurrencyAmount(amount, { allowZero: true });
   if (amountError) throw new Error(amountError);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(operationKey)) {
+    throw new Error("A valid cash-out operation key is required.");
+  }
   return usingLocalStorage()
     ? addCashOutLocal(gameId, playerId, amount)
-    : addCashOutSupabase(gameId, playerId, amount);
+    : saveCashOutSupabase(gameId, playerId, amount, operationKey);
 }
 
 export async function updateCashOut(
   cashOutId: string,
-  amount: number
+  amount: number,
+  operationKey = randomUUID(),
 ): Promise<void> {
   const amountError = validateCurrencyAmount(amount, { allowZero: true });
   if (amountError) throw new Error(amountError);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(operationKey)) {
+    throw new Error("A valid cash-out operation key is required.");
+  }
   return usingLocalStorage()
     ? updateCashOutLocal(cashOutId, amount)
-    : updateCashOutSupabase(cashOutId, amount);
+    : updateCashOutSupabase(cashOutId, amount, operationKey);
 }
 
 export async function endGame(gameId: string): Promise<void> {

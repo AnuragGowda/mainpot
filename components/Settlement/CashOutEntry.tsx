@@ -8,13 +8,14 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import { getPlayerCashOut, playerInvested } from "@/lib/game";
 import { formatCurrency, round2 } from "@/lib/format";
+import { randomUUID } from "@/lib/session";
 import type { GameSnapshot, Player } from "@/lib/types";
 
 export interface CashOutEntryProps {
   snapshot: GameSnapshot;
   currentPlayerId: string | null;
   isHost: boolean;
-  onSaveCashOut: (playerId: string, amount: number) => Promise<boolean>;
+  onSaveCashOut: (playerId: string, amount: number, operationKey: string) => Promise<boolean>;
 }
 
 interface CashOutRowProps {
@@ -23,7 +24,7 @@ interface CashOutRowProps {
   editable: boolean;
   isCurrentUser: boolean;
   earlyCashOutLocked: boolean;
-  onSaveCashOut: (playerId: string, amount: number) => Promise<boolean>;
+  onSaveCashOut: (playerId: string, amount: number, operationKey: string) => Promise<boolean>;
 }
 
 interface ReadOnlyCashOutRowProps {
@@ -66,6 +67,7 @@ function CashOutRow({
   const lastObservedPropValueRef = useRef(propValue);
   const mountedRef = useRef(true);
   const lastRequestedAmountRef = useRef<number | null>(currentAmount);
+  const saveOperationRef = useRef<{ raw: string; key: string } | null>(null);
 
   function setLocalValue(nextValue: string) {
     valueRef.current = nextValue;
@@ -128,6 +130,10 @@ function CashOutRow({
     }
 
     lastRequestedAmountRef.current = parsed;
+    const operation = saveOperationRef.current?.raw === raw
+      ? saveOperationRef.current
+      : { raw, key: randomUUID() };
+    saveOperationRef.current = operation;
     const requestId = ++saveRequestRef.current;
     pendingSaveCountRef.current += 1;
     setSaveStatus("saving");
@@ -139,7 +145,7 @@ function CashOutRow({
       .then(async () => {
         let saved = false;
         try {
-          saved = await onSaveCashOut(player.id, parsed);
+          saved = await onSaveCashOut(player.id, parsed, operation.key);
         } catch {
           saved = false;
         } finally {

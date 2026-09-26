@@ -114,12 +114,13 @@ async function lockFixture(
 ) {
   const settling = await fixture.host.from("games").update({ status: "settling" }).eq("id", fixture.gameId).select("id");
   assert(!settling.error && settling.data?.length === 1, "game enters settlement");
-  const savedCashOuts = await fixture.host.from("cash_outs").insert(cashOuts.map((cashOut) => ({
-    game_id: fixture.gameId,
-    player_id: cashOut.playerId,
-    amount: cashOut.amount,
-  }))).select("id");
-  assert(!savedCashOuts.error && savedCashOuts.data?.length === cashOuts.length, "cash-outs are saved");
+  const savedCashOuts = await Promise.all(cashOuts.map((cashOut) => fixture.host.rpc("save_cash_out", {
+    input_game_id: fixture.gameId,
+    input_player_id: cashOut.playerId,
+    input_amount: cashOut.amount,
+    input_operation_key: randomUUID(),
+  })));
+  assert(savedCashOuts.length === cashOuts.length && savedCashOuts.every((cashOut) => !cashOut.error && cashOut.data), "cash-outs are saved");
   if (options.discrepancyAllocation) {
     const saved = await fixture.host.from("games").update({ discrepancy_allocation: options.discrepancyAllocation }).eq("id", fixture.gameId).select("id");
     assert(!saved.error && saved.data?.length === 1, "discrepancy allocation is saved");
