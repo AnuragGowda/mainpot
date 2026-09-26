@@ -1,0 +1,75 @@
+{
+  "date": "2026-09-26",
+  "implementation_commit": "6cf2c6e26d3d141af8c1b6a2b34808f18ab0e207",
+  "unit": {
+    "passed": 179,
+    "files": 29,
+    "status": "passed"
+  },
+  "typescript": "passed",
+  "eslint": "passed",
+  "production_build": "passed as connected Playwright webServer prerequisite",
+  "database": {
+    "status": "passed",
+    "assurance_scripts": 12,
+    "stack": "disposable mainpot-e2e at 127.0.0.1:55321",
+    "command": "MAINPOT_DB_ASSURANCE_BEFORE_BROWSER=1 PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --grep 'transfers host authority|requires visitors|duplicate lobby names|same host-managed seat' --workers=1 --output=test-results/audit-fix-security-final",
+    "note": "All 12 preflights and all 20 selected browser checks passed. Legacy self-delete cascade was reproduced in a transaction-only probe and rolled back.",
+    "implementation_commit": "916748a"
+  },
+  "focused_connected": {
+    "passed": 15,
+    "status": "passed",
+    "devices": [
+      "Desktop Chrome",
+      "Pixel 5 Chrome",
+      "iPhone 13 WebKit",
+      "Desktop WebKit",
+      "iPad Mini WebKit"
+    ]
+  },
+  "full_connected": {
+    "passed": 129,
+    "failed": 6,
+    "status": "test failures corrected and targeted reruns passed",
+    "failures": "Five obsolete host-departure text expectations and one desktop WebKit navigation issued before the Join form was ready",
+    "targeted_rerun": {
+      "passed": 10,
+      "failed": 0,
+      "covers": "visitor privacy/exit and host handoff across five device profiles"
+    }
+  },
+  "full_local": {
+    "status": "passed",
+    "passed": 97,
+    "skipped": 3,
+    "skip_reason": "Existing real service-worker tests unsupported in WebKit",
+    "command": "NEXT_PUBLIC_SUPABASE_URL= NEXT_PUBLIC_SUPABASE_ANON_KEY= PLAYWRIGHT_ALL_DEVICES=1 PLAYWRIGHT_PORT=3101 npm run test:e2e -- --workers=1"
+  },
+  "physical_devices_tested": false,
+  "hosted_migrations_applied": false,
+  "pushed": false,
+  "ci_run": false,
+  "production_deployed": false,
+  "limits": [
+    "Native payment-app handoff",
+    "Physical phones and actual OS PWA installation",
+    "Real OAuth and email delivery/recovery",
+    "Live authenticated multiplayer"
+  ],
+  "final_security_connected": {
+    "status": "passed",
+    "passed": 20,
+    "failed": 0,
+    "command": "MAINPOT_DB_ASSURANCE_BEFORE_BROWSER=1 PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --grep 'transfers host authority|requires visitors|duplicate lobby names|same host-managed seat' --workers=1 --output=test-results/audit-fix-security-final",
+    "log": "connected-security-final.log",
+    "implementation_commit": "916748a"
+  },
+  "final_name_normalization": {
+    "status": "passed",
+    "database": "Focused lobby-name assurance plus payment-plan prerequisite passed on a fresh migration stack",
+    "browser_passed": 5,
+    "devices": "All five emulated profiles",
+    "log": "connected-name-final.log"
+  }
+}

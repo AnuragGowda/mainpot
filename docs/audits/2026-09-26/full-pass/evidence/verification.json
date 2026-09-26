@@ -1,0 +1,91 @@
+{
+  "date": "2026-09-26",
+  "local_revision": "d3283e716a6fc421f5917182c52e96ab0595018f",
+  "live_public_target": "https://mainpot.app",
+  "unit": {
+    "passed": 161,
+    "files": 26,
+    "exit_code": 0
+  },
+  "smoke_entry_pwa": {
+    "passed": 87,
+    "skipped": 3,
+    "failed": 0,
+    "exit_code": 0,
+    "profiles": 5
+  },
+  "realtime_initial": {
+    "passed": 116,
+    "failed": 4,
+    "exit_code": 1,
+    "profiles": 5,
+    "workers": 3,
+    "automatic_retries": 0,
+    "environment_note": "Overlapped with smoke/public testing; increased local load. Root causes not established."
+  },
+  "serial_follow_up": {
+    "passed": 8,
+    "failed": 0,
+    "exit_code": 0,
+    "profiles": [
+      "mobile-chrome",
+      "mobile-safari"
+    ],
+    "workers": 1,
+    "application_changes": false
+  },
+  "public_sweep": {
+    "checks": 72,
+    "profiles": 6,
+    "overflow": 0,
+    "runtime_errors": 0,
+    "harness_errors": 0,
+    "distinct_axe_findings": 1,
+    "affected_routes": [
+      "signin",
+      "dashboard redirect",
+      "friends redirect"
+    ]
+  },
+  "database": {
+    "exit_code": 0,
+    "passed_suites": [
+      "database-assurance",
+      "audit-security",
+      "settlement-allocation-guard",
+      "account-transfer-security",
+      "early-cashout-phase-race",
+      "game-creation-idempotency",
+      "payment-plan-security"
+    ]
+  },
+  "confirmed_probes": [
+    "payment read failure misrepresented as unpaid",
+    "local quota failure misrepresented as successful save",
+    "production calculator accepts missing stack",
+    "short-height join clipped",
+    "join gate lacks exit",
+    "local invitation promises unavailable cross-device join",
+    "managed seat and joining person remain separate"
+  ],
+  "source_only_findings": [
+    "left seat lacks return workflow",
+    "separate audit event after committed ledger mutation"
+  ],
+  "boundaries": {
+    "physical_devices": false,
+    "real_oauth_email_delivery": false,
+    "production_financial_writes": false,
+    "production_signed_in_acceptance": false,
+    "committed": false,
+    "pushed": false,
+    "ci": false,
+    "deployed": false,
+    "production_migrations": false,
+    "application_source_changed": false
+  },
+  "artifacts": {
+    "report": "../REPORT.md",
+    "readable_report": "../REPORT.html"
+  }
+}

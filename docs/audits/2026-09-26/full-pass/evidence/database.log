@@ -1,0 +1,63 @@
+
+> mainpot@0.1.0 test:db:assurance:isolated
+> node scripts/test-realtime.mts --database-assurance-only
+
+Starting disposable Supabase test stack…
+Resetting disposable Supabase test database…
+Reading disposable Supabase test configuration…
+Running database assurance checks against the disposable migration stack…
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+(node:87660) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/anurag/Documents/ChatGPT/Mainpot/lib/settlement.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/anurag/Documents/ChatGPT/Mainpot/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✓ host-managed seats are atomic, retry-safe, host-only, and compatible with early exits
+✓ non-playing hosts retain controls, admit guests, buy in later, and reconcile at zero
+Running local database assurance checks…
+✓ compact game and host name limits are enforced
+✓ hosts must choose an active successor before leaving
+✓ host-approved early cash-out locks chips, departure, and one active-game payment
+✓ player names reject excess length and control characters
+✓ idempotent buy-in create/retry/mismatch
+✓ host entries auto-approve while player entries stay pending
+✓ idempotent outstanding rebuy advance create/retry
+✓ advances reject self-funding and cross-game payers
+✓ cross-game reads and writes are denied
+✓ push subscriptions stay private and delivery claims stay server-only
+✓ non-member room reads and mutations are denied
+✓ only the host can approve, edit, or remove buy-ins
+✓ cross-game row-rewrite probe is denied
+✓ discrepancy allocations persist for the host and reject non-host writes
+✓ settlement payment writes reject draft settlement state
+✓ settlement payment writes become available after game lock
+✓ payment authority follows authenticated ownership rather than disclosed browser session IDs
+Database assurance passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ audit events reject cross-game references and remain append-only
+✓ only friendship recipients can resolve pending requests
+✓ invitation inbox is scoped, acceptance grants access, and declined invitations can be re-sent
+✓ settlement bank selection is host-only, game-scoped, shared, and immutable after lock
+✓ deletion cancellation is owner-only, pending-only, and idempotent
+Audit security regression checks passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ settlement allocation guards reject malformed capacity/participants and finalized games cannot reopen
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ anonymous account transfer is capability-bound, conflict-safe, single-use, and preserves finalized history
+Early cash-out phase race passed.
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ idempotent game creation replays one table/seat/buy-in and rejects cross-account or changed payloads
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ final payment tracking accepts only exact locked min/bank/funded/discrepancy plans and preserves early-exit payments
+Stopping disposable Supabase test stack…

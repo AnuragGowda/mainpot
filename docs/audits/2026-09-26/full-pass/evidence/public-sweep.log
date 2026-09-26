@@ -1,0 +1,72 @@
+desktop-chrome / 200 overflow 0 axe 
+desktop-chrome /create 200 overflow 0 axe 
+desktop-chrome /join 200 overflow 0 axe 
+desktop-chrome /signin 200 overflow 0 axe color-contrast
+desktop-chrome /dashboard 200 overflow 0 axe color-contrast
+desktop-chrome /friends 200 overflow 0 axe color-contrast
+desktop-chrome /poker-settlement-calculator 200 overflow 0 axe 
+desktop-chrome /feedback 200 overflow 0 axe 
+desktop-chrome /privacy 200 overflow 0 axe 
+desktop-chrome /terms 200 overflow 0 axe 
+desktop-chrome /self-host 200 overflow 0 axe 
+desktop-chrome /missing-full-audit-page 404 overflow 0 axe 
+android-chrome / 200 overflow 0 axe 
+android-chrome /create 200 overflow 0 axe 
+android-chrome /join 200 overflow 0 axe 
+android-chrome /signin 200 overflow 0 axe color-contrast
+android-chrome /dashboard 200 overflow 0 axe color-contrast
+android-chrome /friends 200 overflow 0 axe color-contrast
+android-chrome /poker-settlement-calculator 200 overflow 0 axe 
+android-chrome /feedback 200 overflow 0 axe 
+android-chrome /privacy 200 overflow 0 axe 
+android-chrome /terms 200 overflow 0 axe 
+android-chrome /self-host 200 overflow 0 axe 
+android-chrome /missing-full-audit-page 404 overflow 0 axe 
+iphone-webkit / 200 overflow 0 axe 
+iphone-webkit /create 200 overflow 0 axe 
+iphone-webkit /join 200 overflow 0 axe 
+iphone-webkit /signin 200 overflow 0 axe color-contrast
+iphone-webkit /dashboard 200 overflow 0 axe color-contrast
+iphone-webkit /friends 200 overflow 0 axe color-contrast
+iphone-webkit /poker-settlement-calculator 200 overflow 0 axe 
+iphone-webkit /feedback 200 overflow 0 axe 
+iphone-webkit /privacy 200 overflow 0 axe 
+iphone-webkit /terms 200 overflow 0 axe 
+iphone-webkit /self-host 200 overflow 0 axe 
+iphone-webkit /missing-full-audit-page 404 overflow 0 axe 
+ipad-webkit / 200 overflow 0 axe 
+ipad-webkit /create 200 overflow 0 axe 
+ipad-webkit /join 200 overflow 0 axe 
+ipad-webkit /signin 200 overflow 0 axe color-contrast
+ipad-webkit /dashboard 200 overflow 0 axe color-contrast
+ipad-webkit /friends 200 overflow 0 axe color-contrast
+ipad-webkit /poker-settlement-calculator 200 overflow 0 axe 
+ipad-webkit /feedback 200 overflow 0 axe 
+ipad-webkit /privacy 200 overflow 0 axe 
+ipad-webkit /terms 200 overflow 0 axe 
+ipad-webkit /self-host 200 overflow 0 axe 
+ipad-webkit /missing-full-audit-page 404 overflow 0 axe 
+desktop-webkit / 200 overflow 0 axe 
+desktop-webkit /create 200 overflow 0 axe 
+desktop-webkit /join 200 overflow 0 axe 
+desktop-webkit /signin 200 overflow 0 axe color-contrast
+desktop-webkit /dashboard 200 overflow 0 axe color-contrast
+desktop-webkit /friends 200 overflow 0 axe color-contrast
+desktop-webkit /poker-settlement-calculator 200 overflow 0 axe 
+desktop-webkit /feedback 200 overflow 0 axe 
+desktop-webkit /privacy 200 overflow 0 axe 
+desktop-webkit /terms 200 overflow 0 axe 
+desktop-webkit /self-host 200 overflow 0 axe 
+desktop-webkit /missing-full-audit-page 404 overflow 0 axe 
+narrow-chrome / 200 overflow 0 axe 
+narrow-chrome /create 200 overflow 0 axe 
+narrow-chrome /join 200 overflow 0 axe 
+narrow-chrome /signin 200 overflow 0 axe color-contrast
+narrow-chrome /dashboard 200 overflow 0 axe color-contrast
+narrow-chrome /friends 200 overflow 0 axe color-contrast
+narrow-chrome /poker-settlement-calculator 200 overflow 0 axe 
+narrow-chrome /feedback 200 overflow 0 axe 
+narrow-chrome /privacy 200 overflow 0 axe 
+narrow-chrome /terms 200 overflow 0 axe 
+narrow-chrome /self-host 200 overflow 0 axe 
+narrow-chrome /missing-full-audit-page 404 overflow 0 axe 

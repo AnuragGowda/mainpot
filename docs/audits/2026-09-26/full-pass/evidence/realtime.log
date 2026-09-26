@@ -1,0 +1,335 @@
+
+> mainpot@0.1.0 test:e2e:realtime
+> node scripts/test-realtime.mts --workers=3 --trace=retain-on-failure
+
+Starting disposable Supabase test stack…
+Resetting disposable Supabase test database…
+Reading disposable Supabase test configuration…
+Checking locked payment plan security before browser flows…
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ final payment tracking accepts only exact locked min/bank/funded/discrepancy plans and preserves early-exit payments
+Running realtime browser tests…
+[WebServer] (node:82988) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:82988) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83005) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83014) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83058) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83054) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83052) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83056) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83053) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83057) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83060) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83055) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83059) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:83115) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 120 tests using 3 workers
+
+(node:83118) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:83116) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:83117) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓    1 [chromium] › tests/e2e/realtime.spec.ts:14:5 › keeps account templates, payment history, and deletion cancellation recoverable (10.5s)
+  ✓    3 [mobile-chrome] › tests/e2e/realtime.spec.ts:14:5 › keeps account templates, payment history, and deletion cancellation recoverable (10.9s)
+  ✓    2 [mobile-safari] › tests/e2e/realtime.spec.ts:14:5 › keeps account templates, payment history, and deletion cancellation recoverable (11.3s)
+  ✓    5 [mobile-chrome] › tests/e2e/realtime.spec.ts:19:5 › reviews payments before locking and keeps completion in sync (4.3s)
+  ✓    4 [chromium] › tests/e2e/realtime.spec.ts:19:5 › reviews payments before locking and keeps completion in sync (5.1s)
+  ✓    7 [mobile-chrome] › tests/e2e/realtime.spec.ts:46:5 › requires visitors to join before viewing an active game (1.2s)
+  ✓    6 [mobile-safari] › tests/e2e/realtime.spec.ts:19:5 › reviews payments before locking and keeps completion in sync (4.8s)
+  ✓    8 [chromium] › tests/e2e/realtime.spec.ts:46:5 › requires visitors to join before viewing an active game (1.2s)
+  ✓   10 [mobile-safari] › tests/e2e/realtime.spec.ts:46:5 › requires visitors to join before viewing an active game (2.1s)
+  ✓    9 [mobile-chrome] › tests/e2e/realtime.spec.ts:85:5 › syncs two guests' independent ledger entries and host approval (5.0s)
+  ✓   11 [chromium] › tests/e2e/realtime.spec.ts:85:5 › syncs two guests' independent ledger entries and host approval (5.2s)
+  ✓   12 [mobile-safari] › tests/e2e/realtime.spec.ts:85:5 › syncs two guests' independent ledger entries and host approval (6.1s)
+  ✓   13 [mobile-chrome] › tests/e2e/realtime.spec.ts:118:5 › locks an early cash-out against the host and carries it out of final settlement (7.1s)
+  ✓   14 [chromium] › tests/e2e/realtime.spec.ts:118:5 › locks an early cash-out against the host and carries it out of final settlement (7.6s)
+  ✓   16 [mobile-chrome] › tests/e2e/realtime.spec.ts:195:5 › auto-approves host rebuys while keeping player entries pending (1.6s)
+  ✓   17 [chromium] › tests/e2e/realtime.spec.ts:195:5 › auto-approves host rebuys while keeping player entries pending (2.4s)
+  ✓   15 [mobile-safari] › tests/e2e/realtime.spec.ts:118:5 › locks an early cash-out against the host and carries it out of final settlement (7.4s)
+  ✓   18 [mobile-chrome] › tests/e2e/realtime.spec.ts:225:5 › records one pending opening buy-in when a guest joins and does not duplicate it on reload (4.7s)
+  ✓   20 [mobile-safari] › tests/e2e/realtime.spec.ts:195:5 › auto-approves host rebuys while keeping player entries pending (4.1s)
+  ✓   19 [chromium] › tests/e2e/realtime.spec.ts:225:5 › records one pending opening buy-in when a guest joins and does not duplicate it on reload (5.2s)
+  ✓   21 [mobile-chrome] › tests/e2e/realtime.spec.ts:255:5 › records a player's rebuy in the shared ledger (3.8s)
+  ✓   22 [mobile-safari] › tests/e2e/realtime.spec.ts:225:5 › records one pending opening buy-in when a guest joins and does not duplicate it on reload (5.1s)
+  ✓   24 [mobile-chrome] › tests/e2e/realtime.spec.ts:290:5 › transfers host authority when the host leaves (3.1s)
+  ✓   23 [chromium] › tests/e2e/realtime.spec.ts:255:5 › records a player's rebuy in the shared ledger (5.4s)
+  ✓   27 [chromium] › tests/e2e/realtime.spec.ts:290:5 › transfers host authority when the host leaves (4.0s)
+  ✓   25 [mobile-safari] › tests/e2e/realtime.spec.ts:255:5 › records a player's rebuy in the shared ledger (5.6s)
+  ✓   26 [mobile-chrome] › tests/e2e/realtime.spec.ts:325:5 › recovers a disconnected guest after the host starts settlement (5.2s)
+  ✓   28 [chromium] › tests/e2e/realtime.spec.ts:325:5 › recovers a disconnected guest after the host starts settlement (4.7s)
+  ✓   29 [mobile-safari] › tests/e2e/realtime.spec.ts:290:5 › transfers host authority when the host leaves (4.8s)
+  ✓   30 [mobile-chrome] › tests/e2e/realtime.spec.ts:361:5 › keeps host correction and approval decisions auditable (6.9s)
+  ✓   32 [mobile-safari] › tests/e2e/realtime.spec.ts:325:5 › recovers a disconnected guest after the host starts settlement (10.9s)
+  ✓   31 [chromium] › tests/e2e/realtime.spec.ts:361:5 › keeps host correction and approval decisions auditable (11.9s)
+  ✓   34 [mobile-safari] › tests/e2e/realtime.spec.ts:361:5 › keeps host correction and approval decisions auditable (7.1s)
+  ✓   33 [mobile-chrome] › tests/e2e/realtime.spec.ts:399:5 › releases a stalled host correction and keeps the amount ready to retry (21.3s)
+  ✓   37 [mobile-chrome] › tests/e2e/realtime.spec.ts:437:5 › keeps a zero cash-out draft through a delayed failure and retries it (5.9s)
+  ✓   35 [chromium] › tests/e2e/realtime.spec.ts:399:5 › releases a stalled host correction and keeps the amount ready to retry (20.8s)
+  ✓   39 [chromium] › tests/e2e/realtime.spec.ts:437:5 › keeps a zero cash-out draft through a delayed failure and retries it (7.8s)
+  ✓   36 [mobile-safari] › tests/e2e/realtime.spec.ts:399:5 › releases a stalled host correction and keeps the amount ready to retry (23.7s)
+  ✓   41 [mobile-safari] › tests/e2e/realtime.spec.ts:437:5 › keeps a zero cash-out draft through a delayed failure and retries it (6.7s)
+  ✓   38 [mobile-chrome] › tests/e2e/realtime.spec.ts:513:5 › holds a multi-user settlement until cash-outs reconcile (21.7s)
+  ✓   40 [chromium] › tests/e2e/realtime.spec.ts:513:5 › holds a multi-user settlement until cash-outs reconcile (29.5s)
+  ✘   42 [mobile-safari] › tests/e2e/realtime.spec.ts:513:5 › holds a multi-user settlement until cash-outs reconcile (20.1s)
+  ✘   43 [mobile-chrome] › tests/e2e/realtime.spec.ts:610:5 › runs a whole table with host-added players (18.3s)
+(node:84173) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84176) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   44 [chromium] › tests/e2e/realtime.spec.ts:610:5 › runs a whole table with host-added players (17.4s)
+  ✓   46 [mobile-chrome] › tests/e2e/realtime.spec.ts:615:5 › syncs host-added players to guests without exposing host controls (13.9s)
+  ✓   45 [mobile-safari] › tests/e2e/realtime.spec.ts:610:5 › runs a whole table with host-added players (21.8s)
+  ✘   48 [mobile-chrome] › tests/e2e/realtime.spec.ts:643:5 › restores an account-owned seat and settled history across browsers (11.2s)
+  ✓   47 [chromium] › tests/e2e/realtime.spec.ts:615:5 › syncs host-added players to guests without exposing host controls (18.7s)
+(node:84402) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   49 [mobile-safari] › tests/e2e/realtime.spec.ts:615:5 › syncs host-added players to guests without exposing host controls (17.7s)
+  ✓   51 [mobile-chrome] › tests/e2e/realtime.spec.ts:648:5 › delivers saved-friend invitations before the friend has room access (18.0s)
+  ✓   50 [chromium] › tests/e2e/realtime.spec.ts:643:5 › restores an account-owned seat and settled history across browsers (21.2s)
+  ✓   52 [mobile-safari] › tests/e2e/realtime.spec.ts:643:5 › restores an account-owned seat and settled history across browsers (17.3s)
+  ✓   54 [chromium] › tests/e2e/realtime.spec.ts:648:5 › delivers saved-friend invitations before the friend has room access (26.6s)
+  ✓   53 [mobile-chrome] › tests/e2e/realtime.spec.ts:654:5 › shares a selected bank plan and keeps both bank payment directions visible (28.6s)
+  ✓   55 [mobile-safari] › tests/e2e/realtime.spec.ts:648:5 › delivers saved-friend invitations before the friend has room access (25.7s)
+  ✓   57 [mobile-chrome] › tests/e2e/realtime.spec.ts:660:5 › keeps guest-host ownership after account signup across devices (8.8s)
+  ✓   56 [chromium] › tests/e2e/realtime.spec.ts:654:5 › shares a selected bank plan and keeps both bank payment directions visible (16.5s)
+  ✘   59 [mobile-chrome] › tests/e2e/realtime.spec.ts:665:5 › ends an expired guest recovery window without trapping the signed-in account (9.1s)
+  ✓   58 [mobile-safari] › tests/e2e/realtime.spec.ts:654:5 › shares a selected bank plan and keeps both bank payment directions visible (18.8s)
+(node:84900) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   60 [chromium] › tests/e2e/realtime.spec.ts:660:5 › keeps guest-host ownership after account signup across devices (7.7s)
+  ✓   63 [chromium] › tests/e2e/realtime.spec.ts:665:5 › ends an expired guest recovery window without trapping the signed-in account (2.9s)
+  ✓   62 [mobile-chrome] › tests/e2e/realtime.spec.ts:670:5 › starts a second guest table and keeps both unfinished games recoverable (6.3s)
+  ✓   61 [mobile-safari] › tests/e2e/realtime.spec.ts:660:5 › keeps guest-host ownership after account signup across devices (10.6s)
+  ✓   64 [chromium] › tests/e2e/realtime.spec.ts:670:5 › starts a second guest table and keeps both unfinished games recoverable (3.8s)
+  ✓   66 [mobile-safari] › tests/e2e/realtime.spec.ts:665:5 › ends an expired guest recovery window without trapping the signed-in account (3.7s)
+  ✓   68 [mobile-safari] › tests/e2e/realtime.spec.ts:670:5 › starts a second guest table and keeps both unfinished games recoverable (2.6s)
+  ✓   65 [mobile-chrome] › tests/e2e/realtime.spec.ts:699:5 › recovers the same created table after its committed response is lost (16.6s)
+  ✓   70 [mobile-chrome] › tests/e2e/realtime.spec.ts:735:5 › retries a temporary future-JWT rejection with the same creation request (1.9s)
+(node:85190) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   67 [chromium] › tests/e2e/realtime.spec.ts:699:5 › recovers the same created table after its committed response is lost (17.5s)
+  ✓   72 [chromium] › tests/e2e/realtime.spec.ts:735:5 › retries a temporary future-JWT rejection with the same creation request (2.0s)
+(node:85221) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   69 [mobile-safari] › tests/e2e/realtime.spec.ts:699:5 › recovers the same created table after its committed response is lost (19.2s)
+  ✓   74 [mobile-safari] › tests/e2e/realtime.spec.ts:735:5 › retries a temporary future-JWT rejection with the same creation request (2.9s)
+  ✓   71 [desktop-safari] › tests/e2e/realtime.spec.ts:14:5 › keeps account templates, payment history, and deletion cancellation recoverable (12.9s)
+  ✓   73 [tablet-safari] › tests/e2e/realtime.spec.ts:14:5 › keeps account templates, payment history, and deletion cancellation recoverable (12.9s)
+  ✓   75 [desktop-safari] › tests/e2e/realtime.spec.ts:19:5 › reviews payments before locking and keeps completion in sync (5.2s)
+  ✓   77 [desktop-safari] › tests/e2e/realtime.spec.ts:46:5 › requires visitors to join before viewing an active game (1.7s)
+  ✓   76 [tablet-safari] › tests/e2e/realtime.spec.ts:19:5 › reviews payments before locking and keeps completion in sync (4.0s)
+  ✓   79 [tablet-safari] › tests/e2e/realtime.spec.ts:46:5 › requires visitors to join before viewing an active game (2.0s)
+  ✓   78 [desktop-safari] › tests/e2e/realtime.spec.ts:85:5 › syncs two guests' independent ledger entries and host approval (4.9s)
+  ✓   80 [tablet-safari] › tests/e2e/realtime.spec.ts:85:5 › syncs two guests' independent ledger entries and host approval (4.0s)
+  ✓   81 [desktop-safari] › tests/e2e/realtime.spec.ts:118:5 › locks an early cash-out against the host and carries it out of final settlement (6.5s)
+  ✓   83 [desktop-safari] › tests/e2e/realtime.spec.ts:195:5 › auto-approves host rebuys while keeping player entries pending (1.7s)
+  ✓   82 [tablet-safari] › tests/e2e/realtime.spec.ts:118:5 › locks an early cash-out against the host and carries it out of final settlement (6.7s)
+  ✓   84 [desktop-safari] › tests/e2e/realtime.spec.ts:225:5 › records one pending opening buy-in when a guest joins and does not duplicate it on reload (2.9s)
+  ✓   85 [tablet-safari] › tests/e2e/realtime.spec.ts:195:5 › auto-approves host rebuys while keeping player entries pending (3.4s)
+  ✓   86 [desktop-safari] › tests/e2e/realtime.spec.ts:255:5 › records a player's rebuy in the shared ledger (2.3s)
+  ✓   87 [tablet-safari] › tests/e2e/realtime.spec.ts:225:5 › records one pending opening buy-in when a guest joins and does not duplicate it on reload (3.2s)
+  ✓   88 [desktop-safari] › tests/e2e/realtime.spec.ts:290:5 › transfers host authority when the host leaves (2.5s)
+  ✓   89 [tablet-safari] › tests/e2e/realtime.spec.ts:255:5 › records a player's rebuy in the shared ledger (2.9s)
+  ✓   90 [desktop-safari] › tests/e2e/realtime.spec.ts:325:5 › recovers a disconnected guest after the host starts settlement (4.9s)
+  ✓   91 [tablet-safari] › tests/e2e/realtime.spec.ts:290:5 › transfers host authority when the host leaves (2.9s)
+  ✓   93 [tablet-safari] › tests/e2e/realtime.spec.ts:325:5 › recovers a disconnected guest after the host starts settlement (3.8s)
+  ✓   92 [desktop-safari] › tests/e2e/realtime.spec.ts:361:5 › keeps host correction and approval decisions auditable (5.0s)
+  ✓   94 [tablet-safari] › tests/e2e/realtime.spec.ts:361:5 › keeps host correction and approval decisions auditable (4.2s)
+  ✓   95 [desktop-safari] › tests/e2e/realtime.spec.ts:399:5 › releases a stalled host correction and keeps the amount ready to retry (17.7s)
+  ✓   97 [desktop-safari] › tests/e2e/realtime.spec.ts:437:5 › keeps a zero cash-out draft through a delayed failure and retries it (1.6s)
+  ✓   96 [tablet-safari] › tests/e2e/realtime.spec.ts:399:5 › releases a stalled host correction and keeps the amount ready to retry (16.8s)
+  ✓   99 [tablet-safari] › tests/e2e/realtime.spec.ts:437:5 › keeps a zero cash-out draft through a delayed failure and retries it (2.2s)
+  ✓   98 [desktop-safari] › tests/e2e/realtime.spec.ts:513:5 › holds a multi-user settlement until cash-outs reconcile (6.9s)
+  ✓  100 [tablet-safari] › tests/e2e/realtime.spec.ts:513:5 › holds a multi-user settlement until cash-outs reconcile (6.9s)
+  ✓  101 [desktop-safari] › tests/e2e/realtime.spec.ts:610:5 › runs a whole table with host-added players (4.6s)
+  ✓  102 [tablet-safari] › tests/e2e/realtime.spec.ts:610:5 › runs a whole table with host-added players (4.6s)
+  ✓  103 [desktop-safari] › tests/e2e/realtime.spec.ts:615:5 › syncs host-added players to guests without exposing host controls (3.4s)
+  ✓  104 [tablet-safari] › tests/e2e/realtime.spec.ts:615:5 › syncs host-added players to guests without exposing host controls (3.8s)
+  ✓  105 [desktop-safari] › tests/e2e/realtime.spec.ts:643:5 › restores an account-owned seat and settled history across browsers (8.7s)
+  ✓  106 [tablet-safari] › tests/e2e/realtime.spec.ts:643:5 › restores an account-owned seat and settled history across browsers (8.1s)
+  ✓  107 [desktop-safari] › tests/e2e/realtime.spec.ts:648:5 › delivers saved-friend invitations before the friend has room access (7.5s)
+  ✓  108 [tablet-safari] › tests/e2e/realtime.spec.ts:648:5 › delivers saved-friend invitations before the friend has room access (6.0s)
+  ✓  109 [desktop-safari] › tests/e2e/realtime.spec.ts:654:5 › shares a selected bank plan and keeps both bank payment directions visible (11.1s)
+  ✓  110 [tablet-safari] › tests/e2e/realtime.spec.ts:654:5 › shares a selected bank plan and keeps both bank payment directions visible (12.7s)
+  ✓  111 [desktop-safari] › tests/e2e/realtime.spec.ts:660:5 › keeps guest-host ownership after account signup across devices (6.2s)
+  ✓  112 [tablet-safari] › tests/e2e/realtime.spec.ts:660:5 › keeps guest-host ownership after account signup across devices (4.9s)
+  ✓  113 [desktop-safari] › tests/e2e/realtime.spec.ts:665:5 › ends an expired guest recovery window without trapping the signed-in account (1.7s)
+  ✓  114 [tablet-safari] › tests/e2e/realtime.spec.ts:665:5 › ends an expired guest recovery window without trapping the signed-in account (1.7s)
+  ✓  115 [desktop-safari] › tests/e2e/realtime.spec.ts:670:5 › starts a second guest table and keeps both unfinished games recoverable (2.2s)
+  ✓  116 [tablet-safari] › tests/e2e/realtime.spec.ts:670:5 › starts a second guest table and keeps both unfinished games recoverable (1.8s)
+  ✓  117 [desktop-safari] › tests/e2e/realtime.spec.ts:699:5 › recovers the same created table after its committed response is lost (16.5s)
+  ✓  118 [tablet-safari] › tests/e2e/realtime.spec.ts:699:5 › recovers the same created table after its committed response is lost (16.4s)
+  ✓  119 [desktop-safari] › tests/e2e/realtime.spec.ts:735:5 › retries a temporary future-JWT rejection with the same creation request (1.7s)
+  ✓  120 [tablet-safari] › tests/e2e/realtime.spec.ts:735:5 › retries a temporary future-JWT rejection with the same creation request (1.6s)
+
+
+  1) [mobile-chrome] › tests/e2e/realtime.spec.ts:610:5 › runs a whole table with host-added players 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('dialog', { name: 'Manage Jordan' })
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for getByRole('dialog', { name: 'Manage Jordan' })
+        12 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+       at host-player-flow.ts:35
+
+      33 |   await jordanForm.getByRole("textbox", { name: "Buy-in amount" }).fill("5.50");
+      34 |   await jordanForm.getByRole("button", { name: "Record buy-in" }).click();
+    > 35 |   await expect(jordanForm).toHaveCount(0);
+         |                            ^
+      36 |   await expect(jordan).toContainText("$25.50");
+      37 |   await expect(jordan).toContainText("2 entries");
+      38 |   await expect(page.getByRole("region", { name: "Needs approval" })).toHaveCount(0);
+        at runHostPlayerFlow (/Users/anurag/Documents/ChatGPT/Mainpot/tests/e2e/host-player-flow.ts:35:28)
+        at /Users/anurag/Documents/ChatGPT/Mainpot/tests/e2e/realtime.spec.ts:612:3
+
+    Error Context: test-results/realtime-runs-a-whole-table-with-host-added-players-mobile-chrome/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/realtime-runs-a-whole-table-with-host-added-players-mobile-chrome/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/realtime-runs-a-whole-table-with-host-added-players-mobile-chrome/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile-chrome] › tests/e2e/realtime.spec.ts:643:5 › restores an account-owned seat and settled history across browsers 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'End game', exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByRole('button', { name: 'End game', exact: true })
+        - waiting for "http://127.0.0.1:3110/game/R7TV86" navigation to finish...
+
+
+       at audit-fixes-flow.ts:48
+
+      46 |     await expect(host.locator("#create-game-name")).toHaveValue("Recovery regression");
+      47 |     await host.getByRole("button", { name: "Create game", exact: true }).click();
+    > 48 |     await expect(host.getByRole("button", { name: "End game", exact: true })).toBeVisible();
+         |                                                                               ^
+      49 |     const gameUrl = host.url();
+      50 |     await resumed.goto("/signin");
+      51 |     await resumed.getByLabel("Email", { exact: true }).fill(email);
+        at checkAccountRecovery (/Users/anurag/Documents/ChatGPT/Mainpot/tests/e2e/audit-fixes-flow.ts:48:79)
+        at /Users/anurag/Documents/ChatGPT/Mainpot/tests/e2e/realtime.spec.ts:645:3
+
+    Error Context: test-results/realtime-restores-an-accou-76ab4-led-history-across-browsers-mobile-chrome/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/realtime-restores-an-accou-76ab4-led-history-across-browsers-mobile-chrome/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/realtime-restores-an-accou-76ab4-led-history-across-browsers-mobile-chrome/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [mobile-chrome] › tests/e2e/realtime.spec.ts:665:5 › ends an expired guest recovery window without trapping the signed-in account 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert').filter({ hasText: 'Your guest-game recovery window expired.' })
+    Expected substring: "Your guest-game recovery window expired."
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for getByRole('alert').filter({ hasText: 'Your guest-game recovery window expired.' })
+
+
+       at account-transfer-flow.ts:68
+
+      66 |     await page.getByRole("button", { name: "Retry guest recovery" }).click();
+      67 |     await expect(page.getByRole("heading", { name: "You're signed in" })).toBeVisible();
+    > 68 |     await expect(page.getByRole("alert").filter({ hasText: "Your guest-game recovery window expired." })).toContainText("Your guest-game recovery window expired.");
+         |                                                                                                           ^
+      69 |     await expect(page.getByText("Guest games can only be recovered within one hour after requesting the confirmation email, from the same browser.")).toBeVisible();
+      70 |     await expect(page.getByRole("button", { name: "Retry guest recovery" })).toHaveCount(0);
+      71 |     await expect(page.getByText("Retry recovery from the same browser where you played as a guest.")).toHaveCount(0);
+        at runExpiredGuestRecoveryWindowFlow (/Users/anurag/Documents/ChatGPT/Mainpot/tests/e2e/account-transfer-flow.ts:68:107)
+        at /Users/anurag/Documents/ChatGPT/Mainpot/tests/e2e/realtime.spec.ts:667:3
+
+    Error Context: test-results/realtime-ends-an-expired-g-ba7ac-pping-the-signed-in-account-mobile-chrome/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/realtime-ends-an-expired-g-ba7ac-pping-the-signed-in-account-mobile-chrome/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/realtime-ends-an-expired-g-ba7ac-pping-the-signed-in-account-mobile-chrome/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [mobile-safari] › tests/e2e/realtime.spec.ts:513:5 › holds a multi-user settlement until cash-outs reconcile 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Cash-outs', exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'Cash-outs', exact: true })
+
+
+      528 |     await host.getByRole("button", { name: "End game" }).click();
+      529 |     await host.getByRole("button", { name: "Start cash-outs" }).click();
+    > 530 |     await expect(guest.getByRole("heading", { name: "Cash-outs", exact: true })).toBeVisible();
+          |                                                                                  ^
+      531 |     await expect(guest.getByRole("heading", { name: "Your cash-out", exact: true })).toBeVisible();
+      532 |     await expect(guest.getByRole("heading", { name: "Table cash-outs", exact: true })).toBeVisible();
+      533 |     await expect(guest.locator('ul[aria-label="Table cash-outs"]').getByRole("textbox")).toHaveCount(0);
+        at /Users/anurag/Documents/ChatGPT/Mainpot/tests/e2e/realtime.spec.ts:530:82
+
+    Error Context: test-results/realtime-holds-a-multi-use-25374-t-until-cash-outs-reconcile-mobile-safari/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/realtime-holds-a-multi-use-25374-t-until-cash-outs-reconcile-mobile-safari/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/realtime-holds-a-multi-use-25374-t-until-cash-outs-reconcile-mobile-safari/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [mobile-chrome] › tests/e2e/realtime.spec.ts:610:5 › runs a whole table with host-added players 
+    [mobile-chrome] › tests/e2e/realtime.spec.ts:643:5 › restores an account-owned seat and settled history across browsers 
+    [mobile-chrome] › tests/e2e/realtime.spec.ts:665:5 › ends an expired guest recovery window without trapping the signed-in account 
+    [mobile-safari] › tests/e2e/realtime.spec.ts:513:5 › holds a multi-user settlement until cash-outs reconcile 
+  116 passed (6.7m)
+Stopping disposable Supabase test stack…

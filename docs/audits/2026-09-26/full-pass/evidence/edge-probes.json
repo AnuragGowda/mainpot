@@ -1,0 +1,61 @@
+{
+  "rows": [
+    {
+      "probe": "local host accessibility",
+      "violations": []
+    },
+    {
+      "probe": "local invite copy",
+      "text": "INVITE PLAYERS\n\nScan to join Audit controlled table\n\nROOM CODE\n\nFT8WG4\n\nScan with your camera · no account required\n\nSign in to invite saved friends directly.\n\nCopy code\nShare invite"
+    },
+    {
+      "probe": "local storage keys",
+      "keys": [
+        "ante_active_games",
+        "ante_player_name",
+        "ante_store",
+        "ante_session_id",
+        "ante_active_game"
+      ]
+    },
+    {
+      "probe": "rebuy editor",
+      "text": "Skip to content\nAudit controlled table\nActive\n\nHosted by Casey\n\nInvite\nEnd game\n\nBUY-IN\n\n$20.00\n\nPOT\n\n$20.00\n\nPLAYERS\n\n1\n\nSaved on this device · live sync is off\nAt the table\n\nHost-confirmed entries by player.\n\nAdd player\nCA\n\nCasey\n\nHost\nYou\n\n1 entry\n\n$20.00\n\nActivity\n\nNewest first.\n\n3 events\n$\n\nCasey recorded a buy-in for $20.00\n\n1:20 PM\n···\n+\n\nCasey joined\n\n1:20 PM\n✓\n\nCasey opened the table\n\n1:20 PM\nHow did you hear about Mainpot?\nOptional · one tap\n\nAdd a rebuy\n\nRecord new chips received from the table's bank.\n\nRebuy amount\n$\nAdd rebuy\nCancel\nClose rebuy\nLeave"
+    },
+    {
+      "probe": "quota ledger write",
+      "before": "Skip to content\nAudit controlled table\nActive\n\nHosted by Casey\n\nInvite\nEnd game\n\nBUY-IN\n\n$20.00\n\nPOT\n\n$27.00\n\nPLAYERS\n\n1\n\nSaved on this device · live sync is off\nAt the table\n\nHost-confirmed entries by player.\n\nAdd player\nCA\n\nCasey\n\nHost\nYou\n\n2 entries\n\n$27.00\n\nActivity\n\nNewest first.\n\n4 events\n$\n\nCasey recorded a rebuy for $7.00\n\n1:20 PM\n···\n$\n\nCasey recorded a buy-in for $20.00\n\n1:20 PM\n···\n+\n\nCasey joined\n\n1:20 PM\n✓\n\nCasey opened the table\n\n1:20 PM\nHow did you hear about Mainpot?\nOptional · one tap\nAdd a rebuy\nLeave\nRebuy added",
+      "after": "Skip to content\nAudit controlled table\nActive\n\nHosted by Casey\n\nInvite\nEnd game\n\nBUY-IN\n\n$20.00\n\nPOT\n\n$20.00\n\nPLAYERS\n\n1\n\nSaved on this device · live sync is off\nAt the table\n\nHost-confirmed entries by player.\n\nAdd player\nCA\n\nCasey\n\nHost\nYou\n\n1 entry\n\n$20.00\n\nActivity\n\nNewest first.\n\n3 events\n$\n\nCasey recorded a buy-in for $20.00\n\n1:20 PM\n···\n+\n\nCasey joined\n\n1:20 PM\n✓\n\nCasey opened the table\n\n1:20 PM\nHow did you hear about Mainpot?\nOptional · one tap\nAdd a rebuy\nLeave"
+    },
+    {
+      "probe": "join short viewport",
+      "geometry": {
+        "top": -136,
+        "bottom": 300,
+        "viewport": 300,
+        "documentHeight": 300,
+        "text": "JOIN THE TABLE\n\nAudit controlled table\n\nHost\nCasey\n\nBuy-in\n$20.00\n\nRoom code FT8WG4\n\nJoining records this opening buy-in for the host to review.\n\nYour name\nJoin"
+      },
+      "violations": []
+    },
+    {
+      "probe": "join escape",
+      "stillOpen": 1,
+      "navigation": 0
+    },
+    {
+      "probe": "join landscape viewport",
+      "geometry": {
+        "top": -96,
+        "bottom": 320,
+        "viewport": 320,
+        "documentHeight": 320
+      }
+    },
+    {
+      "probe": "live missing stack",
+      "result": "MONEY IN\n\n$40.00\n\nFINAL STACKS\n\n$40.00\n\nBank balanced\n\nThe payment list uses the recorded results as entered.\n\nPAYMENT LIST\n\n1 payment\nPlayer 2Player 1\n$20.00\nTrack the next game in Mainpot"
+    }
+  ],
+  "errors": []
+}

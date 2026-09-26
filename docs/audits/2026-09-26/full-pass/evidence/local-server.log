@@ -1,0 +1,9 @@
+
+> mainpot@0.1.0 start
+> next start --hostname 127.0.0.1 --port 3120
+
+▲ Next.js 16.3.4
+- Local:         http://127.0.0.1:3120
+- Network:       http://127.0.0.1:3120
+✓ Ready in 1008ms
+✓ Running next.config.mts took 614ms

@@ -1,0 +1,75 @@
+
+> mainpot@0.1.0 test:e2e:realtime
+> node scripts/test-realtime.mts --grep failed payment reads|duplicate lobby names|same host-managed seat --workers=1 --timeout=15000 --output=test-results/audit-fix-connected-check
+
+Starting disposable Supabase test stack…
+Resetting disposable Supabase test database…
+Reading disposable Supabase test configuration…
+Running database assurance checks against the disposable migration stack…
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ lobby name reservations reject normalized duplicates across joins, direct writes, host-managed seats, departures, and concurrent paths without rewriting legacy rows
+Checking locked payment plan security before browser flows…
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ final payment tracking accepts only exact locked min/bank/funded/discrepancy plans and preserves early-exit payments
+Running realtime browser tests…
+[WebServer] (node:14874) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:14874) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:14925) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15086) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15085) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15087) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15089) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15090) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15093) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15091) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15092) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:15132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 15 tests using 1 worker
+
+(node:15134) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/realtime.spec.ts:764:5 › keeps failed payment reads unknown and retries without duplicate sends (6.5s)
+  ✓   2 [chromium] › tests/e2e/realtime.spec.ts:769:5 › rejects duplicate lobby names even when two devices join together (3.1s)
+  ✓   3 [chromium] › tests/e2e/realtime.spec.ts:774:5 › claims and restores the same host-managed seat without another buy-in (2.0s)
+(node:15192) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   4 [mobile-chrome] › tests/e2e/realtime.spec.ts:764:5 › keeps failed payment reads unknown and retries without duplicate sends (4.3s)
+  ✓   5 [mobile-chrome] › tests/e2e/realtime.spec.ts:769:5 › rejects duplicate lobby names even when two devices join together (2.8s)
+  ✓   6 [mobile-chrome] › tests/e2e/realtime.spec.ts:774:5 › claims and restores the same host-managed seat without another buy-in (2.9s)
+(node:15257) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   7 [mobile-safari] › tests/e2e/realtime.spec.ts:764:5 › keeps failed payment reads unknown and retries without duplicate sends (6.2s)
+  ✓   8 [mobile-safari] › tests/e2e/realtime.spec.ts:769:5 › rejects duplicate lobby names even when two devices join together (3.2s)
+  ✓   9 [mobile-safari] › tests/e2e/realtime.spec.ts:774:5 › claims and restores the same host-managed seat without another buy-in (3.1s)
+(node:15328) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  10 [desktop-safari] › tests/e2e/realtime.spec.ts:764:5 › keeps failed payment reads unknown and retries without duplicate sends (5.0s)
+  ✓  11 [desktop-safari] › tests/e2e/realtime.spec.ts:769:5 › rejects duplicate lobby names even when two devices join together (3.3s)
+  ✓  12 [desktop-safari] › tests/e2e/realtime.spec.ts:774:5 › claims and restores the same host-managed seat without another buy-in (3.1s)
+(node:15445) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  13 [tablet-safari] › tests/e2e/realtime.spec.ts:764:5 › keeps failed payment reads unknown and retries without duplicate sends (5.0s)
+  ✓  14 [tablet-safari] › tests/e2e/realtime.spec.ts:769:5 › rejects duplicate lobby names even when two devices join together (3.4s)
+  ✓  15 [tablet-safari] › tests/e2e/realtime.spec.ts:774:5 › claims and restores the same host-managed seat without another buy-in (3.3s)
+
+  15 passed (1.1m)
+Stopping disposable Supabase test stack…

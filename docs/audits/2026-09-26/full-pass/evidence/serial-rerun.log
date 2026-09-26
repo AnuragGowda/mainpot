@@ -1,0 +1,57 @@
+
+> mainpot@0.1.0 test:e2e:realtime
+> node scripts/test-realtime.mts --grep holds a multi-user settlement|runs a whole table|restores an account-owned|ends an expired guest --project=mobile-chrome --project=mobile-safari --workers=1 --trace=retain-on-failure --output=test-results/audit-serial
+
+Starting disposable Supabase test stack…
+Resetting disposable Supabase test database…
+Reading disposable Supabase test configuration…
+Checking locked payment plan security before browser flows…
+Stopped services: [supabase_storage_mainpot-e2e supabase_imgproxy_mainpot-e2e supabase_edge_runtime_mainpot-e2e supabase_analytics_mainpot-e2e supabase_vector_mainpot-e2e supabase_pooler_mainpot-e2e]
+A new version of Supabase CLI is available: v2.118.0 (currently installed v2.116.0)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
+✓ final payment tracking accepts only exact locked min/bank/funded/discrepancy plans and preserves early-exit payments
+Running realtime browser tests…
+[WebServer] (node:86495) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86495) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86498) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86517) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86521) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86519) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86518) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86523) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86522) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86515) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86516) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86520) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:86556) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 8 tests using 1 worker
+
+(node:86557) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [mobile-chrome] › tests/e2e/realtime.spec.ts:513:5 › holds a multi-user settlement until cash-outs reconcile (8.7s)
+  ✓  2 [mobile-chrome] › tests/e2e/realtime.spec.ts:610:5 › runs a whole table with host-added players (4.8s)
+  ✓  3 [mobile-chrome] › tests/e2e/realtime.spec.ts:643:5 › restores an account-owned seat and settled history across browsers (4.9s)
+  ✓  4 [mobile-chrome] › tests/e2e/realtime.spec.ts:665:5 › ends an expired guest recovery window without trapping the signed-in account (678ms)
+(node:86626) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [mobile-safari] › tests/e2e/realtime.spec.ts:513:5 › holds a multi-user settlement until cash-outs reconcile (8.4s)
+  ✓  6 [mobile-safari] › tests/e2e/realtime.spec.ts:610:5 › runs a whole table with host-added players (4.3s)
+  ✓  7 [mobile-safari] › tests/e2e/realtime.spec.ts:643:5 › restores an account-owned seat and settled history across browsers (5.0s)
+  ✓  8 [mobile-safari] › tests/e2e/realtime.spec.ts:665:5 › ends an expired guest recovery window without trapping the signed-in account (689ms)
+
+  8 passed (43.3s)
+Stopping disposable Supabase test stack…

@@ -1,0 +1,17 @@
+import {chromium,expect} from '@playwright/test';
+import {writeFileSync} from 'node:fs';
+const out=new URL('./evidence/',import.meta.url).pathname;
+const b=await chromium.launch({headless:true});const c=await b.newContext({baseURL:'http://127.0.0.1:3110',viewport:{width:390,height:844},serviceWorkers:'block'});const p=await c.newPage();p.setDefaultTimeout(15000);const rows=[];
+try{
+ await p.goto('/create');await p.locator('#create-name').fill('Casey');await p.locator('#create-game-name').fill('Status fault audit');await p.locator('#create-buy-in').fill('20');await p.getByRole('button',{name:'Create game',exact:true}).click();await expect(p.getByRole('heading',{name:'Status fault audit'})).toBeVisible();
+ for(const name of ['Jordan','Taylor']){await p.getByRole('button',{name:'Add player',exact:true}).click();const d=p.getByRole('dialog',{name:'Add a player'});await d.getByRole('textbox',{name:'Player name'}).fill(name);await d.getByRole('button',{name:'Add player',exact:true}).click();await expect(d).toHaveCount(0);}
+ await p.getByRole('button',{name:'End game',exact:true}).click();await p.getByRole('button',{name:'Start cash-outs'}).click();
+ for(const [name,value]of [['Casey','0'],['Jordan','30'],['Taylor','30']]){const i=p.getByRole('spinbutton',{name:`Cash-out amount for ${name}`});await i.fill(value);await i.blur();await expect(i).toHaveValue(value);await p.waitForTimeout(250);}
+ await expect(p.getByText('Bank reconciled',{exact:true})).toBeVisible();await p.getByRole('button',{name:'Review settlement'}).click();await p.getByRole('button',{name:'Lock settlement',exact:true}).click();await p.getByRole('alertdialog').getByRole('button',{name:'Lock settlement',exact:true}).click();
+ const personal=p.locator('section[aria-labelledby="your-settlement-heading"]');await expect(personal.getByRole('heading')).toHaveText('You owe $20.00.');
+ for(let n=0;n<2;n++){await personal.getByTitle('Mark sent').first().click();await expect(personal.getByTitle('Mark sent')).toHaveCount(1-n);}
+ await expect(personal.getByRole('heading')).toHaveText('All your payments are marked sent.');await p.screenshot({path:out+'payment-status-before-failure.png',fullPage:true});rows.push({state:'known sent',text:await personal.innerText()});
+ let failures=0;await p.route('**/rest/v1/settlement_payments**',async route=>{if(route.request().method()==='GET'){failures++;await route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({message:'Audit payment read unavailable',code:'AUDIT_READ_FAILED'})});}else await route.continue();});await p.reload();await expect(p.getByText('Ended',{exact:true})).toBeVisible();await p.waitForTimeout(2000);await p.locator('[data-testid="payment-ledger"] > summary').click();await p.screenshot({path:out+'payment-status-after-failure.png',fullPage:true});rows.push({state:'status read failed',injectedReadFailures:failures,personal:await personal.innerText(),ledger:await p.locator('[data-testid="payment-ledger"]').innerText()});
+ await p.unroute('**/rest/v1/settlement_payments**');await p.reload();await expect(personal.getByRole('heading')).toHaveText('All your payments are marked sent.');rows.push({state:'server state preserved after restore',text:await personal.innerText()});
+}catch(e){rows.push({harnessError:e.message});console.error(e);process.exitCode=1;}
+finally{writeFileSync(out+'payment-failure-probe.json',JSON.stringify(rows,null,2));await b.close();}

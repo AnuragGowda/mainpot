@@ -1,0 +1,13 @@
+
+> mainpot@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 /Users/anurag/Documents/ChatGPT/Mainpot
+
+
+ Test Files  29 passed (29)
+      Tests  179 passed (179)
+   Start at  15:07:00
+   Duration  865ms (transform 917ms, setup 0ms, import 1.77s, tests 462ms, environment 2ms)
+

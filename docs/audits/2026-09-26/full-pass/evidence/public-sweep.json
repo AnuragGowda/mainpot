@@ -1,0 +1,1649 @@
+[
+  {
+    "profile": "desktop-chrome",
+    "path": "/",
+    "status": 200,
+    "url": "https://mainpot.app/",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Keep the game friendly. Keep the money exact."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/create",
+    "status": 200,
+    "url": "https://mainpot.app/create",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Start a game."
+    ],
+    "smallTargets": [
+      {
+        "text": "",
+        "width": 16,
+        "height": 16
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/join",
+    "status": 200,
+    "url": "https://mainpot.app/join",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Join your table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/signin",
+    "status": 200,
+    "url": "https://mainpot.app/signin",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 374,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/dashboard",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/dashboard",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 374,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/friends",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/friends",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 374,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/poker-settlement-calculator",
+    "status": 200,
+    "url": "https://mainpot.app/poker-settlement-calculator",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Poker Settlement Calculator for Home Games | Mainpot",
+    "headings": [
+      "Poker settlement calculator"
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/feedback",
+    "status": 200,
+    "url": "https://mainpot.app/feedback",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Feedback | Mainpot",
+    "headings": [
+      "Send us feedback."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/privacy",
+    "status": 200,
+    "url": "https://mainpot.app/privacy",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Privacy policy | Mainpot",
+    "headings": [
+      "Privacy policy"
+    ],
+    "smallTargets": [
+      {
+        "text": "support@mainpot.app",
+        "width": 149.625,
+        "height": 17
+      },
+      {
+        "text": "repository security page",
+        "width": 163.84375,
+        "height": 17
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/terms",
+    "status": 200,
+    "url": "https://mainpot.app/terms",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Terms of use | Mainpot",
+    "headings": [
+      "Terms of use"
+    ],
+    "smallTargets": [
+      {
+        "text": "public project repository",
+        "width": 163.5,
+        "height": 17
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/self-host",
+    "status": 200,
+    "url": "https://mainpot.app/self-host",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Self-Host Mainpot | Mainpot",
+    "headings": [
+      "Your game. Your server. Your data."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "path": "/missing-full-audit-page",
+    "status": 404,
+    "url": "https://mainpot.app/missing-full-audit-page",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "This page isn’t at the table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/",
+    "status": 200,
+    "url": "https://mainpot.app/",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Keep the game friendly. Keep the money exact."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/create",
+    "status": 200,
+    "url": "https://mainpot.app/create",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Start a game."
+    ],
+    "smallTargets": [
+      {
+        "text": "",
+        "width": 16,
+        "height": 16
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/join",
+    "status": 200,
+    "url": "https://mainpot.app/join",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Join your table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/signin",
+    "status": 200,
+    "url": "https://mainpot.app/signin",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 295,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/dashboard",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/dashboard",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 295,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/friends",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/friends",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 295,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/poker-settlement-calculator",
+    "status": 200,
+    "url": "https://mainpot.app/poker-settlement-calculator",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Poker Settlement Calculator for Home Games | Mainpot",
+    "headings": [
+      "Poker settlement calculator"
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/feedback",
+    "status": 200,
+    "url": "https://mainpot.app/feedback",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Feedback | Mainpot",
+    "headings": [
+      "Send us feedback."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/privacy",
+    "status": 200,
+    "url": "https://mainpot.app/privacy",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Privacy policy | Mainpot",
+    "headings": [
+      "Privacy policy"
+    ],
+    "smallTargets": [
+      {
+        "text": "support@mainpot.app",
+        "width": 149.625,
+        "height": 17
+      },
+      {
+        "text": "repository security page",
+        "width": 163.84375,
+        "height": 17
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/terms",
+    "status": 200,
+    "url": "https://mainpot.app/terms",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Terms of use | Mainpot",
+    "headings": [
+      "Terms of use"
+    ],
+    "smallTargets": [
+      {
+        "text": "public project repository",
+        "width": 163.5,
+        "height": 17
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/self-host",
+    "status": 200,
+    "url": "https://mainpot.app/self-host",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Self-Host Mainpot | Mainpot",
+    "headings": [
+      "Your game. Your server. Your data."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "path": "/missing-full-audit-page",
+    "status": 404,
+    "url": "https://mainpot.app/missing-full-audit-page",
+    "width": 393,
+    "scrollWidth": 393,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "This page isn’t at the table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/",
+    "status": 200,
+    "url": "https://mainpot.app/",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Keep the game friendly. Keep the money exact."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/create",
+    "status": 200,
+    "url": "https://mainpot.app/create",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Start a game."
+    ],
+    "smallTargets": [
+      {
+        "text": "",
+        "width": 16,
+        "height": 16
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/join",
+    "status": 200,
+    "url": "https://mainpot.app/join",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Join your table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/signin",
+    "status": 200,
+    "url": "https://mainpot.app/signin",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 292,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/dashboard",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/dashboard",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 292,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/friends",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/friends",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 292,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/poker-settlement-calculator",
+    "status": 200,
+    "url": "https://mainpot.app/poker-settlement-calculator",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Poker Settlement Calculator for Home Games | Mainpot",
+    "headings": [
+      "Poker settlement calculator"
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/feedback",
+    "status": 200,
+    "url": "https://mainpot.app/feedback",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Feedback | Mainpot",
+    "headings": [
+      "Send us feedback."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/privacy",
+    "status": 200,
+    "url": "https://mainpot.app/privacy",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Privacy policy | Mainpot",
+    "headings": [
+      "Privacy policy"
+    ],
+    "smallTargets": [
+      {
+        "text": "support@mainpot.app",
+        "width": 149.61822509765625,
+        "height": 16.939453125
+      },
+      {
+        "text": "repository security page",
+        "width": 163.8355712890625,
+        "height": 16.939453125
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/terms",
+    "status": 200,
+    "url": "https://mainpot.app/terms",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Terms of use | Mainpot",
+    "headings": [
+      "Terms of use"
+    ],
+    "smallTargets": [
+      {
+        "text": "public project repository",
+        "width": 163.49392700195312,
+        "height": 16.939453125
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/self-host",
+    "status": 200,
+    "url": "https://mainpot.app/self-host",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Self-Host Mainpot | Mainpot",
+    "headings": [
+      "Your game. Your server. Your data."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "path": "/missing-full-audit-page",
+    "status": 404,
+    "url": "https://mainpot.app/missing-full-audit-page",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "This page isn’t at the table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/",
+    "status": 200,
+    "url": "https://mainpot.app/",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Keep the game friendly. Keep the money exact."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/create",
+    "status": 200,
+    "url": "https://mainpot.app/create",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Start a game."
+    ],
+    "smallTargets": [
+      {
+        "text": "",
+        "width": 16,
+        "height": 16
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/join",
+    "status": 200,
+    "url": "https://mainpot.app/join",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Join your table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/signin",
+    "status": 200,
+    "url": "https://mainpot.app/signin",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 654,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/dashboard",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/dashboard",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 654,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/friends",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/friends",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 654,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/poker-settlement-calculator",
+    "status": 200,
+    "url": "https://mainpot.app/poker-settlement-calculator",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Poker Settlement Calculator for Home Games | Mainpot",
+    "headings": [
+      "Poker settlement calculator"
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/feedback",
+    "status": 200,
+    "url": "https://mainpot.app/feedback",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Feedback | Mainpot",
+    "headings": [
+      "Send us feedback."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/privacy",
+    "status": 200,
+    "url": "https://mainpot.app/privacy",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Privacy policy | Mainpot",
+    "headings": [
+      "Privacy policy"
+    ],
+    "smallTargets": [
+      {
+        "text": "support@mainpot.app",
+        "width": 149.61822509765625,
+        "height": 16.939453125
+      },
+      {
+        "text": "repository security page",
+        "width": 163.83558654785156,
+        "height": 16.939453125
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/terms",
+    "status": 200,
+    "url": "https://mainpot.app/terms",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Terms of use | Mainpot",
+    "headings": [
+      "Terms of use"
+    ],
+    "smallTargets": [
+      {
+        "text": "public project repository",
+        "width": 163.493896484375,
+        "height": 16.939453125
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/self-host",
+    "status": 200,
+    "url": "https://mainpot.app/self-host",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Self-Host Mainpot | Mainpot",
+    "headings": [
+      "Your game. Your server. Your data."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "ipad-webkit",
+    "path": "/missing-full-audit-page",
+    "status": 404,
+    "url": "https://mainpot.app/missing-full-audit-page",
+    "width": 768,
+    "scrollWidth": 768,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "This page isn’t at the table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/",
+    "status": 200,
+    "url": "https://mainpot.app/",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Keep the game friendly. Keep the money exact."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/create",
+    "status": 200,
+    "url": "https://mainpot.app/create",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Start a game."
+    ],
+    "smallTargets": [
+      {
+        "text": "",
+        "width": 16,
+        "height": 16
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/join",
+    "status": 200,
+    "url": "https://mainpot.app/join",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Join your table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/signin",
+    "status": 200,
+    "url": "https://mainpot.app/signin",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 374,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/dashboard",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/dashboard",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 374,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/friends",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/friends",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Forgot your password? Get a sign-in link",
+        "width": 374,
+        "height": 20
+      },
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/poker-settlement-calculator",
+    "status": 200,
+    "url": "https://mainpot.app/poker-settlement-calculator",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Poker Settlement Calculator for Home Games | Mainpot",
+    "headings": [
+      "Poker settlement calculator"
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/feedback",
+    "status": 200,
+    "url": "https://mainpot.app/feedback",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Feedback | Mainpot",
+    "headings": [
+      "Send us feedback."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/privacy",
+    "status": 200,
+    "url": "https://mainpot.app/privacy",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Privacy policy | Mainpot",
+    "headings": [
+      "Privacy policy"
+    ],
+    "smallTargets": [
+      {
+        "text": "support@mainpot.app",
+        "width": 149.61822509765625,
+        "height": 16.939453125
+      },
+      {
+        "text": "repository security page",
+        "width": 163.8355712890625,
+        "height": 16.939453125
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/terms",
+    "status": 200,
+    "url": "https://mainpot.app/terms",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Terms of use | Mainpot",
+    "headings": [
+      "Terms of use"
+    ],
+    "smallTargets": [
+      {
+        "text": "public project repository",
+        "width": 163.493896484375,
+        "height": 16.939453125
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/self-host",
+    "status": 200,
+    "url": "https://mainpot.app/self-host",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Self-Host Mainpot | Mainpot",
+    "headings": [
+      "Your game. Your server. Your data."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "path": "/missing-full-audit-page",
+    "status": 404,
+    "url": "https://mainpot.app/missing-full-audit-page",
+    "width": 1440,
+    "scrollWidth": 1440,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "This page isn’t at the table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/",
+    "status": 200,
+    "url": "https://mainpot.app/",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Keep the game friendly. Keep the money exact."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/create",
+    "status": 200,
+    "url": "https://mainpot.app/create",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Start a game."
+    ],
+    "smallTargets": [
+      {
+        "text": "",
+        "width": 16,
+        "height": 16
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/join",
+    "status": 200,
+    "url": "https://mainpot.app/join",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Join your table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/signin",
+    "status": 200,
+    "url": "https://mainpot.app/signin",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/dashboard",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/dashboard",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/friends",
+    "status": 200,
+    "url": "https://mainpot.app/signin?next=/friends",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "Welcome back"
+    ],
+    "smallTargets": [
+      {
+        "text": "Create an account",
+        "width": 122.578125,
+        "height": 20
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".my-5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/poker-settlement-calculator",
+    "status": 200,
+    "url": "https://mainpot.app/poker-settlement-calculator",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Poker Settlement Calculator for Home Games | Mainpot",
+    "headings": [
+      "Poker settlement calculator"
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/feedback",
+    "status": 200,
+    "url": "https://mainpot.app/feedback",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Feedback | Mainpot",
+    "headings": [
+      "Send us feedback."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/privacy",
+    "status": 200,
+    "url": "https://mainpot.app/privacy",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Privacy policy | Mainpot",
+    "headings": [
+      "Privacy policy"
+    ],
+    "smallTargets": [
+      {
+        "text": "support@mainpot.app",
+        "width": 149.625,
+        "height": 17
+      },
+      {
+        "text": "repository security page",
+        "width": 163.84375,
+        "height": 17
+      }
+    ],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/terms",
+    "status": 200,
+    "url": "https://mainpot.app/terms",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Terms of use | Mainpot",
+    "headings": [
+      "Terms of use"
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/self-host",
+    "status": 200,
+    "url": "https://mainpot.app/self-host",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Self-Host Mainpot | Mainpot",
+    "headings": [
+      "Your game. Your server. Your data."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "path": "/missing-full-audit-page",
+    "status": 404,
+    "url": "https://mainpot.app/missing-full-audit-page",
+    "width": 320,
+    "scrollWidth": 320,
+    "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+    "headings": [
+      "This page isn’t at the table."
+    ],
+    "smallTargets": [],
+    "accessibility": [],
+    "errors": []
+  }
+]

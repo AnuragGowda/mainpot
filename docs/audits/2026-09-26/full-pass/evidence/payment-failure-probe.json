@@ -1,0 +1,16 @@
+[
+  {
+    "state": "known sent",
+    "text": "All your payments are marked sent.\n\nNothing left to mark. You can reopen a payment below.\n\nYour net result: -$20.00\n\nJordan\n$10.00\nTaylor\n$10.00"
+  },
+  {
+    "state": "status read failed",
+    "injectedReadFailures": 8,
+    "personal": "You owe $20.00.\n\nSend each payment below, then mark it sent so the table can keep track.\n\nYour net result: -$20.00\n\nJordan\n$10.00\nTaylor\n$10.00",
+    "ledger": "Payment ledger\n0 of 2 payments marked sent\n−\n\nThe payer, recipient, or host can mark a payment sent.\n\nCasey → Jordan\n$10.00\nCasey → Taylor\n$10.00"
+  },
+  {
+    "state": "server state preserved after restore",
+    "text": "All your payments are marked sent.\n\nNothing left to mark. You can reopen a payment below.\n\nYour net result: -$20.00\n\nJordan\n$10.00\nTaylor\n$10.00"
+  }
+]

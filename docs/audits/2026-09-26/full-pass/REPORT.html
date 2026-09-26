@@ -1,0 +1,385 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mainpot application audit — September 26, 2026</title><style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f6f7f8;color:#182230;font:15px/1.75 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:22px 5vw;border-bottom:1px solid #dfe4eb;background:#fff;display:flex;justify-content:space-between;gap:16px}header strong{font-size:13px;letter-spacing:.08em}header span{color:#586577;font-size:13px}.layout{max-width:1480px;margin:32px auto;display:grid;grid-template-columns:250px minmax(0,1fr);gap:30px;padding:0 28px}nav{position:sticky;top:24px;align-self:start;max-height:90vh;overflow:auto}nav a{display:block;padding:7px 10px;font-size:13px;line-height:1.5;text-decoration:none;border-left:2px solid transparent;color:#526071}nav a:hover,nav a:focus{background:#e9edf2;border-color:#182230;color:#182230}main{min-width:0;padding:40px 46px;background:white;border:1px solid #dfe4eb;border-radius:12px}h1{font-size:35px;line-height:1.2;letter-spacing:-.035em;margin:0 0 24px}h2{margin:52px 0 20px;padding-top:24px;border-top:1px solid #e3e7ee;font-size:25px;line-height:1.3;scroll-margin-top:24px}h3{font-size:20px;line-height:1.4;margin:32px 0 14px}p{margin:0 0 18px}a{color:#244c81;text-underline-offset:3px}a:focus-visible{outline:3px solid #3b82f6;outline-offset:3px}code{background:#f0f3f7;padding:2px 5px;border-radius:4px;font-size:12px;overflow-wrap:anywhere}pre{background:#f0f3f7;padding:18px;border-radius:8px;overflow:auto}pre code{padding:0}ul,ol{padding-left:24px}li{margin:6px 0}.table-wrap{overflow:auto;margin:22px 0}table{width:100%;border-collapse:collapse;font-size:13px;line-height:1.55}th,td{border:1px solid #dfe4eb;padding:12px;text-align:left;vertical-align:top;min-width:100px}th{background:#f1f4f8}tr:nth-child(even){background:#fafbfd}.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:24px 0 40px}figure{margin:0;padding:16px;border:1px solid #dfe4eb;border-radius:8px;background:#f8fafc}figure img{width:100%;height:360px;object-fit:contain;object-position:top}figcaption{font-size:13px;color:#526071;margin-top:12px}footer{padding:18px 5vw;color:#586577;font-size:12px}@media(max-width:1000px){.layout{display:block;padding:0 16px}nav{position:static;margin-bottom:24px;max-height:180px}main{padding:26px 22px}h1{font-size:29px}header span{display:none}}@media(max-width:600px){.gallery{grid-template-columns:1fr}main{padding:22px 16px}}@media print{nav,header,footer{display:none}.layout{display:block;margin:0;padding:0}main{border:0;padding:0}body{background:white;font-size:10pt}h2{break-before:page}.gallery{display:none}h3{break-after:avoid}.table-wrap{overflow:visible}}
+</style></head><body><header><strong>MAINPOT / APPLICATION AUDIT</strong><span>September 26, 2026 · Local + live public checks · Emulated devices</span></header><div class="layout"><nav aria-label="Report contents"><a href="#s1">Assessment</a><a href="#s2">Environments and coverage</a><a href="#s3">Fresh verification results</a><a href="#s4">Issue inventory</a><a href="#s5">Multi-device failures requiring follow-up</a><a href="#s6">Role-by-role assessment</a><a href="#s7">Previously reported findings that are addressed locally</a><a href="#s8">Supported-money and operational limits</a><a href="#s9">Checks still needed on actual devices / hosted accounts</a><a href="#s10">Recommended work order</a><a href="#s11">Evidence and reproducibility</a><a href="#s12">Integration follow-up: direct seat writes</a><a href="REPORT.md">Markdown source</a><a href="evidence/verification.json">Verification record</a></nav><main><h1>Mainpot — full application and multi-device audit</h1>
+<p><strong>Follow-up:</strong> <a href="fixes/REMEDIATION.html">Implemented fixes and verification</a>. The observations below describe the original audit; they do not imply the fixes have been deployed.</p>
+<p>Audit date: September 26, 2026. Local application revision: <code>d3283e716a6fc421f5917182c52e96ab0595018f</code>. Production public target: <code>https://mainpot.app</code>. This is a fresh audit of the current checkout, with earlier reports used only to select regression scenarios. No application fixes, release, or production-data writes were performed.</p>
+<h2 id="s1">Assessment</h2>
+<p>The core workflow is substantial and generally usable: host setup, joining, host-confirmed entries, managed players, early cash-out, host transfer, reconciliation, locked settlement, and account recovery have real browser coverage. The public layouts are clean across desktop, phone, tablet, and 320px widths. The most important remaining problems concern <strong>trust in payment status, durability, and recovery</strong>, rather than cosmetic redesign.</p>
+<p>Two freshly reproduced local failures deserve first attention: unavailable payment records are presented as unpaid money, and failed device-only ledger writes are presented as successful saves. The public calculator also still produces payment instructions with a missing final-stack value, although the current local version correctly blocks that scenario. Local and production behavior therefore differ materially.</p>
+<p>This report separates observed defects, intentional limitations that create usability gaps, source-based concerns, and tests that failed without an established product root cause. A passing test means its particular assertion passed; it does not establish every variation of the journey or physical-device behavior.</p>
+<div class="gallery" aria-label="Key evidence screenshots"><figure><a href="evidence/payment-status-before-failure.png"><img src="evidence/payment-status-before-failure.png" alt="Payment records correctly loaded" loading="lazy"></a><figcaption>Payment records correctly loaded</figcaption></figure><figure><a href="evidence/payment-status-after-failure.png"><img src="evidence/payment-status-after-failure.png" alt="Read failure produces send-again instructions" loading="lazy"></a><figcaption>Read failure produces send-again instructions</figcaption></figure><figure><a href="evidence/join-landscape-viewport.png"><img src="evidence/join-landscape-viewport.png" alt="Join context clipped in landscape" loading="lazy"></a><figcaption>Join context clipped in landscape</figcaption></figure><figure><a href="evidence/production-blank-stack.png"><img src="evidence/production-blank-stack.png" alt="Live calculator accepts an unentered stack" loading="lazy"></a><figcaption>Live calculator accepts an unentered stack</figcaption></figure></div><h2 id="s2">Environments and coverage</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Profiles</th>
+<th>Method / boundary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Disposable-backend multi-user application</td>
+<td>Desktop Chromium, Pixel 5 Chromium, iPhone 13 WebKit, desktop WebKit, iPad Mini WebKit</td>
+<td>Separate host/player/account browser contexts; real local Supabase auth, RPCs, migrations, realtime and persistence. This is hosted-style local testing, not production acceptance.</td>
+</tr>
+<tr>
+<td>Device-only application</td>
+<td>Same five profiles</td>
+<td>Local storage, host-managed roster, settlement, validation, offline/recovery and install-prompt simulations.</td>
+</tr>
+<tr>
+<td>Live public application</td>
+<td>Desktop Chromium 1440×900, Pixel 5, iPhone 13, iPad Mini, desktop WebKit 1440×900, narrow Chromium 320×568</td>
+<td>12 routes per profile, 72 checks; accessibility scan, errors, width, redirect destination, screenshot captures. No live game/account created.</td>
+</tr>
+<tr>
+<td>Additional edge probes</td>
+<td>Chromium 390×844, 320×300, 568×320; Pixel-sized multi-session contexts</td>
+<td>Payment-status HTTP failure, storage quota failure, short-height join geometry, dialog escape, and managed-seat continuity. These deliberately target failure states beyond the happy-path suites.</td>
+</tr>
+</tbody></table></div>
+<p>Live routes checked: <code>/</code>, <code>/create</code>, <code>/join</code>, <code>/signin</code>, <code>/dashboard</code>, <code>/friends</code>, <code>/poker-settlement-calculator</code>, <code>/feedback</code>, <code>/privacy</code>, <code>/terms</code>, <code>/self-host</code>, and a nonexistent route. Signed-out Dashboard and Friends correctly returned to sign-in with their intended destination. The nonexistent route returned 404; the other checks returned 200 after redirects. All 72 checks had no uncaught page errors or document-level horizontal overflow.</p>
+<p>Browsers ran headlessly. Docker context was verified as OrbStack before using the disposable <code>mainpot-e2e</code> Supabase stack. The ordinary developer database was not reset. Test accounts and financial records were synthetic and confined to the disposable stack.</p>
+<h2 id="s3">Fresh verification results</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Unit tests</td>
+<td><strong>161 passed</strong>, 26 files</td>
+<td>Supporting calculation, identity, auth, request and payment logic.</td>
+</tr>
+<tr>
+<td>Five-profile device-only smoke / entry / PWA suite</td>
+<td><strong>87 passed, 3 skipped</strong>, 90 total</td>
+<td>Real Chromium service-worker recovery exercised. Three WebKit cases skip worker control that Playwright cannot expose.</td>
+</tr>
+<tr>
+<td>Five-profile multi-user suite</td>
+<td><strong>116 passed, 4 failed</strong>, 120 total, no automatic retries</td>
+<td>The original run is not green. Failures are documented below and remain part of the evidence regardless of follow-up results.</td>
+</tr>
+<tr>
+<td>Serial diagnostic rerun</td>
+<td><strong>8 passed</strong>, no code changes</td>
+<td>The four failing scenarios passed on Android-sized Chromium and iPhone-sized WebKit with one worker. This improves reproducibility confidence but does not explain or erase the initial failures.</td>
+</tr>
+<tr>
+<td>Isolated database assurance</td>
+<td><strong>All seven suites passed</strong>, exit 0</td>
+<td>Authorization, audit security, allocation guards, account-transfer capabilities, early-exit phase race, idempotent creation and locked-plan payment security. These are disposable migration-stack checks.</td>
+</tr>
+<tr>
+<td>Public production route/layout/accessibility sweep</td>
+<td><strong>72 completed</strong>, 0 harness errors, 0 overflow, 0 uncaught page errors</td>
+<td>One distinct contrast defect appeared on sign-in and its redirected entry points across all six profiles.</td>
+</tr>
+<tr>
+<td>Payment-status fault injection</td>
+<td>Confirmed</td>
+<td>Both transfers were marked sent; eight injected status GET failures caused the UI to ask for both payments again. Removing the fault restored the sent states without another write.</td>
+</tr>
+<tr>
+<td>Device-only quota injection</td>
+<td>Confirmed</td>
+<td>A $7 rebuy appeared saved and the pot became $27; reload restored the old $20 ledger.</td>
+</tr>
+<tr>
+<td>Production calculator missing-stack probe</td>
+<td>Confirmed</td>
+<td>Missing player 2 stack yielded “Bank balanced” and a $20 payment.</td>
+</tr>
+</tbody></table></div>
+<p>Both browser suites built the current application successfully before running. Their initial runs overlapped, as did some public/edge probes, increasing local load. Several failing expectations have a five-second assertion deadline. This is a relevant diagnostic condition, not proof that load explains every failure. Serial follow-up removes that overlap. No CI, deployment, or production migration is established by these results.</p>
+<h2 id="s4">Issue inventory</h2>
+<p>Severity: <strong>P1</strong> threatens money instructions, recorded financial data, or reliable release; <strong>P2</strong> disrupts an important task or accessibility; <strong>P3</strong> is lower-impact polish. No P0 exploit or outage was established by this audit; that is not a comprehensive security certification.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Priority</th>
+<th>Finding</th>
+<th>Evidence</th>
+<th>Affected surface</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>F01</td>
+<td>P1</td>
+<td>Failed payment-status reads become “You owe” and zero payments sent</td>
+<td>Browser fault injection + source</td>
+<td>Locked settlements, payer/host</td>
+</tr>
+<tr>
+<td>F02</td>
+<td>P1</td>
+<td>Failed device-only ledger persistence still shows save success</td>
+<td>Browser quota injection + source</td>
+<td>Local-only host ledger</td>
+</tr>
+<tr>
+<td>F03</td>
+<td>P1</td>
+<td>Live calculator turns an unentered final stack into payment-ready results</td>
+<td>Live browser reproduction</td>
+<td>Production calculator</td>
+</tr>
+<tr>
+<td>F04</td>
+<td>P1 release gap</td>
+<td>Local fixes cannot be assumed to be live</td>
+<td>Direct public behavior comparison</td>
+<td>Release / returning users</td>
+</tr>
+<tr>
+<td>F05</td>
+<td>P2</td>
+<td>Direct-link join panel clips table/amount information on short screens</td>
+<td>Browser geometry + screenshot</td>
+<td>Landscape / reduced-height joining</td>
+</tr>
+<tr>
+<td>F06</td>
+<td>P2</td>
+<td>Direct-link join gate has no in-app escape or route back</td>
+<td>Browser Escape/navigation inspection + source</td>
+<td>Visitor joining / wrong identity</td>
+</tr>
+<tr>
+<td>F07</td>
+<td>P2</td>
+<td>Local-only host still gets a QR/link that promises cross-device joining</td>
+<td>Browser dialog capture + regression evidence</td>
+<td>Device-only host / invited player</td>
+</tr>
+<tr>
+<td>F08</td>
+<td>P2 workflow gap</td>
+<td>A host-managed seat cannot become the joining person&#39;s seat</td>
+<td>Disposable-backend browser reproduction</td>
+<td>Host-managed → phone-owning player</td>
+</tr>
+<tr>
+<td>F09</td>
+<td>P2 recovery gap</td>
+<td>A person who left cannot restore participation from the same room</td>
+<td>Current source inspection</td>
+<td>Returning player</td>
+</tr>
+<tr>
+<td>F10</td>
+<td>P2 accessibility</td>
+<td>Sign-in separator text fails contrast</td>
+<td>Live axe scan, six profiles</td>
+<td>Sign-in / redirected account entry</td>
+</tr>
+<tr>
+<td>S01</td>
+<td>P2, source-based</td>
+<td>Some committed ledger operations still depend on a separate audit-event write</td>
+<td>Current source inspection</td>
+<td>Buy-in / removal / repayment error recovery</td>
+</tr>
+</tbody></table></div>
+<h3>F01 — unavailable payment status looks like a fresh debt</h3>
+<p><strong>Observed:</strong> a disposable hosted game was locked with Casey paying Jordan and Taylor $10 each. Both payments were marked sent. The personal summary correctly read “All your payments are marked sent.” After intercepting <code>GET /rest/v1/settlement_payments</code> with a deterministic HTTP 400 and reloading, it read <strong>“You owe $20.00”</strong> and instructed “Send each payment below.” The ledger read <strong>“0 of 2 payments marked sent.”</strong> Removing the interception and reloading restored the original sent status.</p>
+<p><strong>Impact:</strong> a returning payer can be directed to repeat a payment already recorded. The server did not lose the record; the UI converted unknown information into a confident financial instruction. That is more serious than an absent loading indicator.</p>
+<p><strong>Cause:</strong> <code>components/Settlement/SettlementScreen.tsx:317-332</code> and <code>TransferList.tsx:164-180</code> initialize empty status sets and swallow read errors. The personal summary treats missing keys as outstanding. Dashboard history&#39;s unavailable handling does not protect this room view.</p>
+<p><strong>Recommended change:</strong> represent status as loading / known / unavailable; retain previously known state during refresh, visibly mark it stale when appropriate, and suppress unconditional send-again instructions until the payment-state read succeeds. Provide a retry. Apply the same authoritative read state to personal summary, shared ledger and host detail.</p>
+<p><strong>Acceptance:</strong> reproduce this exact two-payment fixture; after read failure, neither sent record becomes a confidently unpaid instruction. Recovery restores both without another payment-status write. Include a failure after an initially successful read and separate payer/recipient views.</p>
+<p>Evidence: <a href="evidence/payment-status-before-failure.png">before failure</a>, <a href="evidence/payment-status-after-failure.png">after failure</a>, <a href="evidence/payment-failure-probe.json">structured results</a>.</p>
+<h3>F02 — quota failure silently discards a successful-looking rebuy</h3>
+<p><strong>Observed:</strong> in device-only mode, the host started at $20. The audit made only writes to the actual ledger key <code>ante_store</code> throw <code>QuotaExceededError</code>; identity and recovery storage remained usable. Adding a $7 rebuy closed the editor, showed <strong>“Rebuy added,”</strong> and updated the pot to $27 / two entries. Reload showed $20 / one entry; the rebuy had never persisted.</p>
+<p><strong>Impact:</strong> the user is encouraged to trust a financial record that disappears on reload. This reproduction simulates browser storage exhaustion or a denied write; it does not claim the ordinary device has actually exhausted its quota.</p>
+<p><strong>Cause:</strong> <code>lib/data.ts:208-216</code> logs the storage error and returns normally. Its caller emits an in-memory snapshot and success state regardless of durability.</p>
+<p><strong>Recommended change:</strong> make persistence failure fail the mutation visibly. Keep the user&#39;s draft and explain that nothing was durably saved. Do not present the optimistic snapshot as confirmed ledger state. If degraded in-memory use is offered, explicitly label it and provide an export/recovery path.</p>
+<p><strong>Acceptance:</strong> injected storage failure produces a retained draft and actionable error; no success toast or confirmed pot change. Removing the fault allows exactly one saved entry that survives reload. Also test unavailable/corrupt storage reads without silently replacing the user&#39;s existing ledger.</p>
+<p>Evidence: <a href="evidence/quota-write-before-reload.png">before reload</a>, <a href="evidence/quota-write-after-reload.png">after reload</a>, <a href="evidence/edge-probes.json">edge results</a>.</p>
+<h3>F03 — production calculator still accepts missing outcomes</h3>
+<p><strong>Observed live:</strong> clear the example; enter player 1 money in $20, final stack $40; enter player 2 money in $20 and leave their final stack blank. The live app displays <strong>“Bank balanced,” “1 payment,” and $20 from player 2 to player 1.</strong> The local five-profile suite correctly requires an explicit stack and accepts a deliberately entered zero.</p>
+<p><strong>Impact:</strong> arithmetic balance can disguise incomplete information. A host may send the provisional instruction without confirming whether the second person actually finished with zero.</p>
+<p><strong>Recommended change:</strong> release the already-existing explicit-input protection with its matching validation. A balanced sum alone must not make an incomplete form payment-ready.</p>
+<p><strong>Acceptance:</strong> repeat the exact fixture at the live route on phone and desktop; blank blocks payment output, explicit zero allows it, and invalid text remains visibly invalid.</p>
+<p>Evidence: <a href="evidence/production-blank-stack.png">live missing-stack screenshot</a>, <a href="evidence/edge-probes.json">edge results</a>, fresh local entry/calculator suite in <a href="evidence/smoke.log">smoke log</a>.</p>
+<h3>F04 — current local and live behavior diverge</h3>
+<p><strong>Observed:</strong> F03 is fixed locally and still present live. Live <code>/create</code> captures also lack the current local explanation of deferred net settlement. The current checkout was 65 commits ahead of the locally stored <code>origin/main</code> ref at intake. That local ref comparison is <strong>not</strong> a freshly fetched remote or a deployment identifier.</p>
+<p><strong>Impact:</strong> earlier reports and local passing tests can overstate what an actual hosted user receives. In particular, public availability, a healthy endpoint, and two previously documented inbox hotfixes do not prove the full schema/application release matches.</p>
+<p><strong>Recommended change:</strong> establish one release manifest linking application commit, deployed artifact and required migration versions, then run acceptance on the exact live routes. Preserve this audit&#39;s failures as release work; do not publish a generic “all fixed” claim.</p>
+<p><strong>Acceptance:</strong> identify the actual deployed revision and migration inventory; verify create/join, same-account fresh-device resume, approval, early exit, locked payments and calculator on that version using explicitly designated test data. This audit did not mutate production or perform that release.</p>
+<p>Evidence: <a href="evidence/public-iphone-webkit-create.png">live phone setup</a>, <a href="evidence/production-blank-stack.png">live calculator fixture</a>.</p>
+<h3>F05 — direct invitation loses its consent context in landscape</h3>
+<p><strong>Observed:</strong> the direct room-link join panel had a top coordinate of <strong>−96px at 568×320</strong> and <strong>−136px at 320×300</strong>. Its bottom equalled viewport height and the document itself had no extra scroll range. The captured panel starts partway through the host/buy-in details; the heading and other consent information are above the viewport. The name and Join button remain available.</p>
+<p><strong>Impact:</strong> the joining person can submit without seeing all table/amount context. This is directly reproduced at short desktop-emulated viewport sizes; it is not proof of what a real iOS virtual keyboard does.</p>
+<p><strong>Cause:</strong> <code>components/GameRoom/JoinPrompt.tsx:116-126</code> uses a fixed, bottom-aligned panel without a viewport-height limit and scroll container, unlike the invitation dialog.</p>
+<p><strong>Recommended change:</strong> constrain the panel to available viewport height and make its content scrollable; preserve the visible title, amount and primary action where practical. Test landscape, large text, long names and keyboard-reduced usable height.</p>
+<p><strong>Acceptance:</strong> all table details can be reached at 568×320 and 320×300 with keyboard/touch scrolling; no content is permanently above the viewport.</p>
+<p>Evidence: <a href="evidence/join-landscape-viewport.png">landscape capture</a>, <a href="evidence/join-short-viewport.png">short capture</a>, geometry in <a href="evidence/edge-probes.json">edge results</a>.</p>
+<h3>F06 — joining gate offers no application exit</h3>
+<p><strong>Observed:</strong> Escape left the mandatory join dialog open; the dialog contained no link, cancel, close, or back action. The room&#39;s only rendered branch for an identity with no seat is this dialog. The name is prefilled from device storage.</p>
+<p><strong>Impact:</strong> a visitor following the wrong room or identity has to know to use browser history/address navigation. There is no visible way to return to code entry or sign in to recover an existing account-owned seat. Treating this as mandatory consent does not require trapping the person inside it.</p>
+<p><strong>Recommended change:</strong> provide “Back to join” and a contextual account-recovery route when relevant. It is acceptable to keep the ledger inaccessible until membership is authorized; exiting must not grant access.</p>
+<p><strong>Acceptance:</strong> a wrong-link visitor exits by visible action and keyboard, retains appropriate input, and can sign in/resume without creating another financial seat.</p>
+<p>Evidence: dialog observations in <a href="evidence/edge-probes.json">edge results</a>; source <code>JoinPrompt.tsx:163-178</code>, room branch <code>app/game/[code]/page.tsx:624-632</code>.</p>
+<h3>F07 — local invitation promises something that cannot work</h3>
+<p><strong>Observed:</strong> a local-only host sees “Saved on this device · live sync is off” in the room, but Invite shows <strong>“Scan to join,” “Scan with your camera · no account required,” Copy code and Share invite</strong>, without a local-only warning inside that dialog. The fresh entry suite confirms that a separate browser cannot find the host&#39;s device-only table.</p>
+<p><strong>Impact:</strong> the user is encouraged to share an unusable invitation. The difference between no sync and no cross-device joining is not obvious to a first-time host.</p>
+<p><strong>Recommended change:</strong> in local-only mode replace QR/share promises with host-managed-player guidance and a clear explanation. If a route to connected hosting exists, offer it explicitly without implying automatic ledger migration.</p>
+<p><strong>Acceptance:</strong> local-only setup/invite clearly explain which browser holds the table; independent guest sees actionable guidance. Connected tables retain functional QR/link joining.</p>
+<p>Evidence: <a href="evidence/local-invite-misleading.png">local invitation</a>, <a href="evidence/edge-probes.json">dialog text</a>, local-only two-context regression in <a href="evidence/smoke.log">smoke log</a>.</p>
+<h3>F08 — a player arriving after host entry creates another seat</h3>
+<p><strong>Observed:</strong> host Casey added a managed Jordan with a $20 opening entry. A separate guest then joined the room as Jordan. The table had three seats: Casey, host-managed Jordan ($20 confirmed), and Jordan / You (another $20 pending). No offered action linked the new device to the existing managed seat.</p>
+<p><strong>Impact:</strong> this ordinary transition can look like duplicate bookkeeping. If the host approves without noticing, one person&#39;s chips may be counted twice. This is a <strong>missing continuity workflow</strong>, not evidence that two people with the same name must be merged.</p>
+<p><strong>Recommended change:</strong> offer a host-authorized claim/link workflow or explicitly warn how to handle an already entered player. Never grant ownership merely because names match. If the feature is intentionally unsupported, make that limitation visible when adding a managed player and when joining.</p>
+<p><strong>Acceptance:</strong> a previously managed player obtains their existing authorized seat without another opening buy-in; wrong users, identical names and replayed claim links cannot claim it. Host and actual joining device see the same financial history.</p>
+<p>Evidence: <a href="evidence/managed-and-joining-same-name.png">duplicate-name seat capture</a>, <a href="evidence/managed-seat-results.json">initial probe results</a>. The initial script&#39;s later leave step hit a locator error; only its completed managed-seat observation is evidence here.</p>
+<h3>F09 — leave is final for participation, with no return path</h3>
+<p><strong>Source-based:</strong> the room resolves a matching seat, then <code>left_at</code> disables active controls. The Join prompt only renders when there is no matching player. The footer says “You left this game” without a rejoin/request action. The join RPC returns an existing seat unchanged rather than undoing its departure.</p>
+<p><strong>Impact:</strong> someone who stepped away or left by mistake cannot resume play from the same identity. Adding another managed seat is not equivalent to restoring their seat and could fragment the ledger.</p>
+<p>The leave dialog does disclose that the person cannot add more and must settle later. This is a deliberate one-way policy with a recovery gap, <strong>not a reproduced unexpected data-loss bug</strong>. The attempted extra leave probe did not complete; fresh normal early-exit/handoff tests are separate evidence.</p>
+<p><strong>Recommended change:</strong> define a host-approved return policy before changing it. A plain leave with no locked early cash-out might be recoverable; a locked early exit needs a financially safe policy. Explain the distinction to the returning player.</p>
+<p><strong>Acceptance:</strong> supported return restores one seat and preserves entries; locked exits cannot silently reopen finalized obligations. Unsupported return explains the actual next step.</p>
+<p>Source: <code>app/game/[code]/page.tsx:293-297, 624-632, 744-749</code>; <code>supabase/migrations/20260926054008_lifecycle_buy_in_reliability.sql:53-63</code>.</p>
+<h3>F10 — sign-in contrast fails the accessibility baseline</h3>
+<p><strong>Observed live:</strong> axe reported the sign-in separator&#39;s foreground <code>#99a1af</code> on white at <strong>2.6:1</strong>, below the <strong>4.5:1</strong> threshold for its 12px normal text. This appeared across all six profiles. Dashboard/Friends scans share the finding because those signed-out requests redirect to the same sign-in page; these are not three distinct defects.</p>
+<p><strong>Impact:</strong> low-vision users may struggle to read the authentication-alternative separator. This is a small visual change with a clearly measurable acceptance criterion.</p>
+<p><strong>Recommended change:</strong> darken the secondary separator text. Source counterpart: <code>app/signin/page.tsx:283</code> (<code>text-gray-400</code>).</p>
+<p><strong>Acceptance:</strong> computed contrast is at least 4.5:1 at the live authentication states; rerun axe and manually inspect. A zero-violation scan elsewhere does not certify keyboard, screen-reader or motion accessibility.</p>
+<p>Evidence: <a href="evidence/public-sweep.json">public structured scan</a>, <a href="evidence/public-iphone-webkit-signin.png">phone sign-in</a>.</p>
+<h3>S01 — commit and audit event are still separate for some operations</h3>
+<p><strong>Source-based, not fault-injected:</strong> <code>addBuyInSupabase</code> commits through <code>create_buy_in_idempotent</code>, then performs name reads and a separate <code>addSupabaseEvent</code> call (<code>lib/data.ts:1664-1725</code>). Removal performs the delete before its event (<code>1730-1755</code>); marking an advance repaid updates the row before its event (<code>1801-1838</code>). A later event failure can therefore reject the overall client action after the financial row already changed.</p>
+<p><strong>Impact:</strong> false failure wording and incomplete activity history can leave a host unsure whether to retry. The idempotent buy-in operation protects the financial entry from simple duplicate replay; that does not make the event atomic or prove all UI recovery states are correct. Host correction already uses an atomic path, so its passing timeout regression does not close these other paths.</p>
+<p><strong>Recommended change:</strong> either include the authoritative event in the same database operation or return a precise committed-success/secondary-history-failure state with reconciliation. Do not replace an unknown outcome with a blanket unsuccessful-save message.</p>
+<p><strong>Acceptance:</strong> inject event failure after each listed committed mutation, then inspect the shared ledger and reload. User copy agrees with committed state; retries do not duplicate financial entries or quietly erase required audit history. Verify effective database triggers before expanding this into a security claim.</p>
+<h2 id="s5">Multi-device failures requiring follow-up</h2>
+<p>The first full backend run failed four checks:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Device</th>
+<th>Scenario</th>
+<th>Actual evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pixel-sized Chromium</td>
+<td>Host-managed table</td>
+<td>After recording Jordan&#39;s $5.50 buy-in, the manage dialog remained present beyond the five-second assertion. The snapshot already showed a $45.50 pot.</td>
+</tr>
+<tr>
+<td>Pixel-sized Chromium</td>
+<td>Account-owned cross-browser recovery</td>
+<td>Initial Create navigation had not exposed End game within five seconds; the captured create form retained the correctly entered values. This failed before the fresh-browser resume assertion.</td>
+</tr>
+<tr>
+<td>Pixel-sized Chromium</td>
+<td>Expired guest recovery</td>
+<td>After Retry recovery, the test could not find its expected expiry alert. The snapshot showed a signed-in dashboard. A claim-transfer request returned HTTP 400 as expected for the injected condition, but the precise UI transition cause remains unresolved.</td>
+</tr>
+<tr>
+<td>iPhone-sized WebKit</td>
+<td>Shared cash-out phase</td>
+<td>Guest still showed the active room when the cash-out heading was expected after host started settlement.</td>
+</tr>
+</tbody></table></div>
+<p>These observations do not prove permanent account loss, duplicated money, or a regression identical to the earlier iPad input-loss report. The current account case retained its input values. The first run had concurrent smoke/public testing; three timing failures have explicit five-second assertions. The expiry-message failure deserves separate attention because reaching Dashboard is a different state from the expected recovery explanation.</p>
+<p>All eight serial follow-up checks passed unchanged (43.3 seconds of browser execution), covering all four scenarios on both mobile profiles. Keep an open diagnostic item for synchronization/navigation/error-state behavior under concurrent load; the exact causes are not established. Original snapshots are retained under <a href="evidence/initial-failures/">initial failures</a> and the full <a href="evidence/realtime.log">multi-user log</a>. The <a href="evidence/serial-rerun.log">serial log</a> documents the follow-up. Rerun success must not be relabelled as a clean first run or a confirmed code fix.</p>
+<h2 id="s6">Role-by-role assessment</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Perspective</th>
+<th>Verified strengths</th>
+<th>Remaining concerns</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>First-time host</td>
+<td>Form validation, optional opening entry, managed players, corrections, approval and end-phase gates have current browser coverage</td>
+<td>Durability in local mode; invitation capability mismatch; release drift; plain financial language remains important</td>
+</tr>
+<tr>
+<td>Joining guest</td>
+<td>Preview and explicit pending opening buy-in; one entry on reload/rejoin; shared ledger and host-only controls</td>
+<td>Direct-link short-height consent context; exit/recovery route; managed-seat continuity</td>
+</tr>
+<tr>
+<td>Returning account host/player</td>
+<td>Cross-browser ownership and history, unfinished resume, guest-to-account transfer, templates and deletion cancellation are exercised</td>
+<td>Original mobile account navigation/recovery failures; real provider handoff remains unverified; left-seat return is unsupported</td>
+</tr>
+<tr>
+<td>Host managing absent/phone-free people</td>
+<td>Record entries and early cash-out without impersonating their device; host-added changes sync to guests</td>
+<td>Existing managed seat cannot be claimed by arriving player; avoid two seats for one person</td>
+</tr>
+<tr>
+<td>Leaving player / replacement host</td>
+<td>Locked early exits carried into final settlement; host authority transfer tested</td>
+<td>Intentional one-way departure needs clearer recovery policy</td>
+</tr>
+<tr>
+<td>Payer / recipient / banker</td>
+<td>Locked plan, both banker directions, mark/reopen and shared payment progress tested</td>
+<td>F01 is a financial trust blocker; status is self-reported, not verified receipt</td>
+</tr>
+<tr>
+<td>Visitor / outsider</td>
+<td>Joining required before active ledger view; signed-out account redirects and 404 behavior correct</td>
+<td>This is limited boundary coverage, not complete authorization/penetration testing</td>
+</tr>
+<tr>
+<td>Slow / offline user</td>
+<td>Bounded correction with retained draft; delayed zero cash-out retry; lost create-response replay; Chromium offline route recovery</td>
+<td>Short-height panel; unavailable payment state; real OS background/eviction and long outages untested</td>
+</tr>
+<tr>
+<td>Low-vision / keyboard user</td>
+<td>Public axe sweep, narrow layouts and existing skip-link/form/focus regressions</td>
+<td>Sign-in contrast; direct-link gate exit; full screen-reader and 200% text behavior not certified</td>
+</tr>
+</tbody></table></div>
+<h2 id="s7">Previously reported findings that are addressed locally</h2>
+<p>Fresh suites support the current implementation of account-wide unfinished-table discovery, multiple guest table recovery, automatic pending opening entries, host-confirmed corrections with retained drafts, shared persisted bank selection, explicit calculator inputs, early-exit obligations in personal payment summaries, templates with maintenance controls, failed friend loading/retry, and deletion cancellation. Some associated multi-user assertions failed in the first run as described above, so this is not an unconditional all-device reliability claim.</p>
+<p>The earlier audit&#39;s manual-join consent and calculator missing-input findings should not be refiled as current local implementation defects. F03 is specifically a <strong>live release gap</strong>. Likewise, this audit did not reproduce the historical forever-loading buy-in edit: the deliberately stalled correction recovered through its tested deadline on all five profiles.</p>
+<h2 id="s8">Supported-money and operational limits</h2>
+<p>Mainpot currently models deferred <strong>net settlement</strong>, including a selected banker routing those net obligations. It does not model gross payouts from an already-funded cashier pot. In the two-player $20/$20 example, $20 from loser to winner is the deferred-net instruction; a cashier who already collected $40 must instead pay the winner $40. This is a product contract and adoption limitation, not evidence of incorrect netting arithmetic. Current local setup explains it; live setup captures lack that explanation.</p>
+<p>“Host-confirmed entry” is bookkeeping acknowledgment. “Marked sent” is a manual participant/host report. Neither establishes that real funds arrived. Existing reminders are useful, but acceptance with actual unfamiliar hosts must establish they understand this distinction.</p>
+<p>Account export is described as account-summary data, not a complete financial-ledger backup. Deletion remains a request-processing workflow. This pass exercises request cancellation; it does not establish fulfillment, retention enforcement, off-host backup or restore.</p>
+<h2 id="s9">Checks still needed on actual devices / hosted accounts</h2>
+<ol>
+<li>Physical iPhone Safari and installed standalone PWA: install, force quit, process eviction, relaunch, background while another person writes, and recovery without a different identity.</li>
+<li>Physical Android Chrome/PWA: real install UI, notification permission and delivery, suspended tab recovery, keyboard amount entry, rotation and text scaling.</li>
+<li>Real password confirmation, magic-link and Google OAuth: delayed email, same-browser and different-browser opening, account/guest continuity and expired-proof explanation. Disposable auth cannot prove mail delivery or provider behavior.</li>
+<li>Native invitation sharing, clipboard permissions, camera QR and external payment-app links, including cancelled handoffs and return to the same obligation. No actual payment was sent.</li>
+<li>Hosted complete game with explicitly authorized test accounts, matching schema/application versions and two genuinely independent devices. This public read-only audit cannot establish hosted signed-in dashboard or realtime quality.</li>
+<li>Human usability: unfamiliar host completes setup, approvals, mismatch handling, cash-outs and payment explanation without coaching. Product comprehension and outside repeat use are unmeasured.</li>
+<li>Full assistive-technology review: screen reader, actual browser zoom/text scaling, reduced motion and all dialog journeys. Automated axe and width checks cover only part of accessibility.</li>
+</ol>
+<h2 id="s10">Recommended work order</h2>
+<ol>
+<li>Fix F01 and F02 with authoritative success/unknown/error states. These are the newly confirmed financial-trust issues.</li>
+<li>Resolve the serial regression findings and release verification; publish the already-fixed calculator/consent/recovery behavior with matching migrations.</li>
+<li>Correct direct-link panel geometry and exit route, and make local invitations truthful.</li>
+<li>Define host-authorized managed-seat claiming and safe return-from-leave policies before adding more roster/social features.</li>
+<li>Close the contrast defect and the separate-event recovery concern; then run physical-device/provider and novice-host acceptance.</li>
+</ol>
+<h2 id="s11">Evidence and reproducibility</h2>
+<p>Commands and scripts:</p>
+<pre><code class="language-sh">npm test
+npm run test:db:assurance:isolated
+PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --workers=3 --trace=retain-on-failure
+NEXT_PUBLIC_SUPABASE_URL=&#39;&#39; NEXT_PUBLIC_SUPABASE_ANON_KEY=&#39;&#39; PLAYWRIGHT_ALL_DEVICES=1 PLAYWRIGHT_PORT=3120 npm run test:e2e -- --workers=3 --trace=retain-on-failure
+node docs/audits/2026-09-26/full-pass/public-sweep.mjs
+</code></pre>
+<p><code>edge-probes.mjs</code> requires a local-only production build running on port 3120. <code>payment-failure-probe.mjs</code> requires the disposable hosted-style build/stack on 3110 and 55321. <code>role-probes.mjs</code> likewise requires that disposable server. Do not retarget financial/identity mutation probes to production without explicit designated test data. The public sweep makes no account/game writes.</p>
+<p>The edge scripts were corrected after initial harness issues (wrong textbox locator and a stopped local server); their completed structured results are the evidence used here. The role script completed the managed-seat observation but its leave step failed before completion. Those harness errors are not counted as product defects.</p>
+<p>The seven-suite database evidence is retained in <a href="evidence/database.log">database.log</a>. The machine-readable <a href="evidence/verification.json">verification record</a> includes counts, exit status and release boundaries.</p>
+<p>Visual inspection included fresh production phone setup, the failed-status settlement, the clipped join panel, and financial/storage before/after captures. Full-page screenshots reveal content and order; they do not establish what is visible above the fold on a physical phone.</p>
+<p>This work leaves application source unchanged. New artifacts are isolated in this audit directory; existing regression screenshots generated by the suites are preserved here rather than changing the historical audit record. No commit, push, CI run or release was requested or performed.</p>
+<h2 id="s12">Integration follow-up: direct seat writes</h2>
+<p>The remediation review identified an additional permission gap beyond the original browser findings. The existing <code>players join as self</code> INSERT policy checked ownership only, allowing raw seat creation outside the guarded join lifecycle. The <code>players self or host delete</code> policy also allowed an active guest to delete their own seat; the player foreign keys cascade to buy-ins and cash-outs. These bypass paths are addressed by S02 in the <a href="fixes/REMEDIATION.html">remediation report</a>, with isolated security verification recorded there. The regular developer database and production were not migrated.</p>
+</main></div><footer>Observed defects, source-based concerns, original test failures and physical-device boundaries are recorded separately. No release performed.</footer></body></html>

@@ -1,0 +1,7 @@
+{
+  "provenance": "Observation recorded from the first completed managed-seat step of role-probes.mjs; subsequent leave step did not complete. Later rerun overwrote the main JSON after the disposable server stopped.",
+  "table": "At the table\nCasey \u2014 Host \u2014 1 entry \u2014 $20.00\nJordan \u2014 Host-managed \u2014 1 entry \u2014 $20.00\nJordan \u2014 You \u2014 1 entry \u2014 $20.00 awaiting host confirmation \u2014 $0.00 confirmed",
+  "seat_count": 3,
+  "screenshot": "managed-and-joining-same-name.png",
+  "leave_probe_completed": false
+}

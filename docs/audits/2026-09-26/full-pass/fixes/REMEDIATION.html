@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mainpot audit fixes and verification</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7f9;color:#182230;font:15px/1.7 system-ui,-apple-system,sans-serif}main{max-width:1160px;margin:30px auto;padding:36px;background:#fff;border:1px solid #dfe4eb;border-radius:12px}h1{font-size:32px;line-height:1.25;letter-spacing:-.035em}h2{margin-top:40px;font-size:23px}a{color:#244c81}table{display:block;overflow:auto;border-collapse:collapse;font-size:13px}th,td{padding:12px;border:1px solid #dfe4eb;vertical-align:top;text-align:left;min-width:180px}th{background:#f1f4f8}img{max-width:100%;max-height:560px;object-fit:contain;object-position:left top;border:1px solid #e3e7ee;border-radius:8px}pre{overflow:auto;background:#f1f4f8;padding:14px}code{font-size:12px}li{margin-bottom:8px}@media(max-width:700px){main{margin:0;padding:22px 16px;border:0;border-radius:0}h1{font-size:27px}}@media print{body{background:white}main{margin:0;padding:0;border:0}table{display:table;font-size:10px}th,td{min-width:0}}
+</style></head><body><main><h1>Mainpot audit remediation — 26 September 2026</h1>
+<p>This follows the <a href="../REPORT.html">full application audit</a>. Changes are implemented in the local checkout; production deployment and production migrations are separate release work. Existing records are preserved.</p>
+<h2>Changes and acceptance criteria</h2>
+<table>
+<thead>
+<tr>
+<th>Finding</th>
+<th>Change</th>
+<th>Required verification</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>F01 Payment read failures look unpaid</td>
+<td>One shared payment-status read distinguishes loading, known, unavailable and stale. Failed refresh retains last known records; failed initial read never invents unpaid debt. Payment actions require confirmed reads. Local corrupt/inaccessible records also fail visibly.</td>
+<td>Record two payments, fail reads, refresh/reload, retry reads without another payment write; payer and recipient views.</td>
+</tr>
+<tr>
+<td>F02 Local saves fail silently</td>
+<td>Failed ledger writes throw before snapshot/success is published. Invalid or inaccessible saved ledgers are preserved instead of being replaced by an empty ledger.</td>
+<td>Inject quota failure, verify unchanged seats/pot, restore storage, retry and reload with one durable entry.</td>
+</tr>
+<tr>
+<td>F03 Missing final stack</td>
+<td>Existing local calculator correction retained.</td>
+<td>Existing calculator validation regressions. Production remains unreleased.</td>
+</tr>
+<tr>
+<td>F04 Release drift</td>
+<td>Documented release boundary; local commits are not production evidence.</td>
+<td>Deploy reviewed changes and migrations, then independently verify production.</td>
+</tr>
+<tr>
+<td>F05/F06 Direct-link join clipping and no exit</td>
+<td>Viewport-bounded scrolling, safe-area padding, Back to join, Escape exit, and existing-account sign-in return route.</td>
+<td>568×320 and 320×300 heading/amount/action reachability and exits; no duplicate seat.</td>
+</tr>
+<tr>
+<td>F07 Misleading local invites</td>
+<td>Browser-only games explain host-managed participation instead of showing a nonfunctional remote invite QR.</td>
+<td>Existing local host workflow plus invite presentation. Connected invites remain shareable.</td>
+</tr>
+<tr>
+<td>F08 Duplicate seats / managed-seat continuity</td>
+<td>Per-game name reservations protect local and database paths, including concurrent joins, host-added seats and departed seats. NFKC normalization, case, collapsed whitespace and common invisible formatting identify collisions. Authenticated ownership alone permits ordinary resume. Host-issued capabilities allow safe managed-seat takeover without a second opening entry.</td>
+<td>Direct writes, simultaneous joins, Unicode variants, copied-session denial, token expiry/replay/authorization, and host/player browser continuity.</td>
+</tr>
+<tr>
+<td>F09 No safe return</td>
+<td>Host can return an eligible departed player to the same active seat, preserving entries. Pending/locked early cash-outs and capacity prevent unsafe returns. Player sees ask-host guidance. The settle-later click invokes departure without passing a browser click event as a host-transfer ID.</td>
+<td>Host-only restore, idempotent retry, phase/cash-out/capacity rejection, browser leave/return journey.</td>
+</tr>
+<tr>
+<td>F10 Sign-in contrast</td>
+<td>Separator text darkened from gray-400 to gray-600.</td>
+<td>Browser render and computed contrast.</td>
+</tr>
+<tr>
+<td>S02 Raw seat-write bypass (found during integration)</td>
+<td>Direct authenticated seat creation is restricted to guarded RPCs. Seat deletion is limited to an active host removing a non-host seat; guests cannot erase their ledger via a cascading self-delete. Local removal mirrors the host-only guard.</td>
+<td>Guarded creation/join/managed-add positive cases; deny raw inserts and guest/outsider deletes; preserve verified entries; permit host non-host removal; deny host self-deletion.</td>
+</tr>
+<tr>
+<td>S01 Financial write/audit split</td>
+<td>Buy-in creation, approval, removal and advance repayment include activity writes in the database transaction. A narrow compatibility guard ignores exact duplicate buy-in-added activity from older cached clients after a new server-side write. Idempotent retries avoid duplicate entries/events.</td>
+<td>Inject activity failure and verify financial rollback; unauthorized action rejection and retry event counts.</td>
+</tr>
+</tbody></table>
+<h2>Name uniqueness scope</h2>
+<p>A name identifies a seat within one game, including the host, phone-free managed players and departed players. Other games can reuse the same name. A matching display name or copied browser session never grants another account&#39;s seat. Existing legacy duplicate rows are grandfathered without rewriting financial history; the migration blocks additional collisions. This is normalized-name uniqueness, not a guarantee against every visually similar Unicode spelling.</p>
+<h2>Verification</h2>
+<p>The final implementation is committed locally as <code>6cf2c6e</code>, with preceding scoped fix commits. The verification manifest records the revision for each final check.</p>
+<ul>
+<li>Unit tests: <strong>179 passed</strong> across 29 files; TypeScript and ESLint passed.</li>
+<li>Focused connected regressions: <strong>15 passed</strong> across desktop Chrome, Pixel 5 Chrome, iPhone 13 WebKit, desktop WebKit and iPad Mini WebKit. Separate browser contexts represent separate identities.</li>
+<li>Database assurance: <strong>all 12 scripts passed</strong> against a fresh disposable Supabase stack, including direct-write permission checks, concurrent joins, Unicode/invisible-name collisions, copied-session denial, legacy-row preservation, claim expiry/conflicts/replays, account deletion, host restoration and financial rollback. The full connected run completed with <strong>129 passed and 6 test failures</strong>: five old host-departure text assertions, plus one WebKit test navigating away before the Join form was ready. Those expectations/timing were corrected; <strong>all 10 targeted reruns passed</strong>, covering visitor privacy/exit and host handoff across the five profiles. This provides passing coverage of all 135 scenario/profile combinations across the full run and focused rerun, rather than a single clean full-run result.</li>
+<li>Local-mode suite: <strong>97 passed, 3 skipped</strong>. The three existing skips cover real service-worker behavior unavailable in WebKit; actual OS PWA behavior remains unverified.</li>
+<li>Final seat-write security verification: <strong>all 12 database checks and 20 browser checks passed</strong> after the permission hardening, covering visitor privacy, host transfer, concurrent duplicate-name rejection and managed-seat claim/return across all five profiles. A transaction-only legacy-policy probe reproduced the cascading guest self-delete and rolled it back before verifying the new restriction. The final accent-normalization refinement then passed focused database assurance and <strong>all five duplicate-name browser checks</strong>.</li>
+</ul>
+<p>Browser checks use emulated devices, not physical phones. Native payment-app handoff, actual iOS/Android PWA installation, real OAuth/email recovery and live authenticated multiplayer remain outside this verification. Public production was audited without creating live games or modifying live financial records.</p>
+<h2>Evidence</h2>
+<p>The screenshots below show the fixed states. The <a href="../REPORT.html">original audit</a> preserves before-fix observations and production findings.</p>
+<h3>Payment read failure remains unknown</h3>
+<p><img src="evidence/connected/mobile-safari/payment-status-unavailable.png" alt="iPhone payment status unavailable, with a retry and no send controls"></p>
+<h3>Returning the original seat</h3>
+<p><img src="evidence/connected/mobile-chrome/seat-continuity-restored.png" alt="Android host view after the same player seat returns with one original buy-in"></p>
+<h3>Join controls remain reachable on a short screen</h3>
+<p><img src="evidence/local/mobile-safari/join-320x300-bottom.png" alt="Join action on a 320 by 300 viewport"></p>
+<h2>Release boundary</h2>
+<p>Migrations were applied only to the disposable test database; the regular developer database was left untouched. No push, CI run, hosted database migration or production deployment was performed for this remediation. F04 remains release work, and production still needs the calculator correction described by F03. Apply the reviewed migrations with the frontend release, then verify the exact live flows with controlled identities. Existing duplicate beta seats are preserved and require a separate host-reviewed decision; the guard prevents new collisions without merging or deleting ledgers.</p>
+</main></body></html>
