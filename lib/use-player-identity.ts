@@ -10,17 +10,29 @@ export function usePlayerIdentity() {
   });
   useEffect(() => {
     const sessionId = getSessionId();
+    // The browser session id is available synchronously. Do not leave the
+    // room on its loading screen while Supabase emits INITIAL_SESSION.
+    setIdentity({ sessionId, userId: null });
     const client = getBrowserSupabase();
     if (!client) {
       setIdentity({ sessionId, userId: null });
       return;
     }
-    // INITIAL_SESSION also initializes the identity. Auth changes update both
-    // room and settlement views without copying another browser's session id.
+    let active = true;
+    // INITIAL_SESSION normally initializes the identity, while getSession
+    // gives a bounded fallback path when that event is delayed by startup.
     const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
-      setIdentity({ sessionId, userId: session?.user.id ?? null });
+      if (active) setIdentity({ sessionId, userId: session?.user.id ?? null });
     });
-    return () => subscription.unsubscribe();
+    void client.auth.getSession().then(({ data }) => {
+      if (active) setIdentity({ sessionId, userId: data.session?.user.id ?? null });
+    }).catch(() => {
+      // Room loading can still resolve via the durable browser session id.
+    });
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
   return identity;
 }

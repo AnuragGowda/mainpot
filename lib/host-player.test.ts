@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { addBuyIn, addHostPlayer, createGame, endGame, getGameSnapshot, joinGame, requestEarlyCashOut, transferHost } from "./data";
+import { addBuyIn, addHostPlayer, createGame, endGame, getGameSnapshot, joinGame, requestEarlyCashOut, transferHost, updateBuyIn } from "./data";
 import { randomUUID } from "./session";
 
 vi.mock("./supabase", () => ({ isSupabaseConfigured: false }));
@@ -54,6 +54,36 @@ describe("host-managed seats in local mode", () => {
     await expect(addHostPlayer(game.gameId, "Sam", 20, randomUUID())).rejects.toThrow("Only the host");
     await expect(addBuyIn(game.gameId, player.id, 20, "rebuy", null, randomUUID())).rejects.toThrow("Only the player or host");
     await expect(requestEarlyCashOut(game.gameId, player.id, 20)).rejects.toThrow("Only the player or host");
+  });
+
+  it("creates one pending opening buy-in for a new guest and never duplicates it on rejoin", async () => {
+    const game = await createGame("Friday", "Casey", 20);
+    window.localStorage.setItem("ante_session_id", randomUUID());
+
+    const joined = await joinGame(game.code, "Jordan");
+    const retried = await joinGame(game.code, "Jordan");
+    const snapshot = await getGameSnapshot(game.gameId);
+    const entries = snapshot.buyIns.filter((entry) => entry.player_id === joined.playerId);
+
+    expect(retried.playerId).toBe(joined.playerId);
+    expect(entries).toMatchObject([{ amount: 20, type: "buy_in", verified: false }]);
+    expect(snapshot.events.filter((event) => event.subject_player_id === joined.playerId)).toHaveLength(2);
+  });
+
+  it("lets the host correct and verify a pending buy-in once", async () => {
+    const game = await createGame("Friday", "Casey", 20);
+    const hostSession = window.localStorage.getItem("ante_session_id");
+    window.localStorage.setItem("ante_session_id", randomUUID());
+    const joined = await joinGame(game.code, "Jordan");
+    const pending = (await getGameSnapshot(game.gameId)).buyIns.find((entry) => entry.player_id === joined.playerId)!;
+
+    window.localStorage.setItem("ante_session_id", hostSession!);
+    const correctionKey = randomUUID();
+    await updateBuyIn(pending.id, 25, correctionKey);
+    await updateBuyIn(pending.id, 25, correctionKey);
+    const snapshot = await getGameSnapshot(game.gameId);
+    expect(snapshot.buyIns.find((entry) => entry.id === pending.id)).toMatchObject({ amount: 25, verified: true });
+    expect(snapshot.events.filter((event) => event.event_type === "buy_in_updated")).toHaveLength(1);
   });
 
   it("rejects invalid amounts and names, closed games, and seats over the limit", async () => {

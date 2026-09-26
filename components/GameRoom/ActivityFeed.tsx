@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { GameEvent, GameSnapshot } from "@/lib/types";
 import { formatCurrency } from "@/lib/format";
+import { randomUUID } from "@/lib/session";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
@@ -11,7 +12,7 @@ import ConfirmButton from "./ConfirmButton";
 export interface ActivityFeedProps {
   snapshot: GameSnapshot;
   isHost: boolean;
-  onEdit: (buyInId: string, amount: number) => void;
+  onEdit: (buyInId: string, amount: number, operationKey: string) => Promise<void>;
   onRemoveBuyIn: (buyInId: string) => void;
   onRemovePlayer: (playerId: string) => void;
 }
@@ -140,6 +141,9 @@ export default function ActivityFeed({
   const [openEventId, setOpenEventId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [editOperationKey, setEditOperationKey] = useState<string | null>(null);
+  const [editError, setEditError] = useState("");
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const events = useMemo(() => {
     const source = snapshot.events.length ? snapshot.events : legacyEvents(snapshot);
@@ -164,14 +168,26 @@ export default function ActivityFeed({
   function startEdit(eventId: string, amount: number) {
     setEditingId(eventId);
     setEditValue(String(amount));
+    setEditOperationKey(randomUUID());
+    setEditError("");
   }
 
-  function saveEdit(buyInId: string) {
+  async function saveEdit(buyInId: string) {
     const amount = Number(editValue);
     if (!Number.isFinite(amount) || amount <= 0) return;
-    onEdit(buyInId, amount);
-    setEditingId(null);
-    setOpenEventId(null);
+    const operationKey = editOperationKey ?? randomUUID();
+    setSavingId(buyInId);
+    setEditError("");
+    try {
+      await onEdit(buyInId, amount, operationKey);
+      setEditingId(null);
+      setOpenEventId(null);
+      setEditOperationKey(null);
+    } catch (error) {
+      setEditError(error instanceof Error ? error.message : "Could not save this correction. Retry to safely continue.");
+    } finally {
+      setSavingId(null);
+    }
   }
 
   return (
@@ -231,9 +247,10 @@ export default function ActivityFeed({
                   <div className="ml-11 mt-3 rounded-lg bg-gray-50 p-3">
                     {editing && buyIn ? (
                       <div className="flex items-end gap-2">
-                        <Input aria-label={`Edit ${buyIn.type === "rebuy" ? "rebuy" : "buy-in"} amount for ${subject?.name ?? "player"}`} type="number" min={0.01} step={0.01} inputMode="decimal" prefix="$" value={editValue} onChange={(event) => setEditValue(event.target.value)} />
-                        <Button size="sm" onClick={() => saveEdit(buyIn.id)}>Save</Button>
-                        <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
+                        <Input aria-label={`Edit ${buyIn.type === "rebuy" ? "rebuy" : "buy-in"} amount for ${subject?.name ?? "player"}`} type="number" min={0.01} step={0.01} inputMode="decimal" prefix="$" value={editValue} onChange={(event) => setEditValue(event.target.value)} disabled={savingId === buyIn.id} />
+                        {editError ? <p role="alert" className="text-sm text-red-700">{editError}</p> : null}
+                        <Button size="sm" loading={savingId === buyIn.id} onClick={() => void saveEdit(buyIn.id)}>Save</Button>
+                        <Button size="sm" variant="ghost" disabled={savingId === buyIn.id} onClick={() => { setEditingId(null); setEditOperationKey(null); setEditError(""); }}>Cancel</Button>
                       </div>
                     ) : (
                       <div className="flex flex-wrap gap-1">

@@ -13,7 +13,7 @@ import { getGameTemplates, saveGameTemplate, type GameTemplate } from "@/lib/acc
 import { getCurrentUser, getCurrentUserId } from "@/lib/auth-client";
 import { getProfileById } from "@/lib/friends";
 import { classifyProductOpsFailure, trackProductOpsEvent } from "@/lib/product-ops";
-import { getPlayerName, getSessionId, setActiveGame, setPlayerName } from "@/lib/session";
+import { getActiveGames, getPlayerName, getSessionId, setActiveGame, setPlayerName } from "@/lib/session";
 import { markPostGameEntry } from "@/lib/push-client";
 import { navigateToFreshAppPage } from "@/lib/navigation";
 import {
@@ -37,6 +37,7 @@ export default function CreateGamePage() {
   const [name, setName] = useState("");
   const [ready, setReady] = useState(false);
   const nameEdited = useRef(false);
+  const creationInFlight = useRef(false);
   const [gameName, setGameName] = useState("");
   const [buyIn, setBuyIn] = useState("");
   const [hostIsPlaying, setHostIsPlaying] = useState(true);
@@ -47,30 +48,36 @@ export default function CreateGamePage() {
   const [preferredRoster, setPreferredRoster] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
-  const [resumeGame, setResumeGame] = useState<ResumableGame | null>(null);
+  const [resumeGames, setResumeGames] = useState<ResumableGame[]>([]);
 
   useEffect(() => {
     setName((current) => current || getPlayerName() || "");
     setReady(true);
-    const previousGame = window.localStorage.getItem("ante_active_game");
-    if (previousGame) {
-      void getGame(previousGame).then(async (game) => {
-        if (!game) return;
-        if (game.status !== "ended") {
-          setResumeGame({ code: game.code, name: game.name, status: game.status });
-          return;
+    const previousGames = getActiveGames();
+    if (previousGames.length) {
+      void Promise.all(previousGames.map(async (code) => {
+        try {
+          const game = await getGame(code);
+          if (!game) return null;
+          if (game.status !== "ended") {
+            return { code: game.code, name: game.name, status: game.status } as ResumableGame;
+          }
+          if (window.sessionStorage.getItem(`returned:${code}`)) return null;
+          window.sessionStorage.setItem(`returned:${code}`, "1");
+          const userId = await getCurrentUserId();
+          const isHost = game.host_user_id
+            ? game.host_user_id === userId
+            : game.host_session_id === getSessionId();
+          if (isHost) {
+            await recordGameEvent(game.id, "host_returned_to_create");
+            trackProductOpsEvent("host.returned_to_create", {}, game.id);
+          }
+        } catch {
+          // A transient recovery lookup must not hide the other unfinished
+          // tables stored on this device.
         }
-        if (window.sessionStorage.getItem(`returned:${previousGame}`)) return;
-        window.sessionStorage.setItem(`returned:${previousGame}`, "1");
-        const userId = await getCurrentUserId();
-        const isHost = game.host_user_id
-          ? game.host_user_id === userId
-          : game.host_session_id === getSessionId();
-        if (isHost) {
-          await recordGameEvent(game.id, "host_returned_to_create");
-          trackProductOpsEvent("host.returned_to_create", {}, game.id);
-        }
-      }).catch(() => undefined);
+        return null;
+      })).then((games) => setResumeGames(games.filter((game): game is ResumableGame => game !== null)));
     }
     const params = new URLSearchParams(window.location.search);
     const suggestedName = params.get("name")?.trim().slice(0, GAME_NAME_MAX_LENGTH);
@@ -94,6 +101,7 @@ export default function CreateGamePage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (creationInFlight.current) return;
 
     const trimmedName = name.trim();
     const trimmedGameName = gameName.trim();
@@ -109,6 +117,7 @@ export default function CreateGamePage() {
       return;
     }
 
+    creationInFlight.current = true;
     setLoading(true);
     try {
       setPlayerName(trimmedName);
@@ -146,12 +155,16 @@ export default function CreateGamePage() {
         reason: classifyProductOpsFailure(err),
         storage_mode: usingLocalStorage() ? "local_storage" : "supabase",
       });
-      const message =
+      const failureMessage =
         err instanceof Error
           ? err.message
           : "Something went wrong. Please try again.";
+      const message = failureMessage === "Finish your active guest game before starting another."
+        ? "Guest accounts can keep two unfinished tables. Resume or finish one before starting another."
+        : failureMessage;
       toast(message, "error");
       setLoading(false);
+      creationInFlight.current = false;
     }
   }
 
@@ -162,7 +175,18 @@ export default function CreateGamePage() {
       description="Set the buy-in, then invite your table with a code."
     >
       <div className="space-y-5">
-        {resumeGame ? <ResumeGameCard game={resumeGame} /> : null}
+        {resumeGames.map((game) => <ResumeGameCard key={game.code} game={game} />)}
+        {resumeGames.length ? (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
+            <p className="text-sm font-semibold text-gray-900">Start another table</p>
+            <p className="mt-1 text-sm leading-6 text-gray-600">
+              Your unfinished table stays available above. Starting another game does not close or change it.
+            </p>
+          </div>
+        ) : null}
+        <p className="text-sm leading-6 text-gray-600">
+          Guests can keep two unfinished tables open. Resume or finish one before starting another, or sign in for more history.
+        </p>
         <form aria-label="Game details" onSubmit={handleSubmit} noValidate className="space-y-5">
             {templates.length ? (
               <label htmlFor="create-template" className="block text-sm font-medium text-gray-700">
@@ -252,7 +276,7 @@ export default function CreateGamePage() {
               {saveTemplate ? <p className="mt-2 text-xs leading-5 text-gray-500">Roster names are a reminder for the host; players still join with the private game link.</p> : null}
             </div> : null}
             <Button type="submit" fullWidth loading={loading} disabled={!ready}>
-              Create game
+              {resumeGames.length ? "Start another game" : "Create game"}
             </Button>
         </form>
       </div>

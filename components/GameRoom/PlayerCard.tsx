@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import { formatCurrency } from "@/lib/format";
+import { randomUUID } from "@/lib/session";
 import ConfirmButton from "./ConfirmButton";
 
 export interface PlayerCardProps {
@@ -17,7 +18,7 @@ export interface PlayerCardProps {
   isHost: boolean;
   game: Game;
   onVerify: (buyInId: string) => void;
-  onEdit: (buyInId: string, amount: number) => void;
+  onEdit: (buyInId: string, amount: number, operationKey: string) => Promise<void>;
   onRemoveBuyIn: (buyInId: string) => void;
   onRemovePlayer: (playerId: string) => void;
 }
@@ -74,24 +75,37 @@ export default function PlayerCard({
   const [expanded, setExpanded] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [editError, setEditError] = useState("");
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   function startEdit(buyIn: BuyIn) {
     setEditingId(buyIn.id);
     setEditValue(String(buyIn.amount));
+    setEditError("");
   }
 
   function cancelEdit() {
     setEditingId(null);
     setEditValue("");
+    setEditError("");
   }
 
-  function saveEdit(buyInId: string) {
+  async function saveEdit(buyInId: string) {
     const parsed = Number(editValue);
     if (!Number.isFinite(parsed) || parsed <= 0) {
+      setEditError("Enter an amount greater than 0.");
       return;
     }
-    onEdit(buyInId, parsed);
-    cancelEdit();
+    setSavingId(buyInId);
+    setEditError("");
+    try {
+      await onEdit(buyInId, parsed, randomUUID());
+      cancelEdit();
+    } catch (error) {
+      setEditError(error instanceof Error ? error.message : "Could not update the buy-in.");
+    } finally {
+      setSavingId(null);
+    }
   }
 
   const buyInCount = buyIns.length;
@@ -142,7 +156,7 @@ export default function PlayerCard({
                 return (
                   <li key={buyIn.id} className="py-3">
                     {editing ? (
-                      <div className="flex items-end gap-2">
+                      <div className="flex flex-wrap items-end gap-2">
                         <div className="min-w-0 flex-1">
                           <Input
                             type="number"
@@ -154,11 +168,15 @@ export default function PlayerCard({
                             onChange={(event) => setEditValue(event.target.value)}
                             aria-label={`Edit amount for ${player.name}'s buy-in`}
                             autoFocus
+                            disabled={savingId === buyIn.id}
                           />
                         </div>
+                        {editError ? <p role="alert" className="w-full text-sm text-red-700">{editError}</p> : null}
                         <Button
                           size="sm"
-                          onClick={() => saveEdit(buyIn.id)}
+                          loading={savingId === buyIn.id}
+                          disabled={savingId === buyIn.id}
+                          onClick={() => { void saveEdit(buyIn.id); }}
                           aria-label={`Save new amount for ${player.name}'s buy-in`}
                         >
                           Save
@@ -166,6 +184,7 @@ export default function PlayerCard({
                         <Button
                           variant="ghost"
                           size="sm"
+                          disabled={savingId === buyIn.id}
                           onClick={cancelEdit}
                           aria-label="Cancel editing buy-in amount"
                         >

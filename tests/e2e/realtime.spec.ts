@@ -3,7 +3,7 @@ import { runBankPlanFlow } from "./bank-flow";
 import { checkAccountRecovery, checkSavedFriendInvitation } from "./audit-fixes-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
 import { runSettlementUxFlow } from "./settlement-ux-flow";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Route } from "@playwright/test";
 
 // Local guest creation is deliberately rate-limited, so these database-backed
 // scenarios run one at a time while each scenario still uses separate users.
@@ -31,11 +31,8 @@ async function joinGame(page: import("@playwright/test").Page, gameUrl: string, 
   await expect(page.getByRole("heading", { name: "Realtime test game" })).toBeVisible({ timeout: 15_000 });
 }
 
-async function addOpeningBuyIn(page: import("@playwright/test").Page) {
-  await page.getByRole("button", { name: "Buy in · $20.00" }).click();
-  const dialog = page.getByRole("alertdialog", { name: "Add your $20.00 buy-in?" });
-  await expect(dialog).toBeVisible();
-  await dialog.getByRole("button", { name: "Add buy-in" }).click();
+async function expectAutomaticOpeningBuyIn(page: import("@playwright/test").Page) {
+  await expect(page.getByRole("button", { name: "Buy in · $20.00" })).toHaveCount(0);
 }
 
 test("requires visitors to join before viewing an active game", async ({ browser }) => {
@@ -93,8 +90,8 @@ test("syncs two guests' independent ledger entries and host approval", async ({ 
     await expect(playerCard(host, "Jordan")).toBeVisible();
     await expect(playerCard(host, "Taylor")).toBeVisible();
 
-    await addOpeningBuyIn(jordan);
-    await addOpeningBuyIn(taylor);
+    await expectAutomaticOpeningBuyIn(jordan);
+    await expectAutomaticOpeningBuyIn(taylor);
     const pending = host.getByRole("region", { name: "Needs approval" });
     await expect(pending.getByRole("listitem")).toHaveCount(2);
 
@@ -121,7 +118,7 @@ test("locks an early cash-out against the host and carries it out of final settl
   try {
     await createGame(host, "Realtime test game");
     await joinGame(guest, host.url(), "Jordan");
-    await addOpeningBuyIn(guest);
+    await expectAutomaticOpeningBuyIn(guest);
     await host.getByRole("button", { name: "Approve", exact: true }).click();
 
     await guest.getByRole("button", { name: "Cash out", exact: true }).click();
@@ -197,7 +194,7 @@ test("auto-approves host rebuys while keeping player entries pending", async ({ 
     await expect(playerCard(host, "Casey")).toContainText("$35.00");
 
     await joinGame(guest, host.url(), "Jordan");
-    await addOpeningBuyIn(guest);
+    await expectAutomaticOpeningBuyIn(guest);
 
     const pending = host.getByRole("region", { name: "Needs approval" });
     await expect(pending.getByRole("listitem")).toHaveCount(1);
@@ -208,7 +205,7 @@ test("auto-approves host rebuys while keeping player entries pending", async ({ 
   }
 });
 
-test("requires confirmation and records only one opening buy-in", async ({ browser }) => {
+test("records one pending opening buy-in when a guest joins and does not duplicate it on reload", async ({ browser }) => {
   const hostContext = await browser.newContext();
   const guestContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -217,33 +214,21 @@ test("requires confirmation and records only one opening buy-in", async ({ brows
   try {
     await createGame(host, "Realtime test game");
     await joinGame(guest, host.url(), "Jordan");
+    await expectAutomaticOpeningBuyIn(guest);
 
-    await guest.getByRole("button", { name: "Buy in · $20.00" }).click();
     const pending = host.getByRole("region", { name: "Needs approval" });
-    await expect(pending).toHaveCount(0);
-    const dialog = guest.getByRole("alertdialog", { name: "Add your $20.00 buy-in?" });
-    await expect(dialog).toContainText("shared ledger for the host to review");
-    await dialog.getByText("Payment details", { exact: false }).click();
-    await dialog.getByRole("checkbox", { name: "Someone else paid and I still owe them" }).check();
-    await dialog.getByRole("combobox", { name: "Who advanced your opening buy-in?" }).click();
-    await guest.getByRole("option", { name: "Casey" }).click();
-    await expect(dialog).toContainText("If you already paid them—or bought chips from their personal stack—leave this off.");
-    await dialog.getByRole("button", { name: "Add buy-in" }).click();
-    await expect(guest.getByText("Buy-in and outstanding advance added", { exact: true })).toBeVisible();
     await expect(pending.getByRole("listitem")).toHaveCount(1);
-    await expect(pending.getByRole("listitem")).toContainText("Outstanding advance owed to Casey");
+    await expect(pending.getByRole("listitem")).toContainText("Jordan");
+    await expect(pending.getByRole("listitem")).toContainText("$20.00");
+
+    await guest.reload();
+    await expect(guest.getByRole("heading", { name: "Realtime test game" })).toBeVisible({ timeout: 15_000 });
+    await expectAutomaticOpeningBuyIn(guest);
+    await expect(pending.getByRole("listitem")).toHaveCount(1);
 
     await pending.getByRole("button", { name: "Approve", exact: true }).click();
     await expect(host.getByRole("region", { name: "Needs approval" })).toHaveCount(0);
     await expect(playerCard(host, "Jordan").getByText("1 entry", { exact: true })).toBeVisible();
-    const advances = host.getByRole("region", { name: "Outstanding advances" });
-    await expect(advances).toContainText("Jordan still owes Casey");
-    await advances.getByRole("button", { name: "Mark repaid" }).click();
-    const repayment = host.getByRole("alertdialog", { name: "Mark this advance repaid?" });
-    await repayment.getByRole("button", { name: "Mark repaid" }).click();
-    await expect(host.getByRole("region", { name: "Outstanding advances" })).toHaveCount(0);
-    await expect(guest.getByRole("region", { name: "Outstanding advances" })).toHaveCount(0);
-    await expect(host.getByText(/marked Jordan’s \$20\.00 advance from Casey repaid/)).toBeVisible();
   } finally {
     await guestContext.close();
     await hostContext.close();
@@ -260,7 +245,7 @@ test("records a player's rebuy in the shared ledger", async ({ browser }) => {
     await createGame(host, "Realtime test game");
     await joinGame(guest, host.url(), "Jordan");
 
-    await addOpeningBuyIn(guest);
+    await expectAutomaticOpeningBuyIn(guest);
     await host.getByRole("button", { name: "Approve", exact: true }).click();
     await guest.getByRole("button", { name: "Add a rebuy" }).click();
     const rebuyDialog = guest.getByRole("dialog", { name: "Add a rebuy" });
@@ -329,9 +314,7 @@ test("recovers a disconnected guest after the host starts settlement", async ({ 
   try {
     await createGame(host, "Realtime test game");
     await joinGame(jordan, host.url(), "Jordan");
-    await expect(
-      jordan.getByRole("button", { name: "Buy in · $20.00" }),
-    ).toBeVisible();
+    await expectAutomaticOpeningBuyIn(jordan);
 
     await jordanContext.setOffline(true);
     // Chromium's network emulation does not consistently dispatch the browser
@@ -369,8 +352,8 @@ test("keeps host correction and approval decisions auditable", async ({ browser 
     await joinGame(jordan, host.url(), "Jordan");
     await joinGame(taylor, host.url(), "Taylor");
 
-    await addOpeningBuyIn(jordan);
-    await addOpeningBuyIn(taylor);
+    await expectAutomaticOpeningBuyIn(jordan);
+    await expectAutomaticOpeningBuyIn(taylor);
     const pending = host.getByRole("region", { name: "Needs approval" });
     await expect(pending.getByRole("listitem")).toHaveCount(2);
 
@@ -395,6 +378,43 @@ test("keeps host correction and approval decisions auditable", async ({ browser 
   }
 });
 
+test("releases a stalled host correction and keeps the amount ready to retry", async ({ browser }) => {
+  test.slow();
+  const hostContext = await browser.newContext();
+  const guestContext = await browser.newContext();
+  const host = await hostContext.newPage();
+  const guest = await guestContext.newPage();
+
+  try {
+    await createGame(host, "Realtime test game");
+    await joinGame(guest, host.url(), "Jordan");
+    const pending = host.getByRole("region", { name: "Needs approval" });
+    const jordanPending = pending.getByRole("listitem").filter({ hasText: "Jordan" });
+    await expect(jordanPending).toBeVisible();
+    const stalledCorrection = async (route: Route) => {
+      await new Promise((resolve) => setTimeout(resolve, 20_000));
+      await route.abort();
+    };
+    await host.route("**/rest/v1/rpc/correct_buy_in_as_host", stalledCorrection);
+    await jordanPending.getByRole("button", { name: /Edit Jordan buy-in/ }).click();
+    const amount = jordanPending.getByLabel("Correct amount");
+    await amount.fill("25");
+    await jordanPending.getByRole("button", { name: "Save" }).click();
+    await expect(jordanPending.getByRole("button", { name: "Save" })).toBeDisabled();
+    await expect(jordanPending.getByRole("alert")).toContainText("couldn't confirm whether the correction was saved", { timeout: 18_000 });
+    await expect(amount).toHaveValue("25");
+    await expect(jordanPending.getByRole("button", { name: "Save" })).toBeEnabled();
+    await host.unroute("**/rest/v1/rpc/correct_buy_in_as_host", stalledCorrection);
+    await jordanPending.getByRole("button", { name: "Save" }).click();
+    await expect(host.getByRole("region", { name: "Needs approval" })).toHaveCount(0, { timeout: 15_000 });
+    await expect(playerCard(host, "Jordan").getByText("1 entry", { exact: true })).toBeVisible();
+    await expect(playerCard(host, "Jordan")).toContainText("$25.00");
+  } finally {
+    await guestContext.close();
+    await hostContext.close();
+  }
+});
+
 test("holds a multi-user settlement until cash-outs reconcile", async ({ browser }) => {
   test.slow();
   const mobile = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
@@ -406,7 +426,7 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
   try {
     await createGame(host, "Realtime test game");
     await joinGame(guest, host.url(), "Jordan");
-    await addOpeningBuyIn(guest);
+    await expectAutomaticOpeningBuyIn(guest);
     await expect(host.getByRole("button", { name: "Approve", exact: true })).toBeVisible();
     await host.getByRole("button", { name: "Approve", exact: true }).click();
 

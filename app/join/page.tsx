@@ -95,7 +95,7 @@ export default function JoinGamePage() {
     <GameSetupShell
       eyebrow="Join the table"
       title="Join your table."
-      description="Enter the host’s six-character code or paste an invite link."
+      description="Enter the host’s six-character code or paste an invite link. Your opening buy-in is recorded for host approval."
     >
           <form aria-label="Join a game" onSubmit={handleSubmit} noValidate className="space-y-5">
             <Input

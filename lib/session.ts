@@ -1,6 +1,8 @@
 const SESSION_ID_KEY = "ante_session_id";
 const PLAYER_NAME_KEY = "ante_player_name";
 const ACTIVE_GAME_KEY = "ante_active_game";
+const ACTIVE_GAMES_KEY = "ante_active_games";
+const MAX_RECOVERABLE_GAMES = 3;
 
 /**
  * Returns a random UUID v4 using crypto.randomUUID() when available,
@@ -59,16 +61,45 @@ export function getActiveGame(): string | null {
   return window.localStorage.getItem(ACTIVE_GAME_KEY);
 }
 
+/**
+ * Returns the recent room codes this device can resume. The legacy single
+ * value remains for existing installs and for callers that need one default.
+ */
+export function getActiveGames(): string[] {
+  if (typeof window === "undefined") return [];
+  const fallback = window.localStorage.getItem(ACTIVE_GAME_KEY);
+  try {
+    const raw = window.localStorage.getItem(ACTIVE_GAMES_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    const codes = Array.isArray(parsed)
+      ? parsed.filter((value): value is string => typeof value === "string" && value.length > 0)
+      : [];
+    return Array.from(new Set([...(fallback ? [fallback] : []), ...codes])).slice(0, MAX_RECOVERABLE_GAMES);
+  } catch {
+    return fallback ? [fallback] : [];
+  }
+}
+
 export function setActiveGame(code: string): void {
   if (typeof window === "undefined") {
     return;
   }
+  const next = [code, ...getActiveGames().filter((existing) => existing !== code)]
+    .slice(0, MAX_RECOVERABLE_GAMES);
   window.localStorage.setItem(ACTIVE_GAME_KEY, code);
+  window.localStorage.setItem(ACTIVE_GAMES_KEY, JSON.stringify(next));
 }
 
-export function clearActiveGame(): void {
+export function clearActiveGame(code?: string): void {
   if (typeof window === "undefined") {
     return;
   }
+  const remaining = code ? getActiveGames().filter((existing) => existing !== code) : [];
+  if (remaining.length) {
+    window.localStorage.setItem(ACTIVE_GAME_KEY, remaining[0]);
+    window.localStorage.setItem(ACTIVE_GAMES_KEY, JSON.stringify(remaining));
+    return;
+  }
   window.localStorage.removeItem(ACTIVE_GAME_KEY);
+  window.localStorage.removeItem(ACTIVE_GAMES_KEY);
 }

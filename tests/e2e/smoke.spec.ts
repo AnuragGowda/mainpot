@@ -116,11 +116,11 @@ test.describe("public local-mode experience", () => {
 
     await expect(page.getByRole("heading", { name: "Keep Mainpot one tap away." })).toBeVisible();
     const acquisitionPrompt = page.getByRole("region", { name: "How did you hear about Mainpot?" });
-    const gameHeading = page.getByRole("heading", { name: "Install prompt game" });
+    const inviteButton = page.getByRole("button", { name: "Invite players" });
     await expect(acquisitionPrompt).toBeVisible();
-    expect(await acquisitionPrompt.evaluate((prompt, heading) => Boolean(
-      prompt.compareDocumentPosition(heading as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ), await gameHeading.elementHandle())).toBe(true);
+    expect(await inviteButton.evaluate((invite, prompt) => Boolean(
+      invite.compareDocumentPosition(prompt as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ), await acquisitionPrompt.elementHandle())).toBe(true);
     await page.getByRole("button", { name: "Show me how" }).click();
     await expect(page.getByText("On iPhone or iPad", { exact: true })).toBeVisible();
     await expect(page.getByText(/choose Add to Home Screen/i)).toBeVisible();

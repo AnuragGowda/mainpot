@@ -27,6 +27,7 @@ import { round2 } from "./format";
 import { productOpsEnabled, trackProductOpsEvent } from "./product-ops";
 import { dispatchGamePush } from "./push-client";
 import { validateGameName, validatePlayerName } from "./name-validation";
+import { withTimeout } from "./request-timeout";
 
 export { isSupabaseConfigured };
 
@@ -58,12 +59,39 @@ function assertSupabase(): SupabaseClient {
   return client;
 }
 
+/**
+ * Mutations that carry an idempotency key may be aborted in the browser. The
+ * server can still commit after an abort, so callers retry the same key rather
+ * than treating a deadline as proof that no write happened.
+ */
+async function awaitAbortableMutation<T>(
+  createQuery: (signal: AbortSignal) => PromiseLike<T>,
+  timeoutMessage: string,
+  timeoutMs = 15_000,
+): Promise<T> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const result = await createQuery(controller.signal);
+    if (controller.signal.aborted) throw new Error(timeoutMessage);
+    return result;
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error(timeoutMessage);
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
 async function ensureSupabaseReady(): Promise<{
   client: SupabaseClient;
   userId: string;
 }> {
   const client = assertSupabase();
-  const user = await ensureCurrentUser();
+  const user = await withTimeout(
+    ensureCurrentUser(),
+    "Could not confirm your secure session. Check your connection and try again.",
+  );
   if (!user) {
     throw new Error("Could not start a secure guest session.");
   }
@@ -448,12 +476,36 @@ async function joinGameLocal(
     user_id: userId ?? null,
   };
   store.players.push(player);
+  const openingBuyIn: BuyIn = {
+    id: randomUUID(),
+    game_id: game.id,
+    player_id: player.id,
+    amount: round2(game.buy_in_amount),
+    type: "buy_in",
+    fronted_by_player_id: null,
+    verified: false,
+    created_at: player.joined_at,
+  };
+  store.buyIns.push(openingBuyIn);
   addLocalEvent(store, {
     gameId: game.id,
     eventType: "player_joined",
     actorPlayerId: player.id,
     subjectPlayerId: player.id,
     metadata: { player_name: playerName },
+    createdAt: player.joined_at,
+  });
+  addLocalEvent(store, {
+    gameId: game.id,
+    eventType: "buy_in_added",
+    actorPlayerId: player.id,
+    subjectPlayerId: player.id,
+    amount: openingBuyIn.amount,
+    metadata: {
+      player_name: player.name,
+      buy_in_id: openingBuyIn.id,
+      buy_in_type: "buy_in",
+    },
     createdAt: player.joined_at,
   });
   persistStore(store);
@@ -687,7 +739,11 @@ async function verifyBuyInLocal(buyInId: string): Promise<void> {
   }
 }
 
-async function updateBuyInLocal(buyInId: string, amount: number): Promise<void> {
+async function updateBuyInLocal(
+  buyInId: string,
+  amount: number,
+  operationKey: string,
+): Promise<void> {
   const store = loadStore();
   const buyIn = store.buyIns.find((b) => b.id === buyInId);
   if (buyIn) requireLocalGameStatus(store, buyIn.game_id, "active");
@@ -701,13 +757,19 @@ async function updateBuyInLocal(buyInId: string, amount: number): Promise<void> 
     throw new Error("Buy-ins involving a locked early cash-out cannot be changed.");
   }
   if (buyIn) {
+    const actorPlayerId = currentLocalPlayerId(store, buyIn.game_id);
+    const actor = store.players.find((player) => player.id === actorPlayerId);
+    if (!actor?.is_host) throw new Error("Only the host can correct a buy-in.");
+    if (buyIn.host_edit_operation_key === operationKey) return;
     const previousAmount = buyIn.amount;
     buyIn.amount = round2(amount);
+    buyIn.verified = true;
+    buyIn.host_edit_operation_key = operationKey;
     const player = store.players.find((item) => item.id === buyIn.player_id);
     addLocalEvent(store, {
       gameId: buyIn.game_id,
       eventType: "buy_in_updated",
-      actorPlayerId: currentLocalPlayerId(store, buyIn.game_id),
+      actorPlayerId,
       subjectPlayerId: buyIn.player_id,
       amount: buyIn.amount,
       metadata: {
@@ -715,6 +777,7 @@ async function updateBuyInLocal(buyInId: string, amount: number): Promise<void> 
         buy_in_id: buyIn.id,
         buy_in_type: buyIn.type,
         previous_amount: previousAmount,
+        verified_by_correction: true,
       },
     });
   }
@@ -1210,7 +1273,10 @@ async function currentSupabasePlayerId(
   client: SupabaseClient,
   gameId: string
 ): Promise<string | null> {
-  const user = await ensureCurrentUser();
+  const user = await withTimeout(
+    ensureCurrentUser(),
+    "Could not confirm your secure session. Check your connection and try again.",
+  );
   const { data, error } = await client
     .from("players")
     .select("id,user_id,session_id")
@@ -1334,13 +1400,14 @@ async function joinGameSupabase(
   const sessionId = getSessionId();
   const normalized = normalizeRoomCode(code);
 
-  const { data, error } = await client
+  const { data, error } = await awaitAbortableMutation((signal) => client
     .rpc("join_game_guarded", {
       input_code: normalized,
       input_player_name: playerName,
       input_session_id: sessionId,
     })
-    .single();
+    .abortSignal(signal)
+    .single(), "We couldn't confirm whether you joined. Retry to safely continue.");
   if (error) {
     throw error;
   }
@@ -1531,46 +1598,19 @@ async function addBuyInSupabase(
   operationKey: string
 ): Promise<BuyIn> {
   const { client } = await ensureSupabaseReady();
-  const { data, error } = await client.rpc("create_buy_in_idempotent", {
+  const { data, error } = await awaitAbortableMutation((signal) => client.rpc("create_buy_in_idempotent", {
     input_game_id: gameId,
     input_player_id: playerId,
     input_amount: amount,
     input_type: type,
     input_fronted_by_player_id: frontedByPlayerId,
     input_operation_key: operationKey,
-  });
+  }).abortSignal(signal), "We couldn't confirm whether the buy-in was added. Retry to safely continue.");
   let result = data?.[0] as (BuyIn & { created: boolean }) | undefined;
-  if (error && error.code !== "PGRST202") {
-    throw error;
-  }
   if (error?.code === "PGRST202") {
-    // Older self-hosted databases predate the idempotent RPC. Keep the ledger
-    // usable while the operator applies the current migration; the normal path
-    // above retains retry protection once that migration is present.
-    const { data: actorIsHost, error: hostLookupError } = await client.rpc(
-      "is_game_host",
-      { target_game_id: gameId }
-    );
-    if (hostLookupError) {
-      throw hostLookupError;
-    }
-    const { data: inserted, error: insertError } = await client
-      .from("buy_ins")
-      .insert({
-        game_id: gameId,
-        player_id: playerId,
-        amount,
-        type,
-        fronted_by_player_id: frontedByPlayerId,
-        verified: actorIsHost === true,
-      })
-      .select()
-      .single();
-    if (insertError) {
-      throw insertError;
-    }
-    result = { ...(inserted as BuyIn), created: true };
+    throw new Error("Update this game database to enable safe, retryable buy-ins.");
   }
+  if (error) throw error;
   if (!result) {
     throw new Error("Could not create or find the buy-in.");
   }
@@ -1669,38 +1709,21 @@ async function verifyBuyInSupabase(buyInId: string): Promise<void> {
   });
 }
 
-async function updateBuyInSupabase(buyInId: string, amount: number): Promise<void> {
+async function updateBuyInSupabase(
+  buyInId: string,
+  amount: number,
+  operationKey: string,
+): Promise<void> {
   const { client } = await ensureSupabaseReady();
-  const { data: existing, error: lookupError } = await client
-    .from("buy_ins")
-    .select("*, player:players!buy_ins_player_id_fkey(name)")
-    .eq("id", buyInId)
-    .single();
-  if (lookupError) throw lookupError;
-  await requireSupabaseGameStatus(client, (existing as BuyIn).game_id, "active");
-  const { data, error } = await client
-    .from("buy_ins")
-    .update({ amount })
-    .eq("id", buyInId)
-    .select()
-    .single();
-  if (error) {
-    throw error;
+  const { error } = await awaitAbortableMutation((signal) => client.rpc("correct_buy_in_as_host", {
+    input_buy_in_id: buyInId,
+    input_amount: amount,
+    input_operation_key: operationKey,
+  }).abortSignal(signal), "We couldn't confirm whether the correction was saved. Retry to safely continue.");
+  if (error?.code === "PGRST202") {
+    throw new Error("Update this game database to enable safe host corrections.");
   }
-  const row = data as BuyIn;
-  const previous = existing as unknown as BuyIn & { player?: { name?: string } };
-  await addSupabaseEvent(client, {
-    gameId: row.game_id,
-    eventType: "buy_in_updated",
-    subjectPlayerId: row.player_id,
-    amount,
-    metadata: {
-      player_name: previous.player?.name,
-      buy_in_id: row.id,
-      buy_in_type: row.type,
-      previous_amount: Number(previous.amount),
-    },
-  });
+  if (error) throw error;
 }
 
 async function markBuyInAdvanceRepaidSupabase(buyInId: string): Promise<void> {
@@ -2295,12 +2318,19 @@ export async function verifyBuyIn(buyInId: string): Promise<void> {
     : verifyBuyInSupabase(buyInId);
 }
 
-export async function updateBuyIn(buyInId: string, amount: number): Promise<void> {
+export async function updateBuyIn(
+  buyInId: string,
+  amount: number,
+  operationKey = randomUUID(),
+): Promise<void> {
   const amountError = validateCurrencyAmount(amount, { allowZero: false });
   if (amountError) throw new Error(amountError);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(operationKey)) {
+    throw new Error("A valid correction key is required.");
+  }
   return usingLocalStorage()
-    ? updateBuyInLocal(buyInId, amount)
-    : updateBuyInSupabase(buyInId, amount);
+    ? updateBuyInLocal(buyInId, amount, operationKey)
+    : updateBuyInSupabase(buyInId, amount, operationKey);
 }
 
 export async function markBuyInAdvanceRepaid(buyInId: string): Promise<void> {

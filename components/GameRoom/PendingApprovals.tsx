@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import { formatCurrency } from "@/lib/format";
+import { randomUUID } from "@/lib/session";
 import type { GameSnapshot } from "@/lib/types";
 import ConfirmButton from "./ConfirmButton";
 
@@ -14,7 +15,7 @@ interface PendingApprovalsProps {
   isHost: boolean;
   onVerify: (buyInId: string) => Promise<void>;
   onVerifyAll: (buyInIds: string[]) => Promise<void>;
-  onEdit: (buyInId: string, amount: number) => void;
+  onEdit: (buyInId: string, amount: number, operationKey: string) => Promise<void>;
   onRemove: (buyInId: string) => void;
 }
 
@@ -28,6 +29,9 @@ export default function PendingApprovals({
 }: PendingApprovalsProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
+  const [editOperationKey, setEditOperationKey] = useState<string | null>(null);
+  const [editError, setEditError] = useState("");
+  const [savingId, setSavingId] = useState<string | null>(null);
   const [approvingAll, setApprovingAll] = useState(false);
   if (!isHost) return null;
 
@@ -123,7 +127,10 @@ export default function PendingApprovals({
                       onClick={() => {
                         setEditingId(editing ? null : buyIn.id);
                         setAmount(String(buyIn.amount));
+                        setEditOperationKey(editing ? null : randomUUID());
+                        setEditError("");
                       }}
+                      disabled={savingId !== null}
                     >
                       <Pencil aria-hidden size={15} />
                     </Button>
@@ -146,12 +153,22 @@ export default function PendingApprovals({
                   <form
                     id={editFormId}
                     className="mt-4 flex flex-col gap-2 rounded-lg bg-gray-50 p-3 sm:flex-row sm:items-end"
-                    onSubmit={(event) => {
+                    onSubmit={async (event) => {
                       event.preventDefault();
                       const next = Number(amount);
                       if (!Number.isFinite(next) || next <= 0) return;
-                      onEdit(buyIn.id, next);
-                      setEditingId(null);
+                      const operationKey = editOperationKey ?? randomUUID();
+                      setSavingId(buyIn.id);
+                      setEditError("");
+                      try {
+                        await onEdit(buyIn.id, next, operationKey);
+                        setEditingId(null);
+                        setEditOperationKey(null);
+                      } catch (error) {
+                        setEditError(error instanceof Error ? error.message : "Could not save this correction. Retry to safely continue.");
+                      } finally {
+                        setSavingId(null);
+                      }
                     }}
                   >
                     <Input
@@ -163,8 +180,10 @@ export default function PendingApprovals({
                       prefix="$"
                       value={amount}
                       onChange={(event) => setAmount(event.target.value)}
+                      disabled={savingId === buyIn.id}
                     />
-                    <Button type="submit" className="mb-px">
+                    {editError ? <p role="alert" className="text-sm text-red-700 sm:mb-2">{editError}</p> : null}
+                    <Button type="submit" className="mb-px" loading={savingId === buyIn.id}>
                       Save
                     </Button>
                     <Button
@@ -172,7 +191,10 @@ export default function PendingApprovals({
                       onClick={() => {
                         setEditingId(null);
                         setAmount("");
+                        setEditOperationKey(null);
+                        setEditError("");
                       }}
+                      disabled={savingId === buyIn.id}
                     >
                       Cancel
                     </Button>

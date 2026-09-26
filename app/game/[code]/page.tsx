@@ -503,9 +503,9 @@ export default function GameRoomPage() {
     }
   }
 
-  async function handleEdit(buyInId: string, amount: number) {
+  async function handleEdit(buyInId: string, amount: number, operationKey: string) {
     try {
-      await updateBuyIn(buyInId, amount);
+      await updateBuyIn(buyInId, amount, operationKey);
       // Keep the initiating host responsive while the room-wide subscription
       // reconciles the authoritative snapshot and audit entry.
       setSnapshot((current) =>
@@ -513,7 +513,7 @@ export default function GameRoomPage() {
           ? {
               ...current,
               buyIns: current.buyIns.map((buyIn) =>
-                buyIn.id === buyInId ? { ...buyIn, amount } : buyIn,
+                buyIn.id === buyInId ? { ...buyIn, amount, verified: true } : buyIn,
               ),
             }
           : current,
@@ -524,6 +524,7 @@ export default function GameRoomPage() {
         err instanceof Error ? err.message : "Failed to update buy-in.",
         "error",
       );
+      throw err;
     }
   }
 
@@ -641,7 +642,6 @@ export default function GameRoomPage() {
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-3xl px-4 pb-32 focus:outline-none md:pb-24">
       <SyncStatusNotice status={syncStatus} onRetry={handleRetrySync} />
-      {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
       <GameHeader
         game={snapshot.game}
         verifiedPot={verifiedPot(snapshot)}
@@ -695,6 +695,7 @@ export default function GameRoomPage() {
           onRemoveBuyIn={handleRemoveBuyIn}
           onRemovePlayer={handleRemovePlayer}
         />
+        {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
       </div>
 
       {currentPlayer && !leftGame && currentEarlyCashOut?.status !== "requested" ? (

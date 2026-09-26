@@ -237,7 +237,7 @@ export default function SettlementSummary({
 
             <Link
               href={`/create?name=${encodeURIComponent(game.name)}&buyin=${game.buy_in_amount}`}
-              onClick={() => { if (isHost) trackProductOpsEvent("host.returned_to_create", {}, game.id); clearActiveGame(); }}
+              onClick={() => { if (isHost) trackProductOpsEvent("host.returned_to_create", {}, game.id); clearActiveGame(game.code); }}
               className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2"
             >
               <RefreshCw aria-hidden size={16} /> Play again

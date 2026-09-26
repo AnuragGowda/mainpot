@@ -70,6 +70,8 @@ export interface BuyIn {
   created_at: string;
   /** Client-generated key used to make retried ledger entries idempotent. */
   operation_key?: string | null;
+  /** Most recent host correction key; used only by localStorage recovery. */
+  host_edit_operation_key?: string | null;
 }
 
 export interface CashOut {

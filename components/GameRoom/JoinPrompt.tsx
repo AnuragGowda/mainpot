@@ -88,8 +88,15 @@ export default function JoinPrompt({
       const userId = await getCurrentUserId();
       const result = await joinGame(game.code, trimmedName, userId);
       markPostGameEntry(game.code);
-      await onJoined(result.gameId);
-      toast("Joined!", "success");
+      try {
+        await onJoined(result.gameId);
+        toast("Joined!", "success");
+      } catch {
+        // The database has already committed the seat. Surface recovery rather
+        // than falsely telling the player that a retry would join again.
+        toast("You joined. Reload this game to finish loading the table.", "success");
+        setLoading(false);
+      }
     } catch (err) {
       const message =
         err instanceof Error
@@ -147,6 +154,9 @@ export default function JoinPrompt({
               <span className="ml-1 font-mono font-semibold tracking-[0.16em] text-gray-900">
                 {game.code}
               </span>
+            </p>
+            <p className="col-span-2 text-xs leading-5 text-gray-600">
+              Joining records this opening buy-in for the host to review.
             </p>
           </div>
 

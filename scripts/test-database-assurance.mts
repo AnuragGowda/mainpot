@@ -94,7 +94,18 @@ async function verifyHostManagedPlayers() {
   const outsider = await guest("Host-managed assurance outsider");
   const game = await createGame(host, "Host-managed assurance");
   const participantSession = randomUUID();
-  await join(participant, game.code, "Independent player", participantSession);
+  const joinedParticipant = await join(participant, game.code, "Independent player", participantSession);
+  const joinedEntries = await participant.from("buy_ins").select("id, amount, verified").eq("player_id", joinedParticipant.player_id);
+  assert(
+    joinedEntries.data?.length === 1 && Number(joinedEntries.data[0].amount) === 20 && !joinedEntries.data[0].verified,
+    "joining atomically creates one pending opening buy-in",
+  );
+  const joinedRetry = await join(participant, game.code, "Independent player", participantSession);
+  const joinedEntriesAfterRetry = await participant.from("buy_ins").select("id").eq("player_id", joinedParticipant.player_id);
+  assert(
+    joinedRetry?.player_id === joinedParticipant.player_id && joinedEntriesAfterRetry.data?.length === 1,
+    "rejoining returns the seat without duplicating its opening buy-in",
+  );
   const input = { input_game_id: game.game_id, input_name: "Phone-free player", input_buy_in: 20, input_operation_key: randomUUID() };
   await expectError(() => participant.rpc("add_host_player", input), "non-host adding players");
   await expectError(() => outsider.rpc("add_host_player", input), "outsider adding players");
@@ -293,19 +304,16 @@ async function run() {
     "Early guest",
     earlyPlayerSessionId,
   );
-  const earlyBuyIn = await earlyGuest.rpc("create_buy_in_idempotent", {
-    input_game_id: earlyGame.game_id,
-    input_player_id: earlyPlayer.player_id,
-    input_amount: 20,
-    input_type: "buy_in",
-    input_fronted_by_player_id: null,
-    input_operation_key: randomUUID(),
-  });
-  assert(!earlyBuyIn.error && earlyBuyIn.data?.[0]?.id, "early player buy-in is created");
+  const { data: earlyBuyIn, error: earlyBuyInError } = await earlyHost
+    .from("buy_ins")
+    .select("id, amount, verified")
+    .eq("player_id", earlyPlayer.player_id)
+    .single();
+  assert(!earlyBuyInError && earlyBuyIn?.id && Number(earlyBuyIn.amount) === 20 && !earlyBuyIn.verified, "early join creates one pending player buy-in");
   const earlyApproval = await earlyHost
     .from("buy_ins")
     .update({ verified: true })
-    .eq("id", earlyBuyIn.data[0].id)
+    .eq("id", earlyBuyIn.id)
     .select("id, verified")
     .single();
   assert(!earlyApproval.error && earlyApproval.data.verified, "host verifies early player buy-in");
@@ -358,7 +366,7 @@ async function run() {
     .single();
   assert(!earlyCashOutRowError && Number(earlyCashOutRow.amount) === 30, "locked final chips enter reconciliation");
   await expectError(
-    () => earlyHost.from("buy_ins").update({ amount: 21 }).eq("id", earlyBuyIn.data[0].id).select("id"),
+    () => earlyHost.from("buy_ins").update({ amount: 21 }).eq("id", earlyBuyIn.id).select("id"),
     "editing a buy-in after early cash-out lock",
   );
   await expectError(
@@ -444,16 +452,16 @@ async function run() {
     input_game_id: gameA.game_id,
     input_player_id: playerA.player_id,
     input_amount: 15,
-    input_type: "buy_in",
+    input_type: "rebuy",
     input_fronted_by_player_id: null,
     input_operation_key: operationKey,
   });
-  assert(!first.error && first.data?.length === 1 && first.data[0].created === true, "first idempotent buy-in is created");
+  assert(!first.error && first.data?.length === 1 && first.data[0].created === true, "first idempotent rebuy is created");
   const second = await guestA.rpc("create_buy_in_idempotent", {
     input_game_id: gameA.game_id,
     input_player_id: playerA.player_id,
     input_amount: 15,
-    input_type: "buy_in",
+    input_type: "rebuy",
     input_fronted_by_player_id: null,
     input_operation_key: operationKey,
   });
@@ -463,7 +471,7 @@ async function run() {
     input_game_id: gameA.game_id,
     input_player_id: playerA.player_id,
     input_amount: 16,
-    input_type: "buy_in",
+    input_type: "rebuy",
     input_fronted_by_player_id: null,
     input_operation_key: operationKey,
   });
@@ -680,17 +688,49 @@ async function run() {
     "rejected player mutations leave the buy-in unchanged",
   );
 
-  const hostCorrection = await host
-    .from("buy_ins")
-    .update({ amount: 17, verified: true })
-    .eq("id", guestBuyIn.id)
-    .select("id, amount, verified");
+  await expectError(
+    () => host.from("buy_ins").update({ amount: 17 }).eq("id", guestBuyIn.id).select("id"),
+    "unaudited host buy-in amount update",
+  );
+  const correctionKey = randomUUID();
+  await expectError(
+    () => guestA.rpc("correct_buy_in_as_host", {
+      input_buy_in_id: guestBuyIn.id,
+      input_amount: 17,
+      input_operation_key: correctionKey,
+    }),
+    "player replaying a host correction key",
+  );
+  const hostCorrection = await host.rpc("correct_buy_in_as_host", {
+    input_buy_in_id: guestBuyIn.id,
+    input_amount: 17,
+    input_operation_key: correctionKey,
+  });
+  const correctionRow = (Array.isArray(hostCorrection.data) ? hostCorrection.data[0] : hostCorrection.data) as {
+    id?: string; amount?: number | string; verified?: boolean;
+  } | null;
   assert(
     !hostCorrection.error
-      && hostCorrection.data?.[0]?.id === guestBuyIn.id
-      && Number(hostCorrection.data[0].amount) === 17
-      && hostCorrection.data[0].verified === true,
-    "host can edit and approve a player buy-in",
+      && correctionRow?.id === guestBuyIn.id
+      && Number(correctionRow?.amount) === 17
+      && correctionRow?.verified === true,
+    "host correction atomically edits and verifies a player buy-in",
+  );
+  const correctionRetry = await host.rpc("correct_buy_in_as_host", {
+    input_buy_in_id: guestBuyIn.id,
+    input_amount: 17,
+    input_operation_key: correctionKey,
+  });
+  const correctionEvents = await host
+    .from("game_events")
+    .select("id, metadata")
+    .eq("game_id", gameA.game_id)
+    .eq("subject_player_id", playerA.player_id)
+    .eq("event_type", "buy_in_updated");
+  assert(
+    !correctionRetry.error && correctionEvents.data?.length === 1
+      && correctionEvents.data[0].metadata?.verified_by_correction === true,
+    "host correction retries return the same result without a second audit event",
   );
 
   const hostRepaidAdvance = await host

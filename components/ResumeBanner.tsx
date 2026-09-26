@@ -4,7 +4,7 @@ import { ArrowRight, CircleDollarSign, Play } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getGame } from "@/lib/data";
 import { navigateToFreshAppPage } from "@/lib/navigation";
-import { clearActiveGame, getActiveGame } from "@/lib/session";
+import { clearActiveGame, getActiveGames } from "@/lib/session";
 import type { GameStatus } from "@/lib/types";
 
 export interface ResumableGame {
@@ -50,35 +50,36 @@ export function ResumeGameCard({ game }: { game: ResumableGame }) {
  * against the data layer, and only renders when a non-ended game exists.
  */
 export default function ResumeBanner() {
-  const [game, setGame] = useState<ResumableGame | null>(null);
+  const [games, setGames] = useState<ResumableGame[]>([]);
 
   useEffect(() => {
     let cancelled = false;
-    const activeCode = getActiveGame();
-    if (!activeCode) {
+    const activeCodes = getActiveGames();
+    if (!activeCodes.length) {
       return;
     }
-    getGame(activeCode)
-      .then((game) => {
-        if (game?.status === "ended") {
-          clearActiveGame();
-          return;
+    void Promise.all(activeCodes.map(async (code) => {
+      try {
+        const game = await getGame(code);
+        if (!game || game.status === "ended") {
+          clearActiveGame(code);
+          return null;
         }
-        if (!cancelled && game) {
-          setGame({ code: game.code, name: game.name, status: game.status });
-        }
-      })
-      .catch(() => {
-        // No valid active game — show nothing.
-      });
+        return { code: game.code, name: game.name, status: game.status } as ResumableGame;
+      } catch {
+        return null;
+      }
+    })).then((results) => {
+      if (!cancelled) setGames(results.filter((game): game is ResumableGame => game !== null));
+    });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  if (!game) {
+  if (!games.length) {
     return null;
   }
 
-  return <ResumeGameCard game={game} />;
+  return <div className="space-y-3">{games.map((game) => <ResumeGameCard key={game.code} game={game} />)}</div>;
 }
