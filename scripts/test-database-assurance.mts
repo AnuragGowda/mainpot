@@ -580,13 +580,16 @@ async function run() {
   });
   assert(!recoveredCashOut.error && Number(recoveredCashOut.data?.amount) === 13,
     "the same operation key can safely retry after the rolled-back activity failure");
+  const fixtureBuyIns = await admin.from("buy_ins").select("amount").eq("game_id", gameB.game_id).eq("verified", true);
+  if (fixtureBuyIns.error) throw fixtureBuyIns.error;
+  const hostFinalStack = fixtureBuyIns.data.reduce((total, entry) => total + Number(entry.amount), 0) - 13;
   const hostSettlementCashOut = await otherHost.rpc("save_cash_out", {
     input_game_id: gameB.game_id,
     input_player_id: gameB.player_id,
-    input_amount: 27,
+    input_amount: hostFinalStack,
     input_operation_key: randomUUID(),
   });
-  assert(!hostSettlementCashOut.error && Number(hostSettlementCashOut.data?.amount) === 27,
+  assert(!hostSettlementCashOut.error && Number(hostSettlementCashOut.data?.amount) === hostFinalStack,
     "host can enter the remaining final stack before settlement lock");
   const otherGameEnded = await otherHost
     .from("games")
@@ -594,7 +597,8 @@ async function run() {
     .eq("id", gameB.game_id)
     .eq("status", "settling")
     .select("id");
-  assert(!otherGameEnded.error && otherGameEnded.data?.length === 1,
+  if (otherGameEnded.error) throw otherGameEnded.error;
+  assert(otherGameEnded.data?.length === 1,
     "the complete cash-out fixture locks its settlement");
   const endedPhaseSave = await otherHost.rpc("save_cash_out", {
     input_game_id: gameB.game_id,
