@@ -65,6 +65,8 @@ test("requires visitors to join before viewing an active game", async ({ browser
 
     await guest.keyboard.press("Escape");
     await expect(guest).toHaveURL(/\/join$/);
+    await expect(guest.getByRole("form", { name: "Join a game" })).toBeVisible();
+    await expect(guest.locator("#join-name")).toBeEnabled();
     await expect(guest.getByRole("region", { name: "At the table" })).toHaveCount(0);
     await guest.goto(host.url());
     await expect(dialog).toBeVisible();
