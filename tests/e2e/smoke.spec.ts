@@ -21,6 +21,25 @@ test.describe("public local-mode experience", () => {
   // can otherwise answer the request before Playwright's route handler.
   test.use({ serviceWorkers: "block" });
 
+  test("refreshes app caches while preserving the saved game and session", async ({ page, context }) => {
+    await page.goto("/recover.html?game=ABC123");
+    await context.addCookies([{ name: "recovery-session-check", value: "preserved", url: page.url() }]);
+    await page.evaluate(async () => {
+      localStorage.setItem("ante_session_id", "preserved-host-session");
+      localStorage.setItem("ante_active_game", "ABC123");
+      localStorage.setItem("ante_store", "preserved-ledger");
+      await caches.open("mainpot-old-runtime");
+      await caches.open("unrelated-app-cache");
+    });
+    await page.route("**/game/ABC123?recovery=*", route => route.fulfill({ contentType: "text/html", body: "<h1>Resumed table</h1>" }));
+    await page.getByRole("button", { name: "Refresh and resume game" }).click();
+    await expect(page.getByRole("heading", { name: "Resumed table" })).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem("ante_session_id"))).toBe("preserved-host-session");
+    expect(await page.evaluate(() => localStorage.getItem("ante_store"))).toBe("preserved-ledger");
+    expect(await page.evaluate(() => caches.keys())).toEqual(["unrelated-app-cache"]);
+    expect((await context.cookies()).find(cookie => cookie.name === "recovery-session-check")?.value).toBe("preserved");
+  });
+
   test("reviews payments before locking and keeps completion in sync", async ({ page }) => {
     test.slow();
     await runSettlementUxFlow(page);

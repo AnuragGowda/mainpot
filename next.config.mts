@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/recover.:extension(html|js)",
+        headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }],
+      },
+      {
         source: "/sw.js",
         headers: [
           {

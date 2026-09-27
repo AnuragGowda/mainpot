@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { classifyProductOpsFailure, trackProductOpsEvent } from "@/lib/product-ops";
@@ -13,6 +14,7 @@ export default function GameRoomErrorBoundary({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { code } = useParams<{ code: string }>();
   useEffect(() => {
     trackProductOpsEvent("game.room_load_failed", {
       reason: classifyProductOpsFailure(error),
@@ -34,6 +36,12 @@ export default function GameRoomErrorBoundary({
           <Button fullWidth variant="secondary" onClick={() => window.location.reload()}>
             Reload Mainpot
           </Button>
+          <a
+            href={`/recover.html?game=${encodeURIComponent(code)}`}
+            className="mt-1 inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-medium text-gray-700 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"
+          >
+            Refresh app files and resume
+          </a>
         </div>
       </Card>
     </main>
