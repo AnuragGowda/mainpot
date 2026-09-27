@@ -46,7 +46,6 @@ jobs:
         with:
           name: multiplayer-failure-diagnostics
           path: |
-            test-results/**/error-context.md
             test-results/**/bank-diagnostics.json
             test-results/**/network-diagnostics.json
           if-no-files-found: ignore
