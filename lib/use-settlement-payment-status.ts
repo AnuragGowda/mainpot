@@ -50,13 +50,11 @@ export function useSettlementPaymentStatus(
     refreshQueuedFor.current = null;
     const read = ++latestRead.current;
     readInFlight.current = { gameId, read };
-    if (!quiet) {
-      if (hasKnownStatus.current) {
-        setPhase("stale");
-      } else {
-        setPhase("loading");
-        setSettledKeys(EMPTY_KEYS);
-      }
+    // Revalidation alone does not invalidate a confirmed read. Keep controls
+    // stable until an actual failure or connectivity loss makes it stale.
+    if (!quiet && !hasKnownStatus.current) {
+      setPhase("loading");
+      setSettledKeys(EMPTY_KEYS);
     }
     void withTimeout(getSettlementPaymentStatuses(gameId), "Payment status read timed out.", 12_000)
       .then((statuses) => {
