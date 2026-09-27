@@ -40,6 +40,17 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
       - run: PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --workers=2
+      - name: Preserve safe multiplayer failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: multiplayer-failure-diagnostics
+          path: |
+            test-results/**/error-context.md
+            test-results/**/bank-diagnostics.json
+            test-results/**/network-diagnostics.json
+          if-no-files-found: ignore
+          retention-days: 7
 
   database-assurance:
     name: Database migrations and RLS assurance

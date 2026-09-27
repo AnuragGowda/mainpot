@@ -1,5 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { createDeviceContext } from "./device-context";
+import { writeFile } from "node:fs/promises";
+import { failureDiagnostics } from "./failure-diagnostics";
 
 const paymentStatusRead = "**/rest/v1/settlement_payments*";
 
@@ -29,20 +31,11 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     [0, 1, 2].map(() => createDeviceContext(browser, { baseURL, reducedMotion: "reduce" })),
   );
   const [host, payer, recipient] = await Promise.all(contexts.map((context) => context.newPage()));
-  const activeHandleReads = new Set<import("@playwright/test").Request>();
-  payer.on("request", request => { if (request.url().includes("/rpc/get_player_payment_handles")) activeHandleReads.add(request); });
-  payer.on("requestfinished", request => activeHandleReads.delete(request));
-  payer.on("requestfailed", request => activeHandleReads.delete(request));
   const failedReaders = new Set<Page>();
-  const runtimeErrors: string[] = [];
-  let phase = "setup";
-  const failedRequests: { device: number; phase: string; path: string; error: string | null }[] = [];
-  for (const [device, page] of [host, payer, recipient].entries()) {
-    page.on("pageerror", error => runtimeErrors.push(`${device}:${phase}:${error.name}: ${error.message}`));
-    page.on("requestfailed", request => failedRequests.push({ device, phase, path: new URL(request.url()).pathname, error: request.failure()?.errorText ?? null }));
-  }
+  const diagnostics = failureDiagnostics([host, payer, recipient]);
+  const { runtimeErrors, setPhase, navigate, duringRoute } = diagnostics;
 
-  const paymentReadFailure = async (route: import("@playwright/test").Route) => {
+  const paymentReadFailure = async (route: import("@playwright/test").Route) => duringRoute(route.request().frame().page(), async () => {
     if (route.request().method() !== "GET" || !failedReaders.has(route.request().frame().page())) return route.continue();
     const response = await route.fetch();
     if (!failedReaders.has(route.request().frame().page())) return route.fulfill({ response });
@@ -51,16 +44,16 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
       status: 400,
       json: { message: "Injected payment-status read failure" },
     });
-  };
+  });
 
   try {
-    phase = "create/join";
+    setPhase("create/join");
     await createGame(host, "Payment status recovery");
     await joinGame(payer, host.url(), "Jordan");
     await joinGame(recipient, host.url(), "Taylor");
     await host.getByRole("region", { name: "Needs approval" }).getByRole("button", { name: "Approve all" }).click();
 
-    phase = "finalize";
+    setPhase("finalize");
     await host.getByRole("button", { name: "End game", exact: true }).click();
     await host.getByRole("button", { name: "Start cash-outs" }).click();
     for (const [name, amount] of [["Casey", "30"], ["Jordan", "0"], ["Taylor", "30"]] as const) {
@@ -86,7 +79,7 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     payer.on("request", (request) => {
       if (request.url().includes("/rest/v1/rpc/set_settlement_payment_status_guarded")) writesAfterFailure += 1;
     });
-    phase = "payer failure/reload";
+    setPhase("payer failure/reload");
     failedReaders.add(payer);
     await payer.route(paymentStatusRead, paymentReadFailure);
 
@@ -101,9 +94,8 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
 
     // A reload has no in-memory last read. It must remain unknown, rather than
     // becoming a confidently unpaid $20 debt or a zero-sent ledger.
-    await expect.poll(() => activeHandleReads.size, { timeout: 15_000 }).toBe(0);
-    await payer.waitForLoadState("networkidle");
-    await payer.reload();
+    await navigate(payer, "payer reload", () => payer.reload());
+    setPhase("payer recovery");
     await expect(personal.getByRole("heading")).toHaveText("Payment status unavailable");
     await expect(personal).not.toContainText("You owe $20.00.");
     await expect(ledger.locator(":scope > summary")).not.toContainText("0 of 2 payments marked sent");
@@ -117,7 +109,7 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     await expect(ledger.locator(":scope > summary")).toContainText("2 of 2 payments marked sent");
     expect(writesAfterFailure).toBe(0);
 
-    phase = "recipient failure/resume";
+    setPhase("recipient failure/resume");
     // Recipient-side refresh failures use the same neutral, non-actionable state.
     const recipientPersonal = recipient.locator('section[aria-labelledby="your-settlement-heading"]');
     await expect(recipientPersonal.getByRole("heading")).toHaveText("All payments to you are marked sent.");
@@ -146,7 +138,7 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     // Keep this recipient foreground and online while forwarding its Realtime
     // subscription except for payment-table frames. Its next state must come
     // from the bounded authoritative HTTP reconciliation, not a browser event.
-    phase = "recipient reload/dropped frames";
+    setPhase("recipient reload/dropped frames");
     let droppedPaymentFrames = 0;
     let paymentChannelReady = false;
     await contexts[2].routeWebSocket(/\/realtime\/v1\/websocket/, (socket) => {
@@ -164,8 +156,8 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
         socket.send(message);
       });
     });
-    await recipient.waitForLoadState("networkidle");
-    await recipient.reload();
+    await navigate(recipient, "recipient reload", () => recipient.reload());
+    setPhase("recipient dropped-frame reconciliation");
     await expect(recipientPersonal.getByRole("heading")).toHaveText("All payments to you are marked sent.");
     await expect.poll(() => paymentChannelReady, { timeout: 15_000 }).toBe(true);
     await personal.getByRole("checkbox", { name: "Mark sent: $10.00 from Jordan to Taylor", exact: true }).locator("..").click();
@@ -175,7 +167,9 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
   } catch (error) {
     // Preserve the original assertion if browser teardown also fails.
     console.error("Payment-read recovery failed before teardown:", error);
-    console.error("Failed request diagnostics:", failedRequests);
+    const report = JSON.stringify(diagnostics.report(), null, 2);
+    console.error("WebKit failure diagnostics:", report);
+    try { await writeFile(test.info().outputPath("network-diagnostics.json"), report); } catch { /* Preserve the original failure. */ }
     throw error;
   } finally {
     await Promise.all([payer, recipient].map(page => page.unrouteAll({ behavior: "ignoreErrors" })));

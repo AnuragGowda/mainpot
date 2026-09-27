@@ -1,5 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { createDeviceContext } from "./device-context";
+import { writeFile } from "node:fs/promises";
+import { failureDiagnostics } from "./failure-diagnostics";
 
 function playerList(page: Page) {
   return page.getByRole("region", { name: "At the table" }).getByRole("listitem");
@@ -9,9 +11,8 @@ function pot(page: Page) {
   return page.getByText("Pot", { exact: true }).locator("..");
 }
 
-async function createGame(host: Page, gameName: string, hostName: string) {
-  await host.waitForLoadState("networkidle");
-  await host.goto("/create");
+async function createGame(host: Page, gameName: string, hostName: string, navigate: ReturnType<typeof failureDiagnostics>["navigate"]) {
+  await navigate(host, "host create navigation", () => host.goto("/create"));
   await host.waitForLoadState("networkidle");
   await host.locator("#create-name").fill(hostName);
   await host.locator("#create-game-name").fill(gameName);
@@ -20,9 +21,8 @@ async function createGame(host: Page, gameName: string, hostName: string) {
   await expect(host.getByRole("heading", { name: gameName })).toBeVisible({ timeout: 15_000 });
 }
 
-async function expectDuplicateJoin(page: Page, gameUrl: string, name: string) {
-  await page.waitForLoadState("networkidle");
-  await page.goto(gameUrl);
+async function expectDuplicateJoin(page: Page, gameUrl: string, name: string, navigate: ReturnType<typeof failureDiagnostics>["navigate"]) {
+  await navigate(page, "duplicate join navigation", () => page.goto(gameUrl));
   const input = page.locator("#join-prompt-name");
   await expect(input).toBeVisible({ timeout: 15_000 });
   await input.fill(name);
@@ -43,11 +43,12 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
   ]);
   const [host, firstGuest, secondGuest] = await Promise.all(contexts.map((context) => context.newPage()));
 
-  const runtimeErrors: string[] = [];
-  for (const page of [host, firstGuest, secondGuest]) page.on("pageerror", error => runtimeErrors.push(error.message));
+  const diagnostics = failureDiagnostics([host, firstGuest, secondGuest]);
+  const { runtimeErrors, setPhase, navigate } = diagnostics;
 
   try {
-    await createGame(host, "Lobby name guards", "Casey");
+    await createGame(host, "Lobby name guards", "Casey", navigate);
+    setPhase("duplicate name guards");
     const guardedGameUrl = host.url();
     const table = host.getByRole("region", { name: "At the table" });
 
@@ -60,19 +61,19 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
     await expect(playerList(host)).toHaveCount(2);
     await expect(pot(host)).toContainText("$40.00");
 
-    await expectDuplicateJoin(firstGuest, guardedGameUrl, "  jordan  ");
+    await expectDuplicateJoin(firstGuest, guardedGameUrl, "  jordan  ", navigate);
     await expect(playerList(host)).toHaveCount(2);
     await expect(pot(host)).toContainText("$40.00");
-    await expectDuplicateJoin(firstGuest, guardedGameUrl, "Ｊｏｒｄａｎ");
-    await expectDuplicateJoin(firstGuest, guardedGameUrl, "Jor\u200bdan");
+    await expectDuplicateJoin(firstGuest, guardedGameUrl, "Ｊｏｒｄａｎ", navigate);
+    await expectDuplicateJoin(firstGuest, guardedGameUrl, "Jor\u200bdan", navigate);
     await expect(playerList(host)).toHaveCount(2);
     await expect(pot(host)).toContainText("$40.00");
 
     const guestSession = await firstGuest.evaluate(() => localStorage.getItem("ante_session_id"));
     const hostSession = await host.evaluate(() => localStorage.getItem("ante_session_id"));
     await firstGuest.evaluate(session => localStorage.setItem("ante_session_id", session!), hostSession);
-    await firstGuest.waitForLoadState("networkidle");
-    await firstGuest.reload();
+    await navigate(firstGuest, "guest session substitution reload", () => firstGuest.reload());
+    setPhase("session substitution assertions");
     await expect(firstGuest.locator("#join-prompt-name")).toBeVisible();
     await expect(firstGuest.getByRole("button", { name: "End game", exact: true })).toHaveCount(0);
     await firstGuest.evaluate(session => localStorage.setItem("ante_session_id", session!), guestSession);
@@ -88,10 +89,13 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
       fullPage: true,
     });
 
-    await createGame(host, "Lobby name race", "Morgan");
+    await createGame(host, "Lobby name race", "Morgan", navigate);
     const raceGameUrl = host.url();
-    await Promise.all([firstGuest.waitForLoadState("networkidle"), secondGuest.waitForLoadState("networkidle")]);
-    await Promise.all([firstGuest.goto(raceGameUrl), secondGuest.goto(raceGameUrl)]);
+    await Promise.all([
+      navigate(firstGuest, "race guest navigation", () => firstGuest.goto(raceGameUrl)),
+      navigate(secondGuest, "race guest navigation", () => secondGuest.goto(raceGameUrl)),
+    ]);
+    setPhase("concurrent name race");
     await Promise.all([
       expect(firstGuest.locator("#join-prompt-name")).toBeVisible({ timeout: 15_000 }),
       expect(secondGuest.locator("#join-prompt-name")).toBeVisible({ timeout: 15_000 }),
@@ -126,8 +130,8 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
     await expect(pot(host)).toContainText("$20.00");
     await expect(pot(host)).toContainText("(+$20.00)");
 
-    await winner.waitForLoadState("networkidle");
-    await winner.reload();
+    await navigate(winner, "winner reload", () => winner.reload());
+    setPhase("winner reload assertions");
     await expect(winner.locator("#join-prompt-name")).toHaveCount(0, { timeout: 15_000 });
     await expect(playerList(winner)).toHaveCount(2);
     await expect(playerList(winner).filter({ hasText: /casey/i })).toContainText("1 entry");
@@ -137,6 +141,11 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
       fullPage: true,
     });
     expect(runtimeErrors, "Independent devices must not leave uncaught browser errors").toEqual([]);
+  } catch (error) {
+    const report = JSON.stringify(diagnostics.report(), null, 2);
+    console.error("WebKit failure diagnostics:", report);
+    try { await writeFile(test.info().outputPath("network-diagnostics.json"), report); } catch { /* Preserve the original failure. */ }
+    throw error;
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }
