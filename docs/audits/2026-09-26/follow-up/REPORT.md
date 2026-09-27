@@ -79,6 +79,10 @@ The final source is independently exercised by CI, including the complete 140-ca
 
 CI now has five jobs, including the full five-profile connected suite, confirmed-email mobile journeys and the operational gate. Sanitized structured request diagnostics are retained for seven days using [GitHub upload-artifact](https://github.com/actions/upload-artifact); raw DOM snapshots, traces, auth headers and capability URLs are excluded. The first uploaded account-recovery DOM snapshot included a disposable local test password; that artifact was removed, the private retained copy redacted, and future raw context uploads disabled. A successful job that required retries remains a reliability finding. A successful local run, a terminal CI result, hosted migration read-back, and independent production verification are separate release facts.
 
+## Landing demo contrast
+
+The production public sweep on source `5f5cffc` found the small Verified labels below the 4.5:1 contrast threshold on Android Chromium (4.49:1 while the demo animated). Their green text has been darkened from emerald-700 to emerald-800 to provide margin. Motion remains enabled during verification; the other 29 profile/page checks passed without detected WCAG violations. The final deployment sweep is recorded separately in the release receipt.
+
 ## Visual evidence
 
 The follow-up evidence folder preserves the new captures separately from the earlier audit. Reviewed captures include the iPhone unknown-payment notice, stale last-known records, desktop/mobile bank plans, account payment history and template editing. A failed payment read leaves a neutral notice and retry action, rather than a fabricated unpaid balance or enabled payment mutation.

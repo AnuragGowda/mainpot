@@ -135,7 +135,7 @@ export default function HeroGameDemo() {
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">{initials}</span>
                 <span className="flex-1 text-sm font-medium">{name}</span>
                 <span className="text-sm font-semibold tabular-nums">{amount}</span>
-                <span className="w-14 text-right text-[10px] font-medium text-emerald-700">Verified</span>
+                <span className="w-14 text-right text-[10px] font-medium text-emerald-800">Verified</span>
               </div>
             ))}
           </div>
