@@ -81,7 +81,7 @@ CI now has five jobs, including the full five-profile connected suite, confirmed
 
 ## Landing demo contrast
 
-The production public sweep on source `5f5cffc` found the small Verified labels below the 4.5:1 contrast threshold on Android Chromium (4.49:1 while the demo animated). Their green text has been darkened from emerald-700 to emerald-800 to provide margin. Motion remains enabled during verification; the other 29 profile/page checks passed without detected WCAG violations. The final deployment sweep is recorded separately in the release receipt.
+The production public sweep on source `5f5cffc` found the small Verified labels below the 4.5:1 contrast threshold on Android Chromium (4.49:1 while the demo animated). Their green text has been darkened from emerald-700 to emerald-800 to provide margin. Checking the later demo states also found three small cash-out/balancing labels at 4.41:1 against the pale stage; the demo header labels now use gray-600. Motion remains enabled during verification; both initial-page and complete-cycle checks are retained separately. The other 29 initial profile/page checks passed without detected WCAG violations. The final deployment sweep is recorded separately in the release receipt.
 
 ## Visual evidence
 

@@ -141,7 +141,7 @@ export default function HeroGameDemo() {
           </div>
           <div key={demoState} aria-hidden={demoState !== "settling"} className={`ante-demo-settling ${demoState === "settling" ? "ante-demo-visible" : ""}`}>
               <div className="border-b border-gray-200 px-4 py-3">
-              <div className="flex items-center justify-between"><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-500">Enter cash-outs</p><span className="text-[10px] font-semibold text-gray-500">4 of 4 entered</span></div>
+              <div className="flex items-center justify-between"><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-600">Enter cash-outs</p><span className="text-[10px] font-semibold text-gray-600">4 of 4 entered</span></div>
             </div>
             {[["AP", "Alex", "$40"], ["MK", "Morgan", "$160"], ["SR", "Sam", "$120"], ["JT", "Jordan", "$40"]].map(([initials, name, amount]) => (
               <div key={name} className="ante-demo-cashout-row flex flex-1 items-center gap-3 border-b border-gray-200/70 px-4 last:border-0">
@@ -153,14 +153,14 @@ export default function HeroGameDemo() {
           </div>
           <div aria-hidden={demoState !== "balancing"} className={`ante-demo-balancing ${demoState === "balancing" ? "ante-demo-visible" : ""}`}>
             <span className="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 text-lg text-emerald-700">✓</span>
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">All stacks entered</p>
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-gray-600">All stacks entered</p>
             <p className="mt-1 text-lg font-semibold">Bank balanced. Preparing payments.</p>
             <div className="mt-5 h-1.5 w-40 overflow-hidden rounded-full bg-gray-100"><span className="ante-balance-progress block h-full rounded-full bg-emerald-500" /></div>
           </div>
           <div aria-hidden={demoState !== "settled"} className={`ante-demo-settlement ${demoState === "settled" ? "ante-demo-visible" : ""}`}>
             <div className="ante-settlement-header">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-500">Final settlement</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-600">Final settlement</p>
                 <p className="mt-0.5 text-sm font-semibold">Two payments. All chips accounted for.</p>
               </div>
             </div>
