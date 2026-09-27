@@ -203,6 +203,91 @@ test("locks an early cash-out against the host and carries it out of final settl
   }
 });
 
+for (const failRealtime of [false, true]) {
+  test(`keeps two early cash-outs usable through refresh and settlement${failRealtime ? " when realtime setup fails" : ""}`, async ({ browser }, testInfo) => {
+    test.slow();
+    const contexts = await Promise.all([createDeviceContext(browser), createDeviceContext(browser), createDeviceContext(browser)]);
+    const [hostContext, jordanContext, taylorContext] = contexts;
+    if (failRealtime) {
+      await hostContext.addInitScript(() => {
+        const NativeWebSocket = window.WebSocket;
+        window.WebSocket = class extends NativeWebSocket {
+          constructor(url: string | URL, protocols?: string | string[]) {
+            if (String(url).includes("/realtime/v1/websocket")) throw new Error("Injected realtime setup failure");
+            super(url, protocols);
+          }
+        };
+      });
+    }
+    const [host, jordan, taylor] = await Promise.all(contexts.map(context => context.newPage()));
+    const errors: string[] = [];
+    let hostReloading = false;
+    for (const page of [host, jordan, taylor]) {
+      page.on("pageerror", error => {
+        // WebKit reports an aborted auth fetch when the old document is
+        // replaced. Still require the refreshed authenticated room below.
+        if (page === host && hostReloading && /auth\/v1\/user due to access control checks\.$/.test(error.message)) return;
+        errors.push(error.message);
+      });
+      page.on("console", message => {
+        // React catches effect failures and reports them to console instead
+        // of pageerror; those must also fail this regression test.
+        if (message.type() === "error" && /^(?:Error|TypeError|ReferenceError):|Minified React error|callbacks for realtime:/.test(message.text())) errors.push(message.text());
+      });
+    }
+    try {
+      await createGame(host, "Realtime test game");
+      const gameUrl = host.url();
+      await joinGame(jordan, gameUrl, "Jordan");
+      await joinGame(taylor, gameUrl, "Taylor");
+      await host.getByRole("region", { name: "Needs approval" }).getByRole("button", { name: "Approve all", exact: true }).click();
+      await expect(host.getByRole("region", { name: "Needs approval" })).toHaveCount(0);
+      const hostEarly = host.getByRole("region", { name: "Early cash-outs" });
+      for (const [guest, name, amount] of [[jordan, "Jordan", "30"], [taylor, "Taylor", "5"]] as const) {
+        await guest.getByRole("button", { name: "Cash out", exact: true }).click();
+        const dialog = guest.getByRole("alertdialog", { name: "Cash out & leave" });
+        await dialog.getByRole("textbox", { name: "Final chips for early cash-out" }).fill(amount);
+        await dialog.getByRole("button", { name: "Send to host" }).click();
+        await hostEarly.getByRole("article", { name, exact: true }).getByRole("button", { name: "Confirm & lock" }).click();
+        await expect(guest.getByText("You cashed out early. Your payment record is above.", { exact: true })).toBeVisible();
+        await expect(hostEarly.getByRole("button", { name: "Confirm & lock" })).toHaveCount(0);
+      }
+      await expect(hostEarly.getByTitle("Mark sent")).toHaveCount(2);
+      await expect(host.getByRole("heading", { name: "Mainpot hit a snag" })).toHaveCount(0);
+      hostReloading = true;
+      await host.reload();
+      await expect(hostEarly.getByTitle("Mark sent")).toHaveCount(2);
+      hostReloading = false;
+      await hostEarly.getByTitle("Mark sent").first().click();
+      await expect(jordan.getByRole("region", { name: "Early cash-outs" }).getByTitle("Reopen payment")).toHaveCount(1);
+      hostReloading = true;
+      await host.reload();
+      await expect(hostEarly.getByTitle("Reopen payment")).toHaveCount(1);
+      await expect(hostEarly.getByTitle("Mark sent")).toHaveCount(1);
+      hostReloading = false;
+      await host.screenshot({ path: testInfo.outputPath("two-early-cash-outs.png"), fullPage: true });
+
+      await host.getByRole("button", { name: "End game" }).click();
+      await host.getByRole("button", { name: "Start cash-outs" }).click();
+      const hostCashOut = host.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
+      await hostCashOut.fill("25");
+      await hostCashOut.blur();
+      await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
+      await host.getByRole("button", { name: "Review settlement" }).click();
+      await host.getByRole("button", { name: "Lock settlement", exact: true }).click();
+      await host.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
+      await expect(host.locator('[data-testid="payment-ledger"] > summary')).toContainText("1 of 2 payments marked sent");
+      hostReloading = true;
+      await host.reload();
+      await expect(host.locator('[data-testid="payment-ledger"] > summary')).toContainText("1 of 2 payments marked sent");
+      hostReloading = false;
+      expect(errors, "All three clients must remain free of room and payment effect crashes").toEqual([]);
+    } finally {
+      await Promise.all(contexts.map(context => context.close()));
+    }
+  });
+}
+
 test("auto-approves host rebuys while keeping player entries pending", async ({ browser }) => {
   const hostContext = await createDeviceContext(browser);
   const guestContext = await createDeviceContext(browser);

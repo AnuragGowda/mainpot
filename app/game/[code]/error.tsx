@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { classifyProductOpsFailure, trackProductOpsEvent } from "@/lib/product-ops";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { roomErrorSupportCode } from "@/lib/room-error";
 
 export default function GameRoomErrorBoundary({
   error,
@@ -30,6 +31,9 @@ export default function GameRoomErrorBoundary({
         </h1>
         <p className="mt-2 text-sm leading-6 text-gray-600">
           Your game data is still saved. Try the screen again, or reload to pick up the latest app version.
+        </p>
+        <p className="mt-3 text-xs text-gray-500">
+          Support code: {roomErrorSupportCode(error, process.env.NEXT_PUBLIC_APP_VERSION ?? "unknown")}
         </p>
         <div className="mt-6 grid gap-3">
           <Button fullWidth onClick={reset}>Try again</Button>

@@ -15,3 +15,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   Docker-compatible runtime.
 - Verify that the Docker-compatible CLI is connected to the intended runtime
   before starting containers.
+
+## Production release safety
+
+- Routine production releases must use `npm run release:production`. It requires
+  a clean `main` checkout, the exact pushed commit, and every required CI job
+  passing for that commit. Git pushes to `main` intentionally do not auto-deploy.
+- Do not bypass the gate with direct Vercel production deployments or promotions
+  for routine changes. Direct deployment is reserved for restoring a live outage
+  explicitly requested in the current session; document any unrun checks.
+- Realtime is optional acceleration. Subscription setup and cleanup must not
+  crash the room or disable authoritative polling.
+- When claiming a live incident is resolved, separate deployed code, browser
+  verification, and recovery on the affected user's existing app. A fresh browser
+  or mocked snapshot alone does not prove the affected device has recovered.

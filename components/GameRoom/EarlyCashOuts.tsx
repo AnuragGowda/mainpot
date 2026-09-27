@@ -7,7 +7,7 @@ import Card from "@/components/ui/Card";
 import { formatCurrency, formatSignedNet } from "@/lib/format";
 import { calculateEarlyCashOutNet, getEarlyCashOutTransfer } from "@/lib/settlement";
 import type { GameSnapshot } from "@/lib/types";
-import type { SettlementPaymentStatusState } from "@/lib/use-settlement-payment-status";
+import { useSettlementPaymentStatus, type SettlementPaymentStatusState } from "@/lib/use-settlement-payment-status";
 import TransferList from "@/components/Settlement/TransferList";
 import ConfirmButton from "./ConfirmButton";
 
@@ -35,6 +35,9 @@ export default function EarlyCashOuts({
     (item) => item.status === "locked"
       || (item.status === "requested" && onApprove && onCancel && (isHost || item.player_id === currentPlayerId))
   );
+  // All early-exit payment cards share one read and realtime subscription.
+  const ownPaymentStatus = useSettlementPaymentStatus(snapshot.game.id, !paymentStatus && visible.some((item) => item.status === "locked"));
+  const activePaymentStatus = paymentStatus ?? ownPaymentStatus;
   if (!visible.length) return null;
 
   async function run(id: string, action: (earlyCashOutId: string) => Promise<void>) {
@@ -70,11 +73,11 @@ export default function EarlyCashOuts({
           const ownRequest = player.id === currentPlayerId;
 
           return (
-            <Card key={earlyCashOut.id} padding="md" className={earlyCashOut.status === "requested" ? "border-amber-200 bg-amber-50/40" : "border-gray-300"}>
+            <Card key={earlyCashOut.id} role="article" aria-labelledby={`${headingId}-${earlyCashOut.id}`} padding="md" className={earlyCashOut.status === "requested" ? "border-amber-200 bg-amber-50/40" : "border-gray-300"}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold text-gray-950">{player.name}</h3>
+                    <h3 id={`${headingId}-${earlyCashOut.id}`} className="font-semibold text-gray-950">{player.name}</h3>
                     {ownRequest ? <Badge variant="green">You</Badge> : null}
                     <Badge variant={earlyCashOut.status === "locked" ? "gray" : "amber"}>
                       {earlyCashOut.status === "locked" ? "cashed out" : "host review"}
@@ -147,7 +150,7 @@ export default function EarlyCashOuts({
                       isHost={isHost}
                       actionsEnabled
                       earlyCashOut={earlyCashOut}
-                      paymentStatus={paymentStatus}
+                      paymentStatus={activePaymentStatus}
                     />
                   ) : (
                     <p className="rounded-lg bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700">No payment needed — this player is even.</p>

@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   // normal `.next` output, which may be used by a concurrent dev server.
   distDir: process.env.NEXT_E2E_DIST_DIR ?? ".next",
   reactStrictMode: true,
+  env: {
+    NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION ?? process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "local",
+  },
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },

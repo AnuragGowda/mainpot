@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isSupabaseConfigured } from "./supabase";
 import { getBrowserSupabase } from "./supabase-browser";
+import { subscribeWithPollingFallback } from "./realtime-subscription";
 import { resolveCurrentPlayer } from "./player-identity";
 import { validateCurrencyAmount } from "./currency-input";
 import { ensureCurrentUser } from "./auth-client";
@@ -1604,9 +1605,8 @@ function subscribeToGameSupabase(
     void requestRefresh();
   }, 2_000);
 
-  const channel = client
-    .channel(`game-${gameId}-${randomUUID()}`)
-    .on(
+  const stopRealtime = subscribeWithPollingFallback(client, `game-${gameId}`, (channel) => {
+    channel.on(
       "postgres_changes",
       { event: "*", schema: "public", table: "games", filter: `id=eq.${gameId}` },
       () => {
@@ -1685,6 +1685,7 @@ function subscribeToGameSupabase(
         reportStatus(browserOffline ? "offline" : "reconnecting");
       }
     });
+  }, () => reportStatus(browserOffline ? "offline" : "reconnecting"));
 
   const handleOffline = () => {
     browserOffline = true;
@@ -1703,7 +1704,7 @@ function subscribeToGameSupabase(
     window.clearInterval(reconciliation);
     window.removeEventListener("offline", handleOffline);
     window.removeEventListener("online", handleOnline);
-    void client.removeChannel(channel);
+    stopRealtime();
   };
 }
 

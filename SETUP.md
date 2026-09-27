@@ -17,6 +17,26 @@ project or deploying the application outside the local development stack.
   the current Node 22 release.
 - A free [Supabase](https://supabase.com) account.
 
+## Production release gate
+
+Pushes to `main` run CI but do not automatically deploy to Vercel. Feature
+branches still receive preview deployments. From a clean `main` checkout:
+
+```sh
+npm run release:production -- --check
+npm run release:production
+```
+
+The release command requires local HEAD to match `origin/main` and the latest
+push CI run for that exact commit to pass every required job, including mobile,
+multiplayer, database, and authentication checks. It uploads only committed
+source. Authenticate `gh` and the Vercel CLI and link `.vercel/project.json`
+first. After deployment, check the affected live journey in the browser;
+deployment readiness alone is not proof that a user's existing app recovered.
+
+Direct production deployment or promotion commands bypass this gate and are
+reserved for a documented outage response. Do not use them for routine releases.
+
 ## 2. Create a Supabase project
 
 1. Go to [supabase.com](https://supabase.com) and sign in.

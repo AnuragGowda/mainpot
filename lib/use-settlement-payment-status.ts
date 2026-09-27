@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getSettlementPaymentStatuses, subscribeToPaymentChanges } from "./payments";
 import { withTimeout } from "./request-timeout";
 import { getBrowserSupabase } from "./supabase-browser";
+import { subscribeWithPollingFallback } from "./realtime-subscription";
 
 export type PaymentStatusReadPhase = "loading" | "known" | "unavailable" | "stale";
 
@@ -32,7 +33,6 @@ export function useSettlementPaymentStatus(
   gameId: string,
   enabled = true,
 ): SettlementPaymentStatusState {
-  const subscriberId = useId();
   const [phase, setPhase] = useState<PaymentStatusReadPhase>("loading");
   const [settledKeys, setSettledKeys] = useState<ReadonlySet<string>>(EMPTY_KEYS);
   const latestRead = useRef(0);
@@ -107,11 +107,8 @@ export function useSettlementPaymentStatus(
     window.addEventListener("offline", onOffline);
     document.addEventListener("visibilitychange", onVisibilityChange);
     const supabase = getBrowserSupabase();
-    const channel = supabase
-      // Supabase reuses a channel for the same topic. Separate mounted readers
-      // must own separate channels so adding a second early exit stays safe.
-      ?.channel(`settlement-payment-status-${gameId}-${subscriberId}`)
-      .on(
+    const stopRealtime = subscribeWithPollingFallback(supabase, `settlement-payment-status-${gameId}`, (channel) => {
+      channel.on(
         "postgres_changes",
         { event: "*", schema: "public", table: "settlement_payments", filter: `game_id=eq.${gameId}` },
         () => refresh(),
@@ -120,6 +117,7 @@ export function useSettlementPaymentStatus(
         // Reconcile after subscription so a write during channel setup is not missed.
         if (channelStatus === "SUBSCRIBED") refresh();
       });
+    });
 
     return () => {
       latestRead.current += 1;
@@ -131,9 +129,9 @@ export function useSettlementPaymentStatus(
       window.removeEventListener("online", onOnline);
       window.removeEventListener("offline", onOffline);
       document.removeEventListener("visibilitychange", onVisibilityChange);
-      if (channel && supabase) void supabase.removeChannel(channel);
+      stopRealtime();
     };
-  }, [enabled, gameId, refresh, subscriberId]);
+  }, [enabled, gameId, refresh]);
 
   return {
     phase,

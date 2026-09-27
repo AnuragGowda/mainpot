@@ -15,6 +15,7 @@
     "build": "npm run build:service-worker && next build",
     "build:service-worker": "tsc --project tsconfig.service-worker.json",
     "start": "next start",
+    "release:production": "node scripts/release-production.mts",
     "lint": "eslint .",
     "test": "vitest run",
     "test:e2e": "playwright test",
