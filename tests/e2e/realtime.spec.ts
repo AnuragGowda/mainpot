@@ -652,6 +652,58 @@ test("syncs host-added players to guests without exposing host controls", async 
   }
 });
 
+test("keeps sign-in controls disabled until client handlers are ready", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  let releaseScripts!: () => void;
+  const scriptGate = new Promise<void>(resolve => { releaseScripts = resolve; });
+  const scriptHandlers: Promise<void>[] = [];
+  let blockedScripts = 0;
+  const scriptPattern = /\/_next\/static\/.*\.js(?:\?|$)/;
+  const holdScripts = (route: Route) => {
+    blockedScripts += 1;
+    const pending = scriptGate.then(() => route.continue());
+    scriptHandlers.push(pending);
+    return pending;
+  };
+  const authWrites: string[] = [];
+  const readOnlyAuth = (route: Route) => {
+    if (!["GET", "HEAD", "OPTIONS"].includes(route.request().method())) {
+      authWrites.push(new URL(route.request().url()).pathname);
+      return route.abort();
+    }
+    return route.continue();
+  };
+  await page.route(scriptPattern, holdScripts);
+  await page.route("**/auth/v1/**", readOnlyAuth);
+  try {
+    await page.goto("/signin", { waitUntil: "commit" });
+    const email = page.getByLabel("Email", { exact: true });
+    const password = page.getByLabel("Password", { exact: true });
+    const toggle = page.getByRole("button", { name: "Create an account", exact: true });
+    await expect.poll(() => blockedScripts).toBeGreaterThan(0);
+    await expect(email).toBeDisabled();
+    await expect(password).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeDisabled();
+    await expect(toggle).toBeDisabled();
+    releaseScripts();
+    await expect(email).toBeEnabled();
+    await email.fill("hydration-check@example.invalid");
+    await password.fill("synthetic-placeholder");
+    await toggle.click();
+    await expect(page.getByLabel("Display name", { exact: true })).toBeVisible();
+    await expect(email).toHaveValue("hydration-check@example.invalid");
+    await expect(password).toHaveValue("synthetic-placeholder");
+    expect(authWrites).toEqual([]);
+    expect(errors).toEqual([]);
+  } finally {
+    releaseScripts();
+    await Promise.all(scriptHandlers);
+    await page.unroute(scriptPattern, holdScripts);
+    await page.unroute("**/auth/v1/**", readOnlyAuth);
+  }
+});
+
 test("restores an account-owned seat and settled history across browsers", async ({ browser, baseURL }) => {
   test.slow();
   await checkAccountRecovery(browser, baseURL!);

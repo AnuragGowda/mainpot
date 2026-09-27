@@ -36,9 +36,11 @@ export default function SignInPage() {
   const [recoveryCanRetry, setRecoveryCanRetry] = useState(true);
   const [recoveryPending, setRecoveryPending] = useState(false);
   const [next, setNext] = useState("/dashboard");
+  const [isHydrated, setIsHydrated] = useState(false);
   const googleAuthEnabled = process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true";
 
   useEffect(() => {
+    setIsHydrated(true);
     const params = new URLSearchParams(window.location.search);
     const requestedNext = params.get("next");
     if (requestedNext?.startsWith("/") && !requestedNext.startsWith("//")) {
@@ -246,8 +248,8 @@ export default function SignInPage() {
               <p aria-live="polite" className="mt-2 text-sm leading-6 text-gray-600">{authStatus ?? "Your account is ready. You can continue to your saved games."}</p>
               {authError ? <p role="alert" className="mt-4 text-sm font-medium text-red-700">{authError}</p> : null}
               <div className="mt-6 grid gap-3">
-                {recoveryCanRetry ? <Button fullWidth loading={loading} onClick={retryRecovery}>Retry guest recovery</Button> : null}
-                <Button fullWidth variant="secondary" onClick={() => router.push(next)}>Continue to your account</Button>
+                {recoveryCanRetry ? <Button fullWidth disabled={!isHydrated} loading={loading} onClick={retryRecovery}>Retry guest recovery</Button> : null}
+                <Button fullWidth disabled={!isHydrated} variant="secondary" onClick={() => router.push(next)}>Continue to your account</Button>
               </div>
             </div>
           ) : emailLinkSent ? (
@@ -260,7 +262,7 @@ export default function SignInPage() {
                 {emailLinkSent === "signup" ? "We sent a confirmation link to " : "We sent a secure sign-in link to "}<strong>{email}</strong>.
               </p>
               {recoveryPending ? <p className="mt-3 text-sm leading-6 text-gray-600">Your guest-game recovery is reserved for this email for up to one hour. Open this link in the same browser where you played as a guest.</p> : null}
-              <Button className="mt-6" variant="secondary" onClick={() => setEmailLinkSent(null)}>
+              <Button className="mt-6" disabled={!isHydrated} variant="secondary" onClick={() => setEmailLinkSent(null)}>
                 Use another email
               </Button>
             </div>
@@ -277,7 +279,7 @@ export default function SignInPage() {
 
               {googleAuthEnabled ? (
                 <>
-                  <Button fullWidth variant="secondary" className="mt-6" loading={loading} onClick={handleGoogle} leftIcon={<GoogleMark className="h-4 w-4" />}>
+                  <Button fullWidth disabled={!isHydrated} variant="secondary" className="mt-6" loading={loading} onClick={handleGoogle} leftIcon={<GoogleMark className="h-4 w-4" />}>
                     Continue with Google
                   </Button>
                   <div className="my-5 flex items-center gap-3 text-xs uppercase tracking-wider text-gray-600">
@@ -290,23 +292,23 @@ export default function SignInPage() {
 
               <form onSubmit={handlePasswordAuth} className="space-y-4">
                 {mode === "signup" ? (
-                  <Input label="Display name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} autoComplete="name" placeholder="Alex" maxLength={PLAYER_NAME_MAX_LENGTH} />
+                  <Input label="Display name" disabled={!isHydrated} value={displayName} onChange={(event) => setDisplayName(event.target.value)} autoComplete="name" placeholder="Alex" maxLength={PLAYER_NAME_MAX_LENGTH} />
                 ) : null}
-                <Input label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" />
-                <Input label="Password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} minLength={6} required placeholder="At least 6 characters" />
-                <Button type="submit" fullWidth loading={loading}>
+                <Input label="Email" disabled={!isHydrated} type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" />
+                <Input label="Password" disabled={!isHydrated} type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} minLength={6} required placeholder="At least 6 characters" />
+                <Button type="submit" disabled={!isHydrated} fullWidth loading={loading}>
                   {mode === "signin" ? "Sign in" : "Create account"}
                 </Button>
               </form>
 
               {mode === "signin" ? (
-                <button type="button" onClick={handleMagicLink} disabled={loading} className="mt-4 w-full text-sm text-gray-600 hover:text-gray-950 disabled:opacity-50">
+                <button type="button" onClick={handleMagicLink} disabled={!isHydrated || loading} className="mt-4 w-full text-sm text-gray-600 hover:text-gray-950 disabled:opacity-50">
                   Forgot your password? <span className="font-medium text-gray-900">Get a sign-in link</span>
                 </button>
               ) : null}
               <p className="mt-6 text-center text-sm text-gray-500">
                 {mode === "signin" ? "New to Mainpot?" : "Already have an account?"}{" "}
-                <button type="button" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setAuthError(null); setAuthStatus(null); }} className="font-medium text-gray-900 hover:text-gray-600">
+                <button type="button" disabled={!isHydrated} onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setAuthError(null); setAuthStatus(null); }} className="font-medium text-gray-900 hover:text-gray-600 disabled:opacity-50">
                   {mode === "signin" ? "Create an account" : "Sign in"}
                 </button>
               </p>

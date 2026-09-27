@@ -1,5 +1,7 @@
-import { expect, type Page, type Browser } from "@playwright/test";
+import { expect, test, type Page, type Browser } from "@playwright/test";
 import { createDeviceContext } from "./device-context";
+import { writeFile } from "node:fs/promises";
+import { failureDiagnostics } from "./failure-diagnostics";
 
 export async function checkCalculatorValidation(page: Page) {
   await page.goto("/poker-settlement-calculator");
@@ -28,7 +30,35 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
   const resumed = await second.newPage();
   const email = `recovery-${crypto.randomUUID()}@example.com`;
   const password = `Recovery-${crypto.randomUUID()}`;
+  const diagnostics = failureDiagnostics([host, resumed]);
+  await host.addInitScript(() => {
+    const events: { event: string; at: number; node: number | null; value: string | null; disabled: boolean | null; trusted?: boolean }[] = [];
+    (window as unknown as { __mainpotCreateInputEvents: typeof events }).__mainpotCreateInputEvents = events;
+    const nodes = new WeakMap<HTMLInputElement, number>();
+    let nextNode = 0;
+    let lastSnapshot = "";
+    const sample = (event: string, trusted?: boolean) => {
+      const element = document.getElementById("create-buy-in");
+      const input = element instanceof HTMLInputElement ? element : null;
+      if (input && !nodes.has(input)) nodes.set(input, ++nextNode);
+      const state = { node: input ? nodes.get(input)! : null, value: input?.value ?? null, disabled: input?.disabled ?? null };
+      const snapshot = JSON.stringify(state);
+      if (event === "mutation" && snapshot === lastSnapshot) return;
+      lastSnapshot = snapshot;
+      events.push({ event, at: Math.round(performance.now()), ...state, ...(trusted === undefined ? {} : { trusted }) });
+      if (events.length > 100) events.shift();
+    };
+    for (const type of ["input", "change", "focus", "blur"]) {
+      document.addEventListener(type, event => {
+        if (event.target instanceof HTMLInputElement && event.target.id === "create-buy-in") sample(type, event.isTrusted);
+      }, true);
+    }
+    new MutationObserver(() => sample("mutation")).observe(document, {
+      subtree: true, childList: true, attributes: true, attributeFilter: ["value", "disabled"],
+    });
+  });
   try {
+    diagnostics.setPhase("account signup");
     await host.goto("/signin");
     await host.getByRole("button", { name: "Create an account", exact: true }).click();
     await host.getByLabel("Display name", { exact: true }).fill("Casey");
@@ -36,6 +66,7 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     await host.getByLabel("Password", { exact: true }).fill(password);
     await host.getByRole("button", { name: "Create account", exact: true }).click();
     await expect(host).toHaveURL(/dashboard/);
+    diagnostics.setPhase("create recovery game");
     await host.goto("/create");
     await host.locator("#create-name").fill("Casey");
     await expect(host.locator("#create-name")).toHaveValue("Casey");
@@ -47,6 +78,7 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     await host.getByRole("button", { name: "Create game", exact: true }).click();
     await expect(host.getByRole("button", { name: "End game", exact: true })).toBeVisible();
     const gameUrl = host.url();
+    diagnostics.setPhase("second browser password sign-in");
     await resumed.goto("/signin");
     await resumed.getByLabel("Email", { exact: true }).fill(email);
     await resumed.getByLabel("Password", { exact: true }).fill(password);
@@ -98,6 +130,16 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     await expect(resumed.getByText(/Your deletion request is/)).toContainText("pending");
     await expect(resumed.getByRole("button", { name: "Request account deletion", exact: true })).toHaveCount(0);
     await expect(resumed.getByRole("button", { name: "Export my data" })).toBeEnabled();
+  } catch (error) {
+    const createInput = await host.evaluate(() =>
+      (window as unknown as { __mainpotCreateInputEvents?: unknown[] }).__mainpotCreateInputEvents ?? [],
+    ).catch(() => []);
+    // Capture only the numeric setup field and sanitized request metadata.
+    // Auth form values, browser storage and raw snapshots never enter this file.
+    try {
+      await writeFile(test.info().outputPath("network-diagnostics.json"), JSON.stringify({ ...diagnostics.report(), createInput }, null, 2));
+    } catch { /* Retain the triggering assertion as the primary failure. */ }
+    throw error;
   } finally {
     await first.close();
     await second.close();
