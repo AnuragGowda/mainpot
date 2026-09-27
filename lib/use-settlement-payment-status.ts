@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { getSettlementPaymentStatuses, subscribeToPaymentChanges } from "./payments";
 import { withTimeout } from "./request-timeout";
 import { getBrowserSupabase } from "./supabase-browser";
@@ -32,6 +32,7 @@ export function useSettlementPaymentStatus(
   gameId: string,
   enabled = true,
 ): SettlementPaymentStatusState {
+  const subscriberId = useId();
   const [phase, setPhase] = useState<PaymentStatusReadPhase>("loading");
   const [settledKeys, setSettledKeys] = useState<ReadonlySet<string>>(EMPTY_KEYS);
   const latestRead = useRef(0);
@@ -107,7 +108,9 @@ export function useSettlementPaymentStatus(
     document.addEventListener("visibilitychange", onVisibilityChange);
     const supabase = getBrowserSupabase();
     const channel = supabase
-      ?.channel(`settlement-payment-status-${gameId}`)
+      // Supabase reuses a channel for the same topic. Separate mounted readers
+      // must own separate channels so adding a second early exit stays safe.
+      ?.channel(`settlement-payment-status-${gameId}-${subscriberId}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "settlement_payments", filter: `game_id=eq.${gameId}` },
@@ -130,7 +133,7 @@ export function useSettlementPaymentStatus(
       document.removeEventListener("visibilitychange", onVisibilityChange);
       if (channel && supabase) void supabase.removeChannel(channel);
     };
-  }, [enabled, gameId, refresh]);
+  }, [enabled, gameId, refresh, subscriberId]);
 
   return {
     phase,
