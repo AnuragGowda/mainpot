@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { ResumeGameCard, type ResumableGame } from "@/components/ResumeBanner";
+import { ResumeGameCard } from "@/components/ResumeBanner";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
@@ -23,6 +23,8 @@ import {
   validateGameName,
   validatePlayerName,
 } from "@/lib/name-validation";
+
+import { useResumableGames } from "@/lib/use-resumable-games";
 
 import { withTimeout } from "@/lib/request-timeout";
 import { validateCurrencyAmount } from "@/lib/currency-input";
@@ -51,7 +53,7 @@ export default function CreateGamePage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [creationError, setCreationError] = useState<string | null>(null);
-  const [resumeGames, setResumeGames] = useState<ResumableGame[]>([]);
+  const resumeGames = useResumableGames();
 
   useEffect(() => {
     setName((current) => current || getPlayerName() || "");
@@ -62,9 +64,7 @@ export default function CreateGamePage() {
         try {
           const game = await getGame(code);
           if (!game) return null;
-          if (game.status !== "ended") {
-            return { code: game.code, name: game.name, status: game.status } as ResumableGame;
-          }
+          if (game.status !== "ended") return;
           if (window.sessionStorage.getItem(`returned:${code}`)) return null;
           window.sessionStorage.setItem(`returned:${code}`, "1");
           const userId = await withTimeout(getCurrentUserId(), "Could not confirm your session. Check your connection and try again.");
@@ -80,7 +80,7 @@ export default function CreateGamePage() {
           // tables stored on this device.
         }
         return null;
-      })).then((games) => setResumeGames(games.filter((game): game is ResumableGame => game !== null)));
+      }));
     }
     const params = new URLSearchParams(window.location.search);
     const suggestedName = params.get("name")?.trim().slice(0, GAME_NAME_MAX_LENGTH);

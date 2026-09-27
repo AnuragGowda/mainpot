@@ -14,7 +14,6 @@ import {
 import type { PlayerNet, Transfer } from "@/lib/settlement";
 import type { GameSnapshot } from "@/lib/types";
 import RecapStoryCard from "./RecapStoryCard";
-import RecapReveal, { type RecapRevealHandle } from "./RecapReveal";
 import { readRecapPrivacy, recapSessionKey, rememberRecapPrivacy } from "@/lib/recap-session";
 
 interface GameRecapDialogProps {
@@ -53,7 +52,6 @@ function GameRecapEditor({
   const subjectId = featuredPlayerId ?? getRecapSubject(data)?.id;
   const sessionKey = recapSessionKey(data.gameId, subjectId);
   const [privacy, setPrivacy] = useState<RecapPrivacy>(() => readRecapPrivacy(sessionKey));
-  const revealRef = useRef<RecapRevealHandle>(null);
   const exportLock = useRef(false);
   const [exporting, setExporting] = useState(false);
   const [previewExpanded, setPreviewExpanded] = useState(false);
@@ -116,7 +114,6 @@ function GameRecapEditor({
   async function handleShare() {
     if (exportLock.current) return;
     exportLock.current = true;
-    revealRef.current?.finish();
     setExporting(true);
     try {
       const image = await createPng();
@@ -195,7 +192,6 @@ function GameRecapEditor({
             <div aria-hidden className="absolute -right-24 bottom-20 h-72 w-72 rounded-full bg-[#e4dfff]/65 blur-3xl" />
             <div className="mx-auto w-full max-w-[560px]">
               <div className={`relative mx-auto rounded-2xl border border-[#e3e7e3] bg-white/70 p-1.5 shadow-sm lg:w-[min(30vw,340px)] lg:rounded-[24px] lg:p-3 ${previewExpanded ? "w-[min(76vw,300px)]" : "w-[min(38vw,148px)]"}`}>
-              <RecapReveal ref={revealRef} sessionKey={sessionKey} description={`${caption.title}. ${caption.line}`}>
               <RecapStoryCard
                 ref={svgRef}
                 data={data}
@@ -204,7 +200,6 @@ function GameRecapEditor({
                 featuredPlayerId={subjectId}
                 decorative
               />
-              </RecapReveal>
               </div>
               <div className="relative mx-auto mt-3 flex max-w-sm justify-center gap-2">
                 <button type="button" onClick={() => setPreviewExpanded((value) => !value)} aria-expanded={previewExpanded} className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-800 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 lg:hidden">

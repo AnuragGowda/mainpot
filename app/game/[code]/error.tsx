@@ -40,6 +40,7 @@ export default function GameRoomErrorBoundary({
           <Button fullWidth variant="secondary" onClick={() => window.location.reload()}>
             Reload Mainpot
           </Button>
+          <a href="/create" className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700">Open another table</a>
           <a
             href={`/recover.html?game=${encodeURIComponent(code)}`}
             className="mt-1 inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-medium text-gray-700 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"

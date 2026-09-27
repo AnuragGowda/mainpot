@@ -17,6 +17,7 @@ import HostLeaveButton from "@/components/GameRoom/HostLeaveButton";
 import PendingApprovals from "@/components/GameRoom/PendingApprovals";
 import OutstandingAdvances from "@/components/GameRoom/OutstandingAdvances";
 import EarlyCashOutButton from "@/components/GameRoom/EarlyCashOutButton";
+import RoomSectionBoundary from "@/components/GameRoom/RoomSectionBoundary";
 import EarlyCashOuts from "@/components/GameRoom/EarlyCashOuts";
 import AcquisitionPrompt from "@/components/GameRoom/AcquisitionPrompt";
 import GameNotifications from "@/components/GameRoom/GameNotifications";
@@ -45,7 +46,7 @@ import { usePlayerIdentity } from "@/lib/use-player-identity";
 import { resolveCurrentPlayer } from "@/lib/player-identity";
 import { pendingPot, verifiedPot } from "@/lib/game";
 import { navigateToFreshAppPage } from "@/lib/navigation";
-import { setActiveGame } from "@/lib/session";
+import { clearActiveGame, setActiveGame } from "@/lib/session";
 import type { GameSnapshot, GameStatus } from "@/lib/types";
 import { classifyProductOpsFailure, trackProductOpsEvent } from "@/lib/product-ops";
 
@@ -150,8 +151,12 @@ function SyncStatusNotice({
 }
 
 export default function GameRoomPage() {
-  const params = useParams<{ code: string }>();
-  const code = params.code;
+  const { code } = useParams<{ code: string }>();
+  // A new room owns fresh screen state, subscriptions, and panel boundaries.
+  return <GameRoom key={code} code={code} />;
+}
+
+function GameRoom({ code }: { code: string }) {
   const { toast } = useToast();
 
   const [snapshot, setSnapshot] = useState<GameSnapshot | null>(null);
@@ -211,7 +216,8 @@ export default function GameRoomPage() {
           return;
         }
 
-        setActiveGame(code);
+        if (game.status === "ended") clearActiveGame(code);
+        else setActiveGame(code);
         journeyId = game.id;
 
         const seatToken = seatClaimFromFragment();
@@ -227,6 +233,7 @@ export default function GameRoomPage() {
         if (cancelled) {
           return;
         }
+        if (gameSnapshot.game.status === "ended") clearActiveGame(gameSnapshot.game.code);
         setSnapshot(gameSnapshot);
         previousGameStatusRef.current = {
           gameId: gameSnapshot.game.id,
@@ -254,6 +261,7 @@ export default function GameRoomPage() {
                 toast("Final settlement is ready to review.", "success");
               }
             }
+            if (next.game.status === "ended") clearActiveGame(next.game.code);
             setSnapshot(next);
           },
           {
@@ -645,7 +653,7 @@ export default function GameRoomPage() {
     return (
       <>
         <SyncStatusNotice status={syncStatus} onRetry={handleRetrySync} />
-        <SettlementScreen snapshot={snapshot} />
+        <SettlementScreen snapshot={snapshot} onRefresh={handleRetrySync} />
       </>
     );
   }
@@ -681,13 +689,15 @@ export default function GameRoomPage() {
           onEdit={handleEdit}
           onRemove={handleRemoveBuyIn}
         />
-        <EarlyCashOuts
-          snapshot={snapshot}
-          currentPlayerId={currentPlayer.id}
-          isHost={isHost}
-          onApprove={handleApproveEarlyCashOut}
-          onCancel={handleCancelEarlyCashOut}
-        />
+        <RoomSectionBoundary key={`early-${snapshot.game.id}`} gameId={snapshot.game.id} name="Early cash-outs" onRetry={handleRetrySync}>
+          <EarlyCashOuts
+            snapshot={snapshot}
+            currentPlayerId={currentPlayer.id}
+            isHost={isHost}
+            onApprove={handleApproveEarlyCashOut}
+            onCancel={handleCancelEarlyCashOut}
+          />
+        </RoomSectionBoundary>
         <OutstandingAdvances
           snapshot={snapshot}
           isHost={isHost}
@@ -699,13 +709,15 @@ export default function GameRoomPage() {
           currentPlayerId={currentPlayer?.id ?? null}
           onHostPlayerSaved={handleHostPlayerSaved}
         />
-        <ActivityFeed
-          snapshot={snapshot}
-          isHost={isHost}
-          onEdit={handleEdit}
-          onRemoveBuyIn={handleRemoveBuyIn}
-          onRemovePlayer={handleRemovePlayer}
-        />
+        <RoomSectionBoundary key={`activity-${snapshot.game.id}`} gameId={snapshot.game.id} name="Activity" onRetry={handleRetrySync}>
+          <ActivityFeed
+            snapshot={snapshot}
+            isHost={isHost}
+            onEdit={handleEdit}
+            onRemoveBuyIn={handleRemoveBuyIn}
+            onRemovePlayer={handleRemovePlayer}
+          />
+        </RoomSectionBoundary>
         {isHost ? <AcquisitionPrompt game={snapshot.game} /> : null}
       </div>
 

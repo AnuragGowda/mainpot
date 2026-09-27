@@ -3,6 +3,7 @@ const PLAYER_NAME_KEY = "ante_player_name";
 const ACTIVE_GAME_KEY = "ante_active_game";
 const ACTIVE_GAMES_KEY = "ante_active_games";
 const MAX_RECOVERABLE_GAMES = 3;
+export const ACTIVE_GAMES_CHANGED = "mainpot:active-games-changed";
 
 /**
  * Returns a random UUID v4 using crypto.randomUUID() when available,
@@ -86,20 +87,27 @@ export function setActiveGame(code: string): void {
   }
   const next = [code, ...getActiveGames().filter((existing) => existing !== code)]
     .slice(0, MAX_RECOVERABLE_GAMES);
+  const previous = window.localStorage.getItem(ACTIVE_GAMES_KEY);
+  const previousActive = getActiveGame();
   window.localStorage.setItem(ACTIVE_GAME_KEY, code);
   window.localStorage.setItem(ACTIVE_GAMES_KEY, JSON.stringify(next));
+  if (previous !== JSON.stringify(next) || previousActive !== code) window.dispatchEvent(new Event(ACTIVE_GAMES_CHANGED));
 }
 
 export function clearActiveGame(code?: string): void {
   if (typeof window === "undefined") {
     return;
   }
-  const remaining = code ? getActiveGames().filter((existing) => existing !== code) : [];
+  const previous = getActiveGames();
+  const remaining = code ? previous.filter((existing) => existing !== code) : [];
+  if (code && previous.length === remaining.length) return;
   if (remaining.length) {
     window.localStorage.setItem(ACTIVE_GAME_KEY, remaining[0]);
     window.localStorage.setItem(ACTIVE_GAMES_KEY, JSON.stringify(remaining));
+    window.dispatchEvent(new Event(ACTIVE_GAMES_CHANGED));
     return;
   }
   window.localStorage.removeItem(ACTIVE_GAME_KEY);
   window.localStorage.removeItem(ACTIVE_GAMES_KEY);
+  if (previous.length) window.dispatchEvent(new Event(ACTIVE_GAMES_CHANGED));
 }

@@ -921,3 +921,126 @@ test("claims and restores the same host-managed seat without another buy-in", as
   test.slow();
   await runSeatContinuityFlow(browser, baseURL!);
 });
+
+test("starts a fresh table during cash-outs and never resumes a finalized game", async ({ page }, testInfo) => {
+  test.slow();
+  await createGame(page, "First restart table");
+  const firstUrl = page.url();
+  const firstCode = firstUrl.split("/").pop()!;
+  await page.getByRole("button", { name: "End game", exact: true }).click();
+  await page.getByRole("button", { name: "Start cash-outs" }).click();
+  await page.getByRole("button", { name: "Start another table", exact: true }).click();
+  await expect(page).toHaveURL(/\/create\?/);
+  await expect(page.locator("#create-game-name")).toHaveValue("First restart table");
+  await expect(page.locator("#create-buy-in")).toHaveValue("20");
+  const settlingCard = page.getByRole("region", { name: "Finish game cash-outs" });
+  await expect(settlingCard).toContainText("First restart table");
+  await expect(settlingCard.getByRole("button", { name: "Resume game" })).toHaveCount(0);
+  await page.locator("#create-game-name").fill("Fresh restart table");
+  await page.getByRole("button", { name: "Start another game", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Fresh restart table" })).toBeVisible();
+  const secondUrl = page.url();
+  expect(secondUrl).not.toBe(firstUrl);
+  const setup = await page.context().newPage();
+  await setup.goto("/create");
+  await expect(setup.getByRole("region", { name: "Finish game cash-outs" })).toContainText("First restart table");
+  await page.goto(firstUrl);
+  await expect(page.getByRole("spinbutton", { name: "Cash-out amount for Casey" })).toBeVisible();
+  const cashOut = page.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
+  await cashOut.fill("20");
+  await cashOut.blur();
+  await page.getByRole("button", { name: "Review settlement" }).click();
+  await page.getByRole("button", { name: "Lock settlement", exact: true }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
+  await setup.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(setup.getByRole("region", { name: "Finish game cash-outs" })).toHaveCount(0);
+  await expect(setup.getByRole("region", { name: "Resume active game" })).toContainText("Fresh restart table");
+  await setup.close();
+  const card = page.getByRole("button", { name: "Customize and share your game card" });
+  await expect(card.locator("svg[viewBox='0 0 1080 1920']")).toBeVisible();
+  await expect(page.locator("[data-recap-reveal]")).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("ante_active_games"))).not.toContain(firstCode);
+  await page.screenshot({ path: testInfo.outputPath("restart-immediate-card.png"), fullPage: true });
+
+  // Simulate an older app's saved ended code. A mounted setup page must also
+  // notice finalization on focus, without requiring its document to reload.
+  await page.evaluate(code => {
+    localStorage.setItem("ante_active_game", code);
+    localStorage.setItem("ante_active_games", JSON.stringify([code, ...JSON.parse(localStorage.getItem("ante_active_games") || "[]")]));
+  }, firstCode);
+  await page.getByRole("button", { name: "Start another table", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Finish game cash-outs" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Resume active game" })).toHaveCount(1);
+  await expect(page.getByRole("region", { name: "Resume active game" })).toContainText("Fresh restart table");
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(page.getByRole("region", { name: "Resume active game" })).toHaveCount(1);
+  await page.getByRole("region", { name: "Resume active game" }).getByRole("button", { name: "Resume game" }).click();
+  await expect(page).toHaveURL(secondUrl);
+  await expect(page.getByRole("region", { name: "At the table" })).toContainText("$20.00");
+});
+
+test("contains a table panel crash while another table keeps saving and refreshing", async ({ browser }) => {
+  test.slow();
+  const shared = await createDeviceContext(browser);
+  const unrelated = await createDeviceContext(browser);
+  const faultTable = await shared.newPage();
+  const sameDeviceTable = await shared.newPage();
+  const otherDeviceTable = await unrelated.newPage();
+  try {
+    await createGame(faultTable, "Panel fault table");
+    const faultUrl = faultTable.url();
+    await createGame(sameDeviceTable, "Unaffected same-device table");
+    await createGame(otherDeviceTable, "Unaffected other-device table");
+    const healthyErrors: string[] = [];
+    const reloadingPages = new Set<import("@playwright/test").Page>();
+    for (const page of [sameDeviceTable, otherDeviceTable]) {
+      page.on("pageerror", error => {
+        // WebKit can report an auth request aborted by this explicit reload as
+        // a page error. Only this exact navigation cancellation is exempt;
+        // each room must still restore its identity and saved balance below.
+        if (browser.browserType().name() === "webkit" && reloadingPages.has(page)
+          && /\/auth\/v1\/user due to access control checks\.$/.test(error.message)) return;
+        healthyErrors.push(error.message);
+      });
+    }
+    // Inject malformed display-only activity for ONE game's responses. The activity renderer
+    // cannot sort a missing event timestamp; no database rows are changed.
+    await faultTable.route("**/rest/v1/game_events?**", async route => {
+      const response = await route.fetch();
+      const events = await response.json();
+      await route.fulfill({ response, json: events.map((event: Record<string, unknown>) => ({ ...event, created_at: null })) });
+    });
+    await faultTable.reload();
+    await expect(faultTable.getByRole("alert", { name: "Activity unavailable" })).toBeVisible();
+    await expect(faultTable.getByRole("heading", { name: "Panel fault table" })).toBeVisible();
+    await expect(faultTable.getByRole("button", { name: "Add a rebuy" })).toBeEnabled();
+    await expect(faultTable.getByText("Mainpot hit a snag", { exact: true })).toHaveCount(0);
+    for (const [page, rebuy, expected] of [[faultTable, "10", "$30.00"], [sameDeviceTable, "20", "$40.00"], [otherDeviceTable, "35", "$55.00"]] as const) {
+      await page.getByRole("button", { name: "Add a rebuy" }).click();
+      const dialog = page.getByRole("dialog", { name: "Add a rebuy" });
+      await dialog.getByRole("spinbutton", { name: "Rebuy amount" }).fill(rebuy);
+      await dialog.getByRole("button", { name: "Add rebuy", exact: true }).click();
+      await expect(playerCard(page, "Casey")).toContainText(expected);
+      reloadingPages.add(page);
+      await page.reload();
+      await expect(playerCard(page, "Casey")).toContainText(expected);
+      reloadingPages.delete(page);
+      await expect(page.getByText("Mainpot hit a snag", { exact: true })).toHaveCount(0);
+    }
+    // Recover the failing panel; its table's original ledger stayed unchanged.
+    await faultTable.unrouteAll({ behavior: "wait" });
+    await faultTable.getByRole("button", { name: "Retry activity" }).click();
+    await expect(faultTable.getByRole("alert", { name: "Activity unavailable" })).toHaveCount(0, { timeout: 15_000 });
+    await expect(playerCard(faultTable, "Casey")).toContainText("$30.00");
+    await faultTable.goto("/create");
+    await faultTable.getByRole("region", { name: "Resume active game" }).filter({ hasText: "Unaffected same-device table" }).getByRole("button", { name: "Resume game" }).click();
+    await expect(faultTable.getByRole("heading", { name: "Unaffected same-device table" })).toBeVisible();
+    await expect(faultTable.getByText("$40.00", { exact: true }).first()).toBeVisible();
+    expect(healthyErrors).toEqual([]);
+    expect(faultUrl).not.toBe(sameDeviceTable.url());
+  } finally {
+    await faultTable.unrouteAll({ behavior: "wait" });
+    await unrelated.close();
+    await shared.close();
+  }
+});

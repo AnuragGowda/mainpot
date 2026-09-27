@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
-import { X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import type { BadgeVariant } from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -17,6 +17,8 @@ import { formatCurrency, round2 } from "@/lib/format";
 import { getPlayerCashOut, playerInvested, totalPot } from "@/lib/game";
 import { usePlayerIdentity } from "@/lib/use-player-identity";
 import { resolveCurrentPlayer } from "@/lib/player-identity";
+import { navigateToFreshAppPage } from "@/lib/navigation";
+import RoomSectionBoundary from "@/components/GameRoom/RoomSectionBoundary";
 import { settlementPaymentKey } from "@/lib/payments";
 import { useSettlementPaymentStatus } from "@/lib/use-settlement-payment-status";
 import {
@@ -49,6 +51,7 @@ function feedbackDismissalKey(gameId: string): string {
 
 export interface SettlementScreenProps {
   snapshot: GameSnapshot;
+  onRefresh?: () => Promise<void>;
 }
 
 const statusMeta: Record<
@@ -79,7 +82,7 @@ function tabClass(selected: boolean): string {
  * and transfer planning with min-transfers / bank tabs (results mode).
  * Self-contained — the current player is derived from the account and browser session.
  */
-export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
+export default function SettlementScreen({ snapshot, onRefresh }: SettlementScreenProps) {
   const { toast } = useToast();
 
   const { sessionId, userId } = usePlayerIdentity();
@@ -438,6 +441,12 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
           </div>
         </div>
 
+        <div className="mt-5 flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-6 text-gray-600">{snapshot.game.status === "ended" ? "This game is saved. Start a fresh table with the same buy-in." : "Play has ended. You can start another table while these cash-outs stay saved."}</p>
+          <Button className="shrink-0" onClick={() => navigateToFreshAppPage(`/create?name=${encodeURIComponent(snapshot.game.name)}&buyin=${snapshot.game.buy_in_amount}`)}>
+            Start another table <ArrowRight aria-hidden size={16} />
+          </Button>
+        </div>
       </header>
 
       {players.length === 0 ? (
@@ -725,12 +734,14 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
                 </p> : <div className="mb-3"><PaymentStatusNotice status={paymentStatus} /></div>}
                 {(paymentStatus.phase === "known" || paymentStatus.phase === "stale") ? <div className="space-y-6">
                   {lockedEarlyCashOuts.length ? (
-                    <EarlyCashOuts
-                      snapshot={snapshot}
-                      currentPlayerId={currentPlayerId ?? ""}
-                      isHost={isHost}
-                      paymentStatus={paymentStatus}
-                    />
+                    <RoomSectionBoundary key={`early-${snapshot.game.id}`} gameId={snapshot.game.id} name="Early cash-outs" onRetry={onRefresh}>
+                      <EarlyCashOuts
+                        snapshot={snapshot}
+                        currentPlayerId={currentPlayerId ?? ""}
+                        isHost={isHost}
+                        paymentStatus={paymentStatus}
+                      />
+                    </RoomSectionBoundary>
                   ) : null}
                   <section aria-labelledby="final-settlement-payments-heading">
                     {lockedEarlyCashOuts.length ? (
@@ -854,12 +865,14 @@ export default function SettlementScreen({ snapshot }: SettlementScreenProps) {
               ) : null}
 
               {lockedEarlyCashOuts.length ? (
-                <EarlyCashOuts
-                  snapshot={snapshot}
-                  currentPlayerId={currentPlayerId ?? ""}
-                  isHost={isHost}
-                  paymentStatus={snapshot.game.status === "ended" ? paymentStatus : undefined}
-                />
+                <RoomSectionBoundary key={`early-${snapshot.game.id}`} gameId={snapshot.game.id} name="Early cash-outs" onRetry={onRefresh}>
+                  <EarlyCashOuts
+                    snapshot={snapshot}
+                    currentPlayerId={currentPlayerId ?? ""}
+                    isHost={isHost}
+                    paymentStatus={snapshot.game.status === "ended" ? paymentStatus : undefined}
+                  />
+                </RoomSectionBoundary>
               ) : null}
 
               {displayedTab === "min" ? (
