@@ -434,7 +434,7 @@ test("transfers host authority when the host leaves", async ({ browser }) => {
   }
 });
 
-test("recovers a disconnected guest after the host starts settlement", async ({ browser }) => {
+test("recovers a disconnected guest after the host starts settlement", async ({ browser }, testInfo) => {
   const hostContext = await createDeviceContext(browser);
   const jordanContext = await createDeviceContext(browser);
   const host = await hostContext.newPage();
@@ -454,6 +454,12 @@ test("recovers a disconnected guest after the host starts settlement", async ({ 
     await expect(
       jordan.getByText(/You’re offline|Live updates paused/),
     ).toBeVisible();
+    const heading = await jordan.getByRole("heading", { name: "Realtime test game", exact: true }).boundingBox();
+    const notice = await jordan.getByRole("status").filter({ hasText: /You’re offline|Live updates paused/ }).boundingBox();
+    expect(heading).not.toBeNull();
+    expect(notice).not.toBeNull();
+    expect(notice!.y + notice!.height, "Recovery information must not cover the table title").toBeLessThanOrEqual(heading!.y);
+    await jordan.screenshot({ path: testInfo.outputPath("offline-room.png") });
     await host.getByRole("button", { name: "End game" }).click();
     await host.getByRole("button", { name: "Start cash-outs" }).click();
     await expect(host.getByRole("heading", { name: "Cash-outs", exact: true })).toBeVisible();

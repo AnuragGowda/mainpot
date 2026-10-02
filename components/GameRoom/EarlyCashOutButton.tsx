@@ -162,7 +162,7 @@ export default function EarlyCashOutButton({
                     </label>
                     <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
                       <div className="flex justify-between gap-4 text-gray-600">
-                        <span>Verified buy-ins</span>
+                        <span>Host-confirmed buy-ins</span>
                         <span className="font-medium tabular-nums text-gray-900">{formatCurrency(verifiedInvested)}</span>
                       </div>
                       {net != null ? (

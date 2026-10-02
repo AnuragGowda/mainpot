@@ -1,0 +1,165 @@
+[
+  {
+    "state": "local-connectivity",
+    "hasFalseNotice": 0
+  },
+  {
+    "state": "host-local-recovery-after-390",
+    "url": "/game/E7G5LJ",
+    "width": 390,
+    "height": 844,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1
+      }
+    ],
+    "overflow": false,
+    "documentHeight": 2839
+  },
+  {
+    "state": "manage-player-short-320",
+    "url": "/game/E7G5LJ",
+    "width": 320,
+    "height": 568,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 2
+      }
+    ],
+    "overflow": false,
+    "documentHeight": 3013
+  },
+  {
+    "state": "manage-player-focus-return",
+    "focusedTrigger": true
+  },
+  {
+    "state": "eight-seat-settlement-review-390",
+    "url": "/game/E7G5LJ",
+    "width": 390,
+    "height": 844,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 9
+      }
+    ],
+    "overflow": false,
+    "documentHeight": 1537
+  },
+  {
+    "state": "eight-seat-settlement-390",
+    "url": "/game/E7G5LJ",
+    "width": 390,
+    "height": 844,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 25
+      }
+    ],
+    "overflow": false,
+    "documentHeight": 2024
+  },
+  {
+    "state": "public-landing-320",
+    "url": "/",
+    "width": 320,
+    "height": 568,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "nodes": 1
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 18
+      }
+    ],
+    "overflow": false,
+    "documentHeight": 3336
+  },
+  {
+    "state": "public-create-320",
+    "url": "/create",
+    "width": 320,
+    "height": 568,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              "button"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 3.78 (foreground color: #ffffff, background color: #818389, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "incomplete": [],
+    "overflow": false,
+    "documentHeight": 987
+  },
+  {
+    "state": "public-join-320",
+    "url": "/join",
+    "width": 320,
+    "height": 568,
+    "violations": [],
+    "incomplete": [],
+    "overflow": false,
+    "documentHeight": 721
+  },
+  {
+    "state": "public-signin-320",
+    "url": "/signin",
+    "width": 320,
+    "height": 568,
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".text-gray-400"
+            ],
+            "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #99a1af, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "incomplete": [],
+    "overflow": false,
+    "documentHeight": 568
+  },
+  {
+    "state": "public-poker-settlement-calculator-320",
+    "url": "/poker-settlement-calculator",
+    "width": 320,
+    "height": 568,
+    "violations": [],
+    "incomplete": [],
+    "overflow": false,
+    "documentHeight": 10710
+  }
+]

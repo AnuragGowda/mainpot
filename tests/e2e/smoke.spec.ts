@@ -56,6 +56,36 @@ test.describe("public local-mode experience", () => {
     await runHostPlayerFlow(page);
   });
 
+  test("keeps a local table usable across offline and online events", async ({ page, context }) => {
+    await page.goto("/create");
+    await page.locator("#create-name").fill("Casey");
+    await page.locator("#create-game-name").fill("Local connection recovery");
+    await page.locator("#create-buy-in").fill("20");
+    await page.getByRole("button", { name: "Create game", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Local connection recovery" })).toBeVisible();
+    const gameUrl = page.url();
+
+    try {
+      await context.setOffline(true);
+      await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+      await expect(page.getByText(/You’re offline|Reconnecting to live updates/)).toHaveCount(0);
+      const table = page.getByRole("region", { name: "At the table" });
+      await table.getByRole("button", { name: "Add player", exact: true }).click();
+      const dialog = page.getByRole("dialog", { name: "Add a player" });
+      await dialog.getByLabel("Player name", { exact: true }).fill("Jordan");
+      await dialog.getByRole("button", { name: "Add player", exact: true }).click();
+      await expect(table.getByRole("listitem").filter({ hasText: "Jordan" })).toBeVisible();
+    } finally {
+      await context.setOffline(false);
+      await page.evaluate(() => window.dispatchEvent(new Event("online")));
+    }
+
+    await expect(page.getByText("Reconnecting to live updates…")).toHaveCount(0);
+    await page.reload();
+    await expect(page).toHaveURL(gameUrl);
+    await expect(page.getByRole("region", { name: "At the table" }).getByRole("listitem").filter({ hasText: "Jordan" })).toBeVisible();
+  });
+
   test("shows the landing page and validates an incomplete game form", async ({ page }) => {
     await page.goto("/");
 

@@ -131,11 +131,11 @@ export default function HeroGameDemo() {
         <div className="ante-demo-stage relative mt-5 overflow-hidden rounded-xl text-gray-900">
           <div aria-hidden={demoState !== "live"} className={`ante-demo-live ${demoState === "live" ? "ante-demo-visible" : ""}`}>
             {players.map(([initials, name, amount], index) => (
-              <div key={name} className={`ante-demo-player-row flex flex-1 items-center gap-3 px-4 ${index ? "border-t border-gray-200/70" : ""}`}>
+              <div key={name} className={`ante-demo-player-row flex flex-1 items-center gap-2 px-4 sm:gap-3 ${index ? "border-t border-gray-200/70" : ""}`}>
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">{initials}</span>
                 <span className="flex-1 text-sm font-medium">{name}</span>
                 <span className="text-sm font-semibold tabular-nums">{amount}</span>
-                <span className="w-14 text-right text-[10px] font-medium text-emerald-800">Verified</span>
+                <span className="w-16 shrink-0 text-right text-[10px] font-medium leading-tight text-emerald-800 sm:w-20">Host-confirmed</span>
               </div>
             ))}
           </div>

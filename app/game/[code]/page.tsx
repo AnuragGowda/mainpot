@@ -126,7 +126,7 @@ function SyncStatusNotice({
       : "Reconnecting to live updates…";
 
   return (
-    <div className="fixed inset-x-3 top-[calc(0.75rem+env(safe-area-inset-top))] z-[60] mx-auto max-w-xl">
+    <div className="mx-auto w-full max-w-xl px-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
       <div
         role="status"
         className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-sm shadow-lg backdrop-blur ${
@@ -185,6 +185,8 @@ function GameRoom({ code }: { code: string }) {
   const isHostRef = useRef(false);
 
   useEffect(() => {
+    // Local tables have no remote connection to lose or reconnect.
+    if (usingLocalStorage()) return;
     const handleOffline = () => setSyncStatus("offline");
     const handleOnline = () => setSyncStatus("reconnecting");
     window.addEventListener("offline", handleOffline);

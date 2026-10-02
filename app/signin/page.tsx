@@ -237,7 +237,7 @@ export default function SignInPage() {
               >
                 Start a game
               </Link>
-              <p className="mt-4 text-xs text-gray-400">
+              <p className="mt-4 text-xs text-gray-600">
                 Account history and live sync are unavailable in this setup.
               </p>
             </div>
