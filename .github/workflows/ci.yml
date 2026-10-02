@@ -20,6 +20,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm audit --audit-level=high
       - run: npm run build:service-worker
       - run: git diff --exit-code -- public/sw.js
       - run: npm run lint
@@ -39,7 +40,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium webkit
-      - run: PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --workers=2
+      # Remove this pinned-bundle assertion with the temporary 1.64 nightly pin
+      # after a stable Playwright release carries the fixed network library.
+      - name: Verify fixed WebKit network library
+        run: strings "$HOME/.cache/ms-playwright/webkit-2369/minibrowser-wpe/sys/lib/libsoup-3.0.so.0" | grep -Fx 'libsoup/3.6.6'
+      - run: PLAYWRIGHT_ALL_DEVICES=1 npm run test:e2e:realtime -- --workers=2 --reporter=line,github
       - name: Preserve safe multiplayer failure diagnostics
         if: always()
         uses: actions/upload-artifact@v7
