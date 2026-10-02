@@ -1573,6 +1573,7 @@ function subscribeToGameSupabase(
   // Several table changes can arrive at once. Serialize refreshes so an older
   // request can never finish last and overwrite a newer room snapshot.
   async function requestRefresh(): Promise<void> {
+    if (disposed) return;
     if (refreshInFlight) {
       refreshQueued = true;
       return;

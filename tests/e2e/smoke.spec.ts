@@ -3,6 +3,7 @@ import { runJoinDialogRecoveryFlow } from "./join-dialog-recovery-flow";
 import { checkCalculatorValidation } from "./audit-fixes-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
 import { runSettlementUxFlow } from "./settlement-ux-flow";
+import { runDiscrepancyRoundingFlow } from "./discrepancy-rounding-flow";
 import { expect, test } from "@playwright/test";
 import { checkPwaRecovery } from "./pwa-flow";
 
@@ -43,6 +44,11 @@ test.describe("public local-mode experience", () => {
   test("reviews payments before locking and keeps completion in sync", async ({ page }) => {
     test.slow();
     await runSettlementUxFlow(page);
+  });
+
+  test("keeps cents allocations and sent payments stable after locking and reload", async ({ page }) => {
+    test.slow();
+    await runDiscrepancyRoundingFlow(page);
   });
 
   test("runs a whole table with host-added players", async ({ page }) => {

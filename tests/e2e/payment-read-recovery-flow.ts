@@ -33,15 +33,17 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
   const [host, payer, recipient] = await Promise.all(contexts.map((context) => context.newPage()));
   const failedReaders = new Set<Page>();
   const diagnostics = failureDiagnostics([host, payer, recipient]);
+  await diagnostics.ready;
   const { runtimeErrors, setPhase, navigate, duringRoute } = diagnostics;
 
   const paymentReadFailure = async (route: import("@playwright/test").Route) => duringRoute(route.request().frame().page(), async () => {
     if (route.request().method() !== "GET" || !failedReaders.has(route.request().frame().page())) return route.continue();
-    const response = await route.fetch();
-    if (!failedReaders.has(route.request().frame().page())) return route.fulfill({ response });
+    // The failure is synthetic. Avoid an independent upstream fetch that can
+    // finish against the old WebKit document while a reload commits.
     await route.fulfill({
-      response,
       status: 400,
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
       json: { message: "Injected payment-status read failure" },
     });
   });
@@ -163,7 +165,8 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
     await personal.getByRole("checkbox", { name: "Mark sent: $10.00 from Jordan to Taylor", exact: true }).locator("..").click();
     await expect.poll(() => droppedPaymentFrames, { timeout: 15_000 }).toBeGreaterThan(0);
     await expect(recipientPersonal.getByRole("heading")).toHaveText("$10.00 coming to you.", { timeout: 12_000 });
-    expect(runtimeErrors, "Independent devices must not leave uncaught browser errors").toEqual([]);
+    if (runtimeErrors.length || diagnostics.report().retiredReads.length) await writeFile(test.info().outputPath("network-diagnostics.json"), JSON.stringify(diagnostics.report(), null, 2));
+    expect(diagnostics.unhandledErrors(), "Independent devices must not leave uncaught browser errors").toEqual([]);
   } catch (error) {
     // Preserve the original assertion if browser teardown also fails.
     console.error("Payment-read recovery failed before teardown:", error);

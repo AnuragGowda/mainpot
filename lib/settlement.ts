@@ -50,6 +50,8 @@ export interface PlayerDiscrepancyAllocation {
 
 export interface DiscrepancyAllocation {
   method: DiscrepancyAllocationMethod;
+  /** Missing on new calculations means v2; persisted unversioned plans use v1. */
+  roundingVersion?: 1 | 2;
   /** Player ids sharing the adjustment. Empty means every eligible player. */
   playerIds: string[];
   /** Exact positive amounts used by the advanced custom method. */
@@ -224,7 +226,7 @@ export function applyDiscrepancyAllocation(
   allocation: DiscrepancyAllocation
 ): PlayerNet[] {
   const amount = round2(Math.abs(discrepancy));
-  if (amount < EPSILON) return players;
+  if (!Number.isFinite(amount) || amount < EPSILON) return players;
 
   const eligible = players.filter((player) =>
     discrepancy > 0 ? player.net < -EPSILON : player.net > EPSILON
@@ -272,19 +274,49 @@ export function applyDiscrepancyAllocation(
   const selected = allocation.method === "selected"
     ? eligible.filter((player) => allocation.playerIds.includes(player.playerId))
     : eligible;
-  const capacity = selected.reduce((sum, player) => sum + Math.abs(player.net), 0);
-
-  if (selected.length === 0 || capacity + EPSILON < amount) return players;
-
   const adjustments = new Map<string, number>();
-  let remaining = amount;
-  selected.forEach((player, index) => {
-    const share = index === selected.length - 1
-      ? remaining
-      : round2(amount * Math.abs(player.net) / capacity);
-    adjustments.set(player.playerId, discrepancy > 0 ? share : -share);
-    remaining = round2(remaining - share);
-  });
+  if (allocation.roundingVersion === 1) {
+    // Finalized games must retain the exact amounts and payment keys agreed
+    // under the original algorithm, even when its remainder was negative.
+    const capacity = selected.reduce((sum, player) => sum + Math.abs(player.net), 0);
+    if (selected.length === 0 || capacity + EPSILON < amount) return players;
+    let remaining = amount;
+    selected.forEach((player, index) => {
+      const share = index === selected.length - 1
+        ? remaining
+        : round2(amount * Math.abs(player.net) / capacity);
+      adjustments.set(player.playerId, discrepancy > 0 ? share : -share);
+      remaining = round2(remaining - share);
+    });
+  } else {
+    const amountCents = Math.round(amount * 100);
+    const capacities = selected.map((player) => Math.round(Math.abs(player.net) * 100));
+    const capacityCents = capacities.reduce((sum, cents) => sum + cents, 0);
+    if (selected.length === 0 || !Number.isSafeInteger(amountCents)
+      || capacities.some((cents) => !Number.isSafeInteger(cents) || cents <= 0)
+      || !Number.isSafeInteger(capacityCents) || capacityCents < amountCents) return players;
+
+    // Largest remainder in integer cents: floor each quota, then give each
+    // spare cent to the largest remainder. Stable input order breaks ties
+    // (room readers order players by joined_at, id, matching PostgreSQL).
+    // BigInt keeps products exact across the ledger's numeric(10,2) range.
+    const total = BigInt(capacityCents);
+    const shares = selected.map((player, index) => {
+      const numerator = BigInt(amountCents) * BigInt(capacities[index]);
+      return { player, index, cents: Number(numerator / total), remainder: numerator % total };
+    });
+    let remaining = amountCents - shares.reduce((sum, share) => sum + share.cents, 0);
+    const ranked = [...shares].sort((left, right) => left.remainder === right.remainder
+      ? left.index - right.index : left.remainder > right.remainder ? -1 : 1);
+    for (const share of ranked) {
+      if (remaining === 0) break;
+      share.cents += 1;
+      remaining -= 1;
+    }
+    for (const share of shares) {
+      adjustments.set(share.player.playerId, (discrepancy > 0 ? share.cents : -share.cents) / 100);
+    }
+  }
 
   return players.map((player) => ({
     ...player,

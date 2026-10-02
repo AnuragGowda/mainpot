@@ -81,7 +81,8 @@ export function getActiveGames(): string[] {
   }
 }
 
-export function setActiveGame(code: string): void {
+/** Skip same-document notifications only when the caller is replacing that document. */
+export function setActiveGame(code: string, options: { notify?: boolean } = {}): void {
   if (typeof window === "undefined") {
     return;
   }
@@ -91,7 +92,9 @@ export function setActiveGame(code: string): void {
   const previousActive = getActiveGame();
   window.localStorage.setItem(ACTIVE_GAME_KEY, code);
   window.localStorage.setItem(ACTIVE_GAMES_KEY, JSON.stringify(next));
-  if (previous !== JSON.stringify(next) || previousActive !== code) window.dispatchEvent(new Event(ACTIVE_GAMES_CHANGED));
+  if (options.notify !== false && (previous !== JSON.stringify(next) || previousActive !== code)) {
+    window.dispatchEvent(new Event(ACTIVE_GAMES_CHANGED));
+  }
 }
 
 export function clearActiveGame(code?: string): void {

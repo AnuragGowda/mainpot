@@ -53,7 +53,19 @@ export default function EarlyCashOutButton({
     const previousOverflow = document.body.style.overflow;
     const triggerElement = triggerRef.current;
     document.body.style.overflow = "hidden";
-    const frame = window.requestAnimationFrame(() => cancelRef.current?.focus());
+    // The amount input autofocuses. Never move focus away from someone who
+    // has already started editing while the dialog's effects are running.
+    if (!dialogRef.current?.contains(document.activeElement)) cancelRef.current?.focus();
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.requestAnimationFrame(() => {
+        if (!dialogRef.current?.isConnected) triggerElement?.focus();
+      });
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape" && !requesting && !leaving) {
         event.preventDefault();
@@ -76,10 +88,7 @@ export default function EarlyCashOutButton({
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.cancelAnimationFrame(frame);
-      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
-      window.requestAnimationFrame(() => triggerElement?.focus());
     };
   }, [leaving, open, requesting]);
 

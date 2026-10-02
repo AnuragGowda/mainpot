@@ -17,6 +17,7 @@ export function getPaymentProgress(snapshot: GameSnapshot, statuses: SettlementP
   const allocation = snapshot.game.discrepancy_allocation;
   const nets = allocation && Math.abs(difference) >= 0.005 ? applyDiscrepancyAllocation(remaining, difference, {
     method: allocation.method, playerIds: allocation.player_ids,
+    roundingVersion: allocation.rounding_version ?? 1,
     playerAllocations: allocation.player_allocations?.map((item) => ({ playerId: item.player_id, amount: item.amount })),
   }) : remaining;
   const mode = snapshot.game.settlement_mode === "bank" && snapshot.game.settlement_bank_player_id ? "bank" : "min";

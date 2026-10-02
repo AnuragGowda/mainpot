@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { isHandledNavigationReadError, type ReadLifecycleEvent } from "./navigation-fetch-errors";
 
 export function failureDiagnostics(pages: Page[]) {
   type Request = import("@playwright/test").Request;
@@ -26,8 +27,10 @@ export function failureDiagnostics(pages: Page[]) {
   let nextRequest = 0;
   let nextNavigation = 0;
   const epochs = pages.map(() => 0);
+  const documents = new Map<Page, number>();
+  const retiredReads: { request: number; device: number; path: string; fromDocument: number; toDocument: number }[] = [];
   const navigation = new Map<Page, number>();
-  const requests = new WeakMap<Request, { id: number; epoch: number; phase: string; at: number }>();
+  const requests = new WeakMap<Request, { id: number; epoch: number; phase: string; at: number; document?: number }>();
   const statuses = new WeakMap<Request, number>();
   // Routed fetch/fulfill work is independent of browser networkidle. Require
   // both lifecycles to finish, then remain quiet before replacing a document.
@@ -56,7 +59,10 @@ export function failureDiagnostics(pages: Page[]) {
       else quietTimer = setTimeout(check, remaining);
     };
     const deadline = setTimeout(() => finish(new Error(
-      `Read quiescence not reached within 15 seconds: ${state.requests.size} browser requests, ${state.handlers} route handlers.`,
+      `Read quiescence not reached within 15 seconds: ${state.requests.size} browser requests, ${state.handlers} route handlers. Pending: ${Array.from(state.requests).map(request => {
+        const meta = requests.get(request);
+        return `${request.method()} ${new URL(request.url()).pathname} (${request.resourceType()}, status ${statuses.get(request) ?? "none"}, ${meta ? at() - meta.at : "unknown"}ms, epoch ${meta?.epoch ?? "unknown"}/${epochs[pages.indexOf(page)]}, started in ${meta?.phase ?? "unknown"})`;
+      }).join("; ")}`,
     )), 15_000);
     state.watchers.add(check);
     check();
@@ -74,16 +80,82 @@ export function failureDiagnostics(pages: Page[]) {
   const responses: { device: number; request: number | null; at: number; phase: string; path: string; status: number; origin: string | null; allowOrigin: string | null; allowCredentials: string | null }[] = [];
   let omittedResponses = 0;
   const transitions: { at: number; phase: string; device?: number; navigation?: number; event?: string; epoch?: number; activeRequests?: number; activeHandlers?: number; quietFor?: number }[] = [];
+  const lifecycle: (ReadLifecycleEvent & { phase: string })[] = [];
+  const ready = Promise.all(pages.map(async (page, device) => {
+    await page.exposeBinding("__mainpotDocumentReady", (source, documentId: number) => {
+      if (source.frame !== page.mainFrame()) return;
+      const previous = documents.get(page);
+      documents.set(page, documentId);
+      if (previous === undefined || previous === documentId) return;
+      // New-document fetches await this binding acknowledgement, so their
+      // request events cannot be tagged with the previous document's token.
+      for (const request of activity.get(page)!.requests) {
+        const meta = requests.get(request)!;
+        const path = new URL(request.url()).pathname;
+        const isRead = ["GET", "HEAD"].includes(request.method())
+          || (request.method() === "POST" && path === "/rest/v1/rpc/get_game_by_code");
+        if (meta.document !== previous || !isRead
+          || request.resourceType() !== "fetch" || request.frame() !== page.mainFrame()) continue;
+        activity.get(page)!.requests.delete(request);
+        retiredReads.push({ request: meta.id, device, path, fromDocument: previous, toDocument: documentId });
+        changed(page);
+      }
+    });
+    await page.addInitScript(() => {
+    if (window !== window.top) return;
+    const documentId = performance.timeOrigin;
+    const documentReady = (window as unknown as {
+      __mainpotDocumentReady: (documentId: number) => Promise<void>;
+    }).__mainpotDocumentReady(documentId);
+    const log = (event: string, detail: Record<string, unknown> = {}) =>
+      console.info("[read-lifecycle]", JSON.stringify({ event, document: documentId, ...detail }));
+    log("document-started");
+    window.addEventListener("pagehide", () => log("pagehide"));
+    window.addEventListener("pageshow", () => log("pageshow"));
+    window.addEventListener("error", () => log("window-error"));
+    window.addEventListener("unhandledrejection", () => log("unhandled-rejection"));
+    const originalFetch = window.fetch;
+    window.fetch = async (input, init) => {
+      const path = new URL(input instanceof Request ? input.url : String(input), location.href).pathname;
+      const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+      try {
+        await documentReady;
+        const response = await originalFetch(input, init);
+        if (path === "/auth/v1/user" || path === "/rest/v1/settlement_payments") log("fetch-completed", { path, method, status: response.status });
+        return response;
+      } catch (error) {
+        log("fetch-rejected", { path, method, name: error instanceof Error ? error.name : "unknown" });
+        throw error;
+      }
+    };
+    });
+  }));
   const setPhase = (value: string) => { phase = value; transitions.push({ at: at(), phase }); };
   pages.forEach((page, device) => {
+    page.on("console", message => {
+      const prefix = "[read-lifecycle] ";
+      if (!message.text().startsWith(prefix)) return;
+      try {
+        const entry = JSON.parse(message.text().slice(prefix.length)) as ReadLifecycleEvent;
+        if (typeof entry.event !== "string" || typeof entry.document !== "number") return;
+        lifecycle.push({ at: at(), device, phase, event: entry.event, document: entry.document,
+          path: typeof entry.path === "string" ? entry.path : undefined,
+          name: typeof entry.name === "string" ? entry.name : undefined,
+          method: typeof entry.method === "string" ? entry.method : undefined,
+          status: typeof entry.status === "number" ? entry.status : undefined });
+      } catch { /* Unrecognized diagnostics cannot classify a browser error. */ }
+    });
     page.on("framenavigated", frame => {
       if (frame === page.mainFrame()) {
         epochs[device] += 1;
-        transitions.push({ at: at(), phase, device, event: "document-committed", epoch: epochs[device] });
+        // This includes same-document history navigation. Lifecycle document
+        // IDs, rather than frame epochs, establish actual document replacement.
+        transitions.push({ at: at(), phase, device, event: "frame-navigated", epoch: epochs[device] });
       }
     });
     page.on("request", request => {
-      requests.set(request, { id: ++nextRequest, epoch: epochs[device], phase, at: at() });
+      const requestedAt = at();
+      requests.set(request, { id: ++nextRequest, epoch: epochs[device], phase, at: requestedAt, document: documents.get(page) });
       if (/^https?:/.test(request.url())) { activity.get(page)!.requests.add(request); changed(page); }
     });
     const complete = (request: Request) => {
@@ -95,7 +167,7 @@ export function failureDiagnostics(pages: Page[]) {
       const request = response.request();
       statuses.set(request, response.status());
       const path = new URL(request.url()).pathname;
-      if (path !== "/auth/v1/user" && path !== "/rest/v1/settlement_payments") return;
+      if (path !== "/auth/v1/user" && path !== "/rest/v1/settlement_payments" && path !== "/rest/v1/rpc/get_game_by_code") return;
       const headers = response.headers();
       const credentials = headers["access-control-allow-credentials"];
       responses.push({ device, request: requests.get(request)?.id ?? null, at: at(), phase, path, status: response.status(),
@@ -135,12 +207,20 @@ export function failureDiagnostics(pages: Page[]) {
       navigation.delete(page);
     }
   };
-  const report = () => ({ runtimeErrors, failedRequests, responses, omittedResponses, transitions,
+  const handledNavigationErrors = () => runtimeErrors.flatMap((error, index) =>
+    isHandledNavigationReadError(error, errorURLs[index] ? new URL(errorURLs[index]!).pathname : null, lifecycle)
+      ? [{ error: index, category: "handled-navigation-read-transport" }] : []);
+  const unhandledErrors = () => {
+    const handled = new Set(handledNavigationErrors().map(entry => entry.error));
+    return [...runtimeErrors.filter((_error, index) => !handled.has(index)),
+      ...lifecycle.filter(event => event.event === "window-error" || event.event === "unhandled-rejection")];
+  };
+  const report = () => ({ runtimeErrors, handledNavigationErrors: handledNavigationErrors(), retiredReads, failedRequests, responses, omittedResponses, transitions, lifecycle,
     // Exact URLs stay private. Candidate IDs expose whether one request supports
     // cancellation; matching alone never suppresses an error or proves its cause.
     correlations: runtimeErrors.map((error, index) => ({ error: index,
       failedRequests: failedRequests.filter((failure, failedIndex) => errorURLs[index] !== null
         && errorURLs[index] === failedURLs[failedIndex] && error.device === failure.device
         && Math.abs(error.at - failure.at) <= 250).map(failure => failure.request) })) });
-  return { runtimeErrors, setPhase, navigate, duringRoute, report };
+  return { ready, runtimeErrors, unhandledErrors, setPhase, navigate, duringRoute, report };
 }

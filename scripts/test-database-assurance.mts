@@ -1091,6 +1091,8 @@ async function run() {
     - cashOuts.reduce((sum, row) => sum + Number(row.amount), 0)) * 100) / 100;
   const expectedPayment = calculateMinTransfers(applyDiscrepancyAllocation(rawNets, difference, {
     method: "proportional", playerIds: allocation.player_ids,
+    // This fixture deliberately represents an unversioned historical plan.
+    roundingVersion: 1,
   }))[0];
   assert(expectedPayment?.fromPlayerId && expectedPayment.toPlayerId, "locked fixture has a real payment to test authenticated ownership");
 

@@ -13,6 +13,17 @@ function fixture(): GameSnapshot {
 }
 
 describe("locked game payment progress", () => {
+  it.each([undefined, 1, 2] as const)("preserves payment keys for saved rounding version %s", (version) => {
+    const snapshot = fixture();
+    snapshot.players = ["a", "b", "c", "d", "e"].map((id) => ({ id, name: id })) as GameSnapshot["players"];
+    snapshot.buyIns = snapshot.players.map((p) => ({ player_id: p.id, amount: 20, verified: true, fronted_by_player_id: null })) as GameSnapshot["buyIns"];
+    snapshot.cashOuts = snapshot.players.map((p, i) => ({ player_id: p.id, amount: i === 4 ? 23.98 : 19 })) as GameSnapshot["cashOuts"];
+    snapshot.game.discrepancy_allocation = { method: "proportional", player_ids: [], amount: 0.02, rounding_version: version };
+    const amounts = version === 2 ? [0.99, 0.99, 1, 1] : [0.99, 0.99, 0.99, 1.01];
+    expect(getPaymentProgress(snapshot, amounts.map((amount, i) => ({
+      key: `min:${snapshot.players[i].id}:e:${amount.toFixed(2)}`, settled: true,
+    })))).toEqual({ total: 4, markedSent: 4 });
+  });
   it("counts transfers that have no status row and ignores stale plan rows", () => {
     expect(getPaymentProgress(fixture(), [])).toEqual({ total: 1, markedSent: 0 });
     expect(getPaymentProgress(fixture(), [{ key: "bank:b:a:20.00", settled: true }])).toEqual({ total: 1, markedSent: 0 });

@@ -219,6 +219,53 @@ describe("getPlayerNetChanges", () => {
 });
 
 describe("applyDiscrepancyAllocation", () => {
+  it.each(["proportional", "selected"] as const)("apportions tied cents without reversing a %s adjustment", (method) => {
+    for (const sign of [1, -1]) {
+      const players = ["A", "B", "C", "D"].map((id) => player(id, -sign));
+      players.push(player("E", sign * 3.98));
+      const result = applyDiscrepancyAllocation(players, sign * 0.02, {
+        method, playerIds: ["A", "B", "C", "D"],
+      });
+      expect(result.map((item) => item.net)).toEqual([
+        -sign * 0.99, -sign * 0.99, -sign, -sign, sign * 3.98,
+      ]);
+    }
+  });
+
+  it("awards a spare cent to the largest remainder rather than the last player", () => {
+    expect(applyDiscrepancyAllocation(
+      [player("A", -1), player("B", -2), player("C", -3), player("D", 5.99)],
+      0.01, { method: "proportional", playerIds: [] },
+    )).toEqual([player("A", -1), player("B", -2), player("C", -2.99), player("D", 5.99)]);
+  });
+
+  it("retains the original amounts for an explicitly historical rounding version", () => {
+    expect(applyDiscrepancyAllocation(
+      [player("A", -1), player("B", -1), player("C", -1), player("D", -1), player("E", 3.98)],
+      0.02, { method: "proportional", playerIds: [], roundingVersion: 1 },
+    ).map((item) => item.net)).toEqual([-0.99, -0.99, -0.99, -1.01, 3.98]);
+  });
+
+  it("conserves every cent and never exceeds a selected player's capacity", () => {
+    // Exhaust small cents/weights, then include large amounts whose quota
+    // products exceed Number.MAX_SAFE_INTEGER. Test behavioral invariants.
+    const weights = [[1, 1, 1, 1], [1, 2, 7], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [9_999_999_999, 7_777_777_777, 8_888_888_888]];
+    for (const cents of weights) {
+      const capacity = cents.reduce((sum, value) => sum + value, 0);
+      const amounts = capacity > 100 ? [1, 2, 3, capacity - 1, capacity] : Array.from({ length: capacity }, (_, i) => i + 1);
+      for (const amount of amounts) for (const sign of [1, -1]) {
+        const before = cents.map((value, i) => player(String(i), -sign * value / 100));
+        const after = applyDiscrepancyAllocation(before, sign * amount / 100, { method: "proportional", playerIds: [] });
+        const adjustments = after.map((item, i) => Math.round((item.net - before[i].net) * sign * 100));
+        expect(adjustments.reduce((sum, value) => sum + value, 0)).toBe(amount);
+        adjustments.forEach((value, i) => {
+          expect(value).toBeGreaterThanOrEqual(0);
+          expect(value).toBeLessThanOrEqual(cents[i]);
+        });
+      }
+    }
+  });
+
   it("reduces winnings proportionally when cash-outs exceed buy-ins", () => {
     expect(applyDiscrepancyAllocation(
       [player("A", 60), player("B", 40), player("C", -80)],

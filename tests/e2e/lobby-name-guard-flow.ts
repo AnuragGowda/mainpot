@@ -44,6 +44,7 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
   const [host, firstGuest, secondGuest] = await Promise.all(contexts.map((context) => context.newPage()));
 
   const diagnostics = failureDiagnostics([host, firstGuest, secondGuest]);
+  await diagnostics.ready;
   const { runtimeErrors, setPhase, navigate } = diagnostics;
 
   try {
@@ -140,7 +141,8 @@ export async function runLobbyNameGuardFlow(browser: Browser, baseURL: string) {
       path: test.info().outputPath("lobby-name-guard-race.png"),
       fullPage: true,
     });
-    expect(runtimeErrors, "Independent devices must not leave uncaught browser errors").toEqual([]);
+    if (runtimeErrors.length || diagnostics.report().retiredReads.length) await writeFile(test.info().outputPath("network-diagnostics.json"), JSON.stringify(diagnostics.report(), null, 2));
+    expect(diagnostics.unhandledErrors(), "Independent devices must not leave uncaught browser errors").toEqual([]);
   } catch (error) {
     const report = JSON.stringify(diagnostics.report(), null, 2);
     console.error("WebKit failure diagnostics:", report);

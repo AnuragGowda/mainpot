@@ -77,13 +77,14 @@ async function createFixture(
   host: SupabaseClient,
   participants: Array<{ label: string; client: SupabaseClient }>,
   label: string,
+  openingAmount = 20,
 ): Promise<Fixture> {
   const hostSessionId = randomUUID();
   const created = await host.rpc("create_game_guarded", {
     input_code: code(),
     input_game_name: label,
     input_host_name: "Host",
-    input_buy_in: 20,
+    input_buy_in: Math.min(openingAmount, 1_000_000),
     input_session_id: hostSessionId,
   });
   const game = (Array.isArray(created.data) ? created.data[0] : created.data) as { game_id: string; player_id: string; code: string } | null;
@@ -104,13 +105,25 @@ async function createFixture(
   }
   const approved = await host.from("buy_ins").update({ verified: true }).eq("game_id", game.game_id).eq("verified", false).select("id");
   assert(!approved.error && approved.data?.length === participants.length, `${label} opening entries are approved`);
+  if (openingAmount > 1_000_000) {
+    // Creation caps the default buy-in; guarded corrections support the full
+    // numeric(10,2) ledger range used by this precision regression.
+    const entries = await host.from("buy_ins").select("id").eq("game_id", game.game_id);
+    assert(!entries.error && entries.data?.length === participants.length + 1, `${label} has all opening entries`);
+    for (const entry of entries.data) {
+      const correction = await host.rpc("correct_buy_in_as_host", {
+        input_buy_in_id: entry.id, input_amount: openingAmount, input_operation_key: randomUUID(),
+      });
+      assert(!correction.error, `${label} sets a supported large ledger amount`);
+    }
+  }
   return { gameId: game.game_id, code: game.code, host, hostPlayerId: game.player_id, hostSessionId, players };
 }
 
 async function lockFixture(
   fixture: Fixture,
   cashOuts: Array<{ playerId: string; amount: number }>,
-  options: { mode?: "min" | "bank"; bankPlayerId?: string | null; discrepancyAllocation?: Record<string, unknown> } = {},
+  options: { mode?: "min" | "bank"; bankPlayerId?: string | null; discrepancyAllocation?: Record<string, unknown>; decimalVersion?: boolean } = {},
 ) {
   const settling = await fixture.host.from("games").update({ status: "settling" }).eq("id", fixture.gameId).select("id");
   assert(!settling.error && settling.data?.length === 1, "game enters settlement");
@@ -122,8 +135,28 @@ async function lockFixture(
   })));
   assert(savedCashOuts.length === cashOuts.length && savedCashOuts.every((cashOut) => !cashOut.error && cashOut.data), "cash-outs are saved");
   if (options.discrepancyAllocation) {
-    const saved = await fixture.host.from("games").update({ discrepancy_allocation: options.discrepancyAllocation }).eq("id", fixture.gameId).select("id");
-    assert(!saved.error && saved.data?.length === 1, "discrepancy allocation is saved");
+    for (const invalidVersion of [0, 3, null, "2"]) {
+      await expectRejected(
+        () => fixture.host.from("games").update({ discrepancy_allocation: {
+          ...options.discrepancyAllocation, rounding_version: invalidVersion,
+        } }).eq("id", fixture.gameId),
+        "unknown or malformed rounding versions are rejected before lock",
+      );
+    }
+    if (options.decimalVersion) {
+      const { data: { session } } = await fixture.host.auth.getSession();
+      assert(session, "host has an authenticated session");
+      // JSON 2.0 and 2 mean the same version; PostgreSQL retains the scale.
+      const saved = await fetch(`${url}/rest/v1/rpc/save_discrepancy_allocation_guarded`, {
+        method: "POST",
+        headers: { apikey: anonKey, Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ input_game_id: fixture.gameId, input_allocation: options.discrepancyAllocation }).replace('"rounding_version":2', '"rounding_version":2.0'),
+      });
+      assert(saved.ok, "numeric 2.0 discrepancy version is saved through the guarded RPC");
+    } else {
+      const saved = await fixture.host.from("games").update({ discrepancy_allocation: options.discrepancyAllocation }).eq("id", fixture.gameId).select("id");
+      assert(!saved.error && saved.data?.length === 1, "discrepancy allocation is saved");
+    }
   }
   const finalized = await fixture.host.from("games").update({
     status: "ended",
@@ -159,6 +192,72 @@ async function run() {
   const guestB = await createGuest("plan guest B");
   const guestC = await createGuest("plan guest C");
   const guestD = await createGuest("plan guest D");
+
+  // Exercise the real guarded payment RPC, not just a duplicate SQL formula.
+  // New cents apportionment and historical payment graphs must both survive
+  // reload, and the obsolete/revised tuples must not be interchangeable.
+  for (const roundingVersion of [undefined, 1, 2] as const) {
+    for (const method of ["proportional", "selected"] as const) {
+      for (const sign of [1, -1]) {
+        const rounded = await createFixture(host, [
+          { label: "A", client: guestA }, { label: "B", client: guestB },
+          { label: "C", client: guestC }, { label: "D", client: guestD },
+        ], `rounding ${roundingVersion ?? "legacy"} ${method} ${sign}`);
+        const ids = [rounded.hostPlayerId, ...["A", "B", "C", "D"].map((name) => rounded.players[name].playerId)];
+        await lockFixture(rounded, ids.map((playerId, i) => ({
+          playerId, amount: i < 4 ? 20 - sign : 20 + sign * 3.98,
+        })), {
+          mode: "bank", bankPlayerId: ids[4],
+          discrepancyAllocation: {
+            method, player_ids: ids.slice(0, 4), amount: 0.02,
+            ...(roundingVersion === undefined ? {} : { rounding_version: roundingVersion }),
+          },
+        });
+        const amounts = roundingVersion === 2 ? [0.99, 0.99, 1, 1] : [0.99, 0.99, 0.99, 1.01];
+        for (const [i, amount] of amounts.entries()) {
+          const from = sign > 0 ? ids[i] : ids[4];
+          const to = sign > 0 ? ids[4] : ids[i];
+          const saved = await setFinalPayment(host, rounded, from, to, amount, "bank", rounded.hostSessionId);
+          assert(!saved.error, `rounding ${roundingVersion ?? "legacy"} ${method} ${sign} accepts its exact payment ${i}`);
+          if (i >= 2) await expectRejected(
+            () => setFinalPayment(host, rounded, from, to, (roundingVersion === 2 ? [0.99, 1.01] : [1, 1])[i - 2], "bank", rounded.hostSessionId),
+            "a different rounding version cannot rewrite the locked amount",
+          );
+        }
+        const reread = await host.from("settlement_payments").select("amount").eq("game_id", rounded.gameId);
+        assert(!reread.error && reread.data?.length === 4, "all exact cents payments survive a database read");
+        await expectRejected(
+          () => host.from("games").update({ discrepancy_allocation: { method, player_ids: ids.slice(0, 4), amount: 0.02, rounding_version: roundingVersion === 2 ? 1 : 2 } }).eq("id", rounded.gameId),
+          "a finalized rounding version cannot be changed",
+        );
+      }
+    }
+  }
+
+  for (const scenario of [
+    { label: "unequal remainder", decimalVersion: true, opening: 20, cashOuts: [16, 17, 18, 19, 29.99], difference: 0.01, payments: [3.99, 3, 2, 1] },
+    { label: "large exact numeric", decimalVersion: false, opening: 40_000_000, cashOuts: [30_000_000, 30_000_000, 30_000_000, 10_000_000, 75_000_000.01], difference: 24_999_999.99, payments: [5_833_333.33, 5_833_333.33, 5_833_333.34, 17_500_000.01] },
+  ]) {
+    const fixture = await createFixture(host, [
+      { label: "A", client: guestA }, { label: "B", client: guestB },
+      { label: "C", client: guestC }, { label: "D", client: guestD },
+    ], scenario.label, scenario.opening);
+    const ids = [fixture.hostPlayerId, ...["A", "B", "C", "D"].map(name => fixture.players[name].playerId)];
+    await lockFixture(fixture, ids.map((playerId, i) => ({ playerId, amount: scenario.cashOuts[i] })), {
+      decimalVersion: scenario.decimalVersion,
+      discrepancyAllocation: { method: "proportional", player_ids: ids.slice(0, 4), amount: scenario.difference, rounding_version: 2 },
+    });
+    for (const [i, amount] of scenario.payments.entries()) {
+      const saved = await setFinalPayment(host, fixture, ids[i], ids[4], amount, "min", fixture.hostSessionId);
+      assert(!saved.error, `${scenario.label} accepts its exact minimum-plan payment ${i}`);
+      await expectRejected(
+        () => setFinalPayment(host, fixture, ids[i], ids[4], amount + 0.01, "min", fixture.hostSessionId),
+        `${scenario.label} rejects even a one-cent drift`,
+      );
+    }
+    const reread = await host.from("settlement_payments").select("amount").eq("game_id", fixture.gameId);
+    assert(!reread.error && reread.data?.length === 4, `${scenario.label} persists all exact payments`);
+  }
 
   const min = await createFixture(host, [{ label: "A", client: guestA }, { label: "B", client: guestB }], "minimum payment plan");
   await lockFixture(min, [

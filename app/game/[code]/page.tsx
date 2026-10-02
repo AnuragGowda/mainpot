@@ -355,20 +355,28 @@ function GameRoom({ code }: { code: string }) {
     setSnapshot(await getGameSnapshot(gameId));
   }, []);
 
-  const handleRetrySync = useCallback(async () => {
-    if (!snapshot) return;
+  const refreshGameSnapshot = useCallback(async () => {
+    if (!snapshot) throw new Error("The game has not loaded yet.");
     setSyncStatus("connecting");
     try {
       setSnapshot(await getGameSnapshot(snapshot.game.id));
       setSyncStatus("connected");
     } catch (err) {
       setSyncStatus(navigator.onLine ? "stale" : "offline");
+      throw err instanceof Error ? err : new Error("Could not refresh the game. Please retry.", { cause: err });
+    }
+  }, [snapshot]);
+
+  const handleRetrySync = useCallback(async () => {
+    try {
+      await refreshGameSnapshot();
+    } catch (err) {
       toast(
         err instanceof Error ? err.message : "Could not refresh the game.",
         "error",
       );
     }
-  }, [snapshot, toast]);
+  }, [refreshGameSnapshot, toast]);
 
   async function handleBuyIn(
     frontedByPlayerId: string | null,
@@ -653,7 +661,7 @@ function GameRoom({ code }: { code: string }) {
     return (
       <>
         <SyncStatusNotice status={syncStatus} onRetry={handleRetrySync} />
-        <SettlementScreen snapshot={snapshot} onRefresh={handleRetrySync} />
+        <SettlementScreen snapshot={snapshot} onRefresh={refreshGameSnapshot} />
       </>
     );
   }
@@ -689,7 +697,7 @@ function GameRoom({ code }: { code: string }) {
           onEdit={handleEdit}
           onRemove={handleRemoveBuyIn}
         />
-        <RoomSectionBoundary key={`early-${snapshot.game.id}`} gameId={snapshot.game.id} name="Early cash-outs" onRetry={handleRetrySync}>
+        <RoomSectionBoundary key={`early-${snapshot.game.id}`} gameId={snapshot.game.id} name="Early cash-outs" onRetry={refreshGameSnapshot}>
           <EarlyCashOuts
             snapshot={snapshot}
             currentPlayerId={currentPlayer.id}
@@ -709,7 +717,7 @@ function GameRoom({ code }: { code: string }) {
           currentPlayerId={currentPlayer?.id ?? null}
           onHostPlayerSaved={handleHostPlayerSaved}
         />
-        <RoomSectionBoundary key={`activity-${snapshot.game.id}`} gameId={snapshot.game.id} name="Activity" onRetry={handleRetrySync}>
+        <RoomSectionBoundary key={`activity-${snapshot.game.id}`} gameId={snapshot.game.id} name="Activity" onRetry={refreshGameSnapshot}>
           <ActivityFeed
             snapshot={snapshot}
             isHost={isHost}

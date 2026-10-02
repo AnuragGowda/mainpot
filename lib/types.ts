@@ -24,6 +24,8 @@ export interface Game {
 
 export interface DiscrepancyAllocationRecord {
   method: "proportional" | "selected" | "custom";
+  /** Absent on historical plans, whose original rounding must be preserved. */
+  rounding_version?: 1 | 2;
   player_ids: string[];
   amount: number;
   player_allocations?: Array<{

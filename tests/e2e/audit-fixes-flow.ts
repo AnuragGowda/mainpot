@@ -31,6 +31,7 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
   const email = `recovery-${crypto.randomUUID()}@example.com`;
   const password = `Recovery-${crypto.randomUUID()}`;
   const diagnostics = failureDiagnostics([host, resumed]);
+  await diagnostics.ready;
   await host.addInitScript(() => {
     const events: { event: string; at: number; node: number | null; value: string | null; disabled: boolean | null; trusted?: boolean }[] = [];
     (window as unknown as { __mainpotCreateInputEvents: typeof events }).__mainpotCreateInputEvents = events;

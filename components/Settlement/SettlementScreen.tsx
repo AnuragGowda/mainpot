@@ -230,9 +230,20 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
   const customAllocationValid = customPlayerAllocations.length > 0
     && !customHasInvalidAmount
     && Math.abs(customAllocatedTotal - Math.abs(difference)) < 0.005;
+  const savedAllocation = snapshot.game.discrepancy_allocation;
+  // Results always reconstruct the saved decision, including changes from
+  // another host tab. Only the editing preview chooses the new algorithm.
   const allocation = !balanced
-    ? {
+    ? mode !== "allocation" && savedAllocation ? {
+        method: savedAllocation.method,
+        roundingVersion: savedAllocation.rounding_version ?? 1,
+        playerIds: savedAllocation.player_ids,
+        playerAllocations: savedAllocation.player_allocations?.map((item) => ({
+          playerId: item.player_id, amount: item.amount,
+        })),
+      } : {
         method: allocationMethod,
+        roundingVersion: 2 as const,
         playerIds: allocationMethod === "proportional"
           ? allocationEligible.map((player) => player.playerId)
           : allocationMethod === "custom"
@@ -375,6 +386,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
     try {
       await saveDiscrepancyAllocation(snapshot.game.id, {
         method: allocationMethod,
+        rounding_version: 2,
         player_ids: allocation?.playerIds ?? [],
         amount: Math.abs(difference),
         player_allocations: allocationMethod === "custom"
@@ -384,6 +396,8 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
             }))
           : undefined,
       });
+      // Show authoritative amounts before moving from the editor to review.
+      await onRefresh?.();
       setMode("results");
     } catch (err) {
       toast(err instanceof Error ? err.message : "Failed to save the discrepancy decision.", "error");

@@ -7,6 +7,7 @@ import { runBankPlanFlow } from "./bank-flow";
 import { checkAccountRecovery, checkSavedFriendInvitation } from "./audit-fixes-flow";
 import { runHostPlayerFlow } from "./host-player-flow";
 import { runSettlementUxFlow } from "./settlement-ux-flow";
+import { runDiscrepancyRoundingFlow } from "./discrepancy-rounding-flow";
 import { expect, test, type Route } from "@playwright/test";
 import { createDeviceContext } from "./device-context";
 
@@ -22,6 +23,16 @@ test("keeps account templates, payment history, and deletion cancellation recove
 test("reviews payments before locking and keeps completion in sync", async ({ page }) => {
   test.slow();
   await runSettlementUxFlow(page);
+});
+
+test("keeps cents allocations and sent payments stable after locking and reload", async ({ browser, baseURL }) => {
+  test.slow();
+  const context = await createDeviceContext(browser, { baseURL });
+  try {
+    await runDiscrepancyRoundingFlow(await context.newPage(), true);
+  } finally {
+    await context.close();
+  }
 });
 
 async function createGame(host: import("@playwright/test").Page, name: string) {
@@ -142,6 +153,11 @@ test("locks an early cash-out against the host and carries it out of final settl
 
     await guest.getByRole("button", { name: "Cash out", exact: true }).click();
     const requestDialog = guest.getByRole("alertdialog", { name: "Cash out & leave" });
+    await expect(requestDialog.getByRole("textbox", { name: "Final chips for early cash-out" })).toBeVisible();
+    // Let opening effects and their scheduled frames finish. The input's
+    // autofocus must survive them so an initial keystroke cannot be lost.
+    await guest.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+    await expect(requestDialog.getByRole("textbox", { name: "Final chips for early cash-out" })).toBeFocused();
     await requestDialog.getByRole("textbox", { name: "Final chips for early cash-out" }).fill("30");
     await expect(requestDialog.getByRole("textbox", { name: "Final chips for early cash-out" })).toHaveValue("30");
     await expect(requestDialog).toContainText("+$10.00");

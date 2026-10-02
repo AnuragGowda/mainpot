@@ -54,4 +54,16 @@ describe("table-specific resume storage", () => {
     expect(values.has("ante_active_game")).toBe(false);
     expect(values.has("ante_active_games")).toBe(false);
   });
+
+  it("persists a created table for the next document without refreshing departing resume cards", () => {
+    setActiveGame("TABLEA");
+    const changed = vi.fn();
+    events.addEventListener(ACTIVE_GAMES_CHANGED, changed);
+    setActiveGame("TABLEB", { notify: false });
+    expect(changed).not.toHaveBeenCalled();
+    expect(getActiveGames()).toEqual(["TABLEB", "TABLEA"]);
+    expect(values.get("ante_active_game")).toBe("TABLEB");
+    setActiveGame("TABLEC");
+    expect(changed).toHaveBeenCalledOnce();
+  });
 });

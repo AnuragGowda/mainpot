@@ -147,7 +147,9 @@ export default function CreateGamePage() {
           toast("Game created, but the recurring template could not be saved.", "error");
         }
       }
-      setActiveGame(code);
+      // The new document revalidates its saved tables on mount. Refreshing the
+      // departing create page would start unused lookups during navigation.
+      setActiveGame(code, { notify: false });
       markPostGameEntry(code);
       window.sessionStorage.setItem("ante_post_create_source_game", code);
       toast("Game created!", "success");
