@@ -43,12 +43,15 @@ test("keeps cents allocations and sent payments stable after locking and reload"
   }
 });
 
-async function createGame(host: import("@playwright/test").Page, name: string) {
+async function createGame(host: import("@playwright/test").Page, name: string, existingTable?: string) {
   await host.goto("/create");
+  if (existingTable) await expect(host.getByRole("region", { name: "Resume active game" })).toContainText(existingTable);
   await host.locator("#create-name").fill("Casey");
   await host.locator("#create-game-name").fill(name);
   await host.locator("#create-buy-in").fill("20");
-  await host.getByRole("button", { name: "Create game" }).click();
+  // Saved-table lookup can finish before the click in a second tab. Both
+  // labels submit this form; waiting for only the first makes setup race it.
+  await host.getByRole("button", { name: /^(?:Create game|Start another game)$/ }).click({ timeout: 15_000 });
   await expect(host).toHaveURL(/\/game\/[A-HJ-NP-Z2-9]{6}$/, { timeout: 15_000 });
 }
 
@@ -1012,16 +1015,21 @@ test("contains a table panel crash while another table keeps saving and refreshi
   const diagnostics = failureDiagnostics([sameDeviceTable, otherDeviceTable]);
   await diagnostics.ready;
   const healthyErrors: string[] = [];
+  let bodyError: unknown;
   for (const page of [sameDeviceTable, otherDeviceTable]) {
     page.on("console", message => {
       if (message.type() === "error" && /^(?:Error|TypeError|ReferenceError):|Minified React error|callbacks for realtime:/.test(message.text())) healthyErrors.push(message.text());
     });
   }
   try {
+    diagnostics.setPhase("create fault table");
     await createGame(faultTable, "Panel fault table");
     const faultUrl = faultTable.url();
-    await createGame(sameDeviceTable, "Unaffected same-device table");
+    diagnostics.setPhase("create same-device table");
+    await createGame(sameDeviceTable, "Unaffected same-device table", "Panel fault table");
+    diagnostics.setPhase("create other-device table");
     await createGame(otherDeviceTable, "Unaffected other-device table");
+    diagnostics.setPhase("inject panel fault");
     // Inject malformed display-only activity for ONE game's responses. The activity renderer
     // cannot sort a missing event timestamp; no database rows are changed.
     await faultTable.route("**/rest/v1/game_events?**", async route => {
@@ -1035,6 +1043,7 @@ test("contains a table panel crash while another table keeps saving and refreshi
     await expect(faultTable.getByRole("button", { name: "Add a rebuy" })).toBeEnabled();
     await expect(faultTable.getByText("Mainpot hit a snag", { exact: true })).toHaveCount(0);
     for (const [page, rebuy, expected] of [[faultTable, "10", "$30.00"], [sameDeviceTable, "20", "$40.00"], [otherDeviceTable, "35", "$55.00"]] as const) {
+      diagnostics.setPhase(`rebuy: ${expected}`);
       await page.getByRole("button", { name: "Add a rebuy" }).click();
       const dialog = page.getByRole("dialog", { name: "Add a rebuy" });
       await dialog.getByRole("spinbutton", { name: "Rebuy amount" }).fill(rebuy);
@@ -1046,6 +1055,7 @@ test("contains a table panel crash while another table keeps saving and refreshi
       await expect(page.getByText("Mainpot hit a snag", { exact: true })).toHaveCount(0);
     }
     // Recover the failing panel; its table's original ledger stayed unchanged.
+    diagnostics.setPhase("recover panel and resume healthy table");
     await faultTable.unrouteAll({ behavior: "wait" });
     await faultTable.getByRole("button", { name: "Retry activity" }).click();
     await expect(faultTable.getByRole("alert", { name: "Activity unavailable" })).toHaveCount(0, { timeout: 15_000 });
@@ -1054,14 +1064,33 @@ test("contains a table panel crash while another table keeps saving and refreshi
     await faultTable.getByRole("region", { name: "Resume active game" }).filter({ hasText: "Unaffected same-device table" }).getByRole("button", { name: "Resume game" }).click();
     await expect(faultTable.getByRole("heading", { name: "Unaffected same-device table" })).toBeVisible();
     await expect(faultTable.getByText("$40.00", { exact: true }).first()).toBeVisible();
+    diagnostics.setPhase("final assertions");
     if (diagnostics.runtimeErrors.length) await preserveNetworkDiagnostics(testInfo, diagnostics);
     expect([...healthyErrors, ...diagnostics.unhandledErrors()]).toEqual([]);
     expect(faultUrl).not.toBe(sameDeviceTable.url());
   } catch (error) {
+    bodyError = error;
     await preserveNetworkDiagnostics(testInfo, diagnostics);
     throw error;
   } finally {
-    if (!faultTable.isClosed()) await faultTable.unrouteAll({ behavior: "ignoreErrors" });
-    await Promise.all([unrelated.close(), shared.close()]);
+    const cleanupErrors: unknown[] = [];
+    const close = async (label: string, action: () => Promise<void>) => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([action(), new Promise<never>((_resolve, reject) => {
+          timer = setTimeout(() => reject(new Error(`${label} did not close within 10 seconds.`)), 10_000);
+        })]);
+      } catch (error) { cleanupErrors.push(error); }
+      finally { clearTimeout(timer); }
+    };
+    // Stop each document's polling/bindings before WebKit flushes context
+    // tracing. Keep teardown bounded and preserve any earlier assertion error.
+    await close("Fault routes", () => faultTable.isClosed() ? Promise.resolve() : faultTable.unrouteAll({ behavior: "ignoreErrors" }));
+    for (const [label, page] of [["Fault page", faultTable], ["Same-device page", sameDeviceTable], ["Other-device page", otherDeviceTable]] as const) {
+      await close(label, () => page.isClosed() ? Promise.resolve() : page.close());
+    }
+    await close("Other-device context", () => unrelated.close());
+    await close("Shared context", () => shared.close());
+    if (cleanupErrors.length) throw new AggregateError(bodyError === undefined ? cleanupErrors : [bodyError, ...cleanupErrors], "Panel-isolation cleanup failed.");
   }
 });
