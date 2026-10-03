@@ -65,4 +65,8 @@ The mobile early-cash-out and desktop panel-isolation cases produced native WebK
 
 Local follow-up acceptance: **45 focused realtime cases passed without retries** (the two affected flows plus cash-out with realtime setup failure, repeated three times on each of five browser profiles), in 4.7 minutes. This is Mac evidence; the subsequent Linux CI result remains a separate receipt.
 
+The first follow-up CI run for `fb42c96` encountered the newly indexed [braces stack-exhaustion advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) at its dependency-audit gate. Upstream lists no patched release. The package is reached only through the pinned Next ESLint development chain; the production audit has zero findings. A [reviewed exception](../../../security/dependency-audit.md) expires October 17 at 00:00 UTC, requires exact versions/dev-only placement, remains visible in CI and keeps all production and other high/critical findings blocking. The raw full audit still has this unresolved upstream advisory; it must not be reported as zero vulnerabilities. This changes audit policy, not the vulnerable upstream package.
+
+Local audit-policy acceptance: the independent production audit has zero findings; the reviewed development policy passes; **311 unit tests in 46 files**, including 16 exception rejection/expiry cases, pass. Lint has zero errors and the existing warning; the production build passes. Exact CI for this policy change is a separate required release receipt.
+
 Production migration, deployment and physical-device acceptance remain uncompleted unless separately recorded.

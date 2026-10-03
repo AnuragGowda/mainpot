@@ -17,6 +17,7 @@
     "start": "next start",
     "release:production": "node scripts/release-production.mts",
     "lint": "eslint .",
+    "audit:dependencies": "node scripts/audit-dependencies.mts",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:mobile": "PLAYWRIGHT_MOBILE=1 playwright test tests/e2e/smoke.spec.ts",
