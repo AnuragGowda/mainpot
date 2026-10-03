@@ -161,6 +161,14 @@ for (const [profile, engine, options] of profiles) {
     await page.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
     await expect(page.getByText("Ended", { exact: true })).toBeVisible();
     await scan("nine-seat-locked", { screenshot: true });
+    await page.goto("/create");
+    await page.locator("#create-name").fill("Casey");
+    await page.locator("#create-game-name").fill("Maximum amount acceptance");
+    await page.locator("#create-buy-in").fill("99999999.99");
+    await page.getByRole("button", { name: /^(Create game|Start another game)$/ }).click();
+    await expect(page.getByRole("region", { name: "At the table" }).getByText("$99,999,999.99", { exact: true })).toBeVisible();
+    await scan("maximum-valid-amount", { screenshot: true });
+    await scan("maximum-valid-amount-200-percent-font", { fontScale: 2, screenshot: true });
     if (engine === chromium && profile === "desktop-chrome") {
       const pwaContext = await browser.newContext({ ...options, baseURL, serviceWorkers: "allow" });
       try {

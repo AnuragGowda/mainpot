@@ -1,0 +1,13 @@
+{
+  "revision": "1a7dd4da43a28dc62df95e0e86742e31d98b875f",
+  "profile": "narrow-chrome",
+  "viewportWidth": 320,
+  "rootFontScale": 2,
+  "amount": "99999999.99",
+  "target": "#player-list li > div:last-child > p",
+  "textWidth": 253.65625,
+  "textRight": 318.65625,
+  "cardRight": 288,
+  "clipped": true,
+  "documentOverflow": false
+}

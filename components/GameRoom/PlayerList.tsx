@@ -76,7 +76,7 @@ export default function PlayerList({ players, snapshot, currentPlayerId, onHostP
                 <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">
                   {player.name.trim().slice(0, 2).toUpperCase()}
                 </span>
-                <div className="min-w-[min(100%,6rem)] flex-1">
+                <div className="min-w-[min(100%,6rem)] flex-1 break-words">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <p className="min-w-0 break-words text-sm font-medium text-gray-900">{player.name}</p>
                     {player.is_host ? <Badge variant="gray" className="px-1.5 py-0.5 text-[10px] leading-none">Host</Badge> : null}
@@ -98,8 +98,8 @@ export default function PlayerList({ players, snapshot, currentPlayerId, onHostP
                     </p>
                   ))}
                 </div>
-                <div className="flex shrink-0 flex-col items-end">
-                <p className="font-semibold tabular-nums text-gray-950">{formatCurrency(verified)}</p>
+                <div className="flex min-w-0 max-w-full shrink-0 flex-col items-end">
+                <p className="max-w-full break-words font-semibold tabular-nums text-gray-950">{formatCurrency(verified)}</p>
                 {canManage && onHostPlayerSaved && player.id !== currentPlayerId && !earlyCashOutLocked ? (
                   <HostPlayerActions snapshot={snapshot} player={player} onSaved={onHostPlayerSaved} />
                 ) : null}
