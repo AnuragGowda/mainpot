@@ -10,6 +10,14 @@ import { runSettlementUxFlow } from "./settlement-ux-flow";
 import { runDiscrepancyRoundingFlow } from "./discrepancy-rounding-flow";
 import { expect, test, type Route } from "@playwright/test";
 import { createDeviceContext } from "./device-context";
+import { failureDiagnostics } from "./failure-diagnostics";
+import { writeFile } from "node:fs/promises";
+
+async function preserveNetworkDiagnostics(testInfo: import("@playwright/test").TestInfo, diagnostics: ReturnType<typeof failureDiagnostics>) {
+  try {
+    await writeFile(testInfo.outputPath("network-diagnostics.json"), JSON.stringify(diagnostics.report(), null, 2));
+  } catch { /* Preserve the original browser assertion failure. */ }
+}
 
 // Local guest creation is deliberately rate-limited, so these database-backed
 // scenarios run one at a time while each scenario still uses separate users.
@@ -236,15 +244,10 @@ for (const failRealtime of [false, true]) {
       });
     }
     const [host, jordan, taylor] = await Promise.all(contexts.map(context => context.newPage()));
+    const diagnostics = failureDiagnostics([host, jordan, taylor]);
+    await diagnostics.ready;
     const errors: string[] = [];
-    let hostReloading = false;
     for (const page of [host, jordan, taylor]) {
-      page.on("pageerror", error => {
-        // WebKit reports an aborted auth fetch when the old document is
-        // replaced. Still require the refreshed authenticated room below.
-        if (page === host && hostReloading && /auth\/v1\/user due to access control checks\.$/.test(error.message)) return;
-        errors.push(error.message);
-      });
       page.on("console", message => {
         // React catches effect failures and reports them to console instead
         // of pageerror; those must also fail this regression test.
@@ -270,17 +273,13 @@ for (const failRealtime of [false, true]) {
       }
       await expect(hostEarly.getByTitle("Mark sent")).toHaveCount(2);
       await expect(host.getByRole("heading", { name: "Mainpot hit a snag" })).toHaveCount(0);
-      hostReloading = true;
-      await host.reload();
+      await diagnostics.navigate(host, "host early cash-outs reload", () => host.reload());
       await expect(hostEarly.getByTitle("Mark sent")).toHaveCount(2);
-      hostReloading = false;
       await hostEarly.getByTitle("Mark sent").first().click();
       await expect(jordan.getByRole("region", { name: "Early cash-outs" }).getByTitle("Reopen payment")).toHaveCount(1);
-      hostReloading = true;
-      await host.reload();
+      await diagnostics.navigate(host, "host early payment reload", () => host.reload());
       await expect(hostEarly.getByTitle("Reopen payment")).toHaveCount(1);
       await expect(hostEarly.getByTitle("Mark sent")).toHaveCount(1);
-      hostReloading = false;
       await host.screenshot({ path: testInfo.outputPath("two-early-cash-outs.png"), fullPage: true });
 
       await host.getByRole("button", { name: "End game" }).click();
@@ -293,11 +292,13 @@ for (const failRealtime of [false, true]) {
       await host.getByRole("button", { name: "Lock settlement", exact: true }).click();
       await host.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
       await expect(host.locator('[data-testid="payment-ledger"] > summary')).toContainText("1 of 2 payments marked sent");
-      hostReloading = true;
-      await host.reload();
+      await diagnostics.navigate(host, "host finalized settlement reload", () => host.reload());
       await expect(host.locator('[data-testid="payment-ledger"] > summary')).toContainText("1 of 2 payments marked sent");
-      hostReloading = false;
-      expect(errors, "All three clients must remain free of room and payment effect crashes").toEqual([]);
+      if (diagnostics.runtimeErrors.length) await preserveNetworkDiagnostics(testInfo, diagnostics);
+      expect([...errors, ...diagnostics.unhandledErrors()], "All three clients must remain free of room and payment effect crashes").toEqual([]);
+    } catch (error) {
+      await preserveNetworkDiagnostics(testInfo, diagnostics);
+      throw error;
     } finally {
       await Promise.all(contexts.map(context => context.close()));
     }
@@ -1001,30 +1002,26 @@ test("starts a fresh table during cash-outs and never resumes a finalized game",
   await expect(page.getByRole("region", { name: "At the table" })).toContainText("$20.00");
 });
 
-test("contains a table panel crash while another table keeps saving and refreshing", async ({ browser }) => {
+test("contains a table panel crash while another table keeps saving and refreshing", async ({ browser }, testInfo) => {
   test.slow();
   const shared = await createDeviceContext(browser);
   const unrelated = await createDeviceContext(browser);
   const faultTable = await shared.newPage();
   const sameDeviceTable = await shared.newPage();
   const otherDeviceTable = await unrelated.newPage();
+  const diagnostics = failureDiagnostics([sameDeviceTable, otherDeviceTable]);
+  await diagnostics.ready;
+  const healthyErrors: string[] = [];
+  for (const page of [sameDeviceTable, otherDeviceTable]) {
+    page.on("console", message => {
+      if (message.type() === "error" && /^(?:Error|TypeError|ReferenceError):|Minified React error|callbacks for realtime:/.test(message.text())) healthyErrors.push(message.text());
+    });
+  }
   try {
     await createGame(faultTable, "Panel fault table");
     const faultUrl = faultTable.url();
     await createGame(sameDeviceTable, "Unaffected same-device table");
     await createGame(otherDeviceTable, "Unaffected other-device table");
-    const healthyErrors: string[] = [];
-    const reloadingPages = new Set<import("@playwright/test").Page>();
-    for (const page of [sameDeviceTable, otherDeviceTable]) {
-      page.on("pageerror", error => {
-        // WebKit can report an auth request aborted by this explicit reload as
-        // a page error. Only this exact navigation cancellation is exempt;
-        // each room must still restore its identity and saved balance below.
-        if (browser.browserType().name() === "webkit" && reloadingPages.has(page)
-          && /\/auth\/v1\/user due to access control checks\.$/.test(error.message)) return;
-        healthyErrors.push(error.message);
-      });
-    }
     // Inject malformed display-only activity for ONE game's responses. The activity renderer
     // cannot sort a missing event timestamp; no database rows are changed.
     await faultTable.route("**/rest/v1/game_events?**", async route => {
@@ -1043,10 +1040,9 @@ test("contains a table panel crash while another table keeps saving and refreshi
       await dialog.getByRole("spinbutton", { name: "Rebuy amount" }).fill(rebuy);
       await dialog.getByRole("button", { name: "Add rebuy", exact: true }).click();
       await expect(playerCard(page, "Casey")).toContainText(expected);
-      reloadingPages.add(page);
-      await page.reload();
+      if (page === faultTable) await page.reload();
+      else await diagnostics.navigate(page, `healthy table reload: ${expected}`, () => page.reload());
       await expect(playerCard(page, "Casey")).toContainText(expected);
-      reloadingPages.delete(page);
       await expect(page.getByText("Mainpot hit a snag", { exact: true })).toHaveCount(0);
     }
     // Recover the failing panel; its table's original ledger stayed unchanged.
@@ -1058,11 +1054,14 @@ test("contains a table panel crash while another table keeps saving and refreshi
     await faultTable.getByRole("region", { name: "Resume active game" }).filter({ hasText: "Unaffected same-device table" }).getByRole("button", { name: "Resume game" }).click();
     await expect(faultTable.getByRole("heading", { name: "Unaffected same-device table" })).toBeVisible();
     await expect(faultTable.getByText("$40.00", { exact: true }).first()).toBeVisible();
-    expect(healthyErrors).toEqual([]);
+    if (diagnostics.runtimeErrors.length) await preserveNetworkDiagnostics(testInfo, diagnostics);
+    expect([...healthyErrors, ...diagnostics.unhandledErrors()]).toEqual([]);
     expect(faultUrl).not.toBe(sameDeviceTable.url());
+  } catch (error) {
+    await preserveNetworkDiagnostics(testInfo, diagnostics);
+    throw error;
   } finally {
-    await faultTable.unrouteAll({ behavior: "wait" });
-    await unrelated.close();
-    await shared.close();
+    if (!faultTable.isClosed()) await faultTable.unrouteAll({ behavior: "ignoreErrors" });
+    await Promise.all([unrelated.close(), shared.close()]);
   }
 });
