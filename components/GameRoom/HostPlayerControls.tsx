@@ -69,7 +69,7 @@ function PlayerSheet({ title, description, busy, error, submitLabel, onSubmit, o
 export function AddHostPlayerButton({ snapshot, onSaved }: { snapshot: GameSnapshot; onSaved: () => Promise<void> }) {
   const [open, setOpen] = useState(false);
   return <>
-    <Button variant="secondary" size="sm" className="shrink-0 whitespace-nowrap" onClick={() => setOpen(true)} aria-haspopup="dialog" aria-expanded={open}>
+    <Button variant="secondary" size="sm" className="shrink-0 whitespace-nowrap" onClick={(event) => { event.currentTarget.focus(); setOpen(true); }} aria-haspopup="dialog" aria-expanded={open}>
       <UserPlus aria-hidden="true" className="mr-1.5 h-4 w-4" />Add player
     </Button>
     {open ? <AddPlayerForm snapshot={snapshot} onSaved={onSaved} onClose={() => setOpen(false)} /> : null}
@@ -114,7 +114,7 @@ export function HostPlayerActions({ snapshot, player, onSaved }: { snapshot: Gam
   if (player.left_at) return <ReturnToTableButton snapshot={snapshot} player={player} onSaved={onSaved} />;
   return <>
     <button type="button" aria-label={`Manage ${player.name}`} aria-haspopup="dialog" aria-expanded={open}
-      onClick={() => setOpen(true)} className="inline-flex min-h-11 shrink-0 items-center rounded-lg px-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
+      onClick={(event) => { event.currentTarget.focus(); setOpen(true); }} className="inline-flex min-h-11 shrink-0 items-center rounded-lg px-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
       Manage
     </button>
     {open ? <ManagePlayerForm snapshot={snapshot} player={player} onSaved={onSaved} onClose={() => setOpen(false)} /> : null}

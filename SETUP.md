@@ -175,6 +175,15 @@ Google OAuth also needs a public feature flag after its credentials are ready.
 7. Set `NEXT_PUBLIC_SITE_URL=https://mainpot.app` in Vercel. Use
    `http://localhost:3000` in `.env.local` while developing locally.
 
+### Optional creator support
+
+Set `NEXT_PUBLIC_SUPPORT_URL` to your own HTTPS support page to show a quiet
+“Support Mainpot” link in the shared public-page footer. Buy Me a Coffee,
+Ko-fi, GitHub Sponsors, or a custom page can be used; confirm that the provider
+accepts your software-support use case. Leave it blank to hide the link.
+Rebuild after changing this public environment variable. Mainpot uses a plain
+external link and does not embed a payment widget or collect support payments.
+
 ### Apple sign-in
 
 Do not expose an Apple button until the provider is fully configured and

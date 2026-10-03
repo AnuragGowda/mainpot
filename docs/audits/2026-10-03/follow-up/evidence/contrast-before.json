@@ -1,0 +1,61 @@
+[
+  {
+    "profile": "desktop-chrome",
+    "state": "landing",
+    "path": "/",
+    "fontScale": 1,
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "nodes": [
+          {
+            "target": [
+              ".tracking-\\[0\\.18em\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.99 (foreground color: #888f9b, background color: #303133, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".bg-white\\/10.p-3.rounded-xl:nth-child(1) > .tracking-wider.text-gray-400.uppercase"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.07 (foreground color: #8c929f, background color: #444547, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".bg-white\\/10.p-3.rounded-xl:nth-child(2) > .tracking-wider.text-gray-400.uppercase"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.07 (foreground color: #8c929f, background color: #444547, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".bg-white\\/10.p-3.rounded-xl:nth-child(3) > .tracking-wider.text-gray-400.uppercase"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.07 (foreground color: #8c929f, background color: #444547, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1"
+          },
+          {
+            "target": [
+              ".bg-white\\/5 > div:nth-child(1) > .text-gray-400.text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.53 (foreground color: #8a919d, background color: #3a3b3d, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "nodes": 1
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 26
+      }
+    ],
+    "errors": []
+  }
+]

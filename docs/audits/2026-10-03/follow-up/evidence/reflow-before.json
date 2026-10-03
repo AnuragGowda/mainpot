@@ -1,0 +1,33 @@
+{
+  "profile": "narrow-chrome",
+  "state": "manage-player-200-percent-font",
+  "path": "/game/7M7L8T",
+  "fontScale": 2,
+  "width": 320,
+  "height": 568,
+  "scrollWidth": 446,
+  "rootFont": "32px",
+  "overflowingElements": [
+    {
+      "tag": "BUTTON",
+      "className": "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition duration-150 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-950 h-11 px-3 text-sm sm:h-9  shrink-0 text-gray-600",
+      "left": 205,
+      "right": 386
+    },
+    {
+      "tag": "BUTTON",
+      "className": "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition duration-150 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-gray-300 bg-white text-gray-900 shadow-sm hover:border-gray-400 hover:bg-gray-50 h-11 px-3 text-sm sm:h-9  shrink-0 whitespace-nowrap",
+      "left": 191,
+      "right": 446
+    },
+    {
+      "tag": "BUTTON",
+      "className": "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition duration-150 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-950 h-11 px-4 text-sm  flex-none text-red-600 hover:bg-red-50",
+      "left": 181,
+      "right": 325
+    }
+  ],
+  "violations": [],
+  "incomplete": [],
+  "errors": []
+}

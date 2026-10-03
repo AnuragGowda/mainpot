@@ -255,7 +255,7 @@ export default function BuyInActions({
         </div>
       ) : null}
 
-      <div ref={actionsRef} className="flex gap-2">
+      <div ref={actionsRef} className="flex flex-wrap gap-2">
         {hasBuyIn ? (
           <Button
             className="flex-1"

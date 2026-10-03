@@ -43,7 +43,7 @@ export default function PlayerList({ players, snapshot, currentPlayerId, onHostP
 
   return (
     <section aria-labelledby="table-heading">
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div>
         <h2 id="table-heading" className="text-base font-semibold text-gray-950">At the table</h2>
         <p className="text-sm text-gray-500">Host-confirmed entries by player.</p>
@@ -72,13 +72,13 @@ export default function PlayerList({ players, snapshot, currentPlayerId, onHostP
               return current;
             }, []);
             return (
-              <li key={player.id} className="flex items-center gap-3 px-4 py-3 sm:px-5">
+              <li key={player.id} className="flex flex-wrap items-center gap-3 px-4 py-3 sm:px-5">
                 <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700">
                   {player.name.trim().slice(0, 2).toUpperCase()}
                 </span>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-[min(100%,6rem)] flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="truncate text-sm font-medium text-gray-900">{player.name}</p>
+                    <p className="min-w-0 break-words text-sm font-medium text-gray-900">{player.name}</p>
                     {player.is_host ? <Badge variant="gray" className="px-1.5 py-0.5 text-[10px] leading-none">Host</Badge> : null}
                     {player.id === currentPlayerId ? <Badge variant="green" className="px-1.5 py-0.5 text-[10px] leading-none">You</Badge> : null}
                     {earlyCashOutLocked

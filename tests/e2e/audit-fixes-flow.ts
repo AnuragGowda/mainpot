@@ -33,25 +33,34 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
   const diagnostics = failureDiagnostics([host, resumed]);
   await diagnostics.ready;
   await host.addInitScript(() => {
-    const events: { event: string; at: number; node: number | null; value: string | null; disabled: boolean | null; trusted?: boolean }[] = [];
+    const events: { event: string; field: string; at: number; node: number | null; value: string | null; nameState: string | null; length: number | null; focused: boolean; selectionStart: number | null; selectionEnd: number | null; disabled: boolean | null; trusted?: boolean }[] = [];
     (window as unknown as { __mainpotCreateInputEvents: typeof events }).__mainpotCreateInputEvents = events;
     const nodes = new WeakMap<HTMLInputElement, number>();
     let nextNode = 0;
-    let lastSnapshot = "";
+    const lastSnapshots = new Map<string, string>();
     const sample = (event: string, trusted?: boolean) => {
-      const element = document.getElementById("create-buy-in");
-      const input = element instanceof HTMLInputElement ? element : null;
-      if (input && !nodes.has(input)) nodes.set(input, ++nextNode);
-      const state = { node: input ? nodes.get(input)! : null, value: input?.value ?? null, disabled: input?.disabled ?? null };
-      const snapshot = JSON.stringify(state);
-      if (event === "mutation" && snapshot === lastSnapshot) return;
-      lastSnapshot = snapshot;
-      events.push({ event, at: Math.round(performance.now()), ...state, ...(trusted === undefined ? {} : { trusted }) });
-      if (events.length > 100) events.shift();
+      for (const field of ["create-name", "create-buy-in"]) {
+        const element = document.getElementById(field);
+        const input = element instanceof HTMLInputElement ? element : null;
+        if (input && !nodes.has(input)) nodes.set(input, ++nextNode);
+        // Name values never enter uploaded artifacts. Classify only the known
+        // synthetic fixture and retain selection/node timing for fill races.
+        const state = { field, node: input ? nodes.get(input)! : null,
+          value: field === "create-buy-in" ? input?.value ?? null : null,
+          nameState: field !== "create-name" || !input ? null : input.value === "" ? "empty" : input.value === "Casey" ? "expected-fixture" : input.value === "CaseyCasey" ? "duplicated-fixture" : "other",
+          length: input?.value.length ?? null, focused: document.activeElement === input,
+          selectionStart: input?.selectionStart ?? null, selectionEnd: input?.selectionEnd ?? null,
+          disabled: input?.disabled ?? null };
+        const snapshot = JSON.stringify(state);
+        if (event === "mutation" && snapshot === lastSnapshots.get(field)) continue;
+        lastSnapshots.set(field, snapshot);
+        events.push({ event, at: Math.round(performance.now()), ...state, ...(trusted === undefined ? {} : { trusted }) });
+        if (events.length > 100) events.shift();
+      }
     };
     for (const type of ["input", "change", "focus", "blur"]) {
       document.addEventListener(type, event => {
-        if (event.target instanceof HTMLInputElement && event.target.id === "create-buy-in") sample(type, event.isTrusted);
+        if (event.target instanceof HTMLInputElement && ["create-name", "create-buy-in"].includes(event.target.id)) sample(type, event.isTrusted);
       }, true);
     }
     new MutationObserver(() => sample("mutation")).observe(document, {
@@ -135,8 +144,8 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     const createInput = await host.evaluate(() =>
       (window as unknown as { __mainpotCreateInputEvents?: unknown[] }).__mainpotCreateInputEvents ?? [],
     ).catch(() => []);
-    // Capture only the numeric setup field and sanitized request metadata.
-    // Auth form values, browser storage and raw snapshots never enter this file.
+    // Capture numeric setup, synthetic-name classification and sanitized
+    // metadata. Auth values, raw names, storage and snapshots stay private.
     try {
       await writeFile(test.info().outputPath("network-diagnostics.json"), JSON.stringify({ ...diagnostics.report(), createInput }, null, 2));
     } catch { /* Retain the triggering assertion as the primary failure. */ }

@@ -12,7 +12,7 @@ Assessed October 2, 2026. This is a bounded source and headless-browser review, 
 | Responsive layout | 8 | Sampled production public screens at 1440, 390 and 320px had no document overflow. Local eight-seat and short-height states extend that sample; physical keyboards, landscape and installed apps remain unproved. |
 | Recovery UX | 7.5 | Payment uncertainty and retry paths are explicit. This pass found and corrected a notice covering game identity and a false local reconnecting state. Real background/resume recovery remains a gate. |
 | First-time host clarity | 7 | Setup explains deferred settlement, but unfamiliar hosts have not freshly demonstrated unaided completion. Task density and recovery action priority deserve observation. |
-| Accessibility | 6.5 | Keyboard/focus regressions exist and sampled axe checks are useful. No complete screen-reader, zoom, contrast or physical touch audit has been accepted. This score reflects incomplete assurance, not a measured WCAG failure rate. |
+| Accessibility | 6.5 | Keyboard/focus regression coverage exists and sampled axe checks are useful. No complete screen-reader, zoom, contrast or physical touch audit has been accepted. This score reflects incomplete assurance, not a measured WCAG failure rate. |
 | Maintainability | 7.5 | Explicit domain logic, migrations and meaningful regression coverage. Some unused UI and changing terminology remain; the temporary Playwright prerelease workaround needs a stable-version follow-up. |
 | Security assurance | 7.5 | RLS, authority and privilege regressions are substantial. Production leaked-password protection remains disabled, the database engine needs a maintenance review, and tests are not a security certification. |
 | Operations readiness | 6 | Synthetic restore and canaries pass; current hosted backup restoration, delivered alerts, representative capacity and responder/device receipts remain incomplete. |
@@ -74,3 +74,5 @@ Local setup-fix acceptance: **15 panel-isolation cases passed without retries**,
 Local audit-policy acceptance: the independent production audit has zero findings; the reviewed development policy passes; **311 unit tests in 46 files**, including 16 exception rejection/expiry cases, pass. Lint has zero errors and the existing warning; the production build passes. Exact CI for this policy change is a separate required release receipt.
 
 Production migration, deployment and physical-device acceptance remain uncompleted unless separately recorded.
+
+The [October 3 support and acceptance follow-up](../../2026-10-03/follow-up/REPORT.md) adds a broader accessibility/reflow pass, sanitized name-input diagnostics, provider selection notes, and explicit physical-device, host-study, backup, alert and capacity receipts still needed.

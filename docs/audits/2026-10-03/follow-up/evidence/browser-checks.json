@@ -1,0 +1,4520 @@
+[
+  {
+    "profile": "desktop-chrome",
+    "state": "landing",
+    "path": "/",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [
+      {
+        "tag": "DIV",
+        "className": "ante-page-glow absolute inset-x-0 top-16",
+        "left": -49,
+        "right": 1359
+      }
+    ],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 26,
+        "details": [
+          {
+            "target": [
+              ".min-\\[360px\\]\\:inline"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".sm\\:inline-flex"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".border-white\\/80"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "h1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".leading-8"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5.inline-flex.items-center:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-y-2 > .gap-1\\.5.inline-flex.items-center:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href=\"/poker-settlement-calculator\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(1) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(2) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(3) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".gap-8 > div:nth-child(1) > .text-2xl.sm\\:text-3xl"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > .pb-5.max-w-2xl.leading-6"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(2) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(3) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "#sendoff-heading"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-cta-button-arrow"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".min-w-0 > .text-gray-700"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".mt-1.text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".min-h-8.sm\\:min-h-11[href$=\"self-host\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"feedback\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"terms\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"privacy\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5[rel=\"noreferrer\"][target=\"_blank\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[rel=\"noopener noreferrer\"] > span"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "create",
+    "path": "/create",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "join",
+    "path": "/join",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "signin",
+    "path": "/signin",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "poker-settlement-calculator",
+    "path": "/poker-settlement-calculator",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "feedback",
+    "path": "/feedback",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "nine-seat-active",
+    "path": "/game/HNGQAK",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "manage-player-200-percent-font",
+    "path": "/game/HNGQAK",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "nine-seat-200-percent-font",
+    "path": "/game/HNGQAK",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "nine-seat-settlement-review",
+    "path": "/game/HNGQAK",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-haspopup=\"dialog\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_1k_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 9,
+        "details": [
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(3) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(4) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(5) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(6) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(7) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(8) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".text-gray-400"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "nine-seat-locked",
+    "path": "/game/HNGQAK",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 1280,
+    "height": 720,
+    "scrollWidth": 1280,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 23,
+        "details": [
+          {
+            "target": [
+              "#payment-ledger > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[x=\"67\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[x=\"1004\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"215\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "tspan[y=\"318\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "tspan[y=\"421\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[y=\"490\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(400 308) rotate(-7)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"rotate(180)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"53\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"158\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"1450\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"68\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[y=\"117\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[x=\"174\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "details[data-testid=\"full-settlement-plan\"] > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-chrome",
+    "state": "service-worker-offline-recovery",
+    "passed": true,
+    "physicalDevice": false
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "landing",
+    "path": "/",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [
+      {
+        "tag": "DIV",
+        "className": "ante-page-glow absolute inset-x-0 top-16",
+        "left": -12,
+        "right": 340
+      },
+      {
+        "tag": "DIV",
+        "className": "ante-card-halo absolute -inset-8 rounded-[3rem]",
+        "left": -8,
+        "right": 330
+      }
+    ],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 24,
+        "details": [
+          {
+            "target": [
+              ".border-white\\/80"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "h1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          },
+          {
+            "target": [
+              ".leading-8"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5.inline-flex.items-center:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-y-2 > .gap-1\\.5.inline-flex.items-center:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href=\"/poker-settlement-calculator\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(1) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(2) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(3) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".gap-8 > div:nth-child(1) > .text-2xl.sm\\:text-3xl"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > .pb-5.max-w-2xl.leading-6"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(2) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(3) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "#sendoff-heading"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-cta-button-arrow"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".min-w-0 > .text-gray-700"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".mt-1.text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".min-h-8.sm\\:min-h-11[href$=\"self-host\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"feedback\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"terms\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"privacy\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5[rel=\"noreferrer\"][target=\"_blank\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[rel=\"noopener noreferrer\"] > span"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "create",
+    "path": "/create",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "join",
+    "path": "/join",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "signin",
+    "path": "/signin",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "poker-settlement-calculator",
+    "path": "/poker-settlement-calculator",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [
+      {
+        "tag": "TABLE",
+        "className": "w-full min-w-[680px] border-collapse text-left text-sm",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "THEAD",
+        "className": "bg-gray-50 text-xs font-semibold uppercase tracking-[0.12em] text-gray-600",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TH",
+        "className": "px-4 py-3 text-right",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TH",
+        "className": "px-4 py-3 text-right",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TH",
+        "className": "px-5 py-3 text-right sm:px-6",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-gray-100",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-red-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-emerald-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-red-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-emerald-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-red-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TFOOT",
+        "className": "border-t border-gray-200 bg-gray-950 font-semibold text-white",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums",
+        "left": 297,
+        "right": 426
+      }
+    ],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "feedback",
+    "path": "/feedback",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "nine-seat-active",
+    "path": "/game/YQLQZT",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "manage-player-200-percent-font",
+    "path": "/game/YQLQZT",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "nine-seat-200-percent-font",
+    "path": "/game/YQLQZT",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 36,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(1) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:38.081Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(2) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:38.081Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(3) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:38.014Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(4) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:38.014Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(5) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.947Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(6) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(6) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.947Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(7) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(7) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.881Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(8) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(8) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.881Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(9) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(9) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.814Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(10) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(10) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.814Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(11) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(11) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.747Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(12) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(12) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.747Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(13) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(13) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.681Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(14) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(14) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.681Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(15) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(15) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.613Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(16) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(16) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.613Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(17) > .items-start.gap-3.flex > .flex-1.min-w-0 > .leading-6.text-gray-800.text-sm"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(17) > .items-start.gap-3.flex > .flex-1.min-w-0 > time[datetime=\"2026-10-03T18:53:37.432Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Unable to determine contrast ratio"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".gap-2\\.5 > span:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "nine-seat-settlement-review",
+    "path": "/game/YQLQZT",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-haspopup=\"dialog\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_1k_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 10,
+        "details": [
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(3) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(4) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(5) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(6) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(7) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(8) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".text-gray-400"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              ".gap-2\\.5.bg-gray-900.py-2\\.5:nth-child(2) > span:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "state": "nine-seat-locked",
+    "path": "/game/YQLQZT",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 320,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 23,
+        "details": [
+          {
+            "target": [
+              "#payment-ledger > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[x=\"67\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[x=\"1004\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"215\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "tspan[y=\"318\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "tspan[y=\"421\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[y=\"490\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(400 308) rotate(-7)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"rotate(180)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"53\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"158\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"1450\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"68\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[y=\"117\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[x=\"174\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "details[data-testid=\"full-settlement-plan\"] > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "landing",
+    "path": "/",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [
+      {
+        "tag": "DIV",
+        "className": "ante-page-glow absolute inset-x-0 top-16",
+        "left": -15,
+        "right": 417
+      },
+      {
+        "tag": "DIV",
+        "className": "ante-card-halo absolute -inset-8 rounded-[3rem]",
+        "left": -7,
+        "right": 404
+      }
+    ],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 24,
+        "details": [
+          {
+            "target": [
+              ".border-white\\/80"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "h1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".leading-8"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          },
+          {
+            "target": [
+              ".gap-1\\.5.inline-flex.items-center:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-y-2 > .gap-1\\.5.inline-flex.items-center:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href=\"/poker-settlement-calculator\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(1) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(2) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(3) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".gap-8 > div:nth-child(1) > .text-2xl.sm\\:text-3xl"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > .pb-5.max-w-2xl.leading-6"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(2) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(3) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "#sendoff-heading"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-cta-button-arrow"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".min-w-0 > .text-gray-700"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".mt-1.text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".min-h-8.sm\\:min-h-11[href$=\"self-host\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"feedback\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"terms\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"privacy\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5[rel=\"noreferrer\"][target=\"_blank\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[rel=\"noopener noreferrer\"] > span"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "create",
+    "path": "/create",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "join",
+    "path": "/join",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "signin",
+    "path": "/signin",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "poker-settlement-calculator",
+    "path": "/poker-settlement-calculator",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [
+      {
+        "tag": "TABLE",
+        "className": "w-full min-w-[680px] border-collapse text-left text-sm",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "THEAD",
+        "className": "bg-gray-50 text-xs font-semibold uppercase tracking-[0.12em] text-gray-600",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TH",
+        "className": "px-4 py-3 text-right",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TH",
+        "className": "px-4 py-3 text-right",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TH",
+        "className": "px-5 py-3 text-right sm:px-6",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-gray-100",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-red-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-emerald-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-red-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-emerald-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-red-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TFOOT",
+        "className": "border-t border-gray-200 bg-gray-950 font-semibold text-white",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums",
+        "left": 297,
+        "right": 426
+      }
+    ],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "feedback",
+    "path": "/feedback",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "nine-seat-active",
+    "path": "/game/LZ2TG3",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "manage-player-200-percent-font",
+    "path": "/game/LZ2TG3",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "nine-seat-200-percent-font",
+    "path": "/game/LZ2TG3",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 2,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".shadow-gray-950\\/10"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "nine-seat-settlement-review",
+    "path": "/game/LZ2TG3",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-haspopup=\"dialog\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_1k_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 9,
+        "details": [
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(3) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(4) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(5) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(6) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(7) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(8) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".text-gray-400"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "android-chrome",
+    "state": "nine-seat-locked",
+    "path": "/game/LZ2TG3",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 393,
+    "height": 727,
+    "scrollWidth": 393,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 24,
+        "details": [
+          {
+            "target": [
+              "#payment-ledger > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[x=\"67\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[x=\"1004\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"215\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "tspan[y=\"318\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "tspan[y=\"421\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[y=\"490\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(400 308) rotate(-7)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"rotate(180)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"53\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"158\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"1450\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"68\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[y=\"117\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[x=\"174\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "details[data-testid=\"full-settlement-plan\"] > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              ".bg-gray-900.py-2\\.5.shadow-lg:nth-child(2) > span:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "landing",
+    "path": "/",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [
+      {
+        "tag": "DIV",
+        "className": "ante-page-glow absolute inset-x-0 top-16",
+        "left": -15,
+        "right": 414
+      },
+      {
+        "tag": "DIV",
+        "className": "ante-card-halo absolute -inset-8 rounded-[3rem]",
+        "left": -7,
+        "right": 401
+      }
+    ],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 24,
+        "details": [
+          {
+            "target": [
+              ".border-white\\/80"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "h1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".leading-8"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          },
+          {
+            "target": [
+              ".gap-1\\.5.inline-flex.items-center:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-y-2 > .gap-1\\.5.inline-flex.items-center:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href=\"/poker-settlement-calculator\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(1) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(2) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(3) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".gap-8 > div:nth-child(1) > .text-2xl.sm\\:text-3xl"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > .pb-5.max-w-2xl.leading-6"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(2) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(3) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "#sendoff-heading"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-cta-button-arrow"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".min-w-0 > .text-gray-700"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".mt-1.text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".min-h-8.sm\\:min-h-11[href$=\"self-host\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"feedback\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"terms\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"privacy\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5[rel=\"noreferrer\"][target=\"_blank\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[rel=\"noopener noreferrer\"] > span"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "create",
+    "path": "/create",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "join",
+    "path": "/join",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "signin",
+    "path": "/signin",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "poker-settlement-calculator",
+    "path": "/poker-settlement-calculator",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [
+      {
+        "tag": "TABLE",
+        "className": "w-full min-w-[680px] border-collapse text-left text-sm",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "THEAD",
+        "className": "bg-gray-50 text-xs font-semibold uppercase tracking-[0.12em] text-gray-600",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TH",
+        "className": "px-4 py-3 text-right",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TH",
+        "className": "px-4 py-3 text-right",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TH",
+        "className": "px-5 py-3 text-right sm:px-6",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TBODY",
+        "className": "divide-y divide-gray-100",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-red-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-emerald-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-red-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-emerald-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 297,
+        "right": 426
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums text-gray-700",
+        "left": 426,
+        "right": 569
+      },
+      {
+        "tag": "TD",
+        "className": "px-5 py-4 text-right font-semibold tabular-nums sm:px-6 text-red-700",
+        "left": 569,
+        "right": 697
+      },
+      {
+        "tag": "TFOOT",
+        "className": "border-t border-gray-200 bg-gray-950 font-semibold text-white",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TR",
+        "className": "",
+        "left": 17,
+        "right": 697
+      },
+      {
+        "tag": "TD",
+        "className": "px-4 py-4 text-right tabular-nums",
+        "left": 297,
+        "right": 426
+      }
+    ],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".min-\\[360px\\]\\:inline"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "feedback",
+    "path": "/feedback",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "nine-seat-active",
+    "path": "/game/7VWRYU",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "manage-player-200-percent-font",
+    "path": "/game/7VWRYU",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "nine-seat-200-percent-font",
+    "path": "/game/7VWRYU",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 2,
+        "details": [
+          {
+            "target": [
+              ".sm\\:mt-0 > .shadow-gray-950\\/10.hover\\:bg-gray-800.bg-gray-950"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "nine-seat-settlement-review",
+    "path": "/game/7VWRYU",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-haspopup=\"dialog\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_1k_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 10,
+        "details": [
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(3) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(4) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(5) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(6) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(7) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(8) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".text-gray-400"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              ".gap-2\\.5.bg-gray-900.py-2\\.5:nth-child(2) > span:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-webkit",
+    "state": "nine-seat-locked",
+    "path": "/game/7VWRYU",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 390,
+    "height": 664,
+    "scrollWidth": 390,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 24,
+        "details": [
+          {
+            "target": [
+              "#payment-ledger > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[x=\"67\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[x=\"1004\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"215\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "tspan[y=\"318\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "tspan[y=\"421\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[y=\"490\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(400 308) rotate(-7)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"rotate(180)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"53\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"158\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"1450\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"68\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"117\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[x=\"174\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "details[data-testid=\"full-settlement-plan\"] > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              ".bg-gray-900.py-2\\.5.shadow-lg:nth-child(2) > span:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "landing",
+    "path": "/",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [
+      {
+        "tag": "DIV",
+        "className": "ante-page-glow absolute inset-x-0 top-16",
+        "left": -32,
+        "right": 896
+      },
+      {
+        "tag": "SPAN",
+        "className": "ante-suit-card-surface",
+        "left": 790,
+        "right": 850
+      },
+      {
+        "tag": "SPAN",
+        "className": "ante-suit-card-surface",
+        "left": -6,
+        "right": 54
+      }
+    ],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 26,
+        "details": [
+          {
+            "target": [
+              ".min-\\[360px\\]\\:inline"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".sm\\:inline-flex"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".border-white\\/80"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "h1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".leading-8"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5.inline-flex.items-center:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-y-2 > .gap-1\\.5.inline-flex.items-center:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href=\"/poker-settlement-calculator\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(1) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(2) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(3) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".gap-8 > div:nth-child(1) > .text-2xl.sm\\:text-3xl"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > .pb-5.max-w-2xl.leading-6"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(2) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(3) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "#sendoff-heading"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-cta-button-arrow"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".min-w-0 > .text-gray-700"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".mt-1.text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".min-h-8.sm\\:min-h-11[href$=\"self-host\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"feedback\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"terms\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"privacy\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5[rel=\"noreferrer\"][target=\"_blank\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[rel=\"noopener noreferrer\"] > span"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "create",
+    "path": "/create",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "join",
+    "path": "/join",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "signin",
+    "path": "/signin",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "poker-settlement-calculator",
+    "path": "/poker-settlement-calculator",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "feedback",
+    "path": "/feedback",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "nine-seat-active",
+    "path": "/game/LYEUW8",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "manage-player-200-percent-font",
+    "path": "/game/LYEUW8",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 2,
+        "details": [
+          {
+            "target": [
+              "#_r_16_"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "#_r_17_"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "nine-seat-200-percent-font",
+    "path": "/game/LYEUW8",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "nine-seat-settlement-review",
+    "path": "/game/LYEUW8",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-haspopup=\"dialog\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_1k_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 9,
+        "details": [
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(3) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(4) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(5) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(6) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(7) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(8) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".text-gray-400"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "iphone-landscape-webkit",
+    "state": "nine-seat-locked",
+    "path": "/game/LYEUW8",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 844,
+    "height": 390,
+    "scrollWidth": 844,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 23,
+        "details": [
+          {
+            "target": [
+              "#payment-ledger > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[x=\"67\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[x=\"1004\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"215\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "tspan[y=\"318\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "tspan[y=\"421\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[y=\"490\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(400 308) rotate(-7)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"rotate(180)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"53\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"158\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"1450\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"68\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"117\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[x=\"174\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "details[data-testid=\"full-settlement-plan\"] > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "landing",
+    "path": "/",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [
+      {
+        "tag": "DIV",
+        "className": "ante-page-glow absolute inset-x-0 top-16",
+        "left": -55,
+        "right": 1529
+      }
+    ],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 26,
+        "details": [
+          {
+            "target": [
+              ".min-\\[360px\\]\\:inline"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".sm\\:inline-flex"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".border-white\\/80"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "h1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".leading-8"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5.inline-flex.items-center:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-y-2 > .gap-1\\.5.inline-flex.items-center:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href=\"/poker-settlement-calculator\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(1) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(2) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".ante-step.p-6.sm\\:p-8:nth-child(3) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+          },
+          {
+            "target": [
+              ".gap-8 > div:nth-child(1) > .text-2xl.sm\\:text-3xl"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details[open=\"\"] > .pb-5.max-w-2xl.leading-6"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(2) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "details:nth-child(3) > summary > .min-w-0.flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "#sendoff-heading"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".ante-cta-button-arrow"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".min-w-0 > .text-gray-700"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".mt-1.text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".min-h-8.sm\\:min-h-11[href$=\"self-host\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"feedback\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"terms\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[href$=\"privacy\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              ".gap-1\\.5[rel=\"noreferrer\"][target=\"_blank\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          },
+          {
+            "target": [
+              "a[rel=\"noopener noreferrer\"] > span"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "create",
+    "path": "/create",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "join",
+    "path": "/join",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "signin",
+    "path": "/signin",
+    "fontScale": 1,
+    "supportLinkCheck": "no-footer",
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "poker-settlement-calculator",
+    "path": "/poker-settlement-calculator",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "feedback",
+    "path": "/feedback",
+    "fontScale": 1,
+    "supportLinkCheck": "passed",
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "nine-seat-active",
+    "path": "/game/J7HDJE",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "manage-player-200-percent-font",
+    "path": "/game/J7HDJE",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "#_r_17_"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "nine-seat-200-percent-font",
+    "path": "/game/J7HDJE",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-controls=\"_r_2_\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              ".py-3\\.5:nth-child(19) > .items-start.gap-3.flex > .h-8.w-8.bg-gray-100"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "nine-seat-settlement-review",
+    "path": "/game/J7HDJE",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-haspopup=\"dialog\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_1k_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 9,
+        "details": [
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(3) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(4) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(5) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(6) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(7) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(8) > .flex-1.px-1.py-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".text-gray-400"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "desktop-webkit",
+    "state": "nine-seat-locked",
+    "path": "/game/J7HDJE",
+    "fontScale": 1,
+    "supportLinkCheck": null,
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "rootFont": "16px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "nodes": 23,
+        "details": [
+          {
+            "target": [
+              "#payment-ledger > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[x=\"67\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[x=\"1004\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"215\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "tspan[y=\"318\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "tspan[y=\"421\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because element contains an image node"
+          },
+          {
+            "target": [
+              "text[y=\"490\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(400 308) rotate(-7)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"rotate(180)\"] > text[x=\"-116\"][y=\"-130\"][font-size=\"40\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"53\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"158\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"1450\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1494)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1494)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(80 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"30\"][font-size=\"18\"][letter-spacing=\"2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "g[transform=\"translate(556 1590)\"] > text[y=\"77\"][font-size=\"41\"][letter-spacing=\"-1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          },
+          {
+            "target": [
+              "text[y=\"68\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[y=\"117\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "text[x=\"174\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "details[data-testid=\"full-settlement-plan\"] > .px-5.py-4.focus-visible\\:ring-inset > .gap-4.justify-between.items-center > .text-lg.text-gray-400[aria-hidden=\"true\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  }
+]

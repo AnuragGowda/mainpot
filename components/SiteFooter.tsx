@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Code2 } from "lucide-react";
-import { GITHUB_URL } from "@/lib/product";
+import { Code2, Coffee } from "lucide-react";
+import { GITHUB_URL, SUPPORT_URL } from "@/lib/product";
 import SuitIcon from "@/components/SuitIcon";
 
 export default function SiteFooter() {
@@ -24,6 +24,12 @@ export default function SiteFooter() {
           <a href={GITHUB_URL} target="_blank" rel="noreferrer" className={`${footerLink} gap-1.5`}>
             <Code2 aria-hidden size={16} /> Open source
           </a>
+          {SUPPORT_URL ? (
+            <a href={SUPPORT_URL} target="_blank" rel="noopener noreferrer" className={`${footerLink} gap-1.5`}>
+              <Coffee aria-hidden size={16} className="shrink-0" />
+              <span>Support Mainpot<span className="sr-only"> (opens in a new tab)</span></span>
+            </a>
+          ) : null}
         </nav>
       </div>
     </footer>

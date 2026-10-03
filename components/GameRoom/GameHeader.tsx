@@ -138,7 +138,7 @@ export default function GameHeader({
         </div>
 
         <div className="w-full sm:w-auto sm:shrink-0">
-          <div className="flex w-full gap-2 sm:w-auto">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             <Button
               ref={inviteTriggerRef}
               type="button"
@@ -173,20 +173,20 @@ export default function GameHeader({
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-3 divide-x divide-gray-200 overflow-hidden rounded-xl border border-gray-200 bg-white">
-        <div className="px-3 py-4 sm:px-5">
+      <div className="mt-6 flex flex-wrap gap-px overflow-hidden rounded-xl border border-gray-200 bg-gray-200">
+        <div className="min-w-0 flex-[1_1_6.5rem] bg-white px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
             Buy-in
           </p>
-          <p className="mt-1 text-lg font-semibold text-gray-900">
+          <p className="mt-1 break-words text-lg font-semibold text-gray-900">
             {formatCurrency(game.buy_in_amount)}
           </p>
         </div>
-        <div className="px-3 py-4 sm:px-5">
+        <div className="min-w-0 flex-[1_1_6.5rem] bg-white px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
             Pot
           </p>
-          <p className="mt-1 text-lg font-semibold text-gray-950">
+          <p className="mt-1 break-words text-lg font-semibold text-gray-950">
             {formatCurrency(verifiedPot)}
           </p>
           {pendingPot > 0 ? (
@@ -195,7 +195,7 @@ export default function GameHeader({
             </p>
           ) : null}
         </div>
-        <div className="px-3 py-4 sm:px-5">
+        <div className="min-w-0 flex-[1_1_6.5rem] bg-white px-3 py-4 sm:px-5">
           <p className="text-xs font-medium uppercase tracking-widest text-gray-500">
             Players
           </p>

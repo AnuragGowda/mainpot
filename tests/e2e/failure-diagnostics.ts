@@ -167,7 +167,7 @@ export function failureDiagnostics(pages: Page[]) {
       const request = response.request();
       statuses.set(request, response.status());
       const path = new URL(request.url()).pathname;
-      if (path !== "/auth/v1/user" && path !== "/rest/v1/settlement_payments" && path !== "/rest/v1/rpc/get_game_by_code") return;
+      if (path !== "/auth/v1/user" && path !== "/rest/v1/settlement_payments" && path !== "/rest/v1/rpc/get_game_by_code" && path !== "/rest/v1/rpc/get_my_profile") return;
       const headers = response.headers();
       const credentials = headers["access-control-allow-credentials"];
       responses.push({ device, request: requests.get(request)?.id ?? null, at: at(), phase, path, status: response.status(),
