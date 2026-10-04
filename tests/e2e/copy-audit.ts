@@ -10,6 +10,8 @@ export async function captureCopyAudit(page: Page, state: string) {
   if (!directory) return;
   const output = resolve(directory);
   await mkdir(output, { recursive: true });
+  // Capture settled copy, after transient toast messages clear naturally.
+  await expect(page.locator('[role="status"].fixed')).toHaveText("");
   await page.evaluate(() => Promise.allSettled(document.getAnimations()
     .filter(animation => Number.isFinite(animation.effect?.getComputedTiming().endTime))
     .map(animation => animation.finished)));
@@ -40,7 +42,10 @@ export async function captureCopyAudit(page: Page, state: string) {
   });
   const stem = `${test.info().project.name}-${state}`;
   await writeFile(`${output}/${stem}.json`, JSON.stringify(receipt, null, 2));
-  await page.screenshot({ path: `${output}/${stem}.png`, fullPage: true });
+  // WebKit full-page captures otherwise place sticky navigation at the
+  // current scroll position inside the exported image.
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+  await page.screenshot({ path: `${output}/${stem}.png`, fullPage: true, timeout: 15_000 });
   expect(receipt.scrollWidth, `${state}: horizontal reflow`).toBeLessThanOrEqual(receipt.width);
   expect(receipt.violations, `${state}: axe violations`).toEqual([]);
   expect(receipt.clippedNames, `${state}: readable friend names`).toEqual([]);

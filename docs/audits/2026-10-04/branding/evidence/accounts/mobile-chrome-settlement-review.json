@@ -36,12 +36,6 @@
             ".text-gray-400"
           ],
           "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
-        },
-        {
-          "target": [
-            ".gap-2\\.5.bg-gray-900.py-2\\.5:nth-child(2) > span:nth-child(2)"
-          ],
-          "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
         }
       ]
     }

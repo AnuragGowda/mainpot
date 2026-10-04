@@ -14,6 +14,7 @@ export async function runAccountPolishFlow(browser: Browser, baseURL: string) {
   const password = `AccountPolish-${suffix}`;
   const originalTemplateName = "Friday regulars";
   const updatedTemplateName = "Saturday regulars";
+  let primaryError: unknown;
 
   try {
     await page.goto("/signin");
@@ -106,7 +107,23 @@ export async function runAccountPolishFlow(browser: Browser, baseURL: string) {
     await expect(page.locator("#create-template")).toHaveCount(0);
     await page.reload();
     await expect(page.locator("#create-template")).toHaveCount(0);
+  } catch (error) {
+    primaryError = error;
+    throw error;
   } finally {
-    await context.close();
+    let closeTimer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        context.close(),
+        new Promise<never>((_, reject) => {
+          closeTimer = setTimeout(() => reject(new Error("Account-flow context did not close within 10 seconds.")), 10_000);
+        }),
+      ]);
+    } catch (closeError) {
+      // A teardown failure must not replace the triggering assertion/capture error.
+      if (primaryError === undefined) throw closeError;
+    } finally {
+      if (closeTimer) clearTimeout(closeTimer);
+    }
   }
 }
