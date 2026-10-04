@@ -58,11 +58,17 @@ export async function ensureCurrentUser(): Promise<User | null> {
   }
 }
 
-/** Signs the current user out. No-op when Supabase is unconfigured. */
-export async function signOutUser(): Promise<void> {
+/** Distinguishes confirmed sign-out from local clearing after a server error. */
+export async function signOutUser(): Promise<"signed-out" | "local-only"> {
   const supabase = getBrowserSupabase();
   if (!supabase) {
-    return;
+    return "signed-out";
   }
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+  if (!error) return "signed-out";
+  // The installed SDK can remove the browser session before returning a
+  // remote logout error. Never claim that account is still signed in.
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (!sessionError && !session) return "local-only";
+  throw new Error("Could not sign out. Check your connection and try again.");
 }

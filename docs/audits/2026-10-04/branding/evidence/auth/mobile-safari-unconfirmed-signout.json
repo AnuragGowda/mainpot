@@ -1,0 +1,164 @@
+{
+  "title": "Mainpot — Poker Buy-In & Settlement Tracker",
+  "width": 390,
+  "scrollWidth": 390,
+  "clippedNames": [],
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "color-contrast",
+      "nodes": [
+        {
+          "target": [
+            ".min-\\[360px\\]\\:inline"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            ".pb-3"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            ".border-white\\/80"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "h1"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            ".leading-8"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+        },
+        {
+          "target": [
+            ".gap-1\\.5.inline-flex.items-center:nth-child(1)"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            ".gap-y-2 > .gap-1\\.5.inline-flex.items-center:nth-child(2)"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "a[href=\"/poker-settlement-calculator\"]"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            ".ante-step.p-6.sm\\:p-8:nth-child(1) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+        },
+        {
+          "target": [
+            ".ante-step.p-6.sm\\:p-8:nth-child(2) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+        },
+        {
+          "target": [
+            ".ante-step.p-6.sm\\:p-8:nth-child(3) > .justify-between.flex.items-center > .ante-step-marker.font-mono.text-gray-500"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a pseudo element"
+        },
+        {
+          "target": [
+            ".gap-8 > div:nth-child(1) > .text-2xl.sm\\:text-3xl"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "details[open=\"\"] > summary > .min-w-0.flex-1"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "details[open=\"\"] > .pb-5.max-w-2xl.leading-6"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "details:nth-child(2) > summary > .min-w-0.flex-1"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "details:nth-child(3) > summary > .min-w-0.flex-1"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "#sendoff-heading"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            ".ante-cta-button-arrow"
+          ],
+          "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "target": [
+            ".text-gray-700.font-medium"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            ".mt-1.text-xs"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            ".min-h-8.sm\\:min-h-11[href$=\"self-host\"]"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "a[href$=\"feedback\"]"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "a[href$=\"terms\"]"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            "a[href$=\"privacy\"]"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        },
+        {
+          "target": [
+            ".gap-1\\.5[target=\"_blank\"][rel=\"noreferrer\"]"
+          ],
+          "summary": "Fix any of the following:\n  Element's background color could not be determined due to a background gradient"
+        }
+      ]
+    }
+  ]
+}

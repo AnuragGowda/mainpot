@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LogIn, LogOut } from "lucide-react";
@@ -15,12 +15,16 @@ const navLink =
 
 export default function SiteNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(!isSupabaseConfigured);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
+    if (new URLSearchParams(window.location.search).get("signout") === "unconfirmed") {
+      setSignOutError("Sign-out on other devices could not be confirmed. Sign out on those devices too.");
+    }
     const readyFallback = isSupabaseConfigured
       ? window.setTimeout(() => {
           if (active) setReady(true);
@@ -57,10 +61,18 @@ export default function SiteNav() {
   }, []);
 
   async function handleSignOut() {
-    await signOutUser();
-    setUser(null);
-    router.push("/");
-    router.refresh();
+    if (signingOut) return;
+    setSigningOut(true);
+    setSignOutError(null);
+    try {
+      const outcome = await signOutUser();
+      // Replace the document so a protected page's pending auth check cannot
+      // overwrite the intended destination with a competing client redirect.
+      window.location.replace(outcome === "local-only" ? "/?signout=unconfirmed" : "/");
+    } catch {
+      setSignOutError("Could not sign out. Check your connection and try again.");
+      setSigningOut(false);
+    }
   }
 
   const hasAccount = Boolean(user && !user.is_anonymous);
@@ -102,13 +114,15 @@ export default function SiteNav() {
               <Link href="/create" className={`${navLink} hidden sm:inline-flex`}>
                 New game
               </Link>
-              <button type="button" onClick={handleSignOut} className={`${navLink} hidden sm:inline-flex`}>
-                Sign out
+              <button type="button" onClick={handleSignOut} disabled={signingOut} aria-busy={signingOut} className={`${navLink} hidden disabled:cursor-wait disabled:opacity-60 sm:inline-flex`}>
+                {signingOut ? "Signing out…" : "Sign out"}
               </button>
               <button
                 type="button"
                 onClick={handleSignOut}
-                aria-label="Sign out"
+                disabled={signingOut}
+                aria-busy={signingOut}
+                aria-label={signingOut ? "Signing out" : "Sign out"}
                 title="Sign out"
                 className={`${navLink} grid h-11 w-11 place-items-center px-0 sm:hidden`}
               >
@@ -146,6 +160,9 @@ export default function SiteNav() {
           )}
         </nav>
       </div>
+      {signOutError ? (
+        <p role="alert" className="mx-auto max-w-6xl px-4 pb-3 text-sm text-red-700 sm:px-6">{signOutError}</p>
+      ) : null}
     </header>
   );
 }

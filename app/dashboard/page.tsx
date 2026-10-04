@@ -100,11 +100,11 @@ export default function DashboardPage() {
     setLoadError(null);
     try {
       const currentUser = await withTimeout(getCurrentUser(), "Sign-in is taking too long. Check your connection and retry.");
+      if (generation !== loadGeneration.current) return;
       if (!currentUser || currentUser.is_anonymous) {
         router.replace("/signin?next=/dashboard");
         return;
       }
-      if (generation !== loadGeneration.current) return;
       setUser(currentUser);
       const warnings: Record<string, string> = {};
       try {
@@ -152,6 +152,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     void load();
+    return () => { loadGeneration.current += 1; };
   }, [load]);
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {

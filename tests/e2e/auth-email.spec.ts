@@ -1,4 +1,9 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
+import { captureCopyAudit } from "./copy-audit";
+
+// Auth fault interception must reach the page in WebKit. Installed-app
+// service-worker behavior is exercised independently in pwa-flow.ts.
+test.use({ serviceWorkers: "block" });
 
 // Mailpit belongs exclusively to mainpot-e2e. Never send test emails through
 // the production provider or save one-time capabilities in test evidence.
@@ -77,4 +82,43 @@ test("handles invalid authentication callbacks without forwarding outside the ap
   await page.goto("/auth/callback?code=invalid-one-time-code&next=https%3A%2F%2Fexample.com");
   await expect(page).toHaveURL(/\/signin\?error=/);
   await expect(page.getByRole("alert").filter({ hasText: "Sign-in could not be completed" })).toBeVisible();
+});
+
+test("leaves the account page and reports unconfirmed remote sign-out after a server error", async ({ page, request }) => {
+  test.setTimeout(90_000);
+  const email = `signout-assurance-${crypto.randomUUID()}@example.com`;
+  const password = `Signout-${crypto.randomUUID()}`;
+  await page.goto("/signin");
+  await page.getByRole("button", { name: "Create an account", exact: true }).click();
+  await page.getByLabel("Display name", { exact: true }).fill("Signout Casey");
+  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Create account", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Check your inbox" })).toBeVisible();
+  await page.goto(await emailLink(request, email));
+  await expect(page.getByRole("heading", { name: "Signout Casey", exact: true })).toBeVisible({ timeout: 20_000 });
+  const dashboardUrl = page.url();
+  const homepageUrl = new URL("/", dashboardUrl).href;
+  const logoutPath = "**/auth/v1/logout**";
+  let failedLogoutRequests = 0;
+  await page.route(logoutPath, route => {
+    failedLogoutRequests += 1;
+    return route.fulfill({
+      status: 500, contentType: "application/json",
+      body: JSON.stringify({ code: "unexpected_failure", msg: "Controlled sign-out failure" }),
+    });
+  });
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(page).toHaveURL(`${homepageUrl}?signout=unconfirmed`);
+  expect(failedLogoutRequests).toBeGreaterThan(0);
+  await expect(page.getByRole("alert").filter({ hasText: "Sign-out on other devices could not be confirmed" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Sign out", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Signout Casey", exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
+  await captureCopyAudit(page, "unconfirmed-signout");
+  await page.reload();
+  await expect(page.getByRole("link", { name: "Sign in", exact: true })).toBeVisible();
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/signin\?next=\/dashboard$/);
 });
