@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     template: "%s | Mainpot",
   },
   description:
-    "Track poker buy-ins, rebuys, cash-outs, and settlement payments for every home game in one shared ledger.",
+    "Track home poker buy-ins, final stacks, and suggested payments in one shared ledger. Players send money separately.",
   applicationName: "Mainpot",
   category: "Poker",
   manifest: "/manifest.webmanifest",
@@ -41,14 +41,14 @@ export const metadata: Metadata = {
     siteName: "Mainpot",
     title: "Mainpot — Poker Buy-In & Settlement Tracker",
     description:
-      "Track the bank from the first chip to the final settlement.",
+      "One shared record of buy-ins, final stacks, and who owes whom. Players send money separately.",
     url: "/",
     images: [
       {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Mainpot — Keep the game friendly. Keep the money exact.",
+        alt: "Mainpot — One clear record for poker night.",
       },
     ],
   },
@@ -56,13 +56,13 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Mainpot — Poker Buy-In & Settlement Tracker",
     description:
-      "Track the bank from the first chip to the final settlement.",
+      "One shared record of buy-ins, final stacks, and who owes whom. Players send money separately.",
     images: [
       {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Mainpot — Keep the game friendly. Keep the money exact.",
+        alt: "Mainpot — One clear record for poker night.",
       },
     ],
   },

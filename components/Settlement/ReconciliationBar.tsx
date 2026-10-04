@@ -72,7 +72,7 @@ export default function ReconciliationBar({
           <div>
             <p className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-900">
               <Check aria-hidden className="h-4 w-4" />
-              Bank reconciled
+              Totals match
             </p>
           </div>
         ) : (
@@ -82,7 +82,7 @@ export default function ReconciliationBar({
               {formatCurrency(Math.abs(difference))} {difference > 0 ? "short in cash-outs" : "extra in cash-outs"}
             </p>
             <p className="mt-1 text-xs leading-5 text-amber-900">
-              Recheck the entries, or agree how to allocate the difference.
+              Recheck the entries, or agree how to split the difference.
             </p>
           </div>
         )}

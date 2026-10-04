@@ -5,11 +5,11 @@ const faqs = [
   },
   {
     question: "Who can change the ledger?",
-    answer: "Players can add their own buy-ins and final stacks, or the host can add players and record everything from one phone. The host verifies buy-ins and can correct any entry.",
+    answer: "Players can record their own buy-ins and final stacks. The host can review buy-ins, correct entries, or manage the whole table from one phone.",
   },
   {
-    question: "What if the bank does not balance?",
-    answer: "The host can correct an entry or allocate the difference by agreement: proportionally, to selected players, or with exact amounts. Every adjustment stays in the game record.",
+    question: "What if the totals don’t match?",
+    answer: "Recheck the buy-ins and final stacks. The host can correct an entry or, if the table agrees, split the difference proportionally, among selected players, or in exact amounts. The adjustment stays in the game record.",
   },
 ];
 

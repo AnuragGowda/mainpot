@@ -21,8 +21,8 @@ test.describe("entry and calculator safeguards", () => {
       await guest.goto("/join");
       await guest.locator("#join-name").fill("Jordan");
       await guest.locator("#join-code").fill(code);
-      await expect(guest.getByText("Local-only tables are saved only in the host's browser.")).toBeVisible();
-      await guest.getByRole("button", { name: "Continue to table details" }).click();
+      await expect(guest.getByText("This setup saves games in one browser.")).toBeVisible();
+      await guest.getByRole("button", { name: "View table details" }).click();
       await expect(guest.getByRole("alert").filter({ hasText: "Game not found" })).toContainText("Game not found. Check the code and try again.");
       await expect(guest.locator("#join-name")).toHaveValue("Jordan");
       await expect(guest.locator("#join-code")).toHaveValue(code);
@@ -45,8 +45,8 @@ test.describe("entry and calculator safeguards", () => {
     await page.goto("/join");
     await page.locator("#join-name").fill("Jordan");
     await page.locator("#join-code").fill(code);
-    await expect(page.getByText("Local-only tables are saved only in the host's browser.")).toBeVisible();
-    await page.getByRole("button", { name: "Continue to table details" }).click();
+    await expect(page.getByText("This setup saves games in one browser.")).toBeVisible();
+    await page.getByRole("button", { name: "View table details" }).click();
 
     const preview = page.getByRole("region", { name: "Confirm table details" });
     await expect(preview).toContainText("Preview required");
@@ -58,10 +58,10 @@ test.describe("entry and calculator safeguards", () => {
 
     await page.locator("#join-code").fill("DEF234");
     await expect(preview).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "Continue to table details" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "View table details" })).toBeVisible();
 
     await page.locator("#join-code").fill(code);
-    await page.getByRole("button", { name: "Continue to table details" }).click();
+    await page.getByRole("button", { name: "View table details" }).click();
     await page.getByRole("button", { name: "Join and record $37.00 buy-in" }).click();
     await expect(page).toHaveURL(new RegExp(`/game/${code}$`));
     const pending = page.getByRole("region", { name: "At the table" }).getByRole("listitem").filter({ hasText: "Jordan" });
@@ -78,12 +78,12 @@ test.describe("entry and calculator safeguards", () => {
     await page.getByLabel("Final stack for player 1", { exact: true }).fill("40");
     await page.getByLabel("Money in for player 2", { exact: true }).fill("20");
     await expect(results).toContainText("Enter money in and a final stack for every player.");
-    await expect(results).not.toContainText("Bank balanced");
+    await expect(results).not.toContainText("Totals match");
     await expect(results).not.toContainText("Payment list");
     await page.screenshot({ path: `docs/audits/2026-09-26/evidence/calculator-incomplete-${test.info().project.name}.png`, fullPage: true });
 
     await page.getByLabel("Final stack for player 2", { exact: true }).fill("0");
-    await expect(results).toContainText("Bank balanced");
+    await expect(results).toContainText("Totals match");
     await expect(results).toContainText("Player 2");
     await expect(results).toContainText("$20.00");
   });

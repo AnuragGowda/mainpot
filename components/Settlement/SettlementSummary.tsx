@@ -165,7 +165,7 @@ function SettlementSummaryContents({
   }
 
   return (
-    <Card padding="md">
+    <Card padding="none" className="p-3 sm:p-6">
       {finalized ? (
           <div>
             <div className="flex items-start gap-3">
@@ -210,7 +210,7 @@ function SettlementSummaryContents({
                 </Button>
                 </span>
               </summary>
-              <pre className="mx-4 mb-3 whitespace-pre-wrap border-t border-gray-200 pt-3 font-mono text-xs leading-6 text-gray-700">{summaryText}</pre>
+              <pre className="mx-4 mb-3 whitespace-pre-wrap border-t border-gray-200 pt-3 font-mono text-xs leading-6 text-gray-700 [overflow-wrap:anywhere]">{summaryText}</pre>
             </details>
 
             <Link
@@ -223,13 +223,13 @@ function SettlementSummaryContents({
           </div>
       ) : (
         <>
-          <h2 className="text-lg font-semibold tracking-tight text-gray-900">Settlement summary</h2>
-          <pre className="mt-3 whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50/80 p-4 font-mono text-sm leading-6 text-gray-800">{summaryText}</pre>
+          <h2 className="break-words text-lg font-semibold tracking-tight text-gray-900">Settlement summary</h2>
+          <pre className="mt-3 whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50/80 p-3 font-mono text-sm leading-6 text-gray-800 [overflow-wrap:anywhere]">{summaryText}</pre>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <Button variant="secondary" size="md" onClick={handleCopy} className="sm:flex-1">
+            <Button variant="secondary" size="md" onClick={handleCopy} style={{ height: "auto" }} className="min-h-11 flex-wrap py-2 [overflow-wrap:anywhere] sm:flex-1">
               <Copy aria-hidden size={16} /> Copy results
             </Button>
-            <Button size="md" onClick={handleShare} className="sm:flex-1">
+            <Button size="md" onClick={handleShare} style={{ height: "auto" }} className="min-h-11 flex-wrap py-2 [overflow-wrap:anywhere] sm:flex-1">
               <Share2 aria-hidden size={16} /> Share settlement
             </Button>
           </div>

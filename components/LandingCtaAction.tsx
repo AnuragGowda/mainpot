@@ -37,7 +37,7 @@ export default function LandingCtaAction() {
         </div>
       </div>
       <Link href="/create" className={`${linkClasses} ante-cta-button w-full bg-white text-gray-950 hover:bg-gray-100`}>
-        Start a cash game <span aria-hidden="true" className="ante-cta-button-arrow">→</span>
+        Start a game <span aria-hidden="true" className="ante-cta-button-arrow">→</span>
       </Link>
     </div>
   );

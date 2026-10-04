@@ -34,13 +34,13 @@ export function buildSummaryText({
     `Mainpot — ${game.name}`,
     `Room code: ${game.code}`,
     `Buy-in: ${formatCurrency(game.buy_in_amount)}`,
-    `Total pot: ${formatCurrency(totalBoughtIn)}`,
+    `Total buy-ins: ${formatCurrency(totalBoughtIn)}`,
     "",
   ];
 
   const settlementLabel =
-    mode === "min" ? "fewest payments" : `bank: ${bankName ?? ""}`;
-  lines.push(`Settlements (${settlementLabel}):`);
+    mode === "min" ? "direct payments" : `through ${bankName ?? "one player"}`;
+  lines.push(`Suggested payments (${settlementLabel}):`);
   if (transfers.length === 0) {
     lines.push("No transfers needed.");
   } else {
@@ -69,7 +69,7 @@ export function buildSummaryText({
     }
     lines.push("");
   }
-  lines.push("Final net:");
+  lines.push("Final results:");
   for (const net of nets) {
     lines.push(`${net.name}: ${formatSignedNet(net.net)}`);
   }

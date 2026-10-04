@@ -1,5 +1,6 @@
 import { expect, test, type Browser } from "@playwright/test";
 import { createDeviceContext } from "./device-context";
+import { captureCopyAudit } from "./copy-audit";
 
 /**
  * Covers the hosted account polish path against the local Supabase stack.
@@ -20,14 +21,17 @@ export async function runAccountPolishFlow(browser: Browser, baseURL: string) {
     await page.getByLabel("Display name", { exact: true }).fill("Account Casey");
     await page.getByLabel("Email", { exact: true }).fill(email);
     await page.getByLabel("Password", { exact: true }).fill(password);
+    await captureCopyAudit(page, "signin-signup");
     await page.getByRole("button", { name: "Create account", exact: true }).click();
     await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page.getByRole("heading", { name: "Account Casey", exact: true })).toBeVisible();
+    await captureCopyAudit(page, "dashboard-first-use");
 
     await page.goto("/create");
     await page.locator("#create-name").fill("Account Casey");
     await page.locator("#create-game-name").fill("Account polish game");
     await page.locator("#create-buy-in").fill("20");
-    await page.getByRole("checkbox", { name: "Save these details as a recurring game" }).check();
+    await page.getByRole("checkbox", { name: "Save as a game template" }).check();
     await page.getByLabel("Template name", { exact: true }).fill(originalTemplateName);
     await page.getByLabel("Preferred roster", { exact: true }).fill("Alex, Jordan");
     await page.getByRole("button", { name: "Create game", exact: true }).click();
@@ -39,7 +43,7 @@ export async function runAccountPolishFlow(browser: Browser, baseURL: string) {
     const cashOut = page.getByRole("spinbutton", { name: "Cash-out amount for Account Casey" });
     await cashOut.fill("20");
     await cashOut.blur();
-    await expect(page.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await expect(page.getByText("Totals match", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Review settlement", exact: true }).click();
     await page.getByRole("button", { name: "Lock settlement", exact: true }).click();
     await page.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
@@ -49,6 +53,7 @@ export async function runAccountPolishFlow(browser: Browser, baseURL: string) {
     await expect(page.getByRole("link", { name: "Account polish game", exact: true })).toBeVisible();
     const noTransfers = page.getByRole("link", { name: /No transfers required/ });
     await expect(noTransfers).toBeVisible();
+    await captureCopyAudit(page, "dashboard-history");
     await page.screenshot({ path: `docs/audits/2026-09-26/evidence/account-payments-${test.info().project.name}.png`, fullPage: true });
     await noTransfers.click();
     await expect(page).toHaveURL(/#payment-ledger$/);
@@ -56,6 +61,7 @@ export async function runAccountPolishFlow(browser: Browser, baseURL: string) {
 
     await page.goto("/dashboard");
     await page.getByText("Account data and deletion", { exact: true }).click();
+    await captureCopyAudit(page, "account-data");
     await page.getByRole("button", { name: "Request account deletion", exact: true }).click();
     await page.getByRole("alertdialog").getByRole("button", { name: "Request deletion", exact: true }).click();
     await expect(page.getByText(/Your deletion request is/)).toContainText("pending");

@@ -208,7 +208,7 @@ export default function TransferList({
             ? buildZellePaymentText(handles.zelle, transfer.amount)
             : null;
           return (
-            <li key={key} className="flex items-center gap-3 px-4 py-3">
+            <li key={key} className="flex flex-wrap items-center gap-3 px-4 py-3">
               {canManage ? (
                 <label
                   className="grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-lg transition hover:bg-gray-100 focus-within:ring-2 focus-within:ring-gray-950 focus-within:ring-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50"
@@ -248,14 +248,14 @@ export default function TransferList({
                 </span>
               ) : null}
               {canUsePaymentShortcut && (venmoUrl || zelleText) ? (
-                <button type="button" aria-label={`Payment details for ${transfer.to}, ${formatCurrency(transfer.amount)}`} onClick={() => setPaymentDetails({ recipient: transfer.to, amount: transfer.amount, venmoUrl, zelleText })} className="flex min-w-0 flex-1 items-center justify-between gap-3 rounded-lg px-1 py-1 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
-                  <span className="min-w-0"><span className={`block break-words font-medium ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{personalOutgoing ? transfer.to : `${transfer.from} → ${transfer.to}`}</span><span className="mt-0.5 block text-xs font-medium text-gray-600 underline underline-offset-2">Payment details</span></span>
-                  <span className={`shrink-0 font-semibold tabular-nums ${personalIncoming ? "self-end" : ""} ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
+                <button type="button" aria-label={`Payment details for ${transfer.to}, ${formatCurrency(transfer.amount)}`} onClick={() => setPaymentDetails({ recipient: transfer.to, amount: transfer.amount, venmoUrl, zelleText })} className="flex min-w-0 flex-1 basis-[8rem] flex-wrap items-center justify-between gap-3 rounded-lg px-1 py-1 text-left transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950">
+                  <span className="min-w-0 flex-1 basis-[6rem]"><span className={`block break-words font-medium ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{personalOutgoing ? transfer.to : `${transfer.from} → ${transfer.to}`}</span><span className="mt-0.5 block text-xs font-medium text-gray-600 underline underline-offset-2">Payment details</span></span>
+                  <span className={`min-w-0 max-w-full font-semibold tabular-nums [overflow-wrap:anywhere] ${personalIncoming ? "self-end" : ""} ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
                 </button>
               ) : (
-                <div className={personalIncoming ? "flex min-w-0 flex-1 flex-col gap-1 px-1 py-1" : "flex min-w-0 flex-1 items-center justify-between gap-4 px-1 py-1"}>
-                  <span className={`min-w-0 break-words font-medium ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{personalIncoming ? `From ${transfer.from}` : personalOutgoing ? transfer.to : <><PartyName name={transfer.from} /> <span className="text-gray-500">→</span> <PartyName name={transfer.to} /></>}</span>
-                  <span className={`shrink-0 font-semibold tabular-nums ${personalIncoming ? "self-end" : ""} ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
+                <div className={personalIncoming ? "flex min-w-0 flex-1 basis-[8rem] flex-col gap-1 px-1 py-1" : "flex min-w-0 flex-1 basis-[8rem] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-1 py-1"}>
+                  <span className={`min-w-0 ${personalIncoming ? "" : "flex-1 basis-[6rem]"} break-words font-medium ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{personalIncoming ? `From ${transfer.from}` : personalOutgoing ? transfer.to : <><PartyName name={transfer.from} /> <span className="text-gray-500">→</span> <PartyName name={transfer.to} /></>}</span>
+                  <span className={`min-w-0 max-w-full font-semibold tabular-nums [overflow-wrap:anywhere] ${personalIncoming ? "self-end" : ""} ${settled ? "text-gray-500 line-through decoration-gray-300" : "text-gray-900"}`}>{formatCurrency(transfer.amount)}</span>
                 </div>
               )}
             </li>

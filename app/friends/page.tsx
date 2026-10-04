@@ -188,8 +188,8 @@ export default function FriendsPage() {
       <main tabIndex={-1} id="main-content" className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
         <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-gray-900">← Dashboard</Link>
         <div className="mt-5">
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-950">Your poker circle</h1>
-          <p className="mt-2 text-gray-600">Find your regulars and keep everyone connected between games.</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-950">Friends</h1>
+          <p className="mt-2 text-gray-600">Add your regular players to invite them to games and compare results.</p>
         </div>
 
         <Card className="mt-8 rounded-xl">
@@ -209,27 +209,29 @@ export default function FriendsPage() {
                 <li key={profile.id} className="flex items-center gap-3 py-3.5">
                   <Avatar profile={profile} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-gray-900">{profile.display_name || profile.username || "Player"}</p>
+                    <p data-testid="friend-name" className="break-words text-sm font-medium text-gray-900">{profile.display_name || profile.username || "Player"}</p>
                     <p className="truncate text-xs text-gray-500">{profileDetail(profile, "No username yet")}</p>
                   </div>
-                  <Button size="sm" variant="secondary" loading={busyId === profile.id} onClick={() => addFriend(profile)}>Add</Button>
+                  <Button size="sm" variant="secondary" loading={busyId === profile.id} onClick={() => addFriend(profile)}>Add friend</Button>
                 </li>
               ))}
             </ul>
-          ) : submittedQuery && !searching ? <div className="mt-5 border-t border-gray-100 pt-5 text-sm text-gray-500"><p>No matching saved accounts. Your guests can still join without an account.</p><Link href="/create" className="mt-2 inline-block font-semibold text-gray-900 underline underline-offset-2">Start a table and share its private invite link</Link></div> : null}
+          ) : submittedQuery && !searching ? <div className="mt-5 border-t border-gray-100 pt-5 text-sm text-gray-500"><p>No matching players found. Friends need accounts; guests can still join a game without one.</p><Link href="/create" className="mt-2 inline-block font-semibold text-gray-900 underline underline-offset-2">Start a game and share its invite link</Link></div> : null}
         </Card>
 
         {incoming.length ? (
           <section className="mt-8">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">Requests · {incoming.length}</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">Friend requests · {incoming.length}</h2>
             <Card padding="none" className="mt-3 overflow-hidden rounded-xl">
               <ul className="divide-y divide-gray-100">
                 {incoming.map(({ friendship, profile }) => (
                   <li key={friendship.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
                     <Avatar profile={profile} />
-                    <div className="min-w-0 flex-1"><p className="font-medium text-gray-900">{profile.display_name || profile.username || "Player"}</p><p className="text-xs text-gray-500">{profile.username ? `@${profile.username}` : "Wants to join your circle"}</p></div>
-                    <Button size="sm" loading={busyId === friendship.id} onClick={() => act(friendship.id, () => acceptFriendRequest(friendship.id), "Friend added")}>Accept</Button>
-                    <Button size="sm" variant="ghost" disabled={busyId === friendship.id} onClick={() => act(friendship.id, () => declineFriendRequest(friendship.id), "Request declined")}>Decline</Button>
+                    <div className="min-w-0 flex-1"><p data-testid="friend-name" className="break-words font-medium text-gray-900">{profile.display_name || profile.username || "Player"}</p><p className="break-words text-xs text-gray-500">{profile.username ? `@${profile.username}` : "Sent you a friend request"}</p></div>
+                    <div className="flex w-full justify-end gap-2 sm:w-auto">
+                      <Button size="sm" loading={busyId === friendship.id} onClick={() => act(friendship.id, () => acceptFriendRequest(friendship.id), "Friend added")}>Accept</Button>
+                      <Button size="sm" variant="ghost" disabled={busyId === friendship.id} onClick={() => act(friendship.id, () => declineFriendRequest(friendship.id), "Request declined")}>Decline</Button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -245,7 +247,7 @@ export default function FriendsPage() {
                 {friends.map(({ friendship, profile }) => (
                   <li key={friendship.id} className="flex items-center gap-3 px-5 py-4">
                     <Avatar profile={profile} />
-                    <div className="min-w-0 flex-1"><p className="truncate font-medium text-gray-900">{profile.display_name || profile.username || "Player"}</p><p className="truncate text-xs text-gray-500">{profileDetail(profile, "No username yet")}</p></div>
+                    <div className="min-w-0 flex-1"><p data-testid="friend-name" className="break-words font-medium text-gray-900">{profile.display_name || profile.username || "Player"}</p><p className="truncate text-xs text-gray-500">{profileDetail(profile, "No username yet")}</p></div>
                     <Button size="sm" variant="ghost" loading={busyId === friendship.id} onClick={() => act(friendship.id, () => removeFriend(friendship.id), "Friend removed")}>Remove</Button>
                   </li>
                 ))}
@@ -259,9 +261,9 @@ export default function FriendsPage() {
             <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">Sent requests · {outgoing.length}</h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {outgoing.map(({ friendship, profile }) => (
-                <button key={friendship.id} type="button" disabled={busyId === friendship.id} onClick={() => act(friendship.id, () => cancelFriendRequest(friendship.id), "Request canceled")} className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white py-1.5 pl-1.5 pr-3 text-sm text-gray-700 shadow-sm transition hover:border-red-200 hover:text-red-600 disabled:opacity-50">
+                <button key={friendship.id} type="button" aria-label={`Cancel friend request to ${profile.display_name || profile.username || "Player"}`} disabled={busyId === friendship.id} onClick={() => act(friendship.id, () => cancelFriendRequest(friendship.id), "Request canceled")} className="inline-flex max-w-full items-center gap-2 rounded-full border border-gray-200 bg-white py-1.5 pl-1.5 pr-3 text-sm text-gray-700 shadow-sm transition hover:border-red-200 hover:text-red-600 disabled:opacity-50">
                   <Avatar profile={profile} size="sm" />
-                  {profile.display_name || profile.username || "Player"}
+                  <span data-testid="friend-name" className="min-w-0 break-words text-left">{profile.display_name || profile.username || "Player"}</span>
                   <span aria-hidden="true">×</span>
                 </button>
               ))}

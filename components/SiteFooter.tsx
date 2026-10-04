@@ -12,7 +12,7 @@ export default function SiteFooter() {
         <div className="flex min-w-0 items-start gap-3 md:items-center">
           <span aria-hidden="true" className="grid h-12 w-10 shrink-0 place-items-center rounded-lg border border-gray-200 bg-white text-gray-900 shadow-sm sm:h-8 sm:w-7 sm:rounded-md"><SuitIcon className="h-5 w-5 sm:h-3.5 sm:w-3.5" suit="spade" /></span>
           <div className="min-w-0">
-            <p className="font-medium text-gray-700">Built for home games.</p>
+            <p className="font-medium text-gray-700">The shared ledger for home poker.</p>
             <p className="mt-1 text-xs">© {new Date().getFullYear()} Mainpot contributors · Open source under the MIT License · Hosted or self-hosted.</p>
           </div>
         </div>

@@ -59,7 +59,7 @@ export async function runDiscrepancyRoundingFlow(page: Page, failFirstRefresh = 
     await page.unroute("**/rest/v1/**", readFailure);
   }
   await page.getByRole("button", { name: "Review adjusted settlement" }).click();
-  const preview = page.getByRole("region", { name: "Review the net settlement" });
+  const preview = page.getByRole("region", { name: "Review who pays whom" });
   await expect(preview.getByText("$0.99", { exact: true })).toHaveCount(2);
   await expect(preview.getByText("$1.00", { exact: true })).toHaveCount(2);
   await page.getByRole("button", { name: "Lock settlement", exact: true }).click();

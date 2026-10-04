@@ -301,7 +301,7 @@ export default function DashboardPage() {
   if (!user) return null;
 
   const statCards = [
-    { label: "All-time P&L", value: formatSignedNet(stats.totalPL), tone: resultClass(stats.totalPL) },
+    { label: "Total result", value: formatSignedNet(stats.totalPL), tone: resultClass(stats.totalPL) },
     { label: "Games played", value: String(stats.gamesPlayed), tone: "text-gray-950" },
     { label: "Win rate", value: `${stats.winRate}%`, tone: "text-gray-950" },
     { label: "Average game", value: formatSignedNet(stats.avgPL), tone: resultClass(stats.avgPL) },
@@ -438,7 +438,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
               <div>
                 <h2 className="font-semibold text-gray-950">Recent games</h2>
-                <p className="text-sm text-gray-500">Final results · payment status is tracked separately</p>
+                <p className="text-sm text-gray-500">Final game results. Payments may still be outstanding.</p>
               </div>
               {!sectionErrors.Statistics ? <span className="text-xs text-gray-600">Best win {formatCurrency(stats.biggestWin)}</span> : null}
             </div>
@@ -487,10 +487,10 @@ export default function DashboardPage() {
           <Card padding="none" className="overflow-hidden rounded-xl">
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
               <div>
-                <h2 className="font-semibold text-gray-950">Your table</h2>
-                <p className="text-sm text-gray-500">Friends by all-time P&L</p>
+                <h2 className="font-semibold text-gray-950">Friends</h2>
+                <p className="text-sm text-gray-500">Ranked by total game result</p>
               </div>
-              <Link href="/friends" className="text-sm font-medium text-gray-900">Manage</Link>
+              <Link href="/friends" className="text-sm font-medium text-gray-900">Manage friends</Link>
             </div>
             {sectionErrors.Friends ? <p className="px-5 py-8 text-sm text-gray-600">Friend records are unavailable. Use Retry dashboard to load them.</p> : friendStats.length ? (
               <ol className="divide-y divide-gray-100">
@@ -518,7 +518,8 @@ export default function DashboardPage() {
 
         <details className="mt-6 rounded-xl border border-gray-200 bg-white px-5 py-4">
           <summary className="cursor-pointer font-semibold text-gray-950">Account data and deletion</summary>
-          <p className="mt-3 text-sm leading-6 text-gray-600">Export your account summary: profile, templates, hosted game details, final results, friendships, invitations, and feedback. Detailed buy-in, cash-out, and payment ledgers are not included. You can also request deletion for support to fulfill; deletion is not immediate.</p>
+          <p className="mt-3 text-sm leading-6 text-gray-600">Export your profile, templates, hosted game details, final results, friendships, invitations, and feedback.</p>
+          <p className="mt-2 text-sm leading-6 text-gray-600">The export does not include detailed buy-in, cash-out, or payment ledgers. Support handles account deletion requests; deletion is not immediate.</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="secondary" onClick={exportData} loading={exporting}>Export my data</Button>
             {deletionRequest?.status === "pending" ? <Button variant="secondary" loading={deleting} onClick={async () => {

@@ -63,7 +63,7 @@ export async function runPaymentReadRecoveryFlow(browser: Browser, baseURL: stri
       await input.fill(amount);
       await input.blur();
     }
-    await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await expect(host.getByText("Totals match", { exact: true })).toBeVisible();
     await host.getByRole("button", { name: "Review settlement", exact: true }).click();
     await host.getByRole("button", { name: "Lock settlement", exact: true }).click();
     await host.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();

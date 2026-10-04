@@ -22,9 +22,14 @@ const profiles = [
   ["iphone-landscape-webkit", webkit, { ...devices["iPhone 13"], viewport: { width: 844, height: 390 } }],
   ["desktop-webkit", webkit, { ...devices["Desktop Safari"], viewport: { width: 1440, height: 900 } }],
 ];
+const requestedProfiles = process.env.MAINPOT_AUDIT_PROFILES?.split(",").map(name => name.trim());
+if (requestedProfiles?.some(name => !profiles.some(([profile]) => profile === name))) {
+  throw new Error("MAINPOT_AUDIT_PROFILES must name known browser profiles.");
+}
 const persist = () => writeFile(`${output}/browser-checks.json`, JSON.stringify(rows, null, 2));
 
 for (const [profile, engine, options] of profiles) {
+  if (requestedProfiles && !requestedProfiles.includes(profile)) continue;
   const browser = await engine.launch({ headless: true });
   const context = await browser.newContext({ ...options, baseURL, serviceWorkers: "block" });
   const page = await context.newPage();
@@ -43,7 +48,7 @@ for (const [profile, engine, options] of profiles) {
       const axeResult = await window.axe.run(document, {
         runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] },
       });
-      const ledgerText = [...document.querySelectorAll("header p.text-lg, #player-list li > div:last-child > p, #player-list li > div:nth-child(2) > div > p")];
+      const ledgerText = [...document.querySelectorAll("header p.text-lg, #player-list li > div:last-child > p, #player-list li > div:nth-child(2) > div > p, #panel-min li p.font-semibold, #panel-bank li p.font-semibold")];
       const clippedLedgerText = ledgerText.flatMap((node, index) => {
         const range = document.createRange();
         range.selectNodeContents(node);
@@ -60,6 +65,12 @@ for (const [profile, engine, options] of profiles) {
         width: innerWidth, height: innerHeight, scrollWidth: document.documentElement.scrollWidth,
         rootFont: getComputedStyle(document.documentElement).fontSize,
         clippedLedgerText,
+        overflowingTextContainers: document.documentElement.scrollWidth > innerWidth
+          ? [...document.querySelectorAll("body *")]
+            .filter(node => node.clientWidth && node.scrollWidth > node.clientWidth + 1)
+            .map(node => ({ tag: node.tagName, className: String(node.className),
+              clientWidth: node.clientWidth, scrollWidth: node.scrollWidth }))
+          : [],
         overflowingElements: [...document.querySelectorAll("body *")]
           .map(node => ({ node, bounds: node.getBoundingClientRect() }))
           .filter(({ bounds }) => bounds.width && (bounds.right > innerWidth + 1 || bounds.left < -1))
@@ -73,7 +84,7 @@ for (const [profile, engine, options] of profiles) {
     });
     rows.push({ profile, state, path: new URL(page.url()).pathname, fontScale, supportLinkCheck, ...result, errors: [...errors] });
     await persist();
-    if (screenshot) await page.screenshot({ path: `${output}/${profile}-${state}.png`, fullPage: state === "nine-seat-200-percent-font" });
+    if (screenshot) await page.screenshot({ path: `${output}/${profile}-${state}.png`, fullPage: state === "nine-seat-200-percent-font" || state.startsWith("expanded-settlement-plan") });
     if (screenshot && state === "nine-seat-200-percent-font") {
       await page.screenshot({ path: `${output}/${profile}-${state}-viewport.png` });
     }
@@ -86,7 +97,7 @@ for (const [profile, engine, options] of profiles) {
     // Check that this server is really local-storage mode before creating data.
     await page.goto("/signin", { waitUntil: "networkidle" });
     await expect(page.getByText("Accounts are off in local mode", { exact: true })).toBeVisible();
-    for (const path of ["/", "/create", "/join", "/signin", "/poker-settlement-calculator", "/feedback"]) {
+    for (const path of ["/", "/create", "/join", "/signin", "/poker-settlement-calculator", "/feedback", "/self-host", "/privacy", "/terms", "/missing-branding-page", "/offline.html", "/recover.html"]) {
       await page.goto(path, { waitUntil: "networkidle" });
       const footer = page.getByRole("navigation", { name: "Footer navigation" });
       supportLinkCheck = "no-footer";
@@ -102,7 +113,10 @@ for (const [profile, engine, options] of profiles) {
           supportLinkCheck = "passed";
         }
       }
-      await scan(path === "/" ? "landing" : path.slice(1), { screenshot: path === "/" });
+      // Focusing the footer link scrolls it into view. Public-page captures
+      // should show the first screen, where the copy establishes the task.
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await scan(path === "/" ? "landing" : path.slice(1), { screenshot: path === "/" || profile === "narrow-chrome" });
     }
     supportLinkCheck = null;
     await page.goto("/create");
@@ -154,9 +168,15 @@ for (const [profile, engine, options] of profiles) {
       await amount.fill(name === "Casey" ? "180" : "0");
       await amount.blur();
     }
-    await expect(page.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await expect(page.getByText("Totals match", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Review settlement", exact: true }).click();
     await scan("nine-seat-settlement-review", { screenshot: true });
+    const fullPlan = page.locator('[data-testid="full-settlement-plan"]');
+    await fullPlan.locator(":scope > summary").click();
+    await scan("expanded-settlement-plan", { screenshot: profile === "narrow-chrome" });
+    await scan("expanded-settlement-plan-200-percent-font", { fontScale: 2, screenshot: profile === "narrow-chrome" });
+    await page.evaluate(() => { document.documentElement.style.fontSize = "100%"; });
+    await fullPlan.locator(":scope > summary").click();
     await page.getByRole("button", { name: "Lock settlement", exact: true }).click();
     await page.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
     await expect(page.getByText("Ended", { exact: true })).toBeVisible();

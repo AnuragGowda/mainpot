@@ -181,7 +181,7 @@ export default function CreateGamePage() {
     <GameSetupShell
       eyebrow="Host a table"
       title="Start a game."
-      description="Set the buy-in, then invite your table with a code."
+      description="Set the opening buy-in, then share a code or invite link with your players."
     >
       <div className="space-y-5">
         {resumeGames.map((game) => <ResumeGameCard key={game.code} game={game} />)}
@@ -193,9 +193,10 @@ export default function CreateGamePage() {
             </p>
           </div>
         ) : null}
-        <p className="text-sm leading-6 text-gray-600">
-          Guests can keep two unfinished tables open. Resume or finish one before starting another, or sign in for more history.
-        </p>
+        <details className="text-sm leading-6 text-gray-600">
+          <summary className="cursor-pointer font-medium text-gray-700">Guest game limits</summary>
+          <p className="mt-2">Guests can keep two unfinished tables open. Resume or finish one before starting another, or sign in for more history.</p>
+        </details>
         {creationError ? <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{creationError}</p> : null}
         <form aria-label="Game details" onSubmit={handleSubmit} noValidate className="space-y-5">
             {templates.length ? (
@@ -256,7 +257,7 @@ export default function CreateGamePage() {
               placeholder="20"
               error={errors.buyIn}
             />
-            <p className="text-xs leading-5 text-gray-600">This game settles wins and losses at the end. If buy-ins have already been paid into a cash pot, its payouts are different from these net payments.</p>
+            <p className="text-xs leading-5 text-gray-600">Mainpot suggests payments for each player’s win or loss at the end. If someone already collected the buy-ins in cash, paying out that cash pot is a different calculation.</p>
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
               <label className="flex cursor-pointer items-start gap-2.5 text-sm font-medium text-gray-800">
                 <input
@@ -277,7 +278,7 @@ export default function CreateGamePage() {
             {canSaveTemplate ? <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-800">
                 <input type="checkbox" checked={saveTemplate} onChange={(event) => setSaveTemplate(event.target.checked)} className="h-4 w-4 rounded border-gray-300 accent-gray-950 focus:ring-gray-950" />
-                Save these details as a recurring game
+                Save as a game template
               </label>
               {saveTemplate ? (
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">

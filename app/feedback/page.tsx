@@ -66,7 +66,7 @@ export default function FeedbackPage() {
         <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 sm:flex-row sm:items-center">
           <div>
             <p className="font-medium text-gray-950">Want to contribute code?</p>
-            <p className="mt-0.5 text-sm text-gray-500">Browse the source, roadmap, and open issues.</p>
+            <p className="mt-0.5 text-sm text-gray-500">Browse the source and open issues.</p>
           </div>
           <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-50">
             <Code2 aria-hidden size={17} /> View GitHub

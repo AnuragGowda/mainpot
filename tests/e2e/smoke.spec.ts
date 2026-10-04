@@ -89,7 +89,7 @@ test.describe("public local-mode experience", () => {
   test("shows the landing page and validates an incomplete game form", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByRole("heading", { name: "Keep the game friendly. Keep the money exact." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "One clear record for poker night." })).toBeVisible();
     const closingCta = page.getByRole("region", { name: "Ready for your next poker night?" });
     await closingCta.getByRole("link", { name: "Start a game" }).click();
 
@@ -263,7 +263,7 @@ test.describe("public local-mode experience", () => {
     await cashOut.fill("20");
     await cashOut.blur();
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
-    await expect(page.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await expect(page.getByText("Totals match", { exact: true })).toBeVisible();
 
     await page.getByRole("button", { name: "Review settlement" }).click();
 
@@ -272,12 +272,12 @@ test.describe("public local-mode experience", () => {
     const fullPlan = page.locator('[data-testid="full-settlement-plan"]');
     const fullPlanSummary = fullPlan.locator(":scope > summary");
     await expect(fullPlan).toHaveJSProperty("open", false);
-    await expect(page.getByText("Locking fixes the cash-outs and opens payment tracking.")).toBeVisible();
+    await expect(page.getByText("Locking makes cash-outs final and opens payment tracking.")).toBeVisible();
     await expect(editCashOutsButton).toBeVisible();
     await expect(page.getByRole("region", { name: "You're even." })).toHaveCount(0);
     await fullPlanSummary.click();
-    await expect(fullPlan.getByRole("tab", { name: "Fewest payments" })).toBeEnabled();
-    await expect(fullPlan.getByRole("tab", { name: "Bank" })).toBeEnabled();
+    await expect(fullPlan.getByRole("tab", { name: "Direct payments" })).toBeEnabled();
+    await expect(fullPlan.getByRole("tab", { name: "Through one player" })).toBeEnabled();
     await fullPlanSummary.click();
     expect(await finalizeButton.evaluate((button, plan) => Boolean(
       button.compareDocumentPosition(plan as Node) & Node.DOCUMENT_POSITION_FOLLOWING,
@@ -287,7 +287,7 @@ test.describe("public local-mode experience", () => {
     await expect(cashOut).toBeVisible();
     await page.getByRole("button", { name: "Review settlement" }).click();
 
-    await page.getByRole("radio", { name: /Route net settlement through a player/ }).check();
+    await page.getByRole("radio", { name: /Payments through one player/ }).check();
     await expect(page.locator("#final-bank-player-select")).toContainText("Casey");
 
     await finalizeButton.click();
@@ -303,18 +303,18 @@ test.describe("public local-mode experience", () => {
     await expect(fullPlanSummary).toContainText("Full settlement plan");
     await expect(fullPlanSummary).toContainText("Host view");
     await expect(fullPlan).toHaveJSProperty("open", false);
-    await expect(page.getByRole("tab", { name: "Fewest payments" })).toHaveCount(0);
-    await expect(page.getByRole("tab", { name: "Bank" })).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "Direct payments" })).toHaveCount(0);
+    await expect(page.getByRole("tab", { name: "Through one player" })).toHaveCount(0);
     await fullPlanSummary.click();
     await expect(fullPlan.getByRole("heading", { name: "Net payments through this player" })).toBeVisible();
-    const finalizedBank = fullPlan.getByRole("combobox", { name: "Who routes the net settlement?" });
+    const finalizedBank = fullPlan.getByRole("combobox", { name: "Who collects and pays?" });
     await expect(finalizedBank).toBeDisabled();
     await expect(finalizedBank).toHaveText("Casey");
     await page.reload();
     const reloadedFullPlan = page.locator('[data-testid="full-settlement-plan"]');
     await reloadedFullPlan.locator(":scope > summary").click();
     await expect(reloadedFullPlan.getByRole("heading", { name: "Net payments through this player" })).toBeVisible();
-    const reloadedBank = reloadedFullPlan.getByRole("combobox", { name: "Who routes the net settlement?" });
+    const reloadedBank = reloadedFullPlan.getByRole("combobox", { name: "Who collects and pays?" });
     await expect(reloadedBank).toBeDisabled();
     await expect(reloadedBank).toHaveText("Casey");
     await reloadedFullPlan.locator(":scope > summary").click();
@@ -478,7 +478,7 @@ test.describe("public local-mode experience", () => {
     await expect(paymentRecord.locator("pre")).toContainText(
       "Casey: -$1.00 +$1.00 discrepancy → $0.00",
     );
-    await expect(paymentRecord.locator("pre")).toContainText("Final net:");
+    await expect(paymentRecord.locator("pre")).toContainText("Final results:");
   });
 
   test("keeps the complete game flow usable on a 320px-wide screen", async ({ page }) => {

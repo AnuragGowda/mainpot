@@ -56,7 +56,7 @@ export default function PendingApprovals({
                 </span>
               </div>
               <p className="mt-0.5 text-sm text-gray-600">
-                Confirm new money before it becomes final.
+                Check each recorded amount before approving it.
               </p>
             </div>
             {pending.length > 1 ? (

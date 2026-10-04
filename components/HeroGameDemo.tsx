@@ -113,7 +113,7 @@ export default function HeroGameDemo() {
       <div ref={cardRef} className="ante-demo-card relative z-[2] rounded-3xl border border-white/10 bg-[#0b0c0e] p-5 text-white shadow-2xl shadow-gray-950/25 sm:p-7">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-gray-300">Friday night</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-gray-300">Example game</p>
             <h2 className="mt-1 text-xl font-semibold">The Basement Game</h2>
           </div>
           <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${isSettled ? "bg-emerald-400/15 text-emerald-200" : isSettling ? "bg-amber-400/15 text-amber-100" : "bg-white/10 text-gray-200"}`}>
@@ -123,7 +123,7 @@ export default function HeroGameDemo() {
         </div>
 
         <div className="mt-8 grid grid-cols-3 gap-3">
-          <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-300">Bank</p><p className="mt-1 text-lg font-semibold">$360</p></div>
+          <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-300">Buy-ins</p><p className="mt-1 text-lg font-semibold">$360</p></div>
           <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-300">Buy-in</p><p className="mt-1 text-lg font-semibold">$40</p></div>
           <div className="rounded-xl bg-white/10 p-3"><p className="text-[10px] uppercase tracking-wider text-gray-300">Players</p><p className="mt-1 text-lg font-semibold">4</p></div>
         </div>
@@ -154,7 +154,7 @@ export default function HeroGameDemo() {
           <div aria-hidden={demoState !== "balancing"} className={`ante-demo-balancing ${demoState === "balancing" ? "ante-demo-visible" : ""}`}>
             <span className="grid h-11 w-11 place-items-center rounded-full bg-emerald-100 text-lg text-emerald-700">✓</span>
             <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-gray-600">All stacks entered</p>
-            <p className="mt-1 text-lg font-semibold">Bank balanced. Preparing payments.</p>
+            <p className="mt-1 text-lg font-semibold">Totals match. Preparing payment list.</p>
             <div className="mt-5 h-1.5 w-40 overflow-hidden rounded-full bg-gray-100"><span className="ante-balance-progress block h-full rounded-full bg-emerald-500" /></div>
           </div>
           <div aria-hidden={demoState !== "settled"} className={`ante-demo-settlement ${demoState === "settled" ? "ante-demo-visible" : ""}`}>

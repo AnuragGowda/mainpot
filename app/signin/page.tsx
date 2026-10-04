@@ -212,7 +212,7 @@ export default function SignInPage() {
             Keep your history
           </p>
           <h2 className="mt-4 max-w-xl text-5xl font-semibold tracking-tight text-gray-950">
-            Keep every settled game in one place.
+            Your games. Your results. One place.
           </h2>
           <p className="mt-5 max-w-lg text-lg leading-8 text-gray-600">
             Create an account or sign in to save results, find regular players, and track your record over time.
@@ -229,7 +229,7 @@ export default function SignInPage() {
                 Accounts are off in local mode
               </h1>
               <p className="mt-2 text-sm leading-6 text-gray-600">
-                Games stay on this device, so you can run the full ledger without signing in.
+                You can track a game on this device without signing in. Accounts and live sync need a connected setup.
               </p>
               <Link
                 href="/create"

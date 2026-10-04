@@ -27,10 +27,10 @@ export default function GameRoomErrorBoundary({
     <main id="main-content" tabIndex={-1} className="flex min-h-screen items-center justify-center bg-[#f7f8f6] px-4 py-16">
       <Card padding="lg" className="w-full max-w-md text-center">
         <h1 className="text-2xl font-semibold tracking-tight text-gray-950">
-          Mainpot hit a snag
+          The game could not load
         </h1>
         <p className="mt-2 text-sm leading-6 text-gray-600">
-          Your game data is still saved. Try the screen again, or reload to pick up the latest app version.
+          Try again, or reload to get the latest app version. Reloading does not clear your saved game.
         </p>
         <p className="mt-3 text-xs text-gray-500">
           Support code: {roomErrorSupportCode(error, process.env.NEXT_PUBLIC_APP_VERSION ?? "unknown")}

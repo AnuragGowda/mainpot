@@ -14,7 +14,7 @@ type ApiDiagnostic = {
 };
 
 const watchedApiPath = (pathname: string) =>
-  (pathname.endsWith("/rpc/join_game_guarded") || pathname.endsWith("/rpc/set_settlement_payment_status_guarded"))
+  (pathname.endsWith("/rpc/join_game_guarded") || pathname.endsWith("/rpc/set_settlement_payment_status_guarded") || /\/rpc\/.*cash_out/.test(pathname))
   || /^\/rest\/v1\/(games|players|buy_ins|cash_outs|early_cash_outs|game_events|settlement_payments)$/.test(pathname);
 
 const sanitizeDiagnosticText = (value: string) => value
@@ -78,6 +78,11 @@ export async function runBankPlanFlow(browser: Browser, baseURL: string, evidenc
   let primaryError: unknown;
   for (const [index, page] of pages.entries()) {
     observeApi(page, labels[index], () => phase, apiDiagnostics, responseReads);
+    if (process.env.PLAYWRIGHT_INPUT_DIAGNOSTICS === "1") {
+      page.on("console", message => {
+        if (message.text().startsWith("[amount-event]")) console.debug(labels[index], message.text());
+      });
+    }
   }
   try {
     phase = "create game";
@@ -112,9 +117,9 @@ export async function runBankPlanFlow(browser: Browser, baseURL: string, evidenc
       await expect(input).toHaveValue(amount);
       await input.blur();
     }
-    await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await expect(host.getByText("Totals match", { exact: true })).toBeVisible();
     await host.getByRole("button", { name: "Review settlement" }).click();
-    await host.getByRole("radio", { name: /Route net settlement through a player/ }).check();
+    await host.getByRole("radio", { name: /Payments through one player/ }).check();
     await host.locator("#final-bank-player-select").click();
     await host.getByRole("option", { name: "Taylor", exact: true }).click();
     await host.getByRole("button", { name: "Lock settlement", exact: true }).click();

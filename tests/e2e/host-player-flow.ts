@@ -67,7 +67,7 @@ export async function runHostPlayerFlow(page: Page) {
   await page.getByRole("spinbutton", { name: "Cash-out amount for Casey" }).blur();
   await page.getByRole("spinbutton", { name: "Cash-out amount for Jordan" }).fill("20.50");
   await page.getByRole("spinbutton", { name: "Cash-out amount for Jordan" }).blur();
-  await expect(page.getByText("Bank reconciled", { exact: true })).toBeVisible();
+  await expect(page.getByText("Totals match", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Review settlement" }).click();
   await page.getByRole("button", { name: "Lock settlement", exact: true }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();

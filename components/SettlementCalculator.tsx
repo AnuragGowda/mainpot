@@ -384,7 +384,7 @@ export default function SettlementCalculator() {
                     <Check aria-hidden className="h-4 w-4" />
                   </span>
                   <div>
-                    <p className="font-semibold text-gray-950">Bank balanced</p>
+                    <p className="font-semibold text-gray-950">Totals match</p>
                     <p className="mt-1 text-sm leading-6 text-gray-600">
                       The payment list uses the recorded results as entered.
                     </p>
@@ -653,8 +653,8 @@ export default function SettlementCalculator() {
                   )
                 ) : (
                   <p className="mt-3 text-sm leading-6 text-gray-600">
-                    Complete the selected allocation so it covers the full
-                    difference to reveal the payments.
+                    Split the full difference using the option you selected
+                    to see the suggested payments.
                   </p>
                 )}
 

@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { captureCopyAudit } from "./copy-audit";
 
 /** Check the review decision and partial, complete, reopened payment states. */
 export async function runSettlementUxFlow(page: Page) {
@@ -22,13 +23,14 @@ export async function runSettlementUxFlow(page: Page) {
     await input.fill(amount);
     await input.blur();
   }
-  await expect(page.getByText("Bank reconciled", { exact: true })).toBeVisible();
+  await expect(page.getByText("Totals match", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Review settlement" }).click();
-  const preview = page.getByRole("region", { name: "Review the net settlement" });
+  const preview = page.getByRole("region", { name: "Review who pays whom" });
   await expect(preview).toContainText("Casey → Jordan");
   await expect(preview).toContainText("Casey → Taylor");
   await expect(preview.getByText("$10.00", { exact: true })).toHaveCount(2);
   await expect(preview.getByRole("checkbox")).toHaveCount(0);
+  await captureCopyAudit(page, "settlement-review");
   const lock = page.getByRole("button", { name: "Lock settlement", exact: true });
   expect(await preview.evaluate((element, button) => Boolean(
     element.compareDocumentPosition(button as Node) & Node.DOCUMENT_POSITION_FOLLOWING,

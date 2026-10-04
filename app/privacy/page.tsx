@@ -16,7 +16,7 @@ export default function PrivacyPage() {
       intro="Mainpot collects only the information needed to keep a shared poker-night ledger working. It does not process payments or sell personal information."
     >
       <LegalSection title="Information we handle">
-        <p>Game data can include display names, room details, buy-ins, rebuys, cash-outs, activity history, settlement transfers, and payment status. Optional profiles can include a username, bio, avatar, and payment handles.</p>
+        <p>Game data can include display names, room details, buy-ins, rebuys, cash-outs, activity history, suggested payments, and recorded payment status. Mainpot does not send money or verify that it arrived. Optional profiles can include a username, bio, avatar, and payment handles.</p>
         <p>If you create an account or use Google sign-in, we receive basic account information such as your email address, name, avatar, and an authentication identifier. We do not receive your Google password.</p>
         <p>If you turn on game alerts, we store a device-specific push subscription and basic browser information needed to deliver and troubleshoot those alerts. Mainpot does not use that subscription for advertising.</p>
       </LegalSection>

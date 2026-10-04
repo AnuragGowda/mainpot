@@ -29,7 +29,7 @@ const linkBaseClasses =
   "inline-flex h-12 items-center justify-center rounded-lg px-4 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 sm:px-6";
 
 const steps = [
-  { number: "01", title: "Start a table", description: "Set the buy-in and invite everyone with a code or QR link." },
+  { number: "01", title: "Start a game", description: "Set the opening buy-in and share a code or QR link." },
   { number: "02", title: "Record the buy-ins", description: "Log each buy-in and rebuy. Everyone can follow the totals." },
   { number: "03", title: "Settle up", description: "Count the final stacks, resolve any difference, and see who owes whom." },
 ];
@@ -44,7 +44,7 @@ export default function HomePage() {
         name: "Mainpot",
         url: SITE_URL,
         description:
-          "A shared poker night ledger for tracking buy-ins, rebuys, cash-outs, and settlement payments.",
+          "A shared home poker ledger for buy-ins, final stacks, and suggested payments. Players send money separately.",
       },
       {
         "@type": "WebApplication",
@@ -54,12 +54,12 @@ export default function HomePage() {
         applicationCategory: "GameApplication",
         operatingSystem: "Any",
         description:
-          "A shared poker night ledger for tracking buy-ins, rebuys, cash-outs, and settlement payments.",
+          "A shared home poker ledger for buy-ins, final stacks, and suggested payments. Players send money separately.",
         isPartOf: { "@id": `${SITE_URL}/#website` },
         featureList: [
           "Track poker buy-ins and rebuys",
-          "Reconcile the bank before cash-out",
-          "Calculate the smallest practical set of settlement payments",
+          "Compare buy-ins with final stacks",
+          "Suggest who pays whom after the game",
         ],
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
       },
@@ -86,21 +86,21 @@ export default function HomePage() {
                   For home poker cash games
                 </div>
                 <h1 className="ante-intro ante-intro-delay-1 mt-6 max-w-2xl text-5xl font-semibold tracking-[-0.055em] text-gray-950 sm:text-6xl lg:text-7xl">
-                  Keep the game friendly. Keep the money exact.
+                  One clear record for poker night.
                 </h1>
                 <p className="ante-intro ante-intro-delay-2 mt-6 max-w-xl text-lg leading-8 text-gray-600">
-                  Track buy-ins, count the final stacks, and see who owes whom. One record for the whole table.
+                  Track buy-ins and rebuys, enter final stacks, and see who owes whom. Mainpot keeps the record; players send money separately.
                 </p>
                 <div className="ante-intro ante-intro-delay-3 mt-7 flex gap-3 sm:mt-9">
                   <Link href="/create" className={`${linkBaseClasses} flex-1 bg-gray-950 text-white shadow-lg shadow-gray-950/10 hover:bg-gray-800 sm:flex-none`}>
-                    Start a cash game
+                    Start a game
                   </Link>
                   <Link href="/join" className={`${linkBaseClasses} flex-1 border border-gray-300 bg-white text-gray-900 shadow-sm hover:border-gray-400 hover:bg-gray-50 sm:flex-none`}>
                     Join a table
                   </Link>
                 </div>
                 <div className="ante-intro ante-intro-delay-3 mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-gray-600 sm:mt-5">
-                  <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />No app or player account</span>
+                  <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />No download or account needed to join</span>
                   <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-gray-900" />{isSupabaseConfigured ? "Syncs across devices" : "Saved on this device"}</span>
                 </div>
                 <Link href="/poker-settlement-calculator" className="ante-intro ante-intro-delay-3 mt-2 inline-flex min-h-11 items-center rounded-lg text-sm font-semibold text-gray-700 underline decoration-gray-300 underline-offset-4 transition hover:text-gray-950 hover:decoration-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">
@@ -147,7 +147,7 @@ export default function HomePage() {
           <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-5 rounded-2xl border border-gray-200 bg-white px-6 py-6 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-8">
             <div>
               <h2 id="open-source-heading" className="text-xl font-semibold tracking-tight text-gray-950">Free and open source.</h2>
-              <p className="mt-1 text-sm leading-6 text-gray-600">Play here, or run Mainpot on your own server.</p>
+              <p className="mt-1 text-sm leading-6 text-gray-600">Use Mainpot here, or run it on your own server.</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/self-host" className="inline-flex min-h-11 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2">Explore self-hosting</Link>

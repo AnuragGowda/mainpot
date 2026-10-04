@@ -1,0 +1,43 @@
+{
+  "title": "Game room | Mainpot",
+  "width": 768,
+  "scrollWidth": 768,
+  "clippedNames": [],
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "aria-valid-attr-value",
+      "nodes": [
+        {
+          "target": [
+            "button[aria-haspopup=\"dialog\"]"
+          ],
+          "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_j_\""
+        }
+      ]
+    },
+    {
+      "id": "color-contrast",
+      "nodes": [
+        {
+          "target": [
+            ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .basis-\\[8rem\\].gap-x-4.gap-y-1 > .basis-\\[6rem\\].break-words.flex-1 > .text-gray-500"
+          ],
+          "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "target": [
+            ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .basis-\\[8rem\\].gap-x-4.gap-y-1 > .basis-\\[6rem\\].break-words.flex-1 > .text-gray-500"
+          ],
+          "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+        },
+        {
+          "target": [
+            ".text-gray-400"
+          ],
+          "summary": "Fix any of the following:\n  Element content is too short to determine if it is actual text content"
+        }
+      ]
+    }
+  ]
+}

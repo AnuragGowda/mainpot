@@ -1,0 +1,20 @@
+{
+  "title": "Your games and results | Mainpot",
+  "width": 390,
+  "scrollWidth": 390,
+  "clippedNames": [],
+  "violations": [],
+  "incomplete": [
+    {
+      "id": "aria-valid-attr-value",
+      "nodes": [
+        {
+          "target": [
+            ".bg-red-600"
+          ],
+          "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_2_\""
+        }
+      ]
+    }
+  ]
+}

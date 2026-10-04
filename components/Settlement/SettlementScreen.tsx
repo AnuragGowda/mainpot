@@ -71,9 +71,9 @@ function defaultBankId(players: GameSnapshot["players"]): string {
 
 function tabClass(selected: boolean): string {
   return [
-    "inline-flex h-11 items-center rounded-md px-4 text-sm font-medium transition-colors duration-150",
+    "inline-flex min-h-11 max-w-full items-center rounded-md px-4 py-2 text-sm font-medium transition-colors duration-150",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-1",
-    selected ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900",
+    selected ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900",
   ].join(" ");
 }
 
@@ -444,7 +444,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+              <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight text-gray-900">
                 {snapshot.game.name}
               </h1>
               <Badge variant={status.variant}>{status.label}</Badge>
@@ -537,7 +537,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
             </p>
 
             <fieldset className="mt-5 space-y-3">
-              <legend className="text-sm font-semibold text-gray-900">Allocate the adjustment</legend>
+              <legend className="text-sm font-semibold text-gray-900">How should the difference be split?</legend>
               <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 bg-white p-4">
                 <input type="radio" name="allocation-method" checked={allocationMethod === "proportional"} onChange={() => setAllocationMethod("proportional")} className="mt-0.5 h-4 w-4 accent-gray-950" />
                 <span><span className="block text-sm font-semibold text-gray-900">Adjust all {difference < 0 ? "winners" : "losing players"} proportionally</span><span className="mt-1 block text-sm text-gray-600">{difference < 0 ? "Larger wins are reduced more. Losing results stay unchanged." : "Larger losses receive more of the adjustment. Winning results stay unchanged."}</span></span>
@@ -627,24 +627,24 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
           {isHost && snapshot.game.status === "settling" ? (
             <section aria-labelledby="proposed-payments-heading" className="space-y-3">
               <div>
-                <h2 id="proposed-payments-heading" className="text-lg font-semibold text-gray-950">Review the net settlement</h2>
+                <h2 id="proposed-payments-heading" className="text-lg font-semibold text-gray-950">Review who pays whom</h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600">Check who owes whom before locking. Mainpot records payment instructions; it does not hold or move money.</p>
               </div>
-              <fieldset className="rounded-xl border border-gray-200 bg-white p-4">
+              <fieldset className="min-w-0 rounded-xl border border-gray-200 bg-white p-4">
                 <legend className="px-1 text-sm font-semibold text-gray-900">Payment method</legend>
-                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 p-3 has-[:checked]:border-gray-950 has-[:checked]:bg-gray-50">
-                    <input type="radio" name="settlement-method" checked={tab === "min"} onChange={() => setTab("min")} className="mt-0.5 h-4 w-4 accent-gray-950" />
-                    <span><span className="block text-sm font-semibold text-gray-900">Fewest payments</span><span className="mt-1 block text-xs leading-5 text-gray-600">Match players directly to minimize transfers.</span></span>
+                    <input type="radio" name="settlement-method" checked={tab === "min"} onChange={() => setTab("min")} className="mt-0.5 h-4 w-4 shrink-0 accent-gray-950" />
+                    <span className="min-w-0 flex-1 break-words"><span className="block text-sm font-semibold text-gray-900">Direct payments</span><span className="mt-1 block text-xs leading-5 text-gray-600">Match players who owe with players who are owed.</span></span>
                   </label>
                   <label className="flex cursor-pointer gap-3 rounded-lg border border-gray-200 p-3 has-[:checked]:border-gray-950 has-[:checked]:bg-gray-50">
-                    <input type="radio" name="settlement-method" checked={tab === "bank"} onChange={() => setTab("bank")} className="mt-0.5 h-4 w-4 accent-gray-950" />
-                    <span><span className="block text-sm font-semibold text-gray-900">Route net settlement through a player</span><span className="mt-1 block text-xs leading-5 text-gray-600">One active player routes end-of-night net debts. It supports deferred settlement, not a cashier-held pot or gross payouts.</span></span>
+                    <input type="radio" name="settlement-method" checked={tab === "bank"} onChange={() => setTab("bank")} className="mt-0.5 h-4 w-4 shrink-0 accent-gray-950" />
+                    <span className="min-w-0 flex-1 break-words"><span className="block text-sm font-semibold text-gray-900">Payments through one player</span><span className="mt-1 block text-xs leading-5 text-gray-600">One player collects what others owe and pays those who won. This settles end-of-game wins and losses; it does not pay out buy-ins already collected in cash.</span></span>
                   </label>
                 </div>
                 {tab === "bank" ? (
                   <div className="mt-4 max-w-sm">
-                    <label htmlFor="final-bank-player-select" className="mb-1 block text-sm font-medium text-gray-700">Who routes the net settlement?</label>
+                    <label htmlFor="final-bank-player-select" className="mb-1 block text-sm font-medium text-gray-700">Who collects and pays?</label>
                     <Select value={bankPlayerId} onValueChange={setBankPlayerId}>
                       <SelectTrigger id="final-bank-player-select"><SelectValue placeholder="Choose a player" /></SelectTrigger>
                       <SelectContent>
@@ -653,7 +653,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="mt-2 text-xs leading-5 text-gray-500">Use this only when players settle net at the end. The host can route payments even when they only observe.</p>
+                    <p className="mt-2 text-xs leading-5 text-gray-500">Use this when players settle their wins and losses at the end. The host can handle payments even if they did not play.</p>
                   </div>
                 ) : null}
               </fieldset>
@@ -672,12 +672,12 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
               <div>
                 <h2 id="finalization-heading" className="text-lg font-semibold text-gray-950">Ready to settle?</h2>
                 <p role="status" className="mt-1 text-sm leading-6 text-gray-700">
-                  Locking fixes the cash-outs and opens payment tracking. It records net debts only; settle actual funds separately.
+                  Locking makes cash-outs final and opens payment tracking. Players send the suggested payments separately.
                 </p>
-                <dl className="mt-4 grid grid-cols-3 gap-4 text-sm">
-                  <div><dt className="text-xs text-gray-500">Players</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{players.length}</dd></div>
-                  <div><dt className="text-xs text-gray-500">Bought in</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{formatCurrency(totalBoughtIn)}</dd></div>
-                  <div><dt className="text-xs text-gray-500">Payments left</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{activeTabTransfers.length}</dd></div>
+                <dl className="mt-4 flex flex-wrap gap-4 text-sm">
+                  <div className="min-w-0 flex-1 basis-[6rem]"><dt className="text-xs text-gray-500">Players</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{players.length}</dd></div>
+                  <div className="min-w-0 flex-1 basis-[6rem]"><dt className="text-xs text-gray-500">Bought in</dt><dd className="mt-1 break-words font-semibold tabular-nums text-gray-950">{formatCurrency(totalBoughtIn)}</dd></div>
+                  <div className="min-w-0 flex-1 basis-[6rem]"><dt className="text-xs text-gray-500">Payments left</dt><dd className="mt-1 font-semibold tabular-nums text-gray-950">{activeTabTransfers.length}</dd></div>
                 </dl>
                 {allocation ? (
                   <DiscrepancyImpact
@@ -805,7 +805,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
             <summary className="cursor-pointer list-none px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-950">
               <span className="flex items-center justify-between gap-4">
                 <span>
-                  <span className="flex items-center gap-2 text-sm font-semibold text-gray-950">
+                  <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-gray-950">
                     Full settlement plan
                     <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-600">Host view</span>
                   </span>
@@ -825,7 +825,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
               </span>
             </summary>
 
-            <div aria-readonly={settlementPlanReadOnly} className="space-y-6 border-t border-gray-200 p-5">
+            <div className="space-y-6 border-t border-gray-200 p-3 sm:p-5">
               {snapshot.game.status === "ended" && allocation ? (
                 <DiscrepancyImpact
                   amount={Math.abs(difference)}
@@ -840,7 +840,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
               role="tablist"
               aria-label="Settlement view"
               onKeyDown={handleTabKeyDown}
-              className="inline-flex items-center rounded-lg border border-gray-200 bg-gray-100 p-1"
+              className="inline-flex max-w-full flex-wrap items-center rounded-lg border border-gray-200 bg-gray-100 p-1"
             >
               <button
                 type="button"
@@ -853,7 +853,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
                 onClick={() => setTab("min")}
                 className={tabClass(tab === "min")}
               >
-                Fewest payments
+                Direct payments
               </button>
               <button
                 type="button"
@@ -866,7 +866,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
                 onClick={() => setTab("bank")}
                 className={tabClass(tab === "bank")}
               >
-                Bank
+                Through one player
               </button>
             </div>
               </div>
@@ -901,7 +901,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
                   id="transfers-min-heading"
                   className="mb-2 text-sm font-medium uppercase tracking-widest text-gray-500"
                 >
-                  Fewest payments
+                  Direct payments
                 </h2>
                 <TransferList
                   transfers={minTransfers}
@@ -936,7 +936,7 @@ export default function SettlementScreen({ snapshot, onRefresh }: SettlementScre
                   htmlFor="bank-player-select"
                   className="mb-1 block text-sm font-medium text-gray-700"
                 >
-                  Who routes the net settlement?
+                  Who collects and pays?
                 </label>
                 <Select
                   value={selectedBankPlayerId}

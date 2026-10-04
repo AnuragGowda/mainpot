@@ -1,0 +1,389 @@
+[
+  {
+    "profile": "narrow-chrome",
+    "state": "expanded-settlement-plan-200-percent-font",
+    "path": "/game/DA2KDC",
+    "fontScale": 2,
+    "supportLinkCheck": null,
+    "width": 320,
+    "height": 568,
+    "scrollWidth": 324,
+    "rootFont": "32px",
+    "clippedLedgerText": [],
+    "overflowingElements": [],
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-valid-attr-value",
+        "nodes": 1,
+        "details": [
+          {
+            "target": [
+              "button[aria-haspopup=\"dialog\"]"
+            ],
+            "summary": "Fix all of the following:\n  Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"_r_1k_\""
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "nodes": 58,
+        "details": [
+          {
+            "target": [
+              ".mt-5 > .shadow-gray-950\\/10.hover\\:bg-gray-800.bg-gray-950"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(3) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(4) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(5) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(6) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(7) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".space-y-3 > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(8) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              ".sm\\:mt-0 > .hover\\:border-gray-400.hover\\:bg-gray-50.border-gray-300"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              ".text-gray-400"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "#tab-min"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(1) > .px-1.py-1.flex-1 > .tabular-nums.shrink-0.font-semibold"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(2) > .px-1.py-1.flex-1 > .tabular-nums.shrink-0.font-semibold"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(3) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(3) > .px-1.py-1.flex-1 > .tabular-nums.shrink-0.font-semibold"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(4) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(4) > .px-1.py-1.flex-1 > .tabular-nums.shrink-0.font-semibold"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(5) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(5) > .px-1.py-1.flex-1 > .tabular-nums.shrink-0.font-semibold"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(6) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(6) > .px-1.py-1.flex-1 > .tabular-nums.shrink-0.font-semibold"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(7) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(7) > .px-1.py-1.flex-1 > .tabular-nums.shrink-0.font-semibold"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(8) > .px-1.py-1.flex-1 > .break-words.min-w-0.font-medium > .text-gray-500"
+            ],
+            "summary": "Fix any of the following:\n  Element content contains only non-text characters"
+          },
+          {
+            "target": [
+              "section[aria-labelledby=\"transfers-min-heading\"] > .border-gray-200\\/90.shadow-\\[0_1px_2px_rgba\\(16\\,24\\,16\\,0\\.04\\)\\].rounded-xl > ul > li:nth-child(8) > .px-1.py-1.flex-1 > .tabular-nums.shrink-0.font-semibold"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(1) > .flex-wrap.gap-2.min-w-0 > .font-medium.text-gray-900"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              ".text-emerald-700"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(1) > .text-right.shrink-0 > .text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(2) > .flex-wrap.gap-2.min-w-0 > .font-medium.text-gray-900"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(2) > .text-right.shrink-0 > .text-red-600"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(2) > .text-right.shrink-0 > .text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(3) > .flex-wrap.gap-2.min-w-0 > .font-medium.text-gray-900"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(3) > .text-right.shrink-0 > .text-red-600"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(3) > .text-right.shrink-0 > .text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(4) > .flex-wrap.gap-2.min-w-0 > .font-medium.text-gray-900"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(4) > .text-right.shrink-0 > .text-red-600"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(4) > .text-right.shrink-0 > .text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(5) > .flex-wrap.gap-2.min-w-0 > .font-medium.text-gray-900"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(5) > .text-right.shrink-0 > .text-red-600"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(5) > .text-right.shrink-0 > .text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(6) > .flex-wrap.gap-2.min-w-0 > .font-medium.text-gray-900"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(6) > .text-right.shrink-0 > .text-red-600"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(6) > .text-right.shrink-0 > .text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(7) > .flex-wrap.gap-2.min-w-0 > .font-medium.text-gray-900"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(7) > .text-right.shrink-0 > .text-red-600"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(7) > .text-right.shrink-0 > .text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(8) > .flex-wrap.gap-2.min-w-0 > .font-medium.text-gray-900"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(8) > .text-right.shrink-0 > .text-red-600"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(8) > .text-right.shrink-0 > .text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(9) > .flex-wrap.gap-2.min-w-0 > .font-medium.text-gray-900"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it is overlapped by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(9) > .text-right.shrink-0 > .text-red-600"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              "li:nth-child(9) > .text-right.shrink-0 > .text-xs"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              ".hover\\:border-gray-400.hover\\:bg-gray-50.sm\\:flex-1"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              ".sm\\:flex-1.shadow-gray-950\\/10.hover\\:bg-gray-800"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+          },
+          {
+            "target": [
+              ".gap-2\\.5.bg-gray-900.py-2\\.5:nth-child(2) > span:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element's background color could not be determined because it partially overlaps other elements"
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "profile": "narrow-chrome",
+    "failure": "narrow-chrome/expanded-settlement-plan-200-percent-font: horizontal reflow\n\nexpect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 320\nReceived:    324"
+  }
+]

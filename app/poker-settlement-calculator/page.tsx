@@ -139,7 +139,8 @@ export default function PokerSettlementCalculatorPage() {
         <section className="bg-[#f7f8f6] px-4 pb-2 pt-6 sm:px-6 sm:pt-10">
           <div className="mx-auto w-full max-w-6xl">
             <h1 className="max-w-5xl text-3xl font-semibold tracking-tight text-gray-950 sm:text-5xl">Poker settlement calculator</h1>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-gray-700">Enter buy-ins and final stacks to see who pays whom. No account needed.</p>
+            <p className="mt-3 max-w-3xl text-base leading-7 text-gray-700">Enter buy-ins and final stacks for a suggested payment list. Players send money separately. No account needed.</p>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-600">For games where players settle wins and losses at the end. Paying out buy-ins already collected in cash needs a different calculation.</p>
             <a href="#overview" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-gray-700 underline underline-offset-4">How settlement works ↓</a>
           </div>
         </section>
@@ -181,10 +182,10 @@ export default function PokerSettlementCalculatorPage() {
 
           <article className="min-w-0">
             <section id="overview" className="scroll-mt-24">
-              <h2 className={sectionHeading}>Balance the bank before settling.</h2>
+              <h2 className={sectionHeading}>Check the totals before settling.</h2>
               <div className="mt-6 space-y-5">
                 <p className={prose}>
-                  The bank needs two numbers per player: money in and final cash-out. Their difference is the player&apos;s result.
+                  Start with two numbers per player: total buy-ins and the value of their final chips (cash-out). Subtract buy-ins from cash-out to find their win or loss.
                 </p>
                 <p className={prose}>
                   Check every rebuy and cash-out before money moves. Mainpot keeps those entries with the game so the table can resolve a mismatch first.
@@ -192,9 +193,9 @@ export default function PokerSettlementCalculatorPage() {
               </div>
 
               <ol className="mt-6 space-y-3 text-sm leading-6 text-gray-600">
-                <li><strong className="text-gray-950">1. Balance the bank.</strong> Total money in must equal total final stacks.</li>
-                <li><strong className="text-gray-950">2. Calculate results.</strong> Cash-out minus money in gives each player’s net.</li>
-                <li><strong className="text-gray-950">3. Route payments.</strong> Players who owe pay those who are owed.</li>
+                <li><strong className="text-gray-950">1. Check the totals.</strong> Compare total buy-ins with final stacks. Recheck any difference or agree how to split it.</li>
+                <li><strong className="text-gray-950">2. Calculate results.</strong> Cash-out minus buy-ins gives each player’s win or loss.</li>
+                <li><strong className="text-gray-950">3. Make a payment list.</strong> Players who owe pay those who are owed, outside Mainpot.</li>
               </ol>
             </section>
 

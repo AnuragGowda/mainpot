@@ -93,7 +93,7 @@ function GameLoadErrorScreen({ message }: { message: string }) {
         </h1>
         <p className="mt-2 text-sm leading-6 text-gray-600">{message}</p>
         <p className="mt-2 text-sm leading-6 text-gray-500">
-          Your game is still saved. Reload it or return to setup to resume it.
+          Reload to try again, or return to setup to find your saved games.
         </p>
         <div className="mt-6 grid gap-3">
           <Button fullWidth onClick={() => window.location.reload()}>

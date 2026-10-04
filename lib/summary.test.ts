@@ -45,7 +45,7 @@ describe("buildSummaryText", () => {
     expect(summary).toContain("Discrepancy: $10.00");
     expect(summary).toContain("Allocation: all affected players, proportional");
     expect(summary).toContain("Result changes:\nAlex: +$40.00 -$10.00 discrepancy → +$30.00");
-    expect(summary).toContain("Final net:\nAlex: +$30.00\nBea: -$30.00");
+    expect(summary).toContain("Final results:\nAlex: +$30.00\nBea: -$30.00");
     expect(summary).not.toContain("Bea: -$30.00 before discrepancy");
   });
 

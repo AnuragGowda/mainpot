@@ -1,0 +1,1610 @@
+{
+  "suite": "tablet-safari bank payment flow, five focused repetitions, workers=1, retries=0",
+  "result": "5 passed (50.7s)",
+  "cashOutLogicChanged": false,
+  "taylorZeroInputEvents": 5,
+  "disconnectedOrReplacedInputEvents": [],
+  "priorFailure": "Initial all-device copy audit: tablet-safari expected Taylor zero draft but saw an empty field before blur. That run had no input-event diagnostics; root cause remains unconfirmed.",
+  "events": [
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": ""
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": ""
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": ""
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Casey",
+      "value": "",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Casey",
+      "value": "0",
+      "node": 1,
+      "connected": true,
+      "currentNode": 1,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Jordan",
+      "value": "40",
+      "node": 2,
+      "connected": true,
+      "currentNode": 2,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "event",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": ""
+    },
+    {
+      "phase": "event",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "event",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Taylor",
+      "value": "0",
+      "node": 3,
+      "connected": true,
+      "currentNode": 3,
+      "currentValue": "0"
+    },
+    {
+      "phase": "frame",
+      "type": "focusin",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "input",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "change",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    },
+    {
+      "phase": "frame",
+      "type": "focusout",
+      "label": "Cash-out amount for Riley",
+      "value": "40",
+      "node": 4,
+      "connected": true,
+      "currentNode": 4,
+      "currentValue": "40"
+    }
+  ]
+}

@@ -23,7 +23,7 @@ function netMeta(net: number): NetMeta {
     return {
       amount: formatSignedNet(net),
       caption: `up ${formatCurrency(net)}`,
-      amountClass: "text-emerald-600",
+      amountClass: "text-emerald-700",
     };
   }
   if (net < -0.005) {
@@ -36,7 +36,7 @@ function netMeta(net: number): NetMeta {
   return {
     amount: formatSignedNet(net),
     caption: "even",
-    amountClass: "text-gray-400",
+    amountClass: "text-gray-600",
   };
 }
 
@@ -73,12 +73,12 @@ export default function NetList({
             return (
               <li
                 key={net.playerId}
-                className="flex items-center justify-between gap-3 px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
               >
-                <span className="flex min-w-0 flex-wrap items-center gap-2">
-                  <span className="font-medium text-gray-900">{net.name}</span>
+                <span className="flex min-w-0 flex-1 basis-[6rem] flex-wrap items-center gap-2">
+                  <span className="break-words font-medium text-gray-900">{net.name}</span>
                 </span>
-                <div className="shrink-0 text-right">
+                <div className="min-w-0 max-w-full text-right [overflow-wrap:anywhere]">
                   <p className={`font-semibold ${meta.amountClass}`}>
                     {meta.amount}
                   </p>
@@ -91,11 +91,11 @@ export default function NetList({
 
       {bankMeta ? (
         <div className="border-t border-gray-100 px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-medium text-gray-900">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="min-w-0 flex-1 basis-[6rem] break-words font-medium text-gray-900">
               Bank{bank ? ` (${bank.name})` : ""}
             </span>
-            <div className="shrink-0 text-right">
+            <div className="min-w-0 max-w-full text-right [overflow-wrap:anywhere]">
               <p className={`font-semibold ${bankMeta.amountClass}`}>
                 {bankMeta.amount}
               </p>

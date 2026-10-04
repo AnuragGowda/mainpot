@@ -51,7 +51,7 @@ const deploymentModels = [
     label: "Simplest",
     title: "Single-browser mode",
     description:
-      "Run only the web app with no Supabase variables. Games stay in that browser’s local storage, so there is no account system or cross-device sync.",
+      "Run just the web app without a Supabase connection. Games are saved only in that browser; accounts and live sync are unavailable.",
     needs: "Node.js 22+",
     command: "npm run dev:app",
     icon: HardDrive,
@@ -60,7 +60,7 @@ const deploymentModels = [
     label: "Fully local",
     title: "Local full stack",
     description:
-      "Run Mainpot with the bundled Supabase development stack for PostgreSQL, authentication, Realtime, and a local email inbox.",
+      "Run the app with a local database, sign-in, live updates, and a test email inbox. The bundled Supabase stack handles these services.",
     needs: "Node.js 22+ and Docker",
     command: "npm run dev",
     icon: Database,
@@ -220,7 +220,7 @@ export default function SelfHostPage() {
         <section id="deployment-options" className="scroll-mt-20 mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-20">
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Choose a model</p>
-            <h2 className={`mt-3 ${sectionHeading}`}>Start with the amount of infrastructure you actually need.</h2>
+              <h2 className={`mt-3 ${sectionHeading}`}>Choose how you want to run Mainpot.</h2>
             <p className="mt-5 text-base leading-8 text-gray-600">
               All three options use the same Mainpot interface. The difference is where data is stored and whether the game can synchronize across devices.
             </p>

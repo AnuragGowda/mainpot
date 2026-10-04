@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Browser } from "@playwright/test";
+import { captureCopyAudit } from "./copy-audit";
 import { createDeviceContext } from "./device-context";
 import { writeFile } from "node:fs/promises";
 import { failureDiagnostics } from "./failure-diagnostics";
@@ -12,7 +13,7 @@ export async function checkCalculatorValidation(page: Page) {
     await amount.fill(invalid);
     await expect(amount).toHaveAttribute("aria-invalid", "true");
     await expect(result).toContainText("Correct the highlighted amounts");
-    await expect(result).not.toContainText("Bank balanced");
+    await expect(result).not.toContainText("Totals match");
     await expect(result).not.toContainText("No payments needed");
   }
   await amount.fill("20");
@@ -20,7 +21,7 @@ export async function checkCalculatorValidation(page: Page) {
   await page.getByLabel("Money in for player 2", { exact: true }).fill("0");
   await page.getByLabel("Final stack for player 2", { exact: true }).fill("0");
   await expect(amount).toHaveAttribute("aria-invalid", "false");
-  await expect(result).toContainText("Bank balanced");
+  await expect(result).toContainText("Totals match");
 }
 
 export async function checkAccountRecovery(browser: Browser, baseURL: string) {
@@ -108,7 +109,7 @@ export async function checkAccountRecovery(browser: Browser, baseURL: string) {
     const cashout = resumed.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
     await cashout.fill("20");
     await cashout.blur();
-    await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await expect(host.getByText("Totals match", { exact: true })).toBeVisible();
     await resumed.getByRole("button", { name: "Review settlement" }).click();
     await resumed.getByRole("button", { name: "Lock settlement", exact: true }).click();
     await resumed.getByRole("alertdialog").getByRole("button", { name: "Lock settlement" }).click();
@@ -171,11 +172,16 @@ export async function checkSavedFriendInvitation(browser: Browser, baseURL: stri
       await expect(page).toHaveURL(/dashboard/);
     }
     await host.goto("/friends");
+    await expect(host.getByRole("heading", { name: "Friends", exact: true }).first()).toBeVisible();
+    await captureCopyAudit(host, "friends-empty");
     await host.getByRole("textbox", { name: "Find a player" }).fill(names[1]);
     await host.getByRole("button", { name: "Search", exact: true }).click();
-    await host.getByRole("button", { name: "Add", exact: true }).click();
+    await host.getByRole("button", { name: "Add friend", exact: true }).click();
     await expect(host.getByText("Sent requests · 1", { exact: true })).toBeVisible();
+    await captureCopyAudit(host, "friends-sent-request");
     await friend.goto("/friends");
+    await expect(friend.getByRole("button", { name: "Accept", exact: true })).toBeVisible();
+    await captureCopyAudit(friend, "friends-incoming-request");
     await friend.getByRole("button", { name: "Accept", exact: true }).click();
     await expect(friend.getByText("Friends · 1", { exact: true })).toBeVisible();
     await host.goto("/create");

@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Mainpot — Keep the game friendly. Keep the money exact.";
+export const alt = "Mainpot — One clear record for poker night.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -69,7 +69,7 @@ export default function OpenGraphImage() {
             Mainpot
           </div>
           <div style={{ fontSize: 72, fontWeight: 700, letterSpacing: -4, lineHeight: 1.02, marginTop: 54 }}>
-            Keep the game friendly. Keep the money exact.
+            One clear record for poker night.
           </div>
           <div style={{ color: "#5f6670", fontSize: 28, marginTop: 28 }}>
             The shared ledger for poker night.

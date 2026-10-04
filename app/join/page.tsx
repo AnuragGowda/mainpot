@@ -120,8 +120,8 @@ export default function JoinGamePage() {
   return (
     <GameSetupShell
       eyebrow="Join the table"
-      title="Join your table."
-      description="Enter the host’s six-character code or paste an invite link. Review the table and opening buy-in before joining."
+      title="Join a table."
+      description="Enter the host’s six-character code or paste an invite link. You’ll see the game and opening buy-in before you join."
     >
           <form aria-label="Join a game" onSubmit={handleSubmit} noValidate className="space-y-5">
             <Input
@@ -183,12 +183,12 @@ export default function JoinGamePage() {
               </section>
             ) : (
               <Button type="submit" fullWidth loading={loading} disabled={!ready}>
-                Continue to table details
+                View table details
               </Button>
             )}
             {localOnly ? (
               <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-5 text-amber-900">
-                Local-only tables are saved only in the host&apos;s browser. Other devices can&apos;t join until sync is configured.
+                This setup saves games in one browser. To join from another device, the host needs a setup with live sync.
               </p>
             ) : null}
           </form>

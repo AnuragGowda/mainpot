@@ -199,7 +199,7 @@ test("locks an early cash-out against the host and carries it out of final settl
     const hostCashOut = host.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
     await hostCashOut.fill("10");
     await hostCashOut.blur();
-    await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await expect(host.getByText("Totals match", { exact: true })).toBeVisible();
     await host.getByRole("button", { name: "Review settlement" }).click();
     const fullPlan = host.locator('[data-testid="full-settlement-plan"]');
     await expect(fullPlan.getByRole("region", { name: "Early cash-outs" })).toBeHidden();
@@ -275,7 +275,7 @@ for (const failRealtime of [false, true]) {
         await expect(hostEarly.getByRole("button", { name: "Confirm & lock" })).toHaveCount(0);
       }
       await expect(hostEarly.getByTitle("Mark sent")).toHaveCount(2);
-      await expect(host.getByRole("heading", { name: "Mainpot hit a snag" })).toHaveCount(0);
+      await expect(host.getByRole("heading", { name: "The game could not load" })).toHaveCount(0);
       await diagnostics.navigate(host, "host early cash-outs reload", () => host.reload());
       await expect(hostEarly.getByTitle("Mark sent")).toHaveCount(2);
       await hostEarly.getByTitle("Mark sent").first().click();
@@ -290,7 +290,7 @@ for (const failRealtime of [false, true]) {
       const hostCashOut = host.getByRole("spinbutton", { name: "Cash-out amount for Casey" });
       await hostCashOut.fill("25");
       await hostCashOut.blur();
-      await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
+      await expect(host.getByText("Totals match", { exact: true })).toBeVisible();
       await host.getByRole("button", { name: "Review settlement" }).click();
       await host.getByRole("button", { name: "Lock settlement", exact: true }).click();
       await host.getByRole("alertdialog").getByRole("button", { name: "Lock settlement", exact: true }).click();
@@ -665,7 +665,7 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
 
     await host.getByRole("spinbutton", { name: "Cash-out amount for Casey" }).fill("30");
     await host.getByRole("spinbutton", { name: "Cash-out amount for Casey" }).blur();
-    await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await expect(host.getByText("Totals match", { exact: true })).toBeVisible();
     await expect(host.getByRole("button", { name: "Review settlement" })).toBeEnabled();
 
     await guest.getByRole("textbox", { name: "Cash-out amount for Jordan" }).fill("20");
@@ -679,7 +679,7 @@ test("holds a multi-user settlement until cash-outs reconcile", async ({ browser
     await expect(host.getByRole("spinbutton", { name: "Cash-out amount for Jordan" })).toHaveValue("10", {
       timeout: 15_000,
     });
-    await expect(host.getByText("Bank reconciled", { exact: true })).toBeVisible();
+    await expect(host.getByText("Totals match", { exact: true })).toBeVisible();
 
     await host.getByRole("button", { name: "Review settlement" }).click();
 
@@ -1041,7 +1041,7 @@ test("contains a table panel crash while another table keeps saving and refreshi
     await expect(faultTable.getByRole("alert", { name: "Activity unavailable" })).toBeVisible();
     await expect(faultTable.getByRole("heading", { name: "Panel fault table" })).toBeVisible();
     await expect(faultTable.getByRole("button", { name: "Add a rebuy" })).toBeEnabled();
-    await expect(faultTable.getByText("Mainpot hit a snag", { exact: true })).toHaveCount(0);
+    await expect(faultTable.getByText("The game could not load", { exact: true })).toHaveCount(0);
     for (const [page, rebuy, expected] of [[faultTable, "10", "$30.00"], [sameDeviceTable, "20", "$40.00"], [otherDeviceTable, "35", "$55.00"]] as const) {
       diagnostics.setPhase(`rebuy: ${expected}`);
       await page.getByRole("button", { name: "Add a rebuy" }).click();
@@ -1052,7 +1052,7 @@ test("contains a table panel crash while another table keeps saving and refreshi
       if (page === faultTable) await page.reload();
       else await diagnostics.navigate(page, `healthy table reload: ${expected}`, () => page.reload());
       await expect(playerCard(page, "Casey")).toContainText(expected);
-      await expect(page.getByText("Mainpot hit a snag", { exact: true })).toHaveCount(0);
+      await expect(page.getByText("The game could not load", { exact: true })).toHaveCount(0);
     }
     // Recover the failing panel; its table's original ledger stayed unchanged.
     diagnostics.setPhase("recover panel and resume healthy table");
